@@ -2,7 +2,7 @@ import { StrictMode, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Command, ResourceId, WorldPresentation } from '@torchline/contracts';
 import { request } from './api.ts';
-import type { DashboardSnapshot } from './api.ts';
+import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
 import './styles.css';
@@ -40,6 +40,7 @@ function App() {
   const [target, setTarget] = useState('sim-beta');
   const [overlayUrl, setOverlayUrl] = useState('');
   const [operatorKey, setOperatorKey] = useState('');
+  const [botSetup, setBotSetup] = useState<BotSetupPreview | null>(null);
   useEffect(() => {
     if (
       data?.mode === 'live' &&
@@ -49,22 +50,40 @@ function App() {
       setTarget(data.recipients[0].id);
   }, [data?.recipients, target, data?.mode]);
   const refresh = useCallback(async () => {
-    if (!overlayChannel) setData(await request<DashboardSnapshot>('/api/state'));
+    if (!overlayChannel) {
+      const next = await request<DashboardSnapshot>('/api/state');
+      setData(next);
+      if (next.mode === 'live')
+        setBotSetup(
+          (await request<{ pending: BotSetupPreview | null }>('/api/operator/bot-setup')).pending,
+        );
+    }
   }, [overlayChannel]);
   useEffect(() => {
     void refresh().catch((e) => setError(e.message));
   }, [refresh]);
   useEffect(() => {
     if (overlayChannel || !data?.me) return;
+    let active = true;
     const source = new EventSource('/api/live/events');
-    source.addEventListener('snapshot', (event) =>
-      setData(JSON.parse((event as MessageEvent).data)),
-    );
-    source.addEventListener('unavailable', () =>
-      setError('Connection interrupted. Current state will return after reconnection.'),
-    );
-    return () => source.close();
-  }, [data?.me?.id, overlayChannel]);
+    source.addEventListener('snapshot', (event) => {
+      if (active) setData(JSON.parse((event as MessageEvent).data));
+    });
+    source.addEventListener('unavailable', () => {
+      source.close();
+      void refresh()
+        .then(() => {
+          if (active) setError('');
+        })
+        .catch(() => {
+          if (active) setError('Connection interrupted. Refresh to reconnect.');
+        });
+    });
+    return () => {
+      active = false;
+      source.close();
+    };
+  }, [data?.me?.id, overlayChannel, refresh]);
   useEffect(() => {
     if (!overlayChannel) return;
     let source: EventSource | undefined;
@@ -138,6 +157,28 @@ function App() {
           {error}
         </div>
       )}
+      {!overlayChannel && botSetup && (
+        <section className="panel" aria-labelledby="bot-conversion-title">
+          <h2 id="bot-conversion-title">Use {botSetup.accountLabel} as the dedicated bot?</h2>
+          <p>
+            Twitch authorized {botSetup.accountLabel} for bot access. Confirming ends this account’s
+            TORCHLINE creator sessions and OBS access and makes it the dedicated bot. Accounts with
+            Ark or handoff history cannot be converted.
+          </p>
+          <button
+            disabled={busy}
+            onClick={() => void perform(() => request('/api/operator/bot-setup/confirm', {}))}
+          >
+            Convert {botSetup.accountLabel} to the dedicated bot
+          </button>
+          <button
+            disabled={busy}
+            onClick={() => void perform(() => request('/api/operator/bot-setup/cancel', {}))}
+          >
+            Cancel bot conversion
+          </button>
+        </section>
+      )}
       {!overlayChannel && !data?.me && (
         <section className="panel welcome">
           <h2>Persistent gameplay flight deck</h2>
@@ -183,9 +224,9 @@ function App() {
               creator with Twitch” and uses the same registered application.
             </p>
             <p>
-              If the intended bot account appears as a Twitch creator session, use “Disconnect
-              Twitch authorization” first, then return here. Only an account with no world history
-              can change from an accidental creator connection to the bot role.
+              After Twitch consent, an accidentally connected creator with no world history gets a
+              named confirmation step to convert it into the bot. Check the account name before
+              confirming.
             </p>
             <label>
               Bot setup secret

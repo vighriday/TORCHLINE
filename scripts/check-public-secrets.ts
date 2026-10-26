@@ -26,7 +26,11 @@ for (const file of ['.env', '.env.live'])
 if (live.DATABASE_URL && live.TOKEN_ENCRYPTION_KEY) {
   const store = new Store(live.DATABASE_URL);
   try {
-    for (const grant of (await store.pool.query('SELECT encrypted FROM oauth_grants')).rows) {
+    for (const grant of (
+      await store.pool.query(
+        'SELECT encrypted FROM oauth_grants UNION ALL SELECT encrypted FROM bot_setup_confirmations',
+      )
+    ).rows) {
       const tokens = decryptSecret<{ access_token?: string; refresh_token?: string }>(
         grant.encrypted,
         live.TOKEN_ENCRYPTION_KEY,

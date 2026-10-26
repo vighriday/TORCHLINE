@@ -29,6 +29,7 @@ import { presentWorld } from './projection.ts';
 import { twitchLifecycle } from './twitch-lifecycle.ts';
 import { twitchSubscriptions } from './twitch-subscriptions.ts';
 import { twitchBot } from './twitch-bot.ts';
+import { twitchBotSetup } from './twitch-bot-setup.ts';
 
 export interface AppConfig {
   mode: 'simulation' | 'live';
@@ -63,6 +64,8 @@ export async function createApp(
   const lifecycle = twitchLifecycle(store, config, fetcher);
   const subscriptions = twitchSubscriptions(store, config, fetcher, lifecycle.applicationToken);
   const botReplies = twitchBot(store, config, fetcher, lifecycle.applicationToken);
+  const botSetup = twitchBotSetup(store, config, fetcher);
+  const botSetupCookiePath = '/api/operator/bot-setup';
   const SessionCookie =
     config.mode === 'simulation' ? 'torchline_sim_session' : 'torchline_session';
   const secure = new URL(config.baseUrl).protocol === 'https:';
@@ -86,18 +89,14 @@ export async function createApp(
   });
   app.setErrorHandler((err, request, reply) => {
     const error = err as Error & { code?: string };
-    const botRoleError =
-      error instanceof DomainError &&
-      ['BOT_CREATOR_CONNECTED', 'BOT_CREATOR_HISTORY'].includes(error.code);
+    const botRoleError = error instanceof DomainError && error.code === 'BOT_CREATOR_HISTORY';
     if (
       botRoleError &&
       request.url.split('?')[0] === '/auth/twitch/callback' &&
       request.headers.accept?.includes('text/html')
     ) {
       const recovery =
-        error.code === 'BOT_CREATOR_CONNECTED'
-          ? 'Return to TORCHLINE in the intended bot account’s window. Check the displayed account name, choose “Disconnect Twitch authorization” (signing out alone does not disconnect it), then enter the bot setup key and authorize again.'
-          : 'Keep this account as a creator. Sign into a separate Twitch account in a private browser window and use TORCHLINE’s dedicated bot setup form.';
+        'Keep this account as a creator. Sign into a separate Twitch account in a private browser window and use TORCHLINE’s dedicated bot setup form.';
       return reply
         .code(403)
         .type('text/html; charset=utf-8')
@@ -443,6 +442,29 @@ export async function createApp(
       ),
     };
   });
+  app.get('/api/operator/bot-setup', async (request) => {
+    requireTwitch();
+    return { pending: await botSetup.preview(request.cookies.torchline_bot_setup) };
+  });
+  app.post('/api/operator/bot-setup/confirm', async (request, reply) => {
+    requireTwitch();
+    z.object({}).strict().parse(request.body);
+    const result = await botSetup.confirm(request.cookies.torchline_bot_setup);
+    reply.clearCookie('torchline_bot_setup', { path: botSetupCookiePath });
+    reply.clearCookie(SessionCookie, { path: '/' });
+    if (options.workers !== false)
+      void subscriptions
+        .reconcileAll()
+        .catch(() => app.log.error('Subscription reconciliation failed.'));
+    return result;
+  });
+  app.post('/api/operator/bot-setup/cancel', async (request, reply) => {
+    requireTwitch();
+    z.object({}).strict().parse(request.body);
+    await botSetup.cancel(request.cookies.torchline_bot_setup);
+    reply.clearCookie('torchline_bot_setup', { path: botSetupCookiePath });
+    return { cancelled: true };
+  });
   app.get('/auth/twitch/callback', async (request, reply) => {
     requireTwitch();
     const parsed = z
@@ -482,37 +504,36 @@ export async function createApp(
       denied('FORBIDDEN', 'Twitch returned an unexpected client, identity or permission set.');
     if (state.role === 'bot' && config.botUserId && identity.user_id !== config.botUserId)
       denied('FORBIDDEN', 'Authorize the configured bot account.');
+    if (state.role === 'bot') {
+      const confirmation = await botSetup.authorize(
+        identity.user_id!,
+        identity.login ?? identity.user_id!,
+        identity.scopes,
+        tokens,
+      );
+      if (confirmation) {
+        reply.setCookie('torchline_bot_setup', confirmation, {
+          path: botSetupCookiePath,
+          httpOnly: true,
+          sameSite: 'strict',
+          secure,
+          maxAge: 300,
+        });
+      } else {
+        reply.clearCookie('torchline_bot_setup', { path: botSetupCookiePath });
+        reply.clearCookie(SessionCookie, { path: '/' });
+        if (options.workers !== false)
+          void subscriptions
+            .reconcileAll()
+            .catch(() => app.log.error('Subscription reconciliation failed.'));
+      }
+      return reply.redirect('/');
+    }
     const creator = await store.transaction(async (c) => {
       // Both OAuth roles share this lock so simultaneous callbacks cannot create dual authority.
       await c.query('SELECT pg_advisory_xact_lock(833017)');
       await store.lockChannels(c, [identity.user_id!]);
-      if (state.role === 'bot') {
-        const account = (
-          await c.query('SELECT connected FROM creators WHERE id=$1', [identity.user_id])
-        ).rows[0];
-        const hasHistory = (
-          await c.query(
-            'SELECT 1 WHERE EXISTS(SELECT 1 FROM worlds WHERE custodian_id=$1) OR EXISTS(SELECT 1 FROM handoffs WHERE source_id=$1 OR target_id=$1) OR EXISTS(SELECT 1 FROM custody_events WHERE source_id=$1 OR target_id=$1)',
-            [identity.user_id],
-          )
-        ).rowCount;
-        if (hasHistory)
-          denied(
-            'BOT_CREATOR_HISTORY',
-            `The Twitch account "${identity.login ?? identity.user_id}" has Ark or handoff history and must remain a creator. Use a separate bot account. No worlds or history were deleted.`,
-          );
-        if (account?.connected)
-          denied(
-            'BOT_CREATOR_CONNECTED',
-            `The Twitch account "${identity.login ?? identity.user_id}" is still connected as a creator. Disconnect its Twitch authorization in TORCHLINE before authorizing it as the bot. Signing out alone does not disconnect it.`,
-          );
-        const previous = (await c.query("SELECT id FROM oauth_grants WHERE role='bot'")).rows[0];
-        if (previous && previous.id !== identity.user_id)
-          await c.query(
-            "UPDATE subscriptions SET status='configuration_changed' WHERE type='channel.chat.message' AND status IN ('enabled','webhook_callback_verification_pending')",
-          );
-        await c.query("DELETE FROM oauth_grants WHERE role='bot'");
-      } else if (
+      if (
         (await c.query("SELECT 1 FROM oauth_grants WHERE id=$1 AND role='bot'", [identity.user_id]))
           .rowCount
       ) {
@@ -828,6 +849,7 @@ export async function createApp(
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
       await lifecycle.validateGrants(true);
+      await botSetup.expire();
       await botReplies.recover();
       void subscriptions
         .reconcileAll()
@@ -844,6 +866,7 @@ export async function createApp(
     validationInterval = setInterval(() => {
       void lifecycle
         .validateGrants()
+        .then(() => botSetup.expire())
         .then(() => subscriptions.reconcileAll())
         .catch(() => app.log.error('Twitch validation dependency failed.'));
     }, 60000);

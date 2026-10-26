@@ -22,6 +22,10 @@ export interface DashboardSnapshot {
     details?: TwitchIntegrationStatus;
   };
 }
+export interface BotSetupPreview {
+  accountLabel: string;
+  expiresAt: string;
+}
 export async function request<T = unknown>(
   path: string,
   body?: unknown,

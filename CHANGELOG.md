@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Direct bot conversion — 2026-10-26
+
+- Replaced the repeated manual-disconnect loop with a named conversion after operator-protected Twitch bot consent. An active empty creator can explicitly confirm or cancel; accounts with world/handoff/custody history remain protected.
+- Added encrypted five-minute pending grants and a browser-bound, one-use HttpOnly cookie. Confirmation revalidates Twitch identity/scopes and atomically ends only the selected creator's local authority before installing the bot grant. No token is exposed in JSON, URLs or browser storage.
+- Added history-race, replay/concurrency, CSRF/account substitution, expiry/cancel, provider revocation/identity and simulation-isolation coverage. All 54 tests across eight files and three browser journeys pass. The owner completed actual bot conversion and Twitch grant validation; genuine chat/output and native raid remain pending.
+- Fixed the stale creator-feed warning after conversion by refreshing current authority when that feed closes; the browser regression includes delayed state loading during conversion.
+
 ### Bot consent recovery feedback — 2026-10-26
 
 - Split bot-role denials into active creator connection versus existing Ark/handoff history, and identify the account Twitch actually authorized.
@@ -69,7 +76,7 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ### Still unverified or unfinished
 
-- Dedicated bot authorization, genuine signed EventSub challenge/chat, visible bot delivery, actual OBS and a native two-broadcaster raid. Real app and broadcaster authorization plus public HTTPS reachability are now verified.
+- Genuine chat effects, visible bot delivery, actual OBS and a native two-broadcaster raid. Real app/broadcaster/bot authorization, named conversion, public HTTPS, three signed challenges and current enabled chat/stream subscriptions are now verified.
 - Automatic timers, resource allocation, high-load/soak behavior, full worker/retention/reconciliation hardening, final Claude Design integration and production deployment.
 - The initial feature push's GitHub Actions run passed; actual deployment and the live verification listed above remain pending. Further publication is held during review.
 

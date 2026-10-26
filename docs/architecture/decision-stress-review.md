@@ -135,8 +135,8 @@ The matrices below cover every proposed decision against every named component. 
 
 | Existing component | Interaction with bot output and authority changes | Evidence or remaining gate |
 | --- | --- | --- |
-| C1 Identity | Separate operator key, creator/bot grants; role/account locks; late validation cannot replace a fresh grant | OAuth role recovery and validation-race regressions; real bot consent pending |
-| C2 Gateway | Query normalization follows HMAC and exact subscription identity; no sending in the callback | Signed fixture/echo/mirror/dedup tests; real challenge pending |
+| C1 Identity | Separate operator key, creator/bot grants; role/account locks; late validation cannot replace a fresh grant | OAuth role recovery and validation-race regressions; real bot consent/identity now verified |
+| C2 Gateway | Query normalization follows HMAC and exact subscription identity; no sending in the callback | Signed fixture/echo/mirror/dedup tests; three real signed challenges now verified |
 | C3 Participation | Queries are read-only and separate from accepted actions; coalescing affects replies only | Slow-send test still applies gameplay |
 | C4 Engine/puzzles | Summaries read canonical state; no rule changes or network calls in transitions | Existing balance/replay tests retained |
 | C5 Episodes | Replies describe the current phase and legal participation; no host command through chat | Gameplay authority tests; automated timers still pending |
@@ -150,5 +150,25 @@ The matrices below cover every proposed decision against every named component. 
 | C13 Operations | Independent live database/port and HTTPS tunnel, disabled request inspection, credential scans | Public HTTPS and deny probes pass; production hosting, leases/retention pending |
 
 The conservative queue policy can drop/coalesce informational replies under pressure; it does not change game rewards or votes. Review pacing, queue age and fairness against measured multi-channel load before expansion.
+
+### Named bot conversion — 2026-10-26
+
+[ADR 0010](../decisions/0010-explicit-empty-account-bot-conversion.md) resolves the observed manual-disconnect loop within the approved stack.
+
+| Component | Conversion interaction and validation |
+| --- | --- |
+| C1 Identity | Operator key plus fresh OAuth produces a five-minute browser capability; confirmation revalidates client/account/scopes, consumes once and serializes role changes |
+| C2 Gateway | Three cookie-scoped setup routes use same-origin/custom-header protections; signed EventSub/raw-body boundaries remain separate |
+| C3 Participation | Selected creator's queued input authority ends under its channel lock; no new viewer command or reward path |
+| C4 Engine/puzzles | No engine imports or rules change; balance/replay coverage retained |
+| C5 Episodes | Conversion requires no world history, so an existing hosted episode cannot be converted away |
+| C6 Custody | Any handoff/custody history blocks conversion; history is checked again under locks to handle a new offer during consent |
+| C7 Database/work | Additive encrypted pending-grant table, atomic claim and authority change, startup/minute expiry cleanup; simulation isolation tested |
+| C8 Projection | Only the cookie holder sees pending label/expiry; OAuth tokens and capability are absent from JSON/feed payloads |
+| C9 Dashboard | Named confirm/cancel replaces the repeated login/disconnect loop; real creator-feed closure refreshes current authority |
+| C10 OBS | Selected account's old overlay capabilities end atomically; another broadcaster's access remains intact |
+| C11 History | No world, event, handoff or lineage deletion; newly created history blocks the pending confirmation |
+| C12 Validation | CSRF/substitution, missing/foreign cookie, creator/operator credentials alone, expiry, cancellation, identity/revocation, one-use race and another Ark's preservation tested |
+| C13 Operations | Migration applied separately to live/simulation stores; pending credentials included in exposure scans; no new service, app registration or browser token storage |
 
 The [validation plan](../planning/validation.md) defines executable tests to build: a complete solo season, a collaborative puzzle, same-recipient races, duplicate proofs, crash recovery, mixed-world participation load, real OBS reconnect, deployed SSE smoke, and a genuine two-channel raid. None is marked passed at planning time. If a choice fails, change the smallest boundary that resolves it, update the ADR and repeat the affected cross-component checks.

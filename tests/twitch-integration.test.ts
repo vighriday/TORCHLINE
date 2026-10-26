@@ -7,9 +7,10 @@ import { createApp } from '../apps/server/src/app.ts';
 import { twitchLifecycle } from '../apps/server/src/twitch-lifecycle.ts';
 import { authorize, browserHeader, liveConfig, providerFixture, tick } from './twitch-provider.ts';
 
-it('renders an escaped, non-mutating browser recovery page for an active creator in the bot flow', () =>
+it('renders an escaped, non-mutating browser recovery page for a creator with world history in the bot flow', () =>
   database(async (store) => {
-    await store.ensureCreator('99', 'Accidental creator', 'live');
+    const creator = await store.ensureCreator('99', 'Accidental creator', 'live');
+    await store.create(creator);
     const provider = providerFixture();
     const fetcher: typeof provider.fetcher = async (input, init) => {
       const response = await provider.fetcher(input, init);
@@ -48,7 +49,7 @@ it('renders an escaped, non-mutating browser recovery page for an active creator
   }));
 
 it.each([false, true])(
-  'requires explicit disconnection and no world history to recover an accidental creator registration as the bot (world=%s)',
+  'preserves manual disconnect recovery and blocks bot conversion with world history (world=%s)',
   (hasWorld) =>
     database(async (store) => {
       const provider = providerFixture();
@@ -66,9 +67,10 @@ it.each([false, true])(
         const creator = await authorize(app, '99');
         expect(creator.response.statusCode).toBe(302);
         const connected = (await authorize(app, '99', true)).response;
-        expect(connected.statusCode).toBe(403);
-        expect(connected.json()).toMatchObject({ error: 'BOT_CREATOR_CONNECTED' });
-        expect(connected.json().message).toContain('fixture_99');
+        expect(connected.statusCode).toBe(302);
+        expect(
+          connected.cookies.find((cookie) => cookie.name === 'torchline_bot_setup')?.httpOnly,
+        ).toBe(true);
         if (hasWorld)
           expect(
             (
