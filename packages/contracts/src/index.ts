@@ -171,6 +171,22 @@ export interface WorldPresentation {
     canResume: boolean;
   };
 }
+export interface TwitchIntegrationStatus {
+  botAuthorized: boolean;
+  chatReady: boolean;
+  raidReady: boolean;
+  lastReconciledAt: string | null;
+  reconcileError: string | null;
+  botReplies: { pending: number; sent: number; failed: number; uncertain: number };
+  subscriptions: { type: string; status: string; current: boolean; providerConfirmed: boolean }[];
+  deliveries: {
+    challenge: number;
+    chat: number;
+    raid: number;
+    appliedChat: number;
+    custodyChanges: number;
+  };
+}
 export class DomainError extends Error {
   readonly code: string;
   constructor(code: string, message: string) {

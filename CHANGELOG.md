@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Creator authority and bot onboarding — 2026-10-26
+
+- Made operator-protected bot setup available after creator sign-in. Added explicit disconnect and recovery for an accidental empty creator registration, with serialized role changes and no deletion of world/custody history.
+- Added private creator diagnostics for subscription identity/readiness, signed deliveries, applied chat, bot outcomes and custody changes. Anonymous/overlay responses exclude those details; private responses are not cached.
+- Made overlay-link rotation atomic and rechecked connected creator authority under mutation locks. Late validation/refresh results cannot overwrite or revoke a newly authorized token pair.
+- Added role-recovery, stale-authority, overlay-race and token-race regressions plus a browser journey for wrong-key denial, disconnect and bot consent. Current full suite: 44 tests across seven files and three browser journeys; real bot/chat/raid acceptance remains pending.
+
 ### Bot reply delivery — 2026-10-26
 
 - Implemented `!status` and `!history` through the native Send Chat Message API, separate from gameplay commands and ingestion work. Replies are bounded, source-channel-only and require current bot/creator permissions plus the matching enabled chat subscription.

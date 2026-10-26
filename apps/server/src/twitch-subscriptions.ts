@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DomainError } from '@torchline/contracts';
+import type { TwitchIntegrationStatus } from '@torchline/contracts';
 import type { Store, Creator } from '@torchline/storage';
 import { BOT_SCOPES, CREATOR_SCOPES, helix } from '@torchline/twitch';
 import type { Fetcher, WebhookNotification } from '@torchline/twitch';
@@ -152,12 +153,34 @@ export function twitchSubscriptions(
       known.callback === sub.transport.callback &&
       sameCondition(known.condition, sub.condition);
     if (notification.type === 'revocation') {
-      if (!knownMatches || active.includes(sub.status))
+      if (active.includes(sub.status))
         throw new DomainError('FORBIDDEN', 'Unknown subscription revocation.');
-      await store.pool.query('UPDATE subscriptions SET status=$2 WHERE id=$1', [
-        sub.id,
-        sub.status,
-      ]);
+      if (known) {
+        if (!knownMatches)
+          throw new DomainError('FORBIDDEN', 'Revocation identity does not match.');
+        await store.pool.query('UPDATE subscriptions SET status=$2 WHERE id=$1', [
+          sub.id,
+          sub.status,
+        ]);
+      } else {
+        // A revocation can beat both the creation response and the first challenge.
+        const owner = await store.creator(channel);
+        const shape = desiredSubscriptions(
+          { id: channel, receive_opt_in: true },
+          sub.condition.user_id ?? '',
+        ).find((item) => item.type === sub.type);
+        if (
+          !owner ||
+          owner.mode !== 'live' ||
+          !shape ||
+          sub.version !== shape.version ||
+          !sameCondition(sub.condition, shape.condition) ||
+          sub.transport.method !== 'webhook' ||
+          sub.transport.callback !== callbackUrl(config)
+        )
+          throw new DomainError('FORBIDDEN', 'Unknown subscription revocation.');
+        await save(sub, channel, false);
+      }
       await record(notification.id, channel, sub.id, 'revocation');
       return { channel, challenge: false };
     }
@@ -362,5 +385,92 @@ export function twitchSubscriptions(
     ).rows;
     await Promise.allSettled(rows.map((row) => reconcile(row.id)));
   }
-  return { observe, reconcile, reconcileAll, record };
+  async function status(channel: string): Promise<TwitchIntegrationStatus> {
+    const creator = await store.creator(channel);
+    const botId = await bot();
+    const rows = (
+      await store.pool.query(
+        'SELECT * FROM subscriptions WHERE channel_id=$1 ORDER BY confirmed_at DESC NULLS LAST',
+        [channel],
+      )
+    ).rows;
+    const specs = desiredSubscriptions(
+      creator ?? { id: channel, receive_opt_in: false },
+      botId ?? '',
+    );
+    const subscriptions = specs.map((spec) => {
+      const matches = rows.filter(
+        (row) =>
+          row.type === spec.type &&
+          row.version === spec.version &&
+          row.callback === callbackUrl(config) &&
+          sameCondition(row.condition, spec.condition),
+      );
+      const row = matches.find((row) => row.status === 'enabled') ?? matches[0];
+      return {
+        type: spec.type,
+        status: row?.status ?? 'missing',
+        current: Boolean(row),
+        providerConfirmed: Boolean(row?.confirmed_at),
+      };
+    });
+    const counts = (
+      await store.pool.query(
+        'SELECT kind,count(*)::integer AS count FROM integration_deliveries WHERE channel_id=$1 GROUP BY kind',
+        [channel],
+      )
+    ).rows;
+    const count = (kind: string) => counts.find((row) => row.kind === kind)?.count ?? 0;
+    const applied = (
+      await store.pool.query(
+        "SELECT count(*)::integer AS count FROM eventsub_inbox WHERE processed_at IS NOT NULL AND error IS NULL AND payload->>'kind'='chat' AND payload->>'channelId'=$1",
+        [channel],
+      )
+    ).rows[0].count;
+    const custody = (
+      await store.pool.query(
+        "SELECT count(*)::integer AS count FROM custody_events WHERE mode='live' AND (source_id=$1 OR target_id=$1)",
+        [channel],
+      )
+    ).rows[0].count;
+    const audit = (
+      await store.pool.query('SELECT reconciled_at,reconcile_error FROM creators WHERE id=$1', [
+        channel,
+      ])
+    ).rows[0];
+    const replies = (
+      await store.pool.query(
+        'SELECT status,count(*)::integer AS count FROM bot_replies WHERE channel_id=$1 GROUP BY status',
+        [channel],
+      )
+    ).rows;
+    const replyCount = (status: string) => replies.find((row) => row.status === status)?.count ?? 0;
+    const ready = (type: string) =>
+      subscriptions.some(
+        (sub) =>
+          sub.type === type && sub.status === 'enabled' && sub.current && sub.providerConfirmed,
+      );
+    return {
+      botAuthorized: Boolean(botId),
+      chatReady: Boolean(botId) && ready('channel.chat.message'),
+      raidReady: ready('channel.raid'),
+      lastReconciledAt: audit?.reconciled_at?.toISOString() ?? null,
+      reconcileError: audit?.reconcile_error ?? null,
+      botReplies: {
+        pending: replyCount('pending') + replyCount('sending'),
+        sent: replyCount('sent'),
+        failed: replyCount('failed'),
+        uncertain: replyCount('uncertain'),
+      },
+      subscriptions,
+      deliveries: {
+        challenge: count('challenge'),
+        chat: count('chat'),
+        raid: count('raid'),
+        appliedChat: applied,
+        custodyChanges: custody,
+      },
+    };
+  }
+  return { observe, reconcile, reconcileAll, record, status };
 }

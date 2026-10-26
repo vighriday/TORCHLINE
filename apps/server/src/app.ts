@@ -3,7 +3,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import cookie from '@fastify/cookie';
 import staticFiles from '@fastify/static';
 import { existsSync } from 'node:fs';
-import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import { CommandRequestSchema, DomainError } from '@torchline/contracts';
@@ -15,12 +15,13 @@ import {
   BOT_SCOPES,
   CREATOR_SCOPES,
   encryptSecret,
-  helix,
+  decryptSecret,
   normalizeChat,
   parseChatCommand,
   RaidSchema,
   requestToken,
   validateToken,
+  revokeToken,
   verifyWebhook,
 } from '@torchline/twitch';
 import type { Fetcher } from '@torchline/twitch';
@@ -45,7 +46,6 @@ const digest = (value: string) => createHash('sha256').update(value).digest('hex
 const denied = (code: string, message: string): never => {
   throw new DomainError(code, message);
 };
-const SessionCookie = 'torchline_session';
 const NodeText = z.string().min(1).max(80);
 
 export async function createApp(
@@ -57,6 +57,8 @@ export async function createApp(
   const lifecycle = twitchLifecycle(store, config, fetcher);
   const subscriptions = twitchSubscriptions(store, config, fetcher, lifecycle.applicationToken);
   const botReplies = twitchBot(store, config, fetcher, lifecycle.applicationToken);
+  const SessionCookie =
+    config.mode === 'simulation' ? 'torchline_sim_session' : 'torchline_session';
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
     bodyLimit: 65536,
@@ -69,6 +71,13 @@ export async function createApp(
       : false,
   });
   await app.register(cookie);
+  app.addHook('onSend', async (request, reply, payload) => {
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('Referrer-Policy', 'no-referrer');
+    if (/^\/(api|auth|integrations|overlay)(\/|$)/.test(request.url))
+      reply.header('Cache-Control', 'no-store');
+    return payload;
+  });
   app.setErrorHandler((err, _request, reply) => {
     const error = err as Error & { code?: string };
     if (error instanceof DomainError)
@@ -174,6 +183,8 @@ export async function createApp(
     const world = await store.active(creator.id);
     const bot = (await store.pool.query("SELECT id FROM oauth_grants WHERE role='bot' LIMIT 1"))
       .rows[0];
+    const details =
+      config.mode === 'live' && !readonly ? await subscriptions.status(creator.id) : undefined;
     return {
       me: { id: creator.id, label: creator.label, receiveOptIn: creator.receive_opt_in },
       mode: config.mode,
@@ -197,9 +208,10 @@ export async function createApp(
           }),
       integration: {
         credentialsConfigured: Boolean(config.twitchClientId && config.twitchClientSecret),
-        botAuthorized: Boolean(bot),
+        botAuthorized: details?.botAuthorized ?? Boolean(bot),
         publicHttps: secure,
         genuineRaidVerified: false,
+        ...(details ? { details } : {}),
       },
     };
   };
@@ -219,7 +231,16 @@ export async function createApp(
         handoffs: [],
         integration: {
           credentialsConfigured: Boolean(config.twitchClientId && config.twitchClientSecret),
-          botAuthorized: false,
+          botAuthorized:
+            config.mode === 'live' &&
+            Boolean(
+              (
+                await store.pool.query(
+                  "SELECT 1 FROM oauth_grants WHERE role='bot' AND scopes @> $1::text[] AND validated_at>now()-interval '1 hour'",
+                  [BOT_SCOPES],
+                )
+              ).rowCount,
+            ),
           publicHttps: secure,
           genuineRaidVerified: false,
         },
@@ -282,9 +303,7 @@ export async function createApp(
       denied('INVALID_INPUT', 'Use !scan, !route, !patch or !vote with valid arguments.');
     const world = await store.active(creator.id);
     if (!world) denied('NOT_FOUND', 'Create a world first.');
-    const actorId = createHmac('sha256', config.sessionSecret)
-      .update(`${world!.id}:${actor}`)
-      .digest('hex');
+    const actorId = participantIdentity(world!.id, actor, config.sessionSecret);
     await store.command(
       world!.id,
       { id: actorId, role: 'viewer', community: creator.id },
@@ -435,40 +454,47 @@ export async function createApp(
       denied('FORBIDDEN', 'Twitch returned an unexpected client, identity or permission set.');
     if (state.role === 'bot' && config.botUserId && identity.user_id !== config.botUserId)
       denied('FORBIDDEN', 'Authorize the configured bot account.');
-    if (state.role === 'bot' && (await store.creator(identity.user_id!)))
-      denied('FORBIDDEN', 'Use a dedicated bot account, separate from connected creators.');
-    if (
-      state.role === 'creator' &&
-      (
-        await store.pool.query("SELECT 1 FROM oauth_grants WHERE id=$1 AND role='bot'", [
-          identity.user_id,
-        ])
-      ).rowCount
-    )
-      denied('FORBIDDEN', 'The bot account cannot be a creator in this application.');
-    await store.transaction(async (c) => {
+    const creator = await store.transaction(async (c) => {
+      // Both OAuth roles share this lock so simultaneous callbacks cannot create dual authority.
+      await c.query('SELECT pg_advisory_xact_lock(833017)');
+      await store.lockChannels(c, [identity.user_id!]);
       if (state.role === 'bot') {
-        await c.query('SELECT pg_advisory_xact_lock(833017)');
+        const account = (
+          await c.query('SELECT connected FROM creators WHERE id=$1', [identity.user_id])
+        ).rows[0];
+        const hasHistory = (
+          await c.query(
+            'SELECT 1 WHERE EXISTS(SELECT 1 FROM worlds WHERE custodian_id=$1) OR EXISTS(SELECT 1 FROM handoffs WHERE source_id=$1 OR target_id=$1) OR EXISTS(SELECT 1 FROM custody_events WHERE source_id=$1 OR target_id=$1)',
+            [identity.user_id],
+          )
+        ).rowCount;
+        if (account?.connected || hasHistory)
+          denied(
+            'FORBIDDEN',
+            'Use a dedicated bot account. If this account was connected as a creator by mistake, disconnect it first; accounts with world history cannot become the bot.',
+          );
         const previous = (await c.query("SELECT id FROM oauth_grants WHERE role='bot'")).rows[0];
         if (previous && previous.id !== identity.user_id)
           await c.query(
             "UPDATE subscriptions SET status='configuration_changed' WHERE type='channel.chat.message' AND status IN ('enabled','webhook_callback_verification_pending')",
           );
         await c.query("DELETE FROM oauth_grants WHERE role='bot'");
+      } else if (
+        (await c.query("SELECT 1 FROM oauth_grants WHERE id=$1 AND role='bot'", [identity.user_id]))
+          .rowCount
+      ) {
+        denied('FORBIDDEN', 'The bot account cannot be a creator in this application.');
       }
       await c.query(
         'INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,scopes=EXCLUDED.scopes,encrypted=EXCLUDED.encrypted,validated_at=now()',
         [identity.user_id, state.role, identity.scopes, encryptSecret(tokens, config.tokenKey)],
       );
+      return state.role === 'creator'
+        ? store.ensureCreator(identity.user_id!, identity.login ?? identity.user_id!, 'live', c)
+        : null;
     });
-    if (state.role === 'creator') {
-      const creator = await store.ensureCreator(
-        identity.user_id!,
-        identity.login ?? identity.user_id!,
-        'live',
-      );
-      await setSession(creator, reply);
-    }
+    if (creator) await setSession(creator, reply);
+    else reply.clearCookie(SessionCookie, { path: '/' });
     if (options.workers !== false)
       void subscriptions
         .reconcileAll()
@@ -486,6 +512,36 @@ export async function createApp(
         ])
       ).rows,
     };
+  });
+  app.get('/api/twitch/status', async (request) => {
+    const creator = await currentCreator(request);
+    if (config.mode !== 'live')
+      denied('MODE_MISMATCH', 'Live integration status is unavailable in simulation.');
+    return subscriptions.status(creator.id);
+  });
+  app.post('/api/twitch/disconnect', async (request, reply) => {
+    const creator = await currentCreator(request);
+    if (config.mode !== 'live') denied('MODE_MISMATCH', 'Use logout for a simulation session.');
+    const grant = (
+      await store.pool.query("SELECT encrypted FROM oauth_grants WHERE id=$1 AND role='creator'", [
+        creator.id,
+      ])
+    ).rows[0];
+    await store.disconnectCreator(creator.id);
+    reply.clearCookie(SessionCookie, { path: '/' });
+    let providerRevoked = false;
+    if (grant && config.twitchClientId) {
+      try {
+        providerRevoked = await revokeToken(
+          config.twitchClientId,
+          decryptSecret<{ access_token: string }>(grant.encrypted, config.tokenKey).access_token,
+          fetcher,
+        );
+      } catch {
+        /* Local revocation must succeed even if provider/key access fails. */
+      }
+    }
+    return { disconnected: true, providerRevoked };
   });
 
   await app.register(async (gateway) => {
@@ -570,11 +626,21 @@ export async function createApp(
   app.post('/api/overlay-grant', async (request) => {
     const creator = await currentCreator(request);
     const token = randomBytes(32).toString('hex');
-    await store.pool.query('DELETE FROM overlay_grants WHERE channel_id=$1', [creator.id]);
-    await store.pool.query('INSERT INTO overlay_grants(hash,channel_id) VALUES($1,$2)', [
-      digest(token),
-      creator.id,
-    ]);
+    await store.transaction(async (c) => {
+      await store.lockChannels(c, [creator.id]);
+      const connected = (
+        await c.query('SELECT 1 FROM creators WHERE id=$1 AND connected AND mode=$2', [
+          creator.id,
+          config.mode,
+        ])
+      ).rowCount;
+      if (!connected) denied('UNAUTHENTICATED', 'Reconnect the creator account first.');
+      await c.query('DELETE FROM overlay_grants WHERE channel_id=$1', [creator.id]);
+      await c.query('INSERT INTO overlay_grants(hash,channel_id) VALUES($1,$2)', [
+        digest(token),
+        creator.id,
+      ]);
+    });
     return { url: `${config.baseUrl}/overlay/${encodeURIComponent(creator.id)}/#${token}` };
   });
   app.post('/overlay/:channel/session', async (request, reply) => {

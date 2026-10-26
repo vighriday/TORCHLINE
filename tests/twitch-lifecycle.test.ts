@@ -12,6 +12,70 @@ const config = {
   twitchClientId: 'client',
   twitchClientSecret: 'secret',
 };
+it.each([false, true])(
+  'preserves a newly authorized grant when obsolete validation finishes late (refresh=%s)',
+  (refresh) =>
+    database(async (store) => {
+      await store.ensureCreator('42', 'Creator', 'live');
+      const original = encryptSecret(
+        { access_token: 'old', ...(refresh ? { refresh_token: 'old-refresh' } : {}) },
+        config.tokenKey,
+      );
+      await store.pool.query(
+        "INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES('42','creator',$1,$2)",
+        [CREATOR_SCOPES, original],
+      );
+      let entered: () => void = () => {};
+      let release: () => void = () => {};
+      const waiting = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const fetcher: Fetcher = async (input, init) => {
+        if ((init?.headers as Record<string, string> | undefined)?.Authorization === 'OAuth old') {
+          entered();
+          await gate;
+          return new Response('', { status: 401 });
+        }
+        if (String(input).endsWith('/token'))
+          return Response.json({
+            access_token: 'obsolete-refresh-result',
+            refresh_token: 'obsolete-refresh-pair',
+            expires_in: 3600,
+          });
+        return Response.json({
+          client_id: 'client',
+          user_id: '42',
+          scopes: CREATOR_SCOPES,
+          expires_in: 3600,
+        });
+      };
+      const validation = twitchLifecycle(store, config, fetcher).validateGrants(true);
+      await waiting;
+      try {
+        const replacement = encryptSecret(
+          { access_token: 'reauthorized', refresh_token: 'reauthorized-pair' },
+          config.tokenKey,
+        );
+        await store.pool.query(
+          "UPDATE oauth_grants SET encrypted=$1,validated_at=now() WHERE id='42'",
+          [replacement],
+        );
+      } finally {
+        release();
+      }
+      await validation;
+      const grant = (await store.pool.query("SELECT encrypted FROM oauth_grants WHERE id='42'"))
+        .rows[0];
+      expect(decryptSecret(grant.encrypted, config.tokenKey)).toMatchObject({
+        access_token: 'reauthorized',
+        refresh_token: 'reauthorized-pair',
+      });
+      expect((await store.creator('42'))?.connected).toBe(true);
+    }),
+);
 it('serializes refresh, revalidates identity/scopes and atomically stores the new token pair', () =>
   database(async (store) => {
     await store.ensureCreator('42', 'Creator', 'live');

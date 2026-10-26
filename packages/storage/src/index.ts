@@ -87,17 +87,54 @@ export class Store {
   async creator(id: string): Promise<Creator | null> {
     return (await this.pool.query('SELECT * FROM creators WHERE id=$1', [id])).rows[0] ?? null;
   }
-  async ensureCreator(id: string, label: string, mode: Creator['mode']) {
-    await this.pool.query(
+  async ensureCreator(id: string, label: string, mode: Creator['mode'], client?: PoolClient) {
+    const db = client ?? this.pool;
+    await db.query(
       'INSERT INTO creators(id,label,mode,connected) VALUES($1,$2,$3,true) ON CONFLICT(id) DO UPDATE SET label=EXCLUDED.label,connected=true WHERE creators.mode=EXCLUDED.mode',
       [id, label, mode],
     );
-    const creator = await this.creator(id);
+    const creator = ((await db.query('SELECT * FROM creators WHERE id=$1', [id])).rows[0] ??
+      null) as Creator | null;
     if (!creator || creator.mode !== mode) error('MODE_MISMATCH', 'Creator mode mismatch.');
     return creator!;
   }
   async optIn(id: string, enabled: boolean) {
-    await this.pool.query('UPDATE creators SET receive_opt_in=$2 WHERE id=$1', [id, enabled]);
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [id]);
+      await this.requireConnected(c, id);
+      await c.query('UPDATE creators SET receive_opt_in=$2 WHERE id=$1', [id, enabled]);
+    });
+  }
+  async disconnectCreator(channel: string) {
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [channel]);
+      await c.query('UPDATE creators SET connected=false,receive_opt_in=false WHERE id=$1', [
+        channel,
+      ]);
+      await c.query('DELETE FROM oauth_grants WHERE id=$1', [channel]);
+      await c.query('DELETE FROM sessions WHERE channel_id=$1', [channel]);
+      await c.query('DELETE FROM overlay_grants WHERE channel_id=$1', [channel]);
+      await c.query(
+        "UPDATE subscriptions SET status='app_disconnected' WHERE channel_id=$1 AND status IN ('enabled','webhook_callback_verification_pending')",
+        [channel],
+      );
+      await c.query(
+        "UPDATE eventsub_inbox SET processed_at=now(),error='AUTH_ENDED' WHERE processed_at IS NULL AND payload->>'channelId'=$1",
+        [channel],
+      );
+    });
+    const pending = (
+      await this.pool.query(
+        "SELECT id,source_id FROM handoffs WHERE (source_id=$1 OR target_id=$1) AND status IN ('prepared','verified')",
+        [channel],
+      )
+    ).rows;
+    for (const intent of pending)
+      await this.cancel(
+        intent.id,
+        channel,
+        intent.source_id === channel ? 'cancelled' : 'declined',
+      );
   }
   async enqueueChat(
     deliveryId: string,
@@ -116,7 +153,11 @@ export class Store {
           [channel],
         )
       ).rows[0];
+      const connected = (
+        await c.query('SELECT 1 FROM creators WHERE id=$1 AND connected', [channel])
+      ).rowCount;
       const eligible =
+        connected &&
         row &&
         row.mode === 'live' &&
         !row.frozen_by &&
@@ -155,9 +196,15 @@ export class Store {
       [...new Set(ids)],
     ]);
   }
+  private async requireConnected(c: PoolClient, id: string, mode?: Creator['mode']) {
+    const row = (await c.query('SELECT connected,mode FROM creators WHERE id=$1', [id])).rows[0];
+    if (!row?.connected || (mode && row.mode !== mode))
+      error('FORBIDDEN', 'The creator authorization ended.');
+  }
   async create(owner: Creator): Promise<string> {
     return this.transaction(async (c) => {
       await this.lockChannels(c, [owner.id]);
+      await this.requireConnected(c, owner.id, owner.mode);
       if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [owner.id])).rowCount)
         error('CHANNEL_BUSY', 'Park or finish the current world first.');
       const id = randomUUID();
@@ -206,6 +253,7 @@ export class Store {
   async park(channel: string, id: string, resume: boolean) {
     await this.transaction(async (c) => {
       await this.lockChannels(c, [channel]);
+      await this.requireConnected(c, channel);
       const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
       if (!row || row.custodian_id !== channel)
         error('FORBIDDEN', 'Only the custodian can host this world.');
@@ -240,6 +288,7 @@ export class Store {
   ) {
     await this.transaction(async (c) => {
       await this.lockChannels(c, [actor.community]);
+      await this.requireConnected(c, actor.community, mode);
       const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
       if (!row || row.custodian_id !== actor.community)
         error('FORBIDDEN', 'This community does not control the world.');
@@ -339,6 +388,11 @@ export class Store {
     if (source.id === targetId) error('INVALID_TARGET', 'Choose another creator.');
     return this.transaction(async (c) => {
       await this.lockChannels(c, [source.id, targetId]);
+      const currentSource = (
+        await c.query('SELECT connected,mode FROM creators WHERE id=$1', [source.id])
+      ).rows[0];
+      if (!currentSource?.connected || currentSource.mode !== source.mode)
+        error('FORBIDDEN', 'The source authorization ended.');
       const target = (await c.query('SELECT * FROM creators WHERE id=$1', [targetId])).rows[0];
       const w = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
       if (!w || w.custodian_id !== source.id || w.mode !== source.mode)
@@ -458,6 +512,10 @@ export class Store {
       if (intent.expires_at.getTime() <= Date.now())
         error('INTENT_EXPIRED', 'The prepared handoff expired.');
       const target = (await c.query('SELECT * FROM creators WHERE id=$1', [receiver.id])).rows[0];
+      const source = (
+        await c.query('SELECT connected FROM creators WHERE id=$1', [intent.source_id])
+      ).rows[0];
+      if (!source?.connected) error('SOURCE_UNAVAILABLE', 'The source authorization ended.');
       if (!target.receive_opt_in || !target.connected)
         error('TARGET_UNAVAILABLE', 'Receiver is no longer opted in or connected.');
       if (

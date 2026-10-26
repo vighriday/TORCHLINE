@@ -129,4 +129,26 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Required evidence before calling this architecture validated
 
+### Live integration refinement — 2026-10-26
+
+[ADR 0009](../decisions/0009-bot-delivery-and-account-boundaries.md) retains the approved stack. The following is design/test evidence, not a claim of real chat or raid verification.
+
+| Existing component | Interaction with bot output and authority changes | Evidence or remaining gate |
+| --- | --- | --- |
+| C1 Identity | Separate operator key, creator/bot grants; role/account locks; late validation cannot replace a fresh grant | OAuth role recovery and validation-race regressions; real bot consent pending |
+| C2 Gateway | Query normalization follows HMAC and exact subscription identity; no sending in the callback | Signed fixture/echo/mirror/dedup tests; real challenge pending |
+| C3 Participation | Queries are read-only and separate from accepted actions; coalescing affects replies only | Slow-send test still applies gameplay |
+| C4 Engine/puzzles | Summaries read canonical state; no rule changes or network calls in transitions | Existing balance/replay tests retained |
+| C5 Episodes | Replies describe the current phase and legal participation; no host command through chat | Gameplay authority tests; automated timers still pending |
+| C6 Custody | Disconnect cancels pending offers; bot output cannot create proof or accept custody | Disconnect/transfer regressions; native two-channel milestone pending |
+| C7 Database/work | Same database, separate bounded worker; durable outcomes and no automatic uncertain retry | Real SQL queue/restart tests; replicas and load gates remain |
+| C8 Live projection | Typed private diagnostic counts; public/overlay views omit details | HTTP projection tests; proxy/OBS acceptance pending |
+| C9 Dashboard | Setup visible after sign-in without granting authority; explicit disconnect | Browser recovery and wrong-key journey |
+| C10 OBS | Read-only capability rotation serialized; no operator/creator privileges from overlay cookie | Concurrent rotation and scoped-overlay tests; actual OBS pending |
+| C11 History | Authored recap from canonical committed decisions, no raw chat/identities | Query output fixtures; full public navigation pending |
+| C12 Validation | Exact staged source exported for independent build/tests; live doctor separated from fixture tests | Local suites, real app/broadcaster validation; live delivery not fabricated |
+| C13 Operations | Independent live database/port and HTTPS tunnel, disabled request inspection, credential scans | Public HTTPS and deny probes pass; production hosting, leases/retention pending |
+
+The conservative queue policy can drop/coalesce informational replies under pressure; it does not change game rewards or votes. Review pacing, queue age and fairness against measured multi-channel load before expansion.
+
 The [validation plan](../planning/validation.md) defines executable tests to build: a complete solo season, a collaborative puzzle, same-recipient races, duplicate proofs, crash recovery, mixed-world participation load, real OBS reconnect, deployed SSE smoke, and a genuine two-channel raid. None is marked passed at planning time. If a choice fails, change the smallest boundary that resolves it, update the ADR and repeat the affected cross-component checks.

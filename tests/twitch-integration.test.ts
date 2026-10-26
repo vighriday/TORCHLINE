@@ -1,10 +1,65 @@
 import { expect, it } from 'vitest';
+
 import { randomUUID } from 'node:crypto';
 import type { Command } from '@torchline/contracts';
 import { database } from './helpers.ts';
 import { createApp } from '../apps/server/src/app.ts';
 import { twitchLifecycle } from '../apps/server/src/twitch-lifecycle.ts';
 import { authorize, browserHeader, liveConfig, providerFixture, tick } from './twitch-provider.ts';
+
+it.each([false, true])(
+  'requires explicit disconnection and no world history to recover an accidental creator registration as the bot (world=%s)',
+  (hasWorld) =>
+    database(async (store) => {
+      const provider = providerFixture();
+      const fetcher: typeof provider.fetcher = async (input, init) => {
+        const response = await provider.fetcher(input, init);
+        if (String(input).endsWith('/validate')) {
+          const identity = await response.json();
+          return Response.json({ ...identity, scopes: [...identity.scopes, 'channel:bot'] });
+        }
+        return response;
+      };
+      const app = await createApp(store, liveConfig, { fetcher, workers: false });
+      provider.attach(app);
+      try {
+        const creator = await authorize(app, '99');
+        expect(creator.response.statusCode).toBe(302);
+        expect((await authorize(app, '99', true)).response.statusCode).toBe(403);
+        if (hasWorld)
+          expect(
+            (
+              await app.inject({
+                method: 'POST',
+                url: '/api/worlds',
+                headers: creator.headers,
+                payload: {},
+              })
+            ).statusCode,
+          ).toBe(200);
+        expect(
+          (
+            await app.inject({
+              method: 'POST',
+              url: '/api/twitch/disconnect',
+              headers: creator.headers,
+              payload: {},
+            })
+          ).statusCode,
+        ).toBe(200);
+        const bot = await authorize(app, '99', true);
+        expect(bot.response.statusCode).toBe(hasWorld ? 403 : 302);
+        expect((await store.creator('99'))?.connected).toBe(false);
+        expect(
+          (await store.pool.query("SELECT 1 FROM oauth_grants WHERE role='bot'")).rowCount,
+        ).toBe(hasWorld ? 0 : 1);
+        expect((await store.pool.query('SELECT 1 FROM worlds')).rowCount).toBe(hasWorld ? 1 : 0);
+        if (!hasWorld) expect((await authorize(app, '99')).response.statusCode).toBe(403);
+      } finally {
+        await app.close();
+      }
+    }),
+);
 
 it('carries OAuth-authorized broadcaster, bot, signed chat and native-raid contract delivery through one persistent world', () =>
   database(async (store) => {
@@ -403,6 +458,132 @@ it('preserves client-error status and safe responses for malformed and oversized
         expect(res.body).not.toContain('xxxx');
       }
       expect((await store.pool.query('SELECT * FROM worlds')).rowCount).toBe(0);
+    } finally {
+      await app.close();
+    }
+  }));
+
+it('disconnects local authority, queued input and overlay access while preserving the Ark for reconnection', () =>
+  database(async (store) => {
+    const provider = providerFixture();
+    const app = await createApp(store, liveConfig, { fetcher: provider.fetcher, workers: false });
+    provider.attach(app);
+    try {
+      const creator = await authorize(app, '42');
+      await authorize(app, '99', true);
+      await app.inject({
+        method: 'POST',
+        url: '/api/twitch/reconcile',
+        headers: creator.headers,
+        payload: {},
+      });
+      expect(
+        (await app.inject({ url: '/api/twitch/status', headers: creator.headers })).json()
+          .chatReady,
+      ).toBe(true);
+      expect((await app.inject('/api/twitch/status')).statusCode).toBe(401);
+      const id = (
+        await app.inject({
+          method: 'POST',
+          url: '/api/worlds',
+          headers: creator.headers,
+          payload: {},
+        })
+      ).json().id;
+      await app.inject({
+        method: 'POST',
+        url: `/api/worlds/${id}/commands`,
+        headers: creator.headers,
+        payload: { command: { type: 'start' }, expectedVersion: 0, commandId: randomUUID() },
+      });
+      const grant = (
+        await app.inject({
+          method: 'POST',
+          url: '/api/overlay-grant',
+          headers: creator.headers,
+          payload: {},
+        })
+      ).json();
+      const token = new URL(grant.url).hash.slice(1);
+      const exchange = await app.inject({
+        method: 'POST',
+        url: '/overlay/42/session',
+        headers: browserHeader,
+        payload: { token },
+      });
+      const cookie = `torchline_overlay=${exchange.cookies.find((item) => item.name === 'torchline_overlay')!.value}`;
+      const chat = provider.subscriptions.find((sub) => sub.type === 'channel.chat.message')!;
+      await provider.deliver(chat, {
+        broadcaster_user_id: '42',
+        chatter_user_id: '77',
+        message_id: 'pending-input',
+        message: { text: '!scan A' },
+      });
+      const before = (await store.get(id)).state;
+      const disconnected = await app.inject({
+        method: 'POST',
+        url: '/api/twitch/disconnect',
+        headers: creator.headers,
+        payload: {},
+      });
+      expect(disconnected.json()).toEqual({ disconnected: true, providerRevoked: true });
+      await tick(app);
+      expect((await store.get(id)).state).toEqual(before);
+      expect((await app.inject({ url: '/api/state', headers: creator.headers })).statusCode).toBe(
+        401,
+      );
+      expect(
+        (await app.inject({ url: '/overlay/42/events', headers: { cookie } })).statusCode,
+      ).toBe(403);
+      expect(
+        (await store.pool.query("SELECT * FROM eventsub_inbox WHERE error='AUTH_ENDED'")).rowCount,
+      ).toBe(1);
+      const reconnected = await authorize(app, '42');
+      expect(
+        (await app.inject({ url: '/api/state', headers: reconnected.headers })).json().world
+          .worldId,
+      ).toBe(id);
+    } finally {
+      await app.close();
+    }
+  }));
+
+it('remembers a signed revocation that arrives before the first challenge or provider response', () =>
+  database(async (store) => {
+    const provider = providerFixture();
+    const app = await createApp(store, liveConfig, { fetcher: provider.fetcher, workers: false });
+    provider.attach(app);
+    try {
+      await authorize(app, '42');
+      await authorize(app, '99', true);
+      const sub = {
+        id: 'early-revocation',
+        type: 'channel.chat.message',
+        version: '1',
+        status: 'authorization_revoked',
+        condition: { broadcaster_user_id: '42', user_id: '99' },
+        transport: {
+          method: 'webhook',
+          callback: `${liveConfig.baseUrl}/integrations/twitch/eventsub`,
+        },
+      };
+      expect(
+        (await provider.deliver(sub, undefined, 'revoked-first', 'revocation')).statusCode,
+      ).toBe(204);
+      expect(
+        (
+          await provider.deliver(
+            { ...sub, status: 'webhook_callback_verification_pending' },
+            undefined,
+            'late-challenge',
+            'webhook_callback_verification',
+          )
+        ).statusCode,
+      ).toBe(200);
+      expect(
+        (await store.pool.query('SELECT status FROM subscriptions WHERE id=$1', [sub.id])).rows[0]
+          .status,
+      ).toBe('authorization_revoked');
     } finally {
       await app.close();
     }

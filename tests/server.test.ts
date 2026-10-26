@@ -16,6 +16,43 @@ const baseConfig: AppConfig = {
   eventsubSecret: 'eventsub-test-secret-adequate-length',
 };
 describe('HTTP authorization, projections and Twitch integration contracts', () => {
+  it('rotates overlay capabilities atomically when several requests race', () =>
+    database(async (store) => {
+      const app = await createApp(store, baseConfig, { workers: false });
+      try {
+        const login = await app.inject({
+          method: 'POST',
+          url: '/api/simulator/login',
+          payload: { channel: 'alpha' },
+          headers: header,
+        });
+        const auth = {
+          ...header,
+          cookie: `torchline_sim_session=${login.cookies.find((c) => c.name === 'torchline_sim_session')!.value}`,
+        };
+        const responses = await Promise.all(
+          Array.from({ length: 4 }, () =>
+            app.inject({ method: 'POST', url: '/api/overlay-grant', payload: {}, headers: auth }),
+          ),
+        );
+        expect(responses.every((response) => response.statusCode === 200)).toBe(true);
+        expect((await store.pool.query('SELECT 1 FROM overlay_grants')).rowCount).toBe(1);
+        const exchanges = [];
+        for (const response of responses)
+          exchanges.push(
+            await app.inject({
+              method: 'POST',
+              url: '/overlay/sim-alpha/session',
+              headers: header,
+              payload: { token: new URL(response.json().url).hash.slice(1) },
+            }),
+          );
+        expect(exchanges.filter((response) => response.statusCode === 200)).toHaveLength(1);
+        expect(exchanges.filter((response) => response.statusCode === 403)).toHaveLength(3);
+      } finally {
+        await app.close();
+      }
+    }));
   it('isolates simulation background work from live inbox, publication and handoff expiry', () =>
     database(async (store) => {
       const source = await store.ensureCreator('live-source', 'Live source', 'live');
@@ -103,7 +140,7 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
           headers: header,
         });
         expect(login.statusCode).toBe(200);
-        const cookie = `torchline_session=${login.cookies.find((c) => c.name === 'torchline_session')!.value}`;
+        const cookie = `torchline_sim_session=${login.cookies.find((c) => c.name === 'torchline_sim_session')!.value}`;
         const auth = { ...header, cookie };
         const created = (
           await app.inject({ method: 'POST', url: '/api/worlds', payload: {}, headers: auth })

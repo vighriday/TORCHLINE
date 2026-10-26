@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { database } from './helpers.ts';
 import { createApp } from '../apps/server/src/app.ts';
 import { twitchBot } from '../apps/server/src/twitch-bot.ts';
-import { authorize, liveConfig, providerFixture, tick } from './twitch-provider.ts';
+import { authorize, browserHeader, liveConfig, providerFixture, tick } from './twitch-provider.ts';
 const send = (app: Awaited<ReturnType<typeof createApp>>) =>
   (app as unknown as { botTick: () => Promise<void> }).botTick();
 
@@ -59,6 +59,11 @@ it('coalesces channel queries, deduplicates messages and sends only through the 
       expect(
         (await store.pool.query('SELECT status FROM bot_replies')).rows.map((row) => row.status),
       ).toEqual(['sent']);
+      const status = await app.inject({ url: '/api/twitch/status', headers: creator.headers });
+      expect(status.json().botReplies).toEqual({ pending: 0, sent: 1, failed: 0, uncertain: 0 });
+      expect(
+        (await app.inject({ url: '/api/twitch/status', headers: browserHeader })).statusCode,
+      ).toBe(401);
     } finally {
       await app.close();
     }

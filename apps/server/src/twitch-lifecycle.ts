@@ -14,7 +14,7 @@ import type { AppConfig } from './app.ts';
 import { hasCurrentSubscription } from './twitch-subscriptions.ts';
 
 export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetcher) {
-  let validating = false;
+  let validation: Promise<void> | null = null;
   let appToken: { value: string; expires: number } | null = null;
   async function applicationToken() {
     if (!config.twitchClientId || !config.twitchClientSecret)
@@ -36,76 +36,83 @@ export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetche
     return appToken.value;
   }
   async function validateGrants(force = false) {
-    if (
-      validating ||
-      config.mode !== 'live' ||
-      !config.twitchClientId ||
-      !config.twitchClientSecret
-    )
-      return;
-    validating = true;
-    try {
-      const rows = (
-        await store.pool.query(
-          "SELECT * FROM oauth_grants WHERE $1::boolean OR validated_at<now()-interval '55 minutes'",
-          [force],
-        )
-      ).rows;
-      for (const grant of rows) {
+    if (validation) return validation;
+    if (config.mode !== 'live' || !config.twitchClientId || !config.twitchClientSecret) return;
+    validation = validateBatch(force).finally(() => {
+      validation = null;
+    });
+    return validation;
+  }
+  async function validateBatch(force: boolean) {
+    const rows = (
+      await store.pool.query(
+        "SELECT * FROM oauth_grants WHERE $1::boolean OR validated_at<now()-interval '55 minutes'",
+        [force],
+      )
+    ).rows;
+    for (const grant of rows) {
+      try {
+        let tokens = decryptSecret<OAuthTokens>(grant.encrypted, config.tokenKey);
+        let identity;
         try {
-          let tokens = decryptSecret<OAuthTokens>(grant.encrypted, config.tokenKey);
-          let identity;
-          try {
-            identity = await validateToken(tokens.access_token, fetcher);
-          } catch (e) {
-            if (
-              !(e instanceof DomainError) ||
-              e.code !== 'TWITCH_TOKEN_INVALID' ||
-              !tokens.refresh_token
-            )
-              throw e;
-            tokens = await requestToken(
-              {
-                client_id: config.twitchClientId!,
-                client_secret: config.twitchClientSecret!,
-                grant_type: 'refresh_token',
-                refresh_token: tokens.refresh_token,
-              },
-              fetcher,
-            );
-            identity = await validateToken(tokens.access_token, fetcher);
-          }
-          if (
-            identity.client_id !== config.twitchClientId ||
-            identity.user_id !== grant.id ||
-            !(grant.role === 'bot' ? BOT_SCOPES : CREATOR_SCOPES).every((s) =>
-              identity.scopes.includes(s),
-            )
-          )
-            throw new DomainError('TWITCH_TOKEN_INVALID', 'Identity or required scopes changed.');
-          await store.pool.query(
-            'UPDATE oauth_grants SET encrypted=$2,scopes=$3,validated_at=now() WHERE id=$1',
-            [grant.id, encryptSecret(tokens, config.tokenKey), identity.scopes],
-          );
+          identity = await validateToken(tokens.access_token, fetcher);
         } catch (e) {
           if (
             !(e instanceof DomainError) ||
-            !['TWITCH_TOKEN_INVALID', 'TWITCH_AUTH_FAILED'].includes(e.code)
+            e.code !== 'TWITCH_TOKEN_INVALID' ||
+            !tokens.refresh_token
           )
-            continue;
-          await store.transaction(async (c) => {
-            await c.query('DELETE FROM oauth_grants WHERE id=$1', [grant.id]);
-            await c.query('DELETE FROM sessions WHERE channel_id=$1', [grant.id]);
-            await c.query('UPDATE creators SET connected=false WHERE id=$1', [grant.id]);
-            await c.query(
-              "UPDATE subscriptions SET status='authorization_revoked' WHERE channel_id=$1 OR ($2='bot' AND type='channel.chat.message')",
-              [grant.id, grant.role],
-            );
-          });
+            throw e;
+          tokens = await requestToken(
+            {
+              client_id: config.twitchClientId!,
+              client_secret: config.twitchClientSecret!,
+              grant_type: 'refresh_token',
+              refresh_token: tokens.refresh_token,
+            },
+            fetcher,
+          );
+          identity = await validateToken(tokens.access_token, fetcher);
         }
+        if (
+          identity.client_id !== config.twitchClientId ||
+          identity.user_id !== grant.id ||
+          !(grant.role === 'bot' ? BOT_SCOPES : CREATOR_SCOPES).every((s) =>
+            identity.scopes.includes(s),
+          )
+        )
+          throw new DomainError('TWITCH_TOKEN_INVALID', 'Identity or required scopes changed.');
+        await store.pool.query(
+          'UPDATE oauth_grants SET encrypted=$2,scopes=$3,validated_at=now() WHERE id=$1 AND encrypted=$4::jsonb',
+          [grant.id, encryptSecret(tokens, config.tokenKey), identity.scopes, grant.encrypted],
+        );
+      } catch (e) {
+        if (
+          !(e instanceof DomainError) ||
+          !['TWITCH_TOKEN_INVALID', 'TWITCH_AUTH_FAILED'].includes(e.code)
+        )
+          continue;
+        await store.transaction(async (c) => {
+          if (grant.role === 'bot') await c.query('SELECT pg_advisory_xact_lock(833017)');
+          else await store.lockChannels(c, [grant.id]);
+          const removed = await c.query(
+            'DELETE FROM oauth_grants WHERE id=$1 AND encrypted=$2::jsonb RETURNING id',
+            [grant.id, grant.encrypted],
+          );
+          if (!removed.rowCount) return;
+          await c.query('DELETE FROM sessions WHERE channel_id=$1', [grant.id]);
+          await c.query('DELETE FROM overlay_grants WHERE channel_id=$1', [grant.id]);
+          await c.query(
+            "UPDATE eventsub_inbox SET processed_at=now(),error='AUTH_ENDED' WHERE processed_at IS NULL AND payload->>'channelId'=$1",
+            [grant.id],
+          );
+          await c.query('UPDATE creators SET connected=false WHERE id=$1', [grant.id]);
+          await c.query(
+            "UPDATE subscriptions SET status='authorization_revoked' WHERE channel_id=$1 OR ($2='bot' AND type='channel.chat.message')",
+            [grant.id, grant.role],
+          );
+        });
       }
-    } finally {
-      validating = false;
     }
   }
   async function readyForTransfer(sourceId: string | null, targetId: string) {
@@ -131,14 +138,6 @@ export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetche
       if (!(await hasCurrentSubscription(store, config, id, 'channel.chat.message', bot.id)))
         throw new DomainError('SUBSCRIPTION_UNREADY', 'Both chat subscriptions must be enabled.');
     }
-    if (
-      !(
-        await store.pool.query(
-          "SELECT 1 FROM oauth_grants WHERE role='bot' AND validated_at>now()-interval '1 hour'",
-        )
-      ).rowCount
-    )
-      throw new DomainError('NOT_CONFIGURED', 'The dedicated bot must be authorized.');
     if (!(await hasCurrentSubscription(store, config, targetId, 'channel.raid', bot.id)))
       throw new DomainError(
         'SUBSCRIPTION_UNREADY',

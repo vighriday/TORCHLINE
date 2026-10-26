@@ -27,6 +27,54 @@ async function boundaryWorld(store: Store, sourceId: string) {
   return { creator, id };
 }
 describe('real PostgreSQL consistency', () => {
+  it('rejects stale creator mutations and new chat ingress after explicit disconnection', () =>
+    database(async (store) => {
+      const creator = await store.ensureCreator('42', 'Creator', 'live');
+      const id = await store.create(creator);
+      const actor = { id: creator.id, community: creator.id, role: 'host' as const };
+      await store.command(id, actor, 'live', 0, randomUUID(), { type: 'start' });
+      const before = await store.get(id);
+      await store.disconnectCreator(creator.id);
+      await expect(store.create(creator)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await expect(store.park(creator.id, id, false)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await expect(store.optIn(creator.id, true)).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await expect(
+        store.command(id, actor, 'live', before.revision, randomUUID(), {
+          type: 'close-challenge',
+        }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await store.enqueueChat(
+        'late-input',
+        creator.id,
+        'viewer',
+        { type: 'scan', node: 'A' },
+        new Date().toISOString(),
+      );
+      expect(
+        (
+          await store.pool.query(
+            "SELECT processed_at,payload FROM eventsub_inbox WHERE message_id='late-input'",
+          )
+        ).rows[0],
+      ).toMatchObject({ payload: { kind: 'ignored' } });
+      expect((await store.get(id)).state).toEqual(before.state);
+      expect((await store.pool.query('SELECT 1 FROM worlds')).rowCount).toBe(1);
+    }));
+  it('cancels an incoming offer on disconnect and preserves source custody and game state', () =>
+    database(async (store) => {
+      const source = await boundaryWorld(store, 'source');
+      const receiver = await store.ensureCreator('receiver', 'Receiver', 'simulation');
+      await store.optIn(receiver.id, true);
+      const before = await store.get(source.id);
+      const intent = await store.prepare(source.id, source.creator, receiver.id, before.revision);
+      await store.disconnectCreator(receiver.id);
+      expect((await store.get(source.id)).state).toEqual(before.state);
+      expect((await store.get(source.id)).custodian_id).toBe(source.creator.id);
+      expect((await store.get(source.id)).frozen_by).toBeNull();
+      expect((await store.handoffs(receiver.id)).find((row) => row.id === intent.id)?.status).toBe(
+        'declined',
+      );
+    }));
   it('persists across repository reconnection and reconstructs JSONB history exactly', () =>
     database(async (store, url) => {
       const { creator, id } = await boundaryWorld(store, 'source');

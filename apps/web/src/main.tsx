@@ -165,34 +165,54 @@ function App() {
                 Connect creator with Twitch
               </a>
               <p>
-                Bot setup is separate. Use the operator secret from the local environment, never a
-                Twitch password.
+                {data.integration.botAuthorized
+                  ? 'Dedicated bot authorization is current. Connect the broadcaster to finish channel setup.'
+                  : 'The dedicated bot still needs separate authorization.'}
               </p>
-              <label>
-                Bot setup secret
-                <input
-                  type="password"
-                  autoComplete="off"
-                  value={operatorKey}
-                  onChange={(e) => setOperatorKey(e.target.value)}
-                />
-              </label>
-              <button
-                onClick={() =>
-                  void perform(async () => {
-                    const result = await request<{ url: string }>(
-                      '/api/operator/bot-authorization',
-                      {},
-                      { Authorization: `Bearer ${operatorKey}` },
-                    );
-                    location.assign(result.url);
-                  })
-                }
-              >
-                Authorize the dedicated bot
-              </button>
             </>
           )}
+        </section>
+      )}
+      {!overlayChannel && data?.mode === 'live' && (
+        <section className="panel">
+          <details open={!data.integration.botAuthorized}>
+            <summary>Dedicated bot setup · operator access</summary>
+            <p>
+              Use a private browser signed into the separate bot account. Enter BOT_SETUP_SECRET
+              from your local .env.live, then authorize the bot. This is separate from “Connect
+              creator with Twitch” and uses the same registered application.
+            </p>
+            <p>
+              If the intended bot account appears as a Twitch creator session, use “Disconnect
+              Twitch authorization” first, then return here. Only an account with no world history
+              can change from an accidental creator connection to the bot role.
+            </p>
+            <label>
+              Bot setup secret
+              <input
+                type="password"
+                autoComplete="off"
+                value={operatorKey}
+                onChange={(e) => setOperatorKey(e.target.value)}
+              />
+            </label>
+            <button
+              disabled={busy || !operatorKey}
+              onClick={() =>
+                void perform(async () => {
+                  const result = await request<{ url: string }>(
+                    '/api/operator/bot-authorization',
+                    {},
+                    { Authorization: `Bearer ${operatorKey}` },
+                  );
+                  setOperatorKey('');
+                  location.assign(result.url);
+                })
+              }
+            >
+              Authorize the dedicated bot
+            </button>
+          </details>
         </section>
       )}
       {!overlayChannel && data?.me && (
@@ -229,7 +249,7 @@ function App() {
               </a>
             )}
             <button onClick={() => void perform(() => request('/auth/logout', {}))}>
-              Switch / disconnect session
+              Sign out
             </button>
           </div>
         </section>
@@ -562,9 +582,68 @@ function App() {
               compatibility and native raid verification.
             </p>
             {data.mode === 'live' && (
-              <button onClick={() => void perform(() => request('/api/twitch/reconcile', {}))}>
-                Reconcile Twitch subscriptions
-              </button>
+              <>
+                {data.integration.details && (
+                  <div aria-live="polite">
+                    <p>
+                      Chat subscription:{' '}
+                      {data.integration.details.chatReady ? 'ready' : 'not ready'} · incoming raid
+                      subscription: {data.integration.details.raidReady ? 'ready' : 'not ready'}
+                    </p>
+                    {!data.integration.details.botAuthorized && (
+                      <p role="status">
+                        Authorize the dedicated bot before setting up chat. Open this site in a
+                        private browser window, sign into the separate bot account, and use the
+                        dedicated bot setup section. Then check subscriptions here.
+                      </p>
+                    )}
+                    {data.integration.details.reconcileError &&
+                      data.integration.details.botAuthorized && (
+                        <p role="status">
+                          Connection check: {data.integration.details.reconcileError}. Reconcile
+                          again after completing account and callback setup.
+                        </p>
+                      )}
+                    <ul>
+                      {data.integration.details.subscriptions.map((sub) => (
+                        <li key={sub.type}>
+                          {sub.type}: {sub.status}
+                          {sub.current && sub.providerConfirmed ? ' · configuration confirmed' : ''}
+                        </li>
+                      ))}
+                    </ul>
+                    <p>
+                      Signed deliveries: {data.integration.details.deliveries.chat} chat,{' '}
+                      {data.integration.details.deliveries.raid} raids · chat actions applied:{' '}
+                      {data.integration.details.deliveries.appliedChat} · custody changes:{' '}
+                      {data.integration.details.deliveries.custodyChanges}
+                    </p>
+                    <p>
+                      In Twitch chat, send !scan A during a challenge, or !vote 1 when the host
+                      opens a decision. Watch the Ark and this delivery count for the result.
+                    </p>
+                    <p>
+                      Send !status or !history to request a bot reply. Replies:{' '}
+                      {data.integration.details.botReplies.sent} sent,{' '}
+                      {data.integration.details.botReplies.pending} pending,{' '}
+                      {data.integration.details.botReplies.failed} failed,{' '}
+                      {data.integration.details.botReplies.uncertain} uncertain.
+                    </p>
+                  </div>
+                )}
+                <button
+                  disabled={busy}
+                  onClick={() => void perform(() => request('/api/twitch/reconcile', {}))}
+                >
+                  Check / repair Twitch subscriptions
+                </button>
+                <button
+                  disabled={busy}
+                  onClick={() => void perform(() => request('/api/twitch/disconnect', {}))}
+                >
+                  Disconnect Twitch authorization
+                </button>
+              </>
             )}
           </section>
         </>
