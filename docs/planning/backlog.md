@@ -1,6 +1,6 @@
 # Implementation backlog
 
-Status: implementation underway, updated 2026-10-26. B01–B05, B09–B11, B13/B14/B16/B17 have substantial local implementation/evidence; completion is limited to the behaviors in [the status report](implementation-status.md). B06/B07 have tested provider/HTTP contracts but genuine OAuth/chat/callback remain unverified; B12 authentic raid is not complete. Allocation, timers, production hardening and final Claude Design integration remain open. Roles express responsibility only.
+Status: implementation underway, updated 2026-10-26. B01–B05, B09–B11, B13/B14/B16/B17 have substantial local implementation/evidence; completion is limited to the behaviors in [the status report](implementation-status.md). B06 has real app/broadcaster authorization plus tested role/refresh/disconnect contracts; dedicated bot consent remains pending. B07 has tested provider/HTTP contracts and public HTTPS reachability, with genuine signed callback/chat still unverified. B12 authentic raid is not complete. Allocation, timers, production hardening and final Claude Design integration remain open. Roles express responsibility only.
 
 ## Foundation and integration
 

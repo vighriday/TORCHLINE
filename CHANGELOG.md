@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Live verification tooling and runbooks — 2026-10-26
+
+- Added real-service preflight for public HTTPS, anonymous/unsigned denials, actual app/grant validation, EventSub reads and live delivery/custody evidence. Reports only sanitized metadata and keeps prerequisites separate from failures; it sends no chat or synthetic proof.
+- Added exposure scans for configured credentials and saved tokens across committed/staged Git objects, tracked files, browser assets, local logs and selected public responses. Local environment files, operator keys and the original concept remain ignored.
+- Updated setup/recovery instructions, component stress review, authority review and implementation evidence. Dedicated live/simulation ports remain independent; no production deployment or merge is included.
+
 ### Creator authority and bot onboarding — 2026-10-26
 
 - Made operator-protected bot setup available after creator sign-in. Added explicit disconnect and recovery for an accidental empty creator registration, with serialized role changes and no deletion of world/custody history.
@@ -57,7 +63,7 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ### Still unverified or unfinished
 
-- Real Twitch app/bot authorization, public HTTPS challenge, genuine chat, actual OBS and a native two-broadcaster raid.
+- Dedicated bot authorization, genuine signed EventSub challenge/chat, visible bot delivery, actual OBS and a native two-broadcaster raid. Real app and broadcaster authorization plus public HTTPS reachability are now verified.
 - Automatic timers, resource allocation, high-load/soak behavior, full worker/retention/reconciliation hardening, final Claude Design integration and production deployment.
 - The initial feature push's GitHub Actions run passed; actual deployment and the live verification listed above remain pending. Further publication is held during review.
 

@@ -19,6 +19,7 @@
     "audit:balance": "node scripts/analyze-balance.ts",
     "design:fixtures": "node scripts/export-design-fixtures.ts",
     "check:repo": "node scripts/check-repo.mjs",
+    "check:public-secrets": "node scripts/check-public-secrets.ts",
     "format": "prettier --write apps packages scripts tests package.json tsconfig.json vitest.config.ts playwright.config.ts .github/workflows/verify.yml",
     "format:check": "prettier --check apps packages scripts tests package.json tsconfig.json vitest.config.ts playwright.config.ts .github/workflows/verify.yml",
     "db:up": "node scripts/local-db.mjs up",
@@ -28,7 +29,8 @@
     "live:prepare": "node --env-file-if-exists=.env scripts/prepare-live.ts",
     "db:migrate:live": "node --env-file=.env.live scripts/migrate.ts",
     "start:live": "node --env-file=.env.live apps/server/src/main.ts",
-    "twitch:doctor:live": "node --env-file=.env.live scripts/twitch-doctor.ts"
+    "twitch:doctor:live": "node --env-file=.env.live scripts/twitch-doctor.ts",
+    "twitch:verify:live": "node --env-file=.env.live scripts/verify-live.ts"
   },
   "dependencies": {
     "@torchline/contracts": "workspace:*",

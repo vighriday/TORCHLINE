@@ -42,6 +42,7 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 | E10 | [Vitest](https://vitest.dev/guide/) and [Playwright](https://playwright.dev/docs/intro) | Engine and browser test capabilities |
 | E11 | [Render web services](https://render.com/docs/web-services), [free limitations](https://render.com/docs/free), [WebSocket alternative](https://render.com/docs/websocket) | Hosting shape, sleep risk and fallback transport support. Deployed SSE behavior is still to be tested. |
 | E12 | [Twurple](https://twurple.js.org/) | Evaluated Twitch API/auth/EventSub SDK alternative |
+| E13 | [ngrok agent configuration](https://ngrok.com/docs/agent/config/) and [TLS](https://ngrok.com/docs/gateway/domains/tls-certificates/) | Development tunnel, disabled request inspector and automatic public TLS; production hosting remains separate |
 
 ## Competition and adjacent products
 
@@ -57,6 +58,6 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 
 ## Research limits
 
-During the initial research no live calls or event fixtures were exercised. The implementation now has signed-event and provider-contract fixtures; see [current evidence](../planning/implementation-status.md). No genuine Twitch account/raid or deployment is claimed. GitHub inspection found no refs at setup; visibility was not established. The Devpost judging dates and FAQ deadline conversion disagree. No exhaustive prior-art search, trademark clearance, legal interpretation, capacity benchmark or cost quote is claimed.
+During initial research no live calls or event fixtures were exercised. The implementation now has signed-event/provider-contract fixtures, real application/broadcaster authorization checks and a reachable development HTTPS tunnel; see [current evidence](../planning/implementation-status.md). Genuine chat, signed callback delivery, native raid and actual OBS remain distinct gates. No production deployment is claimed. GitHub was empty at setup and is now confirmed private; visibility has not been changed. The Devpost judging dates and FAQ deadline conversion disagree. No exhaustive prior-art search, trademark clearance, legal interpretation, capacity benchmark or cost quote is claimed.
 
-Implementation tooling references: [GitHub checkout](https://github.com/actions/checkout), [Node setup action](https://github.com/actions/setup-node), and [Node TypeScript support](https://nodejs.org/api/typescript.html). The workflow is defined but has not run remotely.
+Implementation tooling references: [GitHub checkout](https://github.com/actions/checkout), [Node setup action](https://github.com/actions/setup-node), and [Node TypeScript support](https://nodejs.org/api/typescript.html). The [initial gameplay workflow](https://github.com/vighriday/TORCHLINE/actions/runs/40319660913) passed remotely; it does not cover subsequent changes.

@@ -1,5 +1,7 @@
 # Public capability and authority review
 
+Current follow-up: the owner resumed reviewed incremental pushes on 2026-10-26. The baseline findings below are historical; R1–R4 have regression-tested fixes. Real app/broadcaster OAuth and public HTTPS reachability are now verified. Dedicated bot consent, genuine signed callback/chat, actual OBS and native raid acceptance remain pending. See [current status](../planning/implementation-status.md).
+
 Date: 2026-10-26, Asia/Calcutta. Reviewed implementation: `00250ce`. Review only: no application fixes, release tag, deployment, merge or further push is included. The owner requested local review before publishing further changes.
 
 Follow-up implementation on the same date: R1–R4 now have fixes and passing regression coverage in the local integration work. Subscription identity and provider confirmation are persisted, terminal IDs remain terminal, participant identity is shared across ingress paths, and safe client errors retain their HTTP status. The new 30-test suite includes a complete provider-contract chat/raid journey. The original findings and evidence below are retained as the review of `00250ce`; genuine Twitch acceptance remains pending and no further push has occurred.
@@ -113,3 +115,20 @@ Actual Twitch identities/scopes, public HTTPS callback behavior, native raid tra
 3. Keep Claude Design's renderer interfaces and fixtures; avoid further styling the reference frontend as though it were the final design.
 4. Treat simulation as a shared rehearsal environment. A public simulator would let visitors act as its sample creators by design; never expose that database as private live gameplay.
 5. Review each proposed push's diff, private-file/secret exclusions, exposed capability and authority, focused tests, and honest verification labels before publishing it. Do not release-tag the current snapshot as live-verified.
+
+## Additional integration boundary review
+
+| Capability | Authority and public behavior | Verification |
+| --- | --- | --- |
+| `GET /api/twitch/status` | Current creator session, live mode, own channel only; counts/status without tokens, cookies, raw chat or participant identities | Anonymous denial and provider-fixture status tests |
+| `POST /api/twitch/disconnect` | Current creator, same-origin request; ends local authority before best-effort provider revoke; preserves Ark/history, closes pending offers | Session, overlay, queued-input and offer cancellation regressions |
+| Existing operator bot flow | Operator setup key plus one-use OAuth state; signed-in creator has no implicit operator authority | Wrong-key browser denial and HTTP role tests |
+| OAuth role recovery | Explicit disconnect, fresh bot consent, no world/handoff/custody history; shared role/account locks | Both empty-account recovery and history-preserving rejection tested |
+| Bot output | Signed, current channel chat queries; fresh grants and confirmed chat subscription before send; source-only channel and fixed safe summary | Four provider-fixture tests, including slow-send gameplay isolation |
+| Existing creator mutations | Recheck connected account while holding channel lock; a stale pre-disconnect creator object cannot create/control/park worlds or opt in | Real PostgreSQL stale-authority test; late ingress is ignored |
+| Existing overlay rotation | Same creator boundary; delete/insert atomically under channel lock | Four concurrent rotations leave one accepted read capability |
+| Late token validation | Conditional update/delete against the originally read ciphertext; never overwrite/revoke a new grant | Both old refresh success and old invalid-token completion tested |
+
+The reference bot setup form is public UI with an operator-protected action, not an administrator session. No general application admin/moderator role is implemented. Existing game controls remain custodian-only; viewers submit only normalized participation commands and queries. Handoff preparation, native proof and receiver acceptance remain distinct authorities.
+
+Exposure checks inspect the configured secret fingerprints and decrypted saved grant tokens privately against committed/staged Git objects, tracked working files, built assets, local logs and nine selected public responses. OAuth Client IDs are public identifiers; secrets/access/refresh tokens must remain private. Passing these probes is bounded evidence, not a guarantee that every possible exposure or production threat has been audited. No private input or environment file enters the index.

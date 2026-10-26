@@ -18,15 +18,15 @@ const url = new URL(process.env.DATABASE_URL);
 url.pathname = '/torchline_live';
 const values: Record<string, string> = {
   WORLD_MODE: 'live',
-  PUBLIC_BASE_URL: 'http://localhost:3000',
-  PORT: '3000',
+  PUBLIC_BASE_URL: 'http://localhost:3001',
+  PORT: '3001',
   DATABASE_URL: url.toString(),
   SESSION_SECRET: randomBytes(32).toString('hex'),
   TOKEN_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
   BOT_SETUP_SECRET: randomBytes(32).toString('hex'),
   TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID ?? '',
   TWITCH_CLIENT_SECRET: process.env.TWITCH_CLIENT_SECRET ?? '',
-  TWITCH_REDIRECT_URI: 'http://localhost:3000/auth/twitch/callback',
+  TWITCH_REDIRECT_URI: 'http://localhost:3001/auth/twitch/callback',
   TWITCH_BOT_USER_ID: process.env.TWITCH_BOT_USER_ID ?? '',
   EVENTSUB_SECRET: randomBytes(32).toString('hex'),
 };

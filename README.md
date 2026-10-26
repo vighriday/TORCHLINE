@@ -10,7 +10,7 @@ The first season, **The Ark Protocol**, follows a damaged colony ship through fi
 
 Architecture approved and the first functional gameplay slice implemented on **October 26, 2026**. The reference application runs locally with PostgreSQL: complete five-chapter gameplay, cooperative challenges, persistent physical damage/repairs, safe choice previews, saving, replay, overlays and isolated simulated custody transfers.
 
-Twitch OAuth, encrypted grants, signed webhook ingestion, token lifecycle and transfer readiness have local contract tests. **Genuine Twitch chat, a public HTTPS callback, actual OBS and a native raid remain unverified.** The owner is preparing the Twitch application and bot. Claude Design will supply the final visual experience; the current UI is a functional reference. See [implementation status](docs/planning/implementation-status.md).
+Real Twitch application credentials, broadcaster OAuth and public HTTPS reachability are verified. Bot delivery, signed EventSub callback delivery, genuine chat, actual OBS and a native raid remain separate acceptance milestones. Encrypted grants, webhook ingestion, token lifecycle, bot output and custody have local contract tests. Claude Design will supply the final visual experience; the current UI is a functional reference. See [implementation status](docs/planning/implementation-status.md).
 
 Repository: [vighriday/TORCHLINE](https://github.com/vighriday/TORCHLINE).
 
@@ -86,7 +86,7 @@ pnpm design:fixtures
 pnpm check:repo
 ```
 
-Tests create disposable schemas inside the configured development database. They do not truncate existing worlds. Browser tests use their own server on port 3100 and a separate schema. The GitHub Actions workflow is added but has not run remotely. Real account/event/OBS verification remains a separate gate.
+Tests create disposable schemas inside the configured development database. They do not truncate existing worlds. Browser tests use isolated servers on ports 3100/3101 and separate schemas. GitHub Actions passed the initial gameplay milestone; later commits require their own CI results. Real chat, native raid and OBS verification remain separate gates. The [Twitch setup guide](docs/operations/twitch-setup.md) explains real-service checks and the public secret scan.
 
 ## Privacy and contribution
 
