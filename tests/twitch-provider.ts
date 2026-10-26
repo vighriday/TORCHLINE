@@ -29,6 +29,14 @@ export function providerFixture(config = liveConfig) {
   const deleted: string[] = [];
   const streams = ['42', '43'];
   const calls: string[] = [];
+  const messages: {
+    broadcaster_id: string;
+    sender_id: string;
+    message: string;
+    for_source_only: boolean;
+  }[] = [];
+  let chatResponse: () => Promise<Response> = async () =>
+    Response.json({ data: [{ message_id: randomUUID(), is_sent: true, drop_reason: null }] });
   let app: App;
   let pageSize = 100;
   let beforeReturn: (sub: ProviderSubscription) => Promise<void> = async () => {};
@@ -86,6 +94,11 @@ export function providerFixture(config = liveConfig) {
         expires_in: 3600,
       });
     }
+    if (url.pathname === '/oauth2/revoke') return new Response(null, { status: 200 });
+    if (url.pathname === '/helix/chat/messages') {
+      messages.push(JSON.parse(String(init?.body)));
+      return chatResponse();
+    }
     if (url.pathname === '/helix/streams')
       return Response.json({
         data: streams
@@ -137,6 +150,10 @@ export function providerFixture(config = liveConfig) {
     throw new Error(`Unexpected fixture request: ${url.pathname}`);
   };
   return {
+    messages,
+    setChatResponse: (fn: () => Promise<Response>) => {
+      chatResponse = fn;
+    },
     fetcher,
     subscriptions,
     deleted,

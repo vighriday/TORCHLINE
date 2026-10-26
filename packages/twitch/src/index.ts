@@ -106,6 +106,18 @@ export async function validateToken(token: string, fetcher: Fetcher = fetch) {
     );
   return ValidationSchema.parse(await response.json());
 }
+export async function revokeToken(clientId: string, token: string, fetcher: Fetcher = fetch) {
+  try {
+    const response = await fetcher('https://id.twitch.tv/oauth2/revoke', {
+      method: 'POST',
+      body: new URLSearchParams({ client_id: clientId, token }),
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
 export async function helix(
   path: string,
   clientId: string,
@@ -224,20 +236,67 @@ const ChatSchema = z.object({
 });
 export function normalizeChat(event: unknown) {
   const value = ChatSchema.parse(event);
+  if (value.message.text.length > 160) return null;
   if (
     value.source_broadcaster_user_id &&
     value.source_broadcaster_user_id !== value.broadcaster_user_id
   )
     return null;
   const command = parseChatCommand(value.message.text);
-  return command
+  const query = /^!(status|history)\s*$/i.exec(value.message.text.trim())?.[1].toLowerCase() as
+    'status' | 'history' | undefined;
+  return command || query
     ? {
         channelId: value.broadcaster_user_id,
         actorId: value.chatter_user_id,
         messageId: value.message_id,
         command,
+        query: query ?? null,
       }
     : null;
+}
+const SendResult = z.object({
+  data: z
+    .array(
+      z.object({
+        message_id: z.string(),
+        is_sent: z.boolean(),
+        drop_reason: z
+          .object({ code: z.string().max(100) })
+          .nullable()
+          .optional(),
+      }),
+    )
+    .min(1),
+});
+export async function sendChatMessage(
+  clientId: string,
+  appToken: string,
+  channel: string,
+  bot: string,
+  message: string,
+  fetcher: Fetcher = fetch,
+) {
+  if (!message || message.length > 500)
+    throw new DomainError('INVALID_INPUT', 'Bot messages must contain 1–500 characters.');
+  const result = SendResult.parse(
+    await helix(
+      'chat/messages',
+      clientId,
+      appToken,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          broadcaster_id: channel,
+          sender_id: bot,
+          message,
+          for_source_only: true,
+        }),
+      },
+      fetcher,
+    ),
+  );
+  return result.data[0];
 }
 export const RaidSchema = z.object({
   from_broadcaster_user_id: z.string(),

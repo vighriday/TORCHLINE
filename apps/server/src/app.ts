@@ -27,6 +27,7 @@ import type { Fetcher } from '@torchline/twitch';
 import { presentWorld } from './projection.ts';
 import { twitchLifecycle } from './twitch-lifecycle.ts';
 import { twitchSubscriptions } from './twitch-subscriptions.ts';
+import { twitchBot } from './twitch-bot.ts';
 
 export interface AppConfig {
   mode: 'simulation' | 'live';
@@ -55,6 +56,7 @@ export async function createApp(
   const fetcher = options.fetcher ?? fetch;
   const lifecycle = twitchLifecycle(store, config, fetcher);
   const subscriptions = twitchSubscriptions(store, config, fetcher, lifecycle.applicationToken);
+  const botReplies = twitchBot(store, config, fetcher, lifecycle.applicationToken);
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
     bodyLimit: 65536,
@@ -513,16 +515,20 @@ export async function createApp(
           ).rows[0];
           if (chat.channelId !== channel || subscription.condition.user_id !== bot?.id)
             denied('FORBIDDEN', 'Chat identity does not match its subscription.');
-          if (chat.actorId !== bot?.id)
-            await store.enqueueChat(
-              notification.id,
-              channel,
-              chat.actorId,
-              chat.command,
-              notification.timestamp,
-              config.sessionSecret,
-              chat.messageId,
-            );
+          if (chat.actorId !== bot?.id) {
+            if (chat.query)
+              await botReplies.enqueue(notification.id, channel, chat.messageId, chat.query);
+            else if (chat.command)
+              await store.enqueueChat(
+                notification.id,
+                channel,
+                chat.actorId,
+                chat.command,
+                notification.timestamp,
+                config.sessionSecret,
+                chat.messageId,
+              );
+          }
         }
       } else if (subscription.type === 'channel.raid') {
         const raid = RaidSchema.parse(notification.event);
@@ -719,9 +725,11 @@ export async function createApp(
   };
   let interval: ReturnType<typeof setInterval> | undefined;
   let validationInterval: ReturnType<typeof setInterval> | undefined;
+  let botInterval: ReturnType<typeof setInterval> | undefined;
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
       await lifecycle.validateGrants(true);
+      await botReplies.recover();
       void subscriptions
         .reconcileAll()
         .catch(() => app.log.error('Subscription reconciliation failed.'));
@@ -730,6 +738,10 @@ export async function createApp(
       void tick();
     }, 250);
     interval.unref();
+    botInterval = setInterval(() => {
+      void botReplies.tick().catch(() => app.log.error('Bot delivery dependency failed.'));
+    }, 500);
+    botInterval.unref();
     validationInterval = setInterval(() => {
       void lifecycle
         .validateGrants()
@@ -739,9 +751,12 @@ export async function createApp(
     validationInterval.unref();
   }
   app.decorate('tick', tick);
+  app.decorate('botTick', botReplies.tick);
   app.addHook('onClose', async () => {
     if (interval) clearInterval(interval);
     if (validationInterval) clearInterval(validationInterval);
+    if (botInterval) clearInterval(botInterval);
+    await botReplies.close();
   });
   const publicDir = resolve('apps/web/dist');
   if (existsSync(publicDir)) {

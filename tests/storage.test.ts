@@ -127,7 +127,9 @@ describe('real PostgreSQL consistency', () => {
         targetId: target.id,
         mode: 'simulation' as const,
         subscriptionId: 'test',
-        notificationAt: new Date().toISOString(),
+        notificationAt: new Date(
+          Math.max(Date.now(), intent.prepared_at.getTime() + 1),
+        ).toISOString(),
       };
       await store.observeRaid(proof);
       await store.observeRaid(proof);
@@ -165,7 +167,9 @@ describe('real PostgreSQL consistency', () => {
           targetId: target.id,
           mode: 'simulation',
           subscriptionId: 'test',
-          notificationAt: new Date().toISOString(),
+          notificationAt: new Date(
+            Math.max(Date.now(), intent.prepared_at.getTime() + 1),
+          ).toISOString(),
         });
       const results = await Promise.allSettled([
         store.accept(ia.id, target),
@@ -201,7 +205,9 @@ describe('real PostgreSQL consistency', () => {
         targetId: target.id,
         mode: 'live',
         subscriptionId: 'test',
-        notificationAt: new Date().toISOString(),
+        notificationAt: new Date(
+          Math.max(Date.now(), intent.prepared_at.getTime() + 1),
+        ).toISOString(),
       });
       await expect(store.accept(intent.id, target)).rejects.toMatchObject({
         code: 'PROOF_REQUIRED',
@@ -212,7 +218,9 @@ describe('real PostgreSQL consistency', () => {
         targetId: target.id,
         mode: 'simulation',
         subscriptionId: 'test',
-        notificationAt: new Date().toISOString(),
+        notificationAt: new Date(
+          Math.max(Date.now(), intent.prepared_at.getTime() + 1),
+        ).toISOString(),
       });
       await store.optIn(target.id, false);
       await expect(store.accept(intent.id, target)).rejects.toMatchObject({

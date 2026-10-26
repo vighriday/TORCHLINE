@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Bot reply delivery — 2026-10-26
+
+- Implemented `!status` and `!history` through the native Send Chat Message API, separate from gameplay commands and ingestion work. Replies are bounded, source-channel-only and require current bot/creator permissions plus the matching enabled chat subscription.
+- Added durable reply outcomes, message deduplication, channel coalescing, global bot pacing, provider drop handling and restart quarantine. Ambiguous sends are recorded as uncertain and are not automatically resent.
+- Four provider-fixture bot tests cover identity/scope boundaries, echoes/mirrors, slow-network isolation, throttling, provider rejection and restart behavior. Genuine Twitch bot delivery is not yet verified.
+
 ### Real Twitch application compatibility — 2026-10-26
 
 - Verified real client-credentials issuance and broadcaster OAuth against Twitch through the development HTTPS tunnel. Genuine chat, bot delivery and native raid acceptance remain separate milestones.
