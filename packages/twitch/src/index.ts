@@ -70,7 +70,10 @@ const ValidationSchema = z.object({
   client_id: z.string(),
   user_id: z.string().nullable().optional(),
   login: z.string().nullable().optional(),
-  scopes: z.array(z.string()),
+  scopes: z
+    .array(z.string())
+    .nullish()
+    .transform((value) => value ?? []),
   expires_in: z.number(),
 });
 export async function requestToken(

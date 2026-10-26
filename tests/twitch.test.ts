@@ -7,6 +7,7 @@ import {
   normalizeChat,
   parseChatCommand,
   verifyWebhook,
+  validateToken,
 } from '@torchline/twitch';
 const secret = 'test-secret-with-sufficient-entropy-for-fixtures';
 const now = Date.now();
@@ -26,6 +27,13 @@ const headers = (body = raw, at = timestamp) => ({
       .digest('hex'),
 });
 describe('Twitch wire boundary, independently of live account access', () => {
+  it('accepts Twitch application-token validation with null scopes without granting user permissions', async () => {
+    const result = await validateToken('fixture-app', async () =>
+      Response.json({ client_id: 'fixture', scopes: null, expires_in: 3600 }),
+    );
+    expect(result.scopes).toEqual([]);
+    expect(result.user_id).toBeUndefined();
+  });
   it('verifies exact bytes and rejects tampering, malformed signatures and stale/future timestamps', () => {
     expect(verifyWebhook(headers(), raw, secret, now).event?.viewers).toBe(2);
     expect(() =>

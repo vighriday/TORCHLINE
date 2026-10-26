@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Real Twitch application compatibility — 2026-10-26
+
+- Verified real client-credentials issuance and broadcaster OAuth against Twitch through the development HTTPS tunnel. Genuine chat, bot delivery and native raid acceptance remain separate milestones.
+- Fixed real app-token validation responses with `scopes: null`; normalize them to no scopes while retaining required user identity/permission checks. Added a provider-shape regression.
+- The owner resumed reviewed incremental pushes after the earlier hold. No merge, release or production deployment is implied.
+
 ### Twitch boundary fixes — 2026-10-26 (local)
 
 - Fixed R1–R4 from the authority review: terminal subscription IDs cannot be revived by challenge replay or a delayed creation response; readiness requires the current bot/callback/version/conditions and provider confirmation; dashboard/chat participation shares one identity; malformed and oversized bodies retain 400/413 responses.
