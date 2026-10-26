@@ -2,6 +2,8 @@
 
 Updated 2026-10-26. Architecture approval was given before implementation. This is the current evidence record; earlier proposed documents remain the wider target architecture.
 
+**Review hold:** the [public capability and authority review](../reviews/2026-10-26-public-authority.md) reproduced four unfixed cases involving subscription revocation replay, bot replacement readiness, broadcaster ballot identity and malformed-input responses. Passing baseline tests do not cover these defects. No further pushes or application changes were made during this review.
+
 ## Working locally
 
 - Strict TypeScript workspace on Node 24.22.1, Fastify 5, React 19/Vite, Zod 4 and PostgreSQL 17 with `pg`/SQL migrations.
@@ -29,7 +31,7 @@ Browser evidence is Chromium, **not actual OBS**. Contract OAuth/webhook tests u
 
 The owner has not yet created the Twitch application/bot. Follow [account setup](../operations/twitch-setup.md). Then verify actual identities/scopes, local OAuth, public HTTPS challenge, genuine chat, actual OBS behavior and two consenting broadcasters performing a native raid. The live transfer route checks current grants, enabled subscriptions and stream status before preparation/acceptance; it is implemented but has not been exercised against Twitch.
 
-No hosting has been provisioned, no production deployment or public submission exists, and no GitHub Actions run or push is claimed.
+No hosting has been provisioned, and no production deployment or public submission exists. The initially authorized push published planning baseline `39f59a2` to `main` and gameplay milestone `00250ce` to `feat/gameplay-foundation`; [GitHub Actions](https://github.com/vighriday/TORCHLINE/actions/runs/40319660913) passed for that milestone. Subsequent publication is held for local review as the owner requested. Repository visibility remains private.
 
 ## Deliberate first-slice limits and next work
 

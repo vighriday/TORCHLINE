@@ -38,4 +38,6 @@ Before each commit, inspect the staged file list and confirm the private inputs 
 
 ## Repository discipline
 
-Use small, reviewable commits and explicit file staging. Keep engine, Twitch adapter, storage, and browser dependencies separated. Do not add placeholder CI badges, fake tests, unverified run commands, or speculative dependencies. Do not change remote visibility, push, deploy, purchase services, or contact other people as part of planning.
+Use small, reviewable commits and explicit file staging. Keep engine, Twitch adapter, storage, and browser dependencies separated. Do not add placeholder CI badges, fake tests, unverified run commands, or speculative dependencies. Do not change remote visibility, deploy, purchase services, or contact other people without authorization.
+
+The owner authorized incremental pushes on 2026-10-26, then explicitly instructed: "Review first, push later. Pruning get's difficult." The initial baseline/feature push had already completed. Hold subsequent pushes during local review; review scope, public capabilities, authority, private-file exclusions and evidence before publishing further changes. Do not force-push, rewrite published history, merge or remove remote branches as an inferred cleanup action.

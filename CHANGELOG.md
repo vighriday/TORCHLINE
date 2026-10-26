@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Local review — 2026-10-26 (unpublished)
+
+- Completed a public capability/authority inventory across all application routes and 13 architecture components. Forty-eight local checks reproduced four defects: replayed challenge revives a revoked subscription, stale bot subscriptions pass readiness, one broadcaster can hold two ballot identities, and invalid JSON/body limits return server errors. Fixes and committed regression coverage remain pending.
+- Reran the 25-test baseline successfully and checked dependency advisories (none reported). Confirmed the prior feature push's GitHub Actions run passed; it does not cover the newly found defects.
+- Recorded the owner's review-before-push instruction. No further push, application change, merge, deployment or history cleanup is included in this review.
+
 ### Implemented — 2026-10-26
 
 - Retained the approved TypeScript/React/Fastify/PostgreSQL stack and game/episode/custody separation; implementation began after the user's review.
@@ -27,7 +33,7 @@ All meaningful product, architecture, and development changes are recorded here.
 
 - Real Twitch app/bot authorization, public HTTPS challenge, genuine chat, actual OBS and a native two-broadcaster raid.
 - Automatic timers, resource allocation, high-load/soak behavior, full worker/retention/reconciliation hardening, final Claude Design integration and production deployment.
-- GitHub Actions has not run remotely; no push or deployment is claimed.
+- The initial feature push's GitHub Actions run passed; actual deployment and the live verification listed above remain pending. Further publication is held during review.
 
 ### Planning baseline — 2026-10-26
 
