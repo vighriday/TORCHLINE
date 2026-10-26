@@ -1,0 +1,110 @@
+import { expect, it } from 'vitest';
+import { encryptSecret, decryptSecret } from '@torchline/twitch';
+import type { Fetcher } from '@torchline/twitch';
+import { twitchLifecycle } from '../apps/server/src/twitch-lifecycle.ts';
+import { database } from './helpers.ts';
+const config = {
+  mode: 'live' as const,
+  baseUrl: 'https://fixture.invalid',
+  sessionSecret: 'ab'.repeat(32),
+  tokenKey: 'cd'.repeat(32),
+  botSetupSecret: 'test',
+  twitchClientId: 'client',
+  twitchClientSecret: 'secret',
+};
+it('serializes refresh, revalidates identity/scopes and atomically stores the new token pair', () =>
+  database(async (store) => {
+    await store.ensureCreator('42', 'Creator', 'live');
+    await store.pool.query(
+      "INSERT INTO oauth_grants(id,role,scopes,encrypted,validated_at) VALUES('42','creator',$1,$2,now()-interval '2 hours')",
+      [
+        ['channel:bot'],
+        encryptSecret({ access_token: 'expired', refresh_token: 'refresh-old' }, config.tokenKey),
+      ],
+    );
+    let refreshes = 0;
+    const fetcher: Fetcher = async (input, init) => {
+      if (String(input).endsWith('/token')) {
+        refreshes++;
+        return Response.json({
+          access_token: 'new-token',
+          refresh_token: 'refresh-new',
+          expires_in: 3600,
+        });
+      }
+      if ((init?.headers as Record<string, string>).Authorization === 'OAuth expired')
+        return new Response('', { status: 401 });
+      return Response.json({
+        client_id: 'client',
+        user_id: '42',
+        scopes: ['channel:bot'],
+        expires_in: 3600,
+      });
+    };
+    const lifecycle = twitchLifecycle(store, config, fetcher);
+    await Promise.all([lifecycle.validateGrants(true), lifecycle.validateGrants(true)]);
+    expect(refreshes).toBe(1);
+    const grant = (await store.pool.query('SELECT * FROM oauth_grants')).rows[0];
+    expect(decryptSecret(grant.encrypted, config.tokenKey)).toMatchObject({
+      access_token: 'new-token',
+      refresh_token: 'refresh-new',
+    });
+    expect(Date.now() - grant.validated_at.getTime()).toBeLessThan(5000);
+  }));
+it('removes sessions on confirmed revocation but preserves credentials on provider outage', () =>
+  database(async (store) => {
+    await store.ensureCreator('42', 'Creator', 'live');
+    await store.pool.query(
+      "INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES('42','creator',$1,$2)",
+      [['channel:bot'], encryptSecret({ access_token: 'fixture' }, config.tokenKey)],
+    );
+    await store.pool.query(
+      "INSERT INTO sessions(hash,channel_id,expires_at) VALUES('fixture-session','42',now()+interval '1 hour')",
+    );
+    await twitchLifecycle(
+      store,
+      config,
+      async () => new Response('', { status: 503 }),
+    ).validateGrants(true);
+    expect((await store.pool.query('SELECT * FROM oauth_grants')).rowCount).toBe(1);
+    await twitchLifecycle(
+      store,
+      config,
+      async () => new Response('', { status: 401 }),
+    ).validateGrants(true);
+    expect((await store.pool.query('SELECT * FROM sessions')).rowCount).toBe(0);
+    expect((await store.creator('42'))?.connected).toBe(false);
+  }));
+it('gates live handoff on fresh grants, enabled subscriptions and actual stream response', () =>
+  database(async (store) => {
+    for (const id of ['a', 'b', 'bot'])
+      await store.pool.query(
+        'INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES($1,$2,$3,$4)',
+        [
+          id,
+          id === 'bot' ? 'bot' : 'creator',
+          [],
+          encryptSecret({ access_token: 'fixture' }, config.tokenKey),
+        ],
+      );
+    const fetcher: Fetcher = async (input) =>
+      String(input).endsWith('/token')
+        ? Response.json({ access_token: 'app', expires_in: 3600 })
+        : Response.json({ data: [{ user_id: 'a' }, { user_id: 'b' }] });
+    const lifecycle = twitchLifecycle(store, config, fetcher);
+    await expect(lifecycle.readyForTransfer('a', 'b')).rejects.toMatchObject({
+      code: 'SUBSCRIPTION_UNREADY',
+    });
+    await store.pool.query(
+      "INSERT INTO subscriptions(id,type,channel_id,status) VALUES('a-chat','channel.chat.message','a','enabled'),('b-chat','channel.chat.message','b','enabled'),('b-raid','channel.raid','b','enabled')",
+    );
+    await expect(lifecycle.readyForTransfer('a', 'b')).resolves.toBeUndefined();
+    const offline = twitchLifecycle(store, config, async (input) =>
+      String(input).endsWith('/token')
+        ? Response.json({ access_token: 'app', expires_in: 3600 })
+        : Response.json({ data: [{ user_id: 'a' }] }),
+    );
+    await expect(offline.readyForTransfer('a', 'b')).rejects.toMatchObject({
+      code: 'TARGET_OFFLINE',
+    });
+  }));

@@ -1,0 +1,11 @@
+{
+  "name": "@torchline/twitch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@torchline/contracts": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

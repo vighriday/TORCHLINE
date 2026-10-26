@@ -1,0 +1,9 @@
+**/node_modules/**
+**/dist/**
+**/build/**
+.local/
+.tools/
+docs/internal/
+docs/design/fixtures/
+docs/reports/
+pnpm-lock.yaml

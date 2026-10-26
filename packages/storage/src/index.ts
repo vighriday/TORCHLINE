@@ -1,0 +1,560 @@
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { readdir, readFile } from 'node:fs/promises';
+import { DomainError } from '@torchline/contracts';
+import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
+import { applyCommand, createWorld } from '@torchline/engine';
+
+export interface Creator {
+  id: string;
+  label: string;
+  mode: 'simulation' | 'live';
+  receive_opt_in: boolean;
+  connected: boolean;
+}
+export interface StoredWorld {
+  id: string;
+  mode: 'simulation' | 'live';
+  custodian_id: string;
+  revision: number;
+  state: WorldState;
+  frozen_by: string | null;
+  label: string;
+  events: WorldEvent[];
+}
+export interface Handoff {
+  id: string;
+  world_id: string;
+  source_id: string;
+  target_id: string;
+  mode: 'simulation' | 'live';
+  status: 'prepared' | 'verified' | 'committed' | 'cancelled' | 'expired' | 'declined';
+  frozen_revision: number;
+  proof_id: string | null;
+  prepared_at: Date;
+  expires_at: Date;
+}
+export interface RaidProof {
+  messageId: string;
+  sourceId: string;
+  targetId: string;
+  mode: 'simulation' | 'live';
+  subscriptionId: string;
+  notificationAt: string;
+}
+const error = (code: string, message: string): never => {
+  throw new DomainError(code, message);
+};
+const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+
+export class Store {
+  readonly pool: Pool;
+  constructor(connectionString: string) {
+    this.pool = new Pool({ connectionString, max: 10, connectionTimeoutMillis: 5000 });
+  }
+  async transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await fn(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
+  async migrate() {
+    await this.transaction(async (c) => {
+      await c.query('SELECT pg_advisory_xact_lock(833016)');
+      await c.query(
+        'CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())',
+      );
+      const dir = new URL('../migrations/', import.meta.url);
+      for (const file of (await readdir(dir)).filter((name) => name.endsWith('.sql')).sort()) {
+        if ((await c.query('SELECT 1 FROM schema_migrations WHERE name=$1', [file])).rowCount)
+          continue;
+        await c.query(await readFile(new URL(file, dir), 'utf8'));
+        await c.query('INSERT INTO schema_migrations(name) VALUES ($1)', [file]);
+      }
+    });
+  }
+  async creator(id: string): Promise<Creator | null> {
+    return (await this.pool.query('SELECT * FROM creators WHERE id=$1', [id])).rows[0] ?? null;
+  }
+  async ensureCreator(id: string, label: string, mode: Creator['mode']) {
+    await this.pool.query(
+      'INSERT INTO creators(id,label,mode,connected) VALUES($1,$2,$3,true) ON CONFLICT(id) DO UPDATE SET label=EXCLUDED.label,connected=true WHERE creators.mode=EXCLUDED.mode',
+      [id, label, mode],
+    );
+    const creator = await this.creator(id);
+    if (!creator || creator.mode !== mode) error('MODE_MISMATCH', 'Creator mode mismatch.');
+    return creator!;
+  }
+  async optIn(id: string, enabled: boolean) {
+    await this.pool.query('UPDATE creators SET receive_opt_in=$2 WHERE id=$1', [id, enabled]);
+  }
+  async enqueueChat(
+    deliveryId: string,
+    channel: string,
+    actorId: string,
+    command: Command,
+    timestamp: string,
+    participantKey?: string,
+    chatMessageId?: string,
+  ) {
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [channel]);
+      const row = (
+        await c.query(
+          'SELECT w.* FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w',
+          [channel],
+        )
+      ).rows[0];
+      const eligible =
+        row &&
+        row.mode === 'live' &&
+        !row.frozen_by &&
+        ['challenge', 'decision'].includes(row.state.phase) &&
+        row.state.windowOpenedAt &&
+        Date.parse(timestamp) >= Date.parse(row.state.windowOpenedAt);
+      let duplicate = false;
+      if (chatMessageId)
+        duplicate = !(
+          await c.query(
+            'INSERT INTO chat_message_dedup(channel_id,message_id) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING 1',
+            [channel, chatMessageId],
+          )
+        ).rowCount;
+      const accepted = eligible && !duplicate;
+      const participantId =
+        accepted && participantKey
+          ? createHmac('sha256', participantKey).update(`${row.id}:${actorId}`).digest('hex')
+          : actorId;
+      const payload = accepted
+        ? {
+            kind: 'chat',
+            worldId: row.id,
+            channelId: channel,
+            actorId: participantId,
+            command,
+            window: row.state.window,
+          }
+        : { kind: 'ignored' };
+      await c.query(
+        'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at) VALUES($1,$2,$3,$4) ON CONFLICT(message_id) DO NOTHING',
+        [deliveryId, 'channel.chat.message', payload, accepted ? null : new Date()],
+      );
+    });
+  }
+  async lockChannels(c: PoolClient, ids: string[]) {
+    await c.query('SELECT id FROM creators WHERE id=ANY($1::text[]) ORDER BY id FOR UPDATE', [
+      [...new Set(ids)],
+    ]);
+  }
+  async create(owner: Creator): Promise<string> {
+    return this.transaction(async (c) => {
+      await this.lockChannels(c, [owner.id]);
+      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [owner.id])).rowCount)
+        error('CHANNEL_BUSY', 'Park or finish the current world first.');
+      const id = randomUUID();
+      const state = createWorld(id);
+      await c.query('INSERT INTO worlds(id,mode,custodian_id,state) VALUES($1,$2,$3,$4)', [
+        id,
+        owner.mode,
+        owner.id,
+        state,
+      ]);
+      await c.query('INSERT INTO channel_slots(channel_id,world_id) VALUES($1,$2)', [owner.id, id]);
+      await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,0)', [id]);
+      return id;
+    });
+  }
+  async get(id: string): Promise<StoredWorld> {
+    const row = (
+      await this.pool.query(
+        'SELECT w.*,c.label FROM worlds w JOIN creators c ON c.id=w.custodian_id WHERE w.id=$1',
+        [id],
+      )
+    ).rows[0];
+    if (!row) error('NOT_FOUND', 'World not found.');
+    const events = (
+      await this.pool.query(
+        'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
+        [id, row.state.version],
+      )
+    ).rows.map((row) => row.event);
+    return { ...row, events };
+  }
+  async active(channel: string): Promise<StoredWorld | null> {
+    const row = (
+      await this.pool.query('SELECT world_id FROM channel_slots WHERE channel_id=$1', [channel])
+    ).rows[0];
+    return row ? this.get(row.world_id) : null;
+  }
+  async library(channel: string) {
+    return (
+      await this.pool.query(
+        'SELECT id,revision,state,mode,NOT EXISTS(SELECT 1 FROM channel_slots s WHERE s.world_id=w.id) AS parked FROM worlds w WHERE custodian_id=$1 ORDER BY created_at DESC LIMIT 50',
+        [channel],
+      )
+    ).rows;
+  }
+  async park(channel: string, id: string, resume: boolean) {
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [channel]);
+      const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
+      if (!row || row.custodian_id !== channel)
+        error('FORBIDDEN', 'Only the custodian can host this world.');
+      if (row.frozen_by) error('HANDOFF_PENDING', 'Cancel the pending handoff first.');
+      if (resume) {
+        if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [channel])).rowCount)
+          error('CHANNEL_BUSY', 'This channel already hosts a world.');
+        await c.query('INSERT INTO channel_slots(channel_id,world_id) VALUES($1,$2)', [
+          channel,
+          id,
+        ]);
+      } else
+        await c.query('DELETE FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+          channel,
+          id,
+        ]);
+      await c.query('UPDATE worlds SET revision=revision+1 WHERE id=$1', [id]);
+      await c.query(
+        'INSERT INTO outbox(world_id,revision) SELECT id,revision FROM worlds WHERE id=$1',
+        [id],
+      );
+    });
+  }
+  async command(
+    id: string,
+    actor: Actor,
+    mode: Creator['mode'],
+    expectedRevision: number,
+    commandId: string,
+    command: Command,
+    ingress?: { id: string; window: number },
+  ) {
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [actor.community]);
+      const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
+      if (!row || row.custodian_id !== actor.community)
+        error('FORBIDDEN', 'This community does not control the world.');
+      if (row.mode !== mode) error('MODE_MISMATCH', 'Simulation cannot change a live world.');
+      if (ingress) {
+        const item = (
+          await c.query('SELECT processed_at FROM eventsub_inbox WHERE message_id=$1 FOR UPDATE', [
+            ingress.id,
+          ])
+        ).rows[0];
+        if (!item || item.processed_at) return;
+        if (row.state.window !== ingress.window) {
+          await c.query(
+            "UPDATE eventsub_inbox SET processed_at=now(),error='WINDOW_CLOSED' WHERE message_id=$1",
+            [ingress.id],
+          );
+          return;
+        }
+      } else if (['close-challenge', 'commit', 'pause'].includes(command.type)) {
+        if (
+          (
+            await c.query(
+              "SELECT 1 FROM eventsub_inbox WHERE processed_at IS NULL AND payload->>'worldId'=$1 LIMIT 1",
+              [id],
+            )
+          ).rowCount
+        )
+          error(
+            'INPUT_PENDING',
+            'Previously accepted chat input is processing. Try again after the live update.',
+          );
+      }
+      const requestHash = hash({ command, expectedRevision });
+      const existing = (
+        await c.query(
+          'SELECT request_hash FROM world_commands WHERE world_id=$1 AND actor_id=$2 AND command_id=$3',
+          [id, actor.id, commandId],
+        )
+      ).rows[0];
+      if (existing) {
+        if (existing.request_hash !== requestHash)
+          error('IDEMPOTENCY_CONFLICT', 'Command ID was reused with different input.');
+        return;
+      }
+      if (row.frozen_by) error('HANDOFF_PENDING', 'This world is frozen for handoff.');
+      if (
+        !(
+          await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+            actor.community,
+            id,
+          ])
+        ).rowCount
+      )
+        error('WORLD_PARKED', 'Resume this world before playing.');
+      if (row.revision !== expectedRevision)
+        error('STALE_VERSION', 'The world changed. Refresh and try again.');
+      const next = applyCommand(row.state, command, actor, {
+        commandId,
+        at: new Date().toISOString(),
+      });
+      await c.query('UPDATE worlds SET state=$2,revision=revision+1,updated_at=now() WHERE id=$1', [
+        id,
+        next.state,
+      ]);
+      await c.query('INSERT INTO world_events(world_id,sequence,event) VALUES($1,$2,$3)', [
+        id,
+        next.event.sequence,
+        next.event,
+      ]);
+      await c.query(
+        'INSERT INTO world_commands(world_id,actor_id,command_id,request_hash) VALUES($1,$2,$3,$4)',
+        [id, actor.id, commandId, requestHash],
+      );
+      await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [id, row.revision + 1]);
+      if (ingress)
+        await c.query('UPDATE eventsub_inbox SET processed_at=now() WHERE message_id=$1', [
+          ingress.id,
+        ]);
+    });
+    return this.get(id);
+  }
+  async handoffs(channel: string): Promise<Handoff[]> {
+    return (
+      await this.pool.query(
+        'SELECT * FROM handoffs WHERE source_id=$1 OR target_id=$1 ORDER BY prepared_at DESC LIMIT 20',
+        [channel],
+      )
+    ).rows;
+  }
+  async prepare(
+    id: string,
+    source: Creator,
+    targetId: string,
+    expectedRevision: number,
+    ttlMs = 180000,
+  ): Promise<Handoff> {
+    if (source.id === targetId) error('INVALID_TARGET', 'Choose another creator.');
+    return this.transaction(async (c) => {
+      await this.lockChannels(c, [source.id, targetId]);
+      const target = (await c.query('SELECT * FROM creators WHERE id=$1', [targetId])).rows[0];
+      const w = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [id])).rows[0];
+      if (!w || w.custodian_id !== source.id || w.mode !== source.mode)
+        error('FORBIDDEN', 'Invalid source custody.');
+      if (!target || target.mode !== source.mode || !target.receive_opt_in || !target.connected)
+        error('TARGET_UNAVAILABLE', 'Target must connect and opt in in the same mode.');
+      if (w.revision !== expectedRevision)
+        error('STALE_VERSION', 'The world changed. Refresh before preparing.');
+      if (w.state.phase !== 'ready' || w.state.chapter === 0 || w.frozen_by)
+        error('INVALID_PHASE', 'Finish a chapter before preparing a handoff.');
+      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [targetId])).rowCount)
+        error('TARGET_BUSY', 'The receiving channel already hosts a world.');
+      if (
+        !(
+          await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+            source.id,
+            id,
+          ])
+        ).rowCount
+      )
+        error('WORLD_PARKED', 'Resume this world before preparing a handoff.');
+      if (
+        (
+          await c.query(
+            "SELECT 1 FROM handoffs WHERE source_id=$1 AND target_id=$2 AND status IN ('cancelled','declined','expired') AND expires_at>now()-interval '10 minutes'",
+            [source.id, targetId],
+          )
+        ).rowCount
+      )
+        error(
+          'PAIR_COOLDOWN',
+          'Wait ten minutes after a cancelled or expired handoff before retrying this pair.',
+        );
+      const intentId = randomUUID();
+      const intent = (
+        await c.query(
+          "INSERT INTO handoffs(id,world_id,source_id,target_id,mode,status,frozen_revision,expires_at) VALUES($1,$2,$3,$4,$5,'prepared',$6,$7) RETURNING *",
+          [
+            intentId,
+            id,
+            source.id,
+            targetId,
+            source.mode,
+            w.revision + 1,
+            new Date(Date.now() + ttlMs),
+          ],
+        )
+      ).rows[0];
+      await c.query('UPDATE worlds SET frozen_by=$2,revision=revision+1 WHERE id=$1', [
+        id,
+        intentId,
+      ]);
+      await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [id, w.revision + 1]);
+      return intent;
+    });
+  }
+  async observeRaid(proof: RaidProof) {
+    const timestamp = Date.parse(proof.notificationAt);
+    if (
+      !Number.isFinite(timestamp) ||
+      timestamp < Date.now() - 600000 ||
+      timestamp > Date.now() + 30000
+    )
+      error('PROOF_STALE', 'Raid evidence is outside the freshness window.');
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [proof.sourceId, proof.targetId]);
+      const existing = (
+        await c.query('SELECT * FROM raid_proofs WHERE message_id=$1', [proof.messageId])
+      ).rows[0];
+      if (existing) {
+        if (
+          existing.mode !== proof.mode ||
+          existing.source_id !== proof.sourceId ||
+          existing.target_id !== proof.targetId
+        )
+          error('PROOF_CONFLICT', 'Duplicate proof ID has different identities.');
+        return;
+      }
+      await c.query(
+        'INSERT INTO raid_proofs(message_id,mode,source_id,target_id,subscription_id,notification_at) VALUES($1,$2,$3,$4,$5,$6)',
+        [
+          proof.messageId,
+          proof.mode,
+          proof.sourceId,
+          proof.targetId,
+          proof.subscriptionId,
+          proof.notificationAt,
+        ],
+      );
+      const intent = (
+        await c.query(
+          "SELECT * FROM handoffs WHERE source_id=$1 AND target_id=$2 AND mode=$3 AND status='prepared' AND expires_at>now() AND prepared_at<=$4::timestamptz AND expires_at>=$4::timestamptz FOR UPDATE",
+          [proof.sourceId, proof.targetId, proof.mode, proof.notificationAt],
+        )
+      ).rows[0];
+      if (!intent) return;
+      await c.query("UPDATE handoffs SET status='verified',proof_id=$2 WHERE id=$1", [
+        intent.id,
+        proof.messageId,
+      ]);
+    });
+  }
+  async accept(intentId: string, receiver: Creator) {
+    const info = (await this.pool.query('SELECT * FROM handoffs WHERE id=$1', [intentId]))
+      .rows[0] as Handoff | undefined;
+    if (!info || info.target_id !== receiver.id || info.mode !== receiver.mode)
+      error('FORBIDDEN', 'Only the intended receiving creator can accept.');
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [info!.source_id, receiver.id]);
+      const w = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [info!.world_id]))
+        .rows[0];
+      const intent = (await c.query('SELECT * FROM handoffs WHERE id=$1 FOR UPDATE', [intentId]))
+        .rows[0] as Handoff;
+      if (intent.status === 'committed') return;
+      if (intent.status !== 'verified' || !intent.proof_id)
+        error('PROOF_REQUIRED', 'A verified native raid is required before acceptance.');
+      if (intent.expires_at.getTime() <= Date.now())
+        error('INTENT_EXPIRED', 'The prepared handoff expired.');
+      const target = (await c.query('SELECT * FROM creators WHERE id=$1', [receiver.id])).rows[0];
+      if (!target.receive_opt_in || !target.connected)
+        error('TARGET_UNAVAILABLE', 'Receiver is no longer opted in or connected.');
+      if (
+        w.frozen_by !== intent.id ||
+        w.revision !== intent.frozen_revision ||
+        w.custodian_id !== intent.source_id
+      )
+        error('STALE_VERSION', 'Custody or frozen state changed.');
+      if (
+        (await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [receiver.id])).rowCount
+      )
+        error('TARGET_BUSY', 'The receiving channel now hosts another world.');
+      const proof = (
+        await c.query('SELECT * FROM raid_proofs WHERE message_id=$1 FOR UPDATE', [intent.proof_id])
+      ).rows[0];
+      if (
+        !proof ||
+        proof.consumed_by ||
+        proof.mode !== intent.mode ||
+        proof.source_id !== intent.source_id ||
+        proof.target_id !== intent.target_id
+      )
+        error('PROOF_REQUIRED', 'Proof was consumed or does not match.');
+      await c.query('DELETE FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+        intent.source_id,
+        intent.world_id,
+      ]);
+      await c.query('INSERT INTO channel_slots(channel_id,world_id) VALUES($1,$2)', [
+        receiver.id,
+        intent.world_id,
+      ]);
+      await c.query(
+        'UPDATE worlds SET custodian_id=$2,frozen_by=NULL,revision=revision+1 WHERE id=$1',
+        [intent.world_id, receiver.id],
+      );
+      await c.query('UPDATE raid_proofs SET consumed_by=$2 WHERE message_id=$1', [
+        intent.proof_id,
+        intent.id,
+      ]);
+      await c.query("UPDATE handoffs SET status='committed' WHERE id=$1", [intent.id]);
+      await c.query(
+        'INSERT INTO custody_events(id,world_id,source_id,target_id,proof_id,mode) VALUES($1,$2,$3,$4,$5,$6)',
+        [
+          intent.id,
+          intent.world_id,
+          intent.source_id,
+          intent.target_id,
+          intent.proof_id,
+          intent.mode,
+        ],
+      );
+      await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [
+        intent.world_id,
+        w.revision + 1,
+      ]);
+    });
+    return this.get(info!.world_id);
+  }
+  async cancel(intentId: string, channel: string, status: 'cancelled' | 'declined' | 'expired') {
+    const info = (await this.pool.query('SELECT * FROM handoffs WHERE id=$1', [intentId])).rows[0];
+    if (
+      !info ||
+      (status === 'cancelled' && info.source_id !== channel) ||
+      (status === 'declined' && info.target_id !== channel)
+    )
+      error('FORBIDDEN', 'Not a party to this handoff.');
+    await this.transaction(async (c) => {
+      await this.lockChannels(c, [info.source_id, info.target_id]);
+      await c.query('SELECT id FROM worlds WHERE id=$1 FOR UPDATE', [info.world_id]);
+      const intent = (await c.query('SELECT * FROM handoffs WHERE id=$1 FOR UPDATE', [intentId]))
+        .rows[0];
+      if (!['prepared', 'verified'].includes(intent.status)) return;
+      if (status === 'expired' && intent.expires_at.getTime() > Date.now()) return;
+      await c.query(
+        'UPDATE handoffs SET status=$2,expires_at=LEAST(expires_at,now()) WHERE id=$1',
+        [intentId, status],
+      );
+      await c.query(
+        'UPDATE worlds SET frozen_by=NULL,revision=revision+1 WHERE id=$1 AND frozen_by=$2',
+        [info.world_id, intentId],
+      );
+      await c.query(
+        'INSERT INTO outbox(world_id,revision) SELECT id,revision FROM worlds WHERE id=$1',
+        [info.world_id],
+      );
+    });
+  }
+  async expire(mode?: Creator['mode']) {
+    const rows = (
+      await this.pool.query(
+        "SELECT id FROM handoffs WHERE status IN ('prepared','verified') AND expires_at<=now() AND ($1::text IS NULL OR mode=$1) LIMIT 50",
+        [mode ?? null],
+      )
+    ).rows;
+    for (const row of rows) await this.cancel(row.id, '', 'expired');
+  }
+  async close() {
+    await this.pool.end();
+  }
+}

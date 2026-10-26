@@ -37,6 +37,8 @@ test-results/
 /recordings/
 /tmp/
 /temp/
+.tools/
+.local/
 .idea/
 .vscode/
 .DS_Store

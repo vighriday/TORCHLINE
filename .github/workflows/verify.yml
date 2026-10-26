@@ -1,0 +1,37 @@
+name: Verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: torchline
+          POSTGRES_PASSWORD: isolated-ci-password
+          POSTGRES_DB: torchline
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U torchline"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://torchline:isolated-ci-password@127.0.0.1:5432/torchline
+      WORLD_MODE: simulation
+      PLAYWRIGHT_BROWSERS_PATH: .local/browsers
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+      - run: npm install --global pnpm@12.4.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium --only-shell
+      - run: pnpm test:browser
+      - run: pnpm audit:balance && pnpm design:fixtures
+      - run: pnpm check:repo
+      - run: git diff --exit-code -- docs/reports docs/design/fixtures
