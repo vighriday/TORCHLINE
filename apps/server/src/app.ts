@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { z } from 'zod';
 import { CommandRequestSchema, DomainError } from '@torchline/contracts';
 import type { Command } from '@torchline/contracts';
-import { Store } from '@torchline/storage';
+import { Store, participantIdentity } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import {
   authorizationUrl,
@@ -26,6 +26,7 @@ import {
 import type { Fetcher } from '@torchline/twitch';
 import { presentWorld } from './projection.ts';
 import { twitchLifecycle } from './twitch-lifecycle.ts';
+import { twitchSubscriptions } from './twitch-subscriptions.ts';
 
 export interface AppConfig {
   mode: 'simulation' | 'live';
@@ -53,6 +54,7 @@ export async function createApp(
 ) {
   const fetcher = options.fetcher ?? fetch;
   const lifecycle = twitchLifecycle(store, config, fetcher);
+  const subscriptions = twitchSubscriptions(store, config, fetcher, lifecycle.applicationToken);
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
     bodyLimit: 65536,
@@ -81,6 +83,17 @@ export async function createApp(
         .send({ error: error.code, message: error.message });
     if (error instanceof z.ZodError)
       return reply.code(400).send({ error: 'INVALID_INPUT', message: 'Invalid request fields.' });
+    const clientErrors: Record<string, number> = {
+      FST_ERR_CTP_INVALID_JSON_BODY: 400,
+      FST_ERR_CTP_EMPTY_JSON_BODY: 400,
+      FST_ERR_CTP_BODY_TOO_LARGE: 413,
+      FST_ERR_CTP_INVALID_MEDIA_TYPE: 415,
+    };
+    if (error.code && clientErrors[error.code])
+      return reply.code(clientErrors[error.code]).send({
+        error: clientErrors[error.code] === 413 ? 'BODY_TOO_LARGE' : 'INVALID_INPUT',
+        message: 'The request body is invalid, unsupported or exceeds the allowed size.',
+      });
     if (error.code === '23505')
       return reply.code(409).send({
         error: 'CONFLICT',
@@ -240,9 +253,14 @@ export async function createApp(
     const creator = await currentCreator(request);
     const { id } = z.object({ id: NodeText }).parse(request.params);
     const body = CommandRequestSchema.parse(request.body);
+    const participation = ['scan', 'route', 'patch', 'vote'].includes(body.command.type);
     await store.command(
       id,
-      { id: creator.id, role: 'host', community: creator.id },
+      {
+        id: participation ? participantIdentity(id, creator.id, config.sessionSecret) : creator.id,
+        role: 'host',
+        community: creator.id,
+      },
       creator.mode,
       body.expectedVersion,
       body.commandId,
@@ -316,6 +334,9 @@ export async function createApp(
         notificationAt: new Date().toISOString(),
       });
     } else if (action === 'accept') {
+      const intent = (await store.handoffs(creator.id)).find((item) => item.id === id);
+      if (!intent || intent.target_id !== creator.id || intent.mode !== creator.mode)
+        denied('FORBIDDEN', 'Only the intended receiving creator can accept.');
       if (config.mode === 'live') await lifecycle.readyForTransfer(null, creator.id);
       await store.accept(id, creator);
     } else await store.cancel(id, creator.id, action === 'decline' ? 'declined' : 'cancelled');
@@ -424,7 +445,15 @@ export async function createApp(
     )
       denied('FORBIDDEN', 'The bot account cannot be a creator in this application.');
     await store.transaction(async (c) => {
-      if (state.role === 'bot') await c.query("DELETE FROM oauth_grants WHERE role='bot'");
+      if (state.role === 'bot') {
+        await c.query('SELECT pg_advisory_xact_lock(833017)');
+        const previous = (await c.query("SELECT id FROM oauth_grants WHERE role='bot'")).rows[0];
+        if (previous && previous.id !== identity.user_id)
+          await c.query(
+            "UPDATE subscriptions SET status='configuration_changed' WHERE type='channel.chat.message' AND status IN ('enabled','webhook_callback_verification_pending')",
+          );
+        await c.query("DELETE FROM oauth_grants WHERE role='bot'");
+      }
       await c.query(
         'INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,scopes=EXCLUDED.scopes,encrypted=EXCLUDED.encrypted,validated_at=now()',
         [identity.user_id, state.role, identity.scopes, encryptSecret(tokens, config.tokenKey)],
@@ -438,82 +467,16 @@ export async function createApp(
       );
       await setSession(creator, reply);
     }
+    if (options.workers !== false)
+      void subscriptions
+        .reconcileAll()
+        .catch(() => app.log.error('Subscription reconciliation failed.'));
     return reply.redirect('/');
   });
   app.post('/api/twitch/reconcile', async (request) => {
     requireTwitch();
     const creator = await currentCreator(request);
-    if (!secure || !config.eventsubSecret || config.eventsubSecret.length < 10)
-      denied(
-        'NOT_CONFIGURED',
-        'Public HTTPS and an EventSub secret are required for webhook verification.',
-      );
-    const bot = (await store.pool.query("SELECT * FROM oauth_grants WHERE role='bot' LIMIT 1"))
-      .rows[0];
-    if (!bot) denied('NOT_CONFIGURED', 'Authorize the dedicated bot first.');
-    const token = await requestToken(
-      {
-        client_id: config.twitchClientId!,
-        client_secret: config.twitchClientSecret!,
-        grant_type: 'client_credentials',
-      },
-      fetcher,
-    );
-    const callback = `${config.baseUrl}/integrations/twitch/eventsub`;
-    const existing = await helix(
-      'eventsub/subscriptions?first=100',
-      config.twitchClientId!,
-      token.access_token,
-      {},
-      fetcher,
-    );
-    const desired = [
-      {
-        type: 'channel.chat.message',
-        condition: { broadcaster_user_id: creator.id, user_id: bot.id },
-      },
-      { type: 'stream.online', condition: { broadcaster_user_id: creator.id } },
-      { type: 'stream.offline', condition: { broadcaster_user_id: creator.id } },
-      ...(creator.receive_opt_in
-        ? [{ type: 'channel.raid', condition: { to_broadcaster_user_id: creator.id } }]
-        : []),
-    ];
-    for (const spec of desired) {
-      let sub = existing?.data?.find(
-        (item: {
-          type: string;
-          condition: Record<string, string>;
-          transport: { callback: string };
-          status: string;
-        }) =>
-          item.type === spec.type &&
-          item.transport.callback === callback &&
-          ['enabled', 'webhook_callback_verification_pending'].includes(item.status) &&
-          Object.entries(spec.condition).every(([key, value]) => item.condition[key] === value),
-      );
-      if (!sub)
-        sub = (
-          await helix(
-            'eventsub/subscriptions',
-            config.twitchClientId!,
-            token.access_token,
-            {
-              method: 'POST',
-              body: JSON.stringify({
-                ...spec,
-                version: '1',
-                transport: { method: 'webhook', callback, secret: config.eventsubSecret },
-              }),
-            },
-            fetcher,
-          )
-        )?.data?.[0];
-      if (sub)
-        await store.pool.query(
-          "INSERT INTO subscriptions(id,type,channel_id,status) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET status=CASE WHEN subscriptions.status='enabled' AND EXCLUDED.status='webhook_callback_verification_pending' THEN subscriptions.status ELSE EXCLUDED.status END",
-          [sub.id, spec.type, creator.id, sub.status],
-        );
-    }
+    await subscriptions.reconcile(creator.id);
     return {
       subscriptions: (
         await store.pool.query('SELECT type,status FROM subscriptions WHERE channel_id=$1', [
@@ -539,49 +502,9 @@ export async function createApp(
         config.eventsubSecret!,
       );
       const subscription = notification.subscription;
-      const channel = String(
-        subscription.condition.to_broadcaster_user_id ??
-          subscription.condition.broadcaster_user_id ??
-          '',
-      );
-      const owner = await store.creator(channel);
-      if (
-        !owner ||
-        !owner.connected ||
-        owner.mode !== 'live' ||
-        config.mode !== 'live' ||
-        subscription.version !== '1'
-      )
-        denied('FORBIDDEN', 'Unregistered channel, mode or subscription version.');
-      if (
-        !['channel.chat.message', 'channel.raid', 'stream.online', 'stream.offline'].includes(
-          subscription.type,
-        )
-      )
-        denied('FORBIDDEN', 'Unexpected subscription type.');
-      if (notification.type === 'webhook_callback_verification') {
-        if (!notification.challenge) denied('INVALID_EVENT', 'Challenge missing.');
-        await store.pool.query(
-          "INSERT INTO subscriptions(id,type,channel_id,status) VALUES($1,$2,$3,'enabled') ON CONFLICT(id) DO UPDATE SET status='enabled'",
-          [subscription.id, subscription.type, channel],
-        );
-        return reply.type('text/plain').send(notification.challenge);
-      }
-      const known = (
-        await store.pool.query(
-          'SELECT * FROM subscriptions WHERE id=$1 AND channel_id=$2 AND type=$3',
-          [subscription.id, channel, subscription.type],
-        )
-      ).rows[0];
-      if (!known) denied('FORBIDDEN', 'Unknown EventSub subscription.');
-      if (notification.type === 'revocation') {
-        await store.pool.query('UPDATE subscriptions SET status=$2 WHERE id=$1', [
-          subscription.id,
-          subscription.status,
-        ]);
-        return reply.code(204).send();
-      }
-      if (known.status !== 'enabled') denied('FORBIDDEN', 'Subscription is not enabled.');
+      const { channel, challenge } = await subscriptions.observe(notification);
+      if (challenge) return reply.type('text/plain').send(notification.challenge);
+      if (notification.type === 'revocation') return reply.code(204).send();
       if (subscription.type === 'channel.chat.message') {
         const chat = normalizeChat(notification.event);
         if (chat) {
@@ -624,6 +547,16 @@ export async function createApp(
           'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at) VALUES($1,$2,$3,now()) ON CONFLICT(message_id) DO NOTHING',
           [notification.id, subscription.type, { kind: 'presence', channelId: channel }],
         );
+      await subscriptions.record(
+        notification.id,
+        channel,
+        subscription.id,
+        subscription.type === 'channel.chat.message'
+          ? 'chat'
+          : subscription.type === 'channel.raid'
+            ? 'raid'
+            : 'presence',
+      );
       return reply.code(204).send();
     });
   });
@@ -789,6 +722,9 @@ export async function createApp(
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
       await lifecycle.validateGrants(true);
+      void subscriptions
+        .reconcileAll()
+        .catch(() => app.log.error('Subscription reconciliation failed.'));
     });
     interval = setInterval(() => {
       void tick();
@@ -797,6 +733,7 @@ export async function createApp(
     validationInterval = setInterval(() => {
       void lifecycle
         .validateGrants()
+        .then(() => subscriptions.reconcileAll())
         .catch(() => app.log.error('Twitch validation dependency failed.'));
     }, 60000);
     validationInterval.unref();

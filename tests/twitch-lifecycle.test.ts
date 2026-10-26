@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { encryptSecret, decryptSecret } from '@torchline/twitch';
+import { encryptSecret, decryptSecret, BOT_SCOPES, CREATOR_SCOPES } from '@torchline/twitch';
 import type { Fetcher } from '@torchline/twitch';
 import { twitchLifecycle } from '../apps/server/src/twitch-lifecycle.ts';
 import { database } from './helpers.ts';
@@ -83,7 +83,7 @@ it('gates live handoff on fresh grants, enabled subscriptions and actual stream 
         [
           id,
           id === 'bot' ? 'bot' : 'creator',
-          [],
+          id === 'bot' ? BOT_SCOPES : CREATOR_SCOPES,
           encryptSecret({ access_token: 'fixture' }, config.tokenKey),
         ],
       );
@@ -97,6 +97,10 @@ it('gates live handoff on fresh grants, enabled subscriptions and actual stream 
     });
     await store.pool.query(
       "INSERT INTO subscriptions(id,type,channel_id,status) VALUES('a-chat','channel.chat.message','a','enabled'),('b-chat','channel.chat.message','b','enabled'),('b-raid','channel.raid','b','enabled')",
+    );
+    await store.pool.query(
+      "UPDATE subscriptions SET version='1',condition=CASE WHEN type='channel.raid' THEN jsonb_build_object('to_broadcaster_user_id',channel_id) ELSE jsonb_build_object('broadcaster_user_id',channel_id,'user_id','bot') END,callback=$1,confirmed_at=now()",
+      [`${config.baseUrl}/integrations/twitch/eventsub`],
     );
     await expect(lifecycle.readyForTransfer('a', 'b')).resolves.toBeUndefined();
     const offline = twitchLifecycle(store, config, async (input) =>

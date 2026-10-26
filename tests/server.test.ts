@@ -235,6 +235,10 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
   it('durably ingests signed chat, applies once, filters mirrors and handles challenge/revocation', () =>
     database(async (store) => {
       const owner = await store.ensureCreator('42', 'Creator', 'live');
+      await store.pool.query(
+        "INSERT INTO oauth_grants(id,role,scopes,encrypted) VALUES('42','creator',$1,$2)",
+        [['channel:bot'], encryptSecret({ access_token: 'creator-fixture' }, baseConfig.tokenKey)],
+      );
       const worldId = await store.create(owner);
       await store.command(
         worldId,
@@ -258,6 +262,10 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
         version: '1',
         status: 'enabled',
         condition: { broadcaster_user_id: '42', user_id: '99' },
+        transport: {
+          method: 'webhook',
+          callback: `${baseConfig.baseUrl}/integrations/twitch/eventsub`,
+        },
       };
       const event = {
         broadcaster_user_id: '42',
@@ -294,6 +302,7 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
         );
         expect(challenge.statusCode).toBe(200);
         expect(challenge.body).toBe('plain-challenge');
+        await store.pool.query("UPDATE subscriptions SET confirmed_at=now() WHERE id='chat-sub'");
         expect((await deliver({ subscription, event }, 'delivery-1')).statusCode).toBe(204);
         const inbox = (
           await store.pool.query('SELECT payload FROM eventsub_inbox WHERE message_id=$1', [

@@ -2,7 +2,7 @@
 
 Updated 2026-10-26. Architecture approval was given before implementation. This is the current evidence record; earlier proposed documents remain the wider target architecture.
 
-**Review hold:** the [public capability and authority review](../reviews/2026-10-26-public-authority.md) reproduced four unfixed cases involving subscription revocation replay, bot replacement readiness, broadcaster ballot identity and malformed-input responses. Passing baseline tests do not cover these defects. No further pushes or application changes were made during this review.
+**Integration follow-up:** the [public capability and authority review](../reviews/2026-10-26-public-authority.md) reproduced four cases in baseline `00250ce`. All four now have local fixes and passing regression coverage. A complete provider-contract OAuth/bot/chat/signed-raid journey is also tested. Actual Twitch grants and native raid acceptance remain separate external gates. Further pushes stay held during review.
 
 ## Working locally
 
@@ -19,7 +19,7 @@ Updated 2026-10-26. Architecture approval was given before implementation. This 
 ## Executed evidence
 
 - `pnpm build`: type-check and production browser build pass.
-- `pnpm test`: **25 tests across five files pass**, covering domain, balance, replay, real PostgreSQL races/constraints, HTTP authorization, OAuth/webhook fixtures, token lifecycle and worker mode isolation.
+- `pnpm test`: **30 tests across six files pass**, covering domain, balance, replay, real PostgreSQL races/constraints, HTTP authorization, OAuth/webhook fixtures, token lifecycle, worker mode isolation, the four reviewed defects and a complete provider-contract chat/raid journey.
 - `pnpm test:browser`: **two journeys pass** in headless Chromium, including shared contribution → repair → sacrifice → reload → read-only overlay → simulated two-creator transfer. A 390px viewport has no horizontal overflow.
 - `pnpm audit:legacy`: original tree has 32 paths, 28 colonies, four partial endings, zero wrecks.
 - `pnpm audit:balance`: 2,398 terminal branches; 964 colonies, 1,304 partial survivors, 130 wrecks (86 hull, 44 oxygen). Equivalent clue ordering/routes collapsed; no allocation/timer coverage is implied.
@@ -39,7 +39,7 @@ No hosting has been provisioned, and no production deployment or public submissi
 - Chat currently supports `!scan`, `!route`, `!patch`, `!vote`. Bot output for `!status`/`!history` and announcement throttling is pending.
 - Early ingress binds a window under the world lock. Close/pause refuses while accepted input is pending. Per-phase/ballot tables and finer write partitioning are needed before claiming the planned large-chat throughput.
 - The worker is single-instance with bounded polling. Worker leases, cross-instance fan-out, durable retry/dead-letter diagnostics and scheduled retention cleanup require further production hardening.
-- Reconciliation is manually triggered and currently inspects the first 100 Twitch subscriptions. Pagination, automatic desired-state reconciliation and unused-subscription cleanup are required before a broader creator network.
+- Reconciliation now paginates provider records, serializes per channel, runs on startup/authorization and bounded periodic batches, and retires tracked subscriptions for obsolete configurations. Untested public-provider behavior, transient-error handling and broader network scale still require further evidence.
 - Current event replay reconstructs the game from accepted commands under immutable rules and checks stored effects. Hosting/custody revisions have their own transaction/audit records; they do not mutate game sequence numbers.
 - Load/soak targets, backup restore, deployment rollback, actual OBS frame time, final accessibility/usability playtesting, public history navigation and final Claude Design integration remain unverified or unfinished.
 - The HTTP server binds loopback by default. This is a local functional slice, not a claim of production readiness.

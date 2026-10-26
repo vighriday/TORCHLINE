@@ -135,6 +135,7 @@ const EnvelopeSchema = z.object({
     version: z.string(),
     status: z.string(),
     condition: z.record(z.string(), z.unknown()),
+    transport: z.object({ method: z.string(), callback: z.string().optional() }).optional(),
   }),
   event: z.record(z.string(), z.unknown()).optional(),
   challenge: z.string().optional(),
@@ -192,6 +193,7 @@ export function verifyWebhook(
     throw new DomainError('INVALID_EVENT', 'Subscription version mismatch.');
   return { id, timestamp, type, ...body };
 }
+export type WebhookNotification = ReturnType<typeof verifyWebhook>;
 export function parseChatCommand(text: string): Command | null {
   if (text.length > 160) return null;
   const [name, ...args] = text.trim().split(/\s+/);

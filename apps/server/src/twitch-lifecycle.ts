@@ -11,6 +11,7 @@ import {
 } from '@torchline/twitch';
 import type { Fetcher, OAuthTokens } from '@torchline/twitch';
 import type { AppConfig } from './app.ts';
+import { hasCurrentSubscription } from './twitch-subscriptions.ts';
 
 export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetcher) {
   let validating = false;
@@ -109,6 +110,14 @@ export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetche
   }
   async function readyForTransfer(sourceId: string | null, targetId: string) {
     await validateGrants();
+    const bot = (
+      await store.pool.query(
+        "SELECT id FROM oauth_grants WHERE role='bot' AND scopes @> $1::text[] AND validated_at>now()-interval '1 hour'",
+        [BOT_SCOPES],
+      )
+    ).rows[0];
+    if (!bot)
+      throw new DomainError('NOT_CONFIGURED', 'The dedicated bot must have current authorization.');
     const ids = sourceId ? [sourceId, targetId] : [targetId];
     for (const id of ids) {
       const grant = (
@@ -119,14 +128,7 @@ export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetche
       ).rowCount;
       if (!grant)
         throw new DomainError('NOT_CONFIGURED', 'Both creators need valid Twitch grants.');
-      if (
-        !(
-          await store.pool.query(
-            "SELECT 1 FROM subscriptions WHERE channel_id=$1 AND type='channel.chat.message' AND status='enabled'",
-            [id],
-          )
-        ).rowCount
-      )
+      if (!(await hasCurrentSubscription(store, config, id, 'channel.chat.message', bot.id)))
         throw new DomainError('SUBSCRIPTION_UNREADY', 'Both chat subscriptions must be enabled.');
     }
     if (
@@ -137,14 +139,7 @@ export function twitchLifecycle(store: Store, config: AppConfig, fetcher: Fetche
       ).rowCount
     )
       throw new DomainError('NOT_CONFIGURED', 'The dedicated bot must be authorized.');
-    if (
-      !(
-        await store.pool.query(
-          "SELECT 1 FROM subscriptions WHERE channel_id=$1 AND type='channel.raid' AND status='enabled'",
-          [targetId],
-        )
-      ).rowCount
-    )
+    if (!(await hasCurrentSubscription(store, config, targetId, 'channel.raid', bot.id)))
       throw new DomainError(
         'SUBSCRIPTION_UNREADY',
         'The destination needs an enabled native raid subscription.',

@@ -2,6 +2,8 @@
 
 Date: 2026-10-26, Asia/Calcutta. Reviewed implementation: `00250ce`. Review only: no application fixes, release tag, deployment, merge or further push is included. The owner requested local review before publishing further changes.
 
+Follow-up implementation on the same date: R1–R4 now have fixes and passing regression coverage in the local integration work. Subscription identity and provider confirmation are persisted, terminal IDs remain terminal, participant identity is shared across ingress paths, and safe client errors retain their HTTP status. The new 30-test suite includes a complete provider-contract chat/raid journey. The original findings and evidence below are retained as the review of `00250ce`; genuine Twitch acceptance remains pending and no further push has occurred.
+
 ## Disposition
 
 Retain the approved architecture. The existing session, engine, SQL and overlay boundaries support the intended product; this review does not justify a new authorization framework, service split, queue or transport. Fix the four reproduced defects below in small changes before treating the slice as ready for live integration acceptance. Keep the wider product roadmap, but defer adding gameplay systems during these fixes.

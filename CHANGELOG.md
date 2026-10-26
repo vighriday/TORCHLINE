@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Twitch boundary fixes — 2026-10-26 (local)
+
+- Fixed R1–R4 from the authority review: terminal subscription IDs cannot be revived by challenge replay or a delayed creation response; readiness requires the current bot/callback/version/conditions and provider confirmation; dashboard/chat participation shares one identity; malformed and oversized bodies retain 400/413 responses.
+- Added subscription identity migration, paginated provider reconciliation, cleanup limited to tracked subscriptions, per-channel reconciliation serialization, automatic bounded reconciliation and signed-delivery metadata without raw chat.
+- Added a complete provider-contract OAuth → bot → chat gameplay → signed raid → receiver acceptance journey, plus role, replay, bot replacement, callback and invalid-input regressions. Thirty tests pass across six files. These remain fixture-based integration tests, not actual Twitch authorization or native raid evidence.
+- Started an owner-requested ngrok HTTPS tunnel forwarding only the dedicated live port 3001; the simulation remains on 3000. Application registration and real grants are still pending. No further push or deployment is included.
+
 ### Local review — 2026-10-26 (unpublished)
 
 - Completed a public capability/authority inventory across all application routes and 13 architecture components. Forty-eight local checks reproduced four defects: replayed challenge revives a revoked subscription, stale bot subscriptions pass readiness, one broadcaster can hold two ballot identities, and invalid JSON/body limits return server errors. Fixes and committed regression coverage remain pending.

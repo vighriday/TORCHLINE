@@ -47,6 +47,8 @@ const error = (code: string, message: string): never => {
   throw new DomainError(code, message);
 };
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+export const participantIdentity = (worldId: string, accountId: string, key: string) =>
+  createHmac('sha256', key).update(`${worldId}:${accountId}`).digest('hex');
 
 export class Store {
   readonly pool: Pool;
@@ -131,9 +133,7 @@ export class Store {
         ).rowCount;
       const accepted = eligible && !duplicate;
       const participantId =
-        accepted && participantKey
-          ? createHmac('sha256', participantKey).update(`${row.id}:${actorId}`).digest('hex')
-          : actorId;
+        accepted && participantKey ? participantIdentity(row.id, actorId, participantKey) : actorId;
       const payload = accepted
         ? {
             kind: 'chat',
