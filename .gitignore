@@ -1,0 +1,44 @@
+# Private source material: exclude every case variant at every depth.
+[Ii][Dd][Ee][Aa].[Tt][Xx][Tt]
+/docs/internal/
+
+# Credentials and machine-local configuration.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+.aws/
+.codex/
+.agents/
+
+# JavaScript dependencies and generated output (reserved for development).
+node_modules/
+.pnpm-store/
+dist/
+build/
+coverage/
+.cache/
+.vite/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Runtime data, logs, recordings, and local tooling.
+*.log
+*.sqlite
+*.sqlite3
+*.db
+/data/
+/backups/
+/recordings/
+/tmp/
+/temp/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini

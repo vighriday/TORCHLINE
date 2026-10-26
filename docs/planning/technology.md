@@ -1,0 +1,42 @@
+# Technology choices
+
+Status: recommended for review, checked 2026-10-26. Dependencies have not been installed. Pin supported stable versions and the package manager in the first implementation commit; commit a lockfile after compatibility checks. Avoid unverified claims about the latest patch release.
+
+The [component decision review](../architecture/decision-stress-review.md) is part of this recommendation. Each selection must work with the entire product rather than just its local feature.
+
+| Area | Recommendation | Task-specific reason | Strong alternative and trade-off |
+| --- | --- | --- | --- |
+| Runtime/language | Node.js 24 LTS, strict TypeScript | One domain model across engine, Twitch adapter and browser; long-running I/O service; supported LTS line | Go offers efficient concurrency but adds a second language/schema boundary; Python is fast to prototype but gives less shared browser typing |
+| API service | Fastify 5, modular monolith | Route-scoped raw-byte webhook parser, explicit HTTP commands, test injection and plugin boundaries | Next.js is attractive for content/SSR; this product needs a durable worker and streaming host regardless, so it would not remove that server |
+| Browser | React 19 + Vite, semantic HTML/CSS | Dashboard, puzzle board, overlay and history share a presentation model; no server rendering requirement | Next.js adds server rendering/routing conventions we do not currently need; a plain DOM app saves dependencies but makes shared complex UI harder to maintain |
+| Rendering | SVG/CSS ship and puzzle board; Canvas for profiled effects later | Ship damage maps naturally to independently styled systems; readable DOM UI and testable SVG graph support clues and route solving | PixiJS/Canvas suits many sprites; Phaser suits a continuous game loop. Neither should be required for meters, transitions and a small graph puzzle |
+| Browser updates | SSE snapshots + authenticated HTTP mutations | Twitch chat supplies gameplay input; browser feeds are one-way. Native reconnect and existing HTTP auth reduce protocol work | WebSocket remains a ready alternative if OBS/proxy tests expose streaming issues or future inputs need continuous bidirectional traffic |
+| Twitch transport | EventSub HTTPS webhooks with cloud bot grants | Hosted service and durable ingress can survive application restarts; one shared bot serves opted-in creators | EventSub WebSocket is useful for installed clients and a local spike, but has reconnect gaps and requires user-token subscription handling |
+| Database | PostgreSQL 17, managed in production | Custody needs relational uniqueness and multi-record transactions; JSONB suits versioned state and events | SQLite is excellent locally but mismatches hosted multi-channel concurrency; document stores shift relational custody constraints into application code |
+| Data access | `pg`, parameterized SQL and ordered SQL migrations | Critical locks, partial indexes, inbox claims and atomic handoff stay visible in review | Drizzle is viable and supports transactions; its query typing is useful, but it does not remove our custom SQL/locking work. Prisma adds another migration/runtime abstraction without solving the hardest invariant |
+| Validation/contracts | Zod 4 + TypeScript; explicit schema versions | Reject untrusted payloads at boundaries; infer shared shapes without assuming static types validate JSON | JSON Schema alone fits Fastify well but duplicates inferred client models; isolate schema integration and do not validate/reshape bytes before HMAC |
+| Work processing | PostgreSQL inbox, outbox and persisted deadlines | Handles crash recovery using the already-required database; single deployment, auditable jobs | Redis/BullMQ helps at higher job volume but adds failure domains and a cross-store commit problem |
+| Tests | Vitest, real PostgreSQL integration tests, Playwright, Twitch CLI | Pure engine fixtures, actual lock races, browser onboarding and signed event simulation require different evidence | Browser-only tests miss custody races; mocked databases cannot establish PostgreSQL behavior |
+| Workspace | pnpm workspaces, no task orchestrator initially | Shares engine/contracts with explicit package boundaries and one lockfile | Turborepo/Nx caching is useful later; it does not improve the first feature's correctness |
+| Hosting | One always-on Render web service + managed PostgreSQL in the same region | Public TLS ingress, durable process, simple deploy/rollback; externalize all data | Railway/Fly/a managed VM can satisfy the same contract. Validate budget, region, stream behavior and backups before provisioning; never depend on a sleeping tier |
+| AI | Codex for development; authored runtime text and deterministic rules | Essential gameplay stays reproducible, low latency and operational when an AI API is unavailable | Later event-grounded narration can add atmosphere, with templates as fallback; models never change resources or judge puzzle solutions |
+
+## Versions and compatibility
+
+For the bounded initial Helix surface, use Node's native `fetch` and `crypto` behind the Twitch adapter, with explicit wire schemas and contract fixtures. Evaluate [Twurple](https://twurple.js.org/) as the strongest SDK alternative: it provides API/auth/EventSub packages and automatic refresh support. Our persisted grant locking, minimal durable ingress, phase binding and proof audit still need application-specific coordination. Direct calls keep that ownership visible and avoid two competing subscription/refresh managers. If the OAuth/webhook spike shows substantial maintenance burden, use Twurple inside this same adapter boundary rather than expanding a homemade general-purpose SDK. This choice is included in D6's component review.
+
+Node 24 and PostgreSQL 17 are deliberate supported baselines, not claims that they are the newest releases. React 19, Fastify 5 and Zod 4 are the selected major lines. Vite, pnpm, TypeScript, Vitest, Playwright and `pg` must be pinned to mutually compatible supported stable versions when building. Confirm each tool's Node engine requirement and all Fastify plugin majors before installation.
+
+OBS uses an embedded browser, so target the tested OBS browser version rather than assuming every modern desktop feature is available. Validate SVG effects, font loading, EventSource, same-origin overlay cookies and reduced-motion behavior on the actual OBS installation.
+
+## What changed during the architecture review
+
+The initial concept suggested Canvas and WebSockets. Component analysis favors SVG/DOM for the first ship/graph UI and SSE for the actual one-way browser traffic. Explicit `pg` transactions keep the custody-critical SQL visible; an ORM is not needed to establish safety. These are recommendations to validate in the initial spikes, not performance claims. A failed deployment/OBS streaming gate would justify switching the feed to WebSocket without changing world rules or custody semantics.
+
+## Operating cost and build complexity
+
+Runtime AI has no mandatory cost. Initial infrastructure is one application instance, one database, backups and optional domain/storage services. No monthly price is asserted here: instance, region, retention and usage must be priced at provisioning. Choose a budget with the user then; no service is being purchased during planning. Keep hosting available for the entire judging window described in [the submission plan](hackathon.md).
+
+## Primary references
+
+[Node releases](https://nodejs.org/en/about/previous-releases), [Fastify](https://fastify.dev/docs/latest/), [Fastify parser](https://fastify.dev/docs/latest/Reference/ContentTypeParser/), [React versions](https://react.dev/versions), [Vite](https://vite.dev/guide/), [PostgreSQL support](https://www.postgresql.org/support/versioning/), [pg transactions](https://node-postgres.com/features/transactions), [Zod](https://zod.dev/), [SSE standard](https://html.spec.whatwg.org/multipage/server-sent-events.html), [pnpm workspaces](https://pnpm.io/workspaces), [Vitest](https://vitest.dev/guide/), [Playwright](https://playwright.dev/docs/intro), [Render web services](https://render.com/docs/web-services), [Render free-tier limitations](https://render.com/docs/free).
