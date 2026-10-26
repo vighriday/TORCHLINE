@@ -9,6 +9,7 @@ import {
   validateToken,
 } from '@torchline/twitch';
 import { DomainError } from '@torchline/contracts';
+import { desiredSubscriptions } from '../apps/server/src/twitch-subscriptions.ts';
 type Check = { name: string; status: 'verified' | 'blocked' | 'failed'; detail: string };
 const checks: Check[] = [];
 const check = (name: string, status: Check['status'], detail: string) =>
@@ -140,6 +141,42 @@ else {
         'verified',
         `Real provider returned ${page.data?.length ?? 0} subscription(s) on the first page; this count alone does not verify a channel or callback.`,
       );
+      const bot = grants.find((grant) => grant.role === 'bot');
+      const creators = (
+        await store.pool.query(
+          "SELECT id,receive_opt_in FROM creators WHERE connected AND mode='live'",
+        )
+      ).rows;
+      if (bot)
+        for (const creator of creators) {
+          const specs = desiredSubscriptions(creator, bot.id);
+          const callback = `${new URL(origin).origin}/integrations/twitch/eventsub`;
+          const enabled = specs.filter((spec) =>
+            page.data.some(
+              (sub: {
+                type: string;
+                version: string;
+                status: string;
+                condition: Record<string, string>;
+                transport: { method: string; callback: string };
+              }) =>
+                sub.type === spec.type &&
+                sub.version === spec.version &&
+                sub.status === 'enabled' &&
+                sub.transport?.method === 'webhook' &&
+                sub.transport.callback === callback &&
+                Object.keys(sub.condition).length === Object.keys(spec.condition).length &&
+                Object.entries(spec.condition).every(
+                  ([key, value]) => sub.condition[key] === value,
+                ),
+            ),
+          ).length;
+          check(
+            'enabled current channel subscriptions',
+            enabled === specs.length ? 'verified' : 'blocked',
+            `${enabled}/${specs.length} required subscriptions enabled with the current bot, version, conditions and callback on the real provider page; later pages are not inspected by this diagnostic.`,
+          );
+        }
       const counts = (
         await store.pool.query(
           'SELECT kind,count(*)::integer AS count FROM integration_deliveries GROUP BY kind',
@@ -160,6 +197,16 @@ else {
         'live chat action',
         applied ? 'verified' : 'blocked',
         `${applied} accepted chat action(s) applied; send a valid command in the active broadcaster's Twitch chat.`,
+      );
+      const sent = (
+        await store.pool.query(
+          "SELECT count(*)::integer AS count FROM bot_replies WHERE status='sent'",
+        )
+      ).rows[0].count;
+      check(
+        'native bot send accepted',
+        sent ? 'verified' : 'blocked',
+        `${sent} bot send(s) accepted by Twitch with is_sent=true. Confirm visibility in actual chat separately; no message is sent by this script.`,
       );
       const transfers = (
         await store.pool.query(

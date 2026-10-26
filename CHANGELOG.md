@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Genuine Twitch bot and callback milestone — 2026-10-26
+
+- Verified real broadcaster and bot identities/scopes after owner consent and the named account conversion. Received three genuine signed webhook challenges; Twitch reports current chat/online/offline subscriptions enabled with the expected bot, callback, version and conditions.
+- Extended the read-only live verifier to check exact enabled subscription metadata and accepted native bot-send outcomes. It still sends no chat or synthetic proof.
+- Genuine gameplay chat effects and visible bot output remain pending owner commands; actual OBS and the native two-broadcaster raid remain separate milestones.
+
 ### Direct bot conversion — 2026-10-26
 
 - Replaced the repeated manual-disconnect loop with a named conversion after operator-protected Twitch bot consent. An active empty creator can explicitly confirm or cancel; accounts with world/handoff/custody history remain protected.
