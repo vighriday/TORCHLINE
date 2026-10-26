@@ -1,6 +1,6 @@
 # Deployment and operational runbook
 
-Status: proposed only. No services have been provisioned or purchased. Hosting selection becomes final after account, price, region, database version, backup and streaming checks.
+Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster are running/verified as described in the README; no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
 
 ## Recommended topology
 

@@ -1,0 +1,437 @@
+{
+  "schemaVersion": "2026-10-26.1",
+  "worldId": "design-fixture-ark",
+  "worldVersion": 7,
+  "gameVersion": 7,
+  "rulesVersion": "ark-v2",
+  "mode": "simulation",
+  "host": "Fixture community A",
+  "handoffPending": false,
+  "chapter": 3,
+  "phase": "challenge",
+  "title": "Life Support Rupture",
+  "recap": "Life Support Rupture: inherited systems and due consequences applied.",
+  "resources": {
+    "passengers": 216,
+    "hull": 45,
+    "power": 35,
+    "oxygen": 40,
+    "navigation": 60,
+    "supplies": 25
+  },
+  "systems": [
+    {
+      "id": "hull",
+      "integrity": 45,
+      "condition": "damaged",
+      "marks": [
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:1",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:4",
+          "chapter": 2,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:7",
+          "chapter": 3,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:7",
+      "severity": "compromised"
+    },
+    {
+      "id": "navigation",
+      "integrity": 60,
+      "condition": "repaired",
+      "marks": [
+        {
+          "kind": "sacrifice",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "repair",
+          "eventId": "design-fixture-ark:6",
+          "chapter": 2,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:6",
+      "severity": "stable"
+    },
+    {
+      "id": "lifeSupport",
+      "integrity": 35,
+      "condition": "damaged",
+      "marks": [
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:7",
+          "chapter": 3,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:7",
+      "severity": "compromised"
+    },
+    {
+      "id": "shields",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "cargo",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "habitat",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "reactor",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    }
+  ],
+  "obligations": [
+    {
+      "id": "design-fixture-ark:3:blind-jump",
+      "kind": "blind-jump",
+      "dueChapter": 2,
+      "originEventId": "design-fixture-ark:3",
+      "status": "applied"
+    },
+    {
+      "id": "design-fixture-ark:6:supply-debt",
+      "kind": "supply-debt",
+      "dueChapter": 4,
+      "originEventId": "design-fixture-ark:6",
+      "status": "pending"
+    },
+    {
+      "id": "design-fixture-ark:7:leak",
+      "kind": "leak",
+      "dueChapter": 4,
+      "originEventId": "design-fixture-ark:7",
+      "status": "pending"
+    }
+  ],
+  "challenge": {
+    "kind": "work-order",
+    "title": "Cooperative life-support work order",
+    "prompt": "Scan faults. Patch A and B in either order, then patch C.",
+    "nodes": [
+      {
+        "id": "S",
+        "label": "Source",
+        "revealed": true,
+        "clue": null,
+        "patched": false
+      },
+      {
+        "id": "A",
+        "label": "Relay A",
+        "revealed": false,
+        "clue": null,
+        "patched": false
+      },
+      {
+        "id": "B",
+        "label": "Relay B",
+        "revealed": false,
+        "clue": null,
+        "patched": false
+      },
+      {
+        "id": "C",
+        "label": "Relay C",
+        "revealed": false,
+        "clue": null,
+        "patched": false
+      },
+      {
+        "id": "D",
+        "label": "Relay D",
+        "revealed": false,
+        "clue": null,
+        "patched": false
+      },
+      {
+        "id": "T",
+        "label": "Destination",
+        "revealed": true,
+        "clue": null,
+        "patched": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "S",
+        "to": "A",
+        "cost": 1
+      },
+      {
+        "from": "S",
+        "to": "B",
+        "cost": 2
+      },
+      {
+        "from": "A",
+        "to": "C",
+        "cost": 2
+      },
+      {
+        "from": "A",
+        "to": "D",
+        "cost": 3
+      },
+      {
+        "from": "B",
+        "to": "C",
+        "cost": 1
+      },
+      {
+        "from": "B",
+        "to": "D",
+        "cost": 2
+      },
+      {
+        "from": "C",
+        "to": "T",
+        "cost": 2
+      },
+      {
+        "from": "D",
+        "to": "T",
+        "cost": 1
+      },
+      {
+        "from": "C",
+        "to": "D",
+        "cost": 1
+      }
+    ],
+    "budget": 6,
+    "requiredNode": null,
+    "blockedNode": null,
+    "scanned": [],
+    "solved": false,
+    "tasks": [],
+    "reward": "Repair A and B, then C. Each task changes resources; all three stop the future leak and halve repair power cost."
+  },
+  "choices": [
+    {
+      "id": "repair-life",
+      "label": "Restore life support",
+      "description": "Gain 25 oxygen and stop future leaks. Spend 20 power.",
+      "cost": {
+        "power": 20
+      },
+      "available": true,
+      "unavailableReason": null,
+      "preview": {
+        "resources": {
+          "passengers": 216,
+          "hull": 45,
+          "power": 15,
+          "oxygen": 65,
+          "navigation": 60,
+          "supplies": 25
+        },
+        "outcome": null,
+        "warnings": [
+          "Below the thirty-crate colony threshold."
+        ]
+      }
+    },
+    {
+      "id": "seal-cabins",
+      "label": "Abandon the leaking cabins",
+      "description": "Lose sixty passengers and recover five oxygen. Unrepaired machinery will leak again in chapter four.",
+      "available": true,
+      "unavailableReason": null,
+      "preview": {
+        "resources": {
+          "passengers": 156,
+          "hull": 45,
+          "power": 35,
+          "oxygen": 45,
+          "navigation": 60,
+          "supplies": 25
+        },
+        "outcome": null,
+        "warnings": [
+          "Below the thirty-crate colony threshold.",
+          "Damaged life support will leak fifteen oxygen in chapter four."
+        ]
+      }
+    }
+  ],
+  "votes": {},
+  "participantCount": 0,
+  "outcome": null,
+  "endingReason": null,
+  "events": [
+    {
+      "id": "design-fixture-ark:1",
+      "chapter": 1,
+      "summary": "Radiation Storm: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:1"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:1"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:2",
+      "chapter": 1,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:3",
+      "chapter": 1,
+      "summary": "Sacrifice navigation: committed by Fixture community A.",
+      "resourceDelta": {
+        "hull": -5,
+        "power": -10,
+        "navigation": -70
+      },
+      "cues": [
+        {
+          "kind": "sacrifice",
+          "systemId": "navigation",
+          "eventId": "design-fixture-ark:3"
+        },
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:3"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:4",
+      "chapter": 2,
+      "summary": "The Blind Jump: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:4"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:4"
+        }
+      ],
+      "causes": [
+        "design-fixture-ark:3"
+      ]
+    },
+    {
+      "id": "design-fixture-ark:5",
+      "chapter": 2,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:6",
+      "chapter": 2,
+      "summary": "Rebuild navigation: committed by Fixture community A.",
+      "resourceDelta": {
+        "power": -15,
+        "navigation": 60,
+        "supplies": -25
+      },
+      "cues": [
+        {
+          "kind": "repair",
+          "systemId": "navigation",
+          "eventId": "design-fixture-ark:6"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:7",
+      "chapter": 3,
+      "summary": "Life Support Rupture: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10,
+        "oxygen": -25
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:7"
+        },
+        {
+          "kind": "damage",
+          "systemId": "lifeSupport",
+          "eventId": "design-fixture-ark:7"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:7"
+        }
+      ],
+      "causes": []
+    }
+  ],
+  "capabilities": {
+    "canStart": false,
+    "canCloseChallenge": false,
+    "canCommit": false,
+    "canPause": false,
+    "canResume": false
+  }
+}

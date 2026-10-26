@@ -1,6 +1,6 @@
 # Validation and stress-test plan
 
-Status: planned; **no application tests have run**. The current change only permits repository/documentation checks. Record execution date, commit, environment, case, expected/actual result and evidence when application tests exist.
+Status: initial domain, PostgreSQL, HTTP/Twitch-contract and browser tests have run locally. [Implementation status](implementation-status.md) and the changelog record exact evidence and limits. The full matrix below remains the wider acceptance plan; unexecuted load, soak, real Twitch and actual OBS checks must not be marked passed.
 
 ## Evidence layers
 
@@ -64,4 +64,4 @@ Simulator fixtures support every step except native proof. A demonstration must 
 
 Before release: all required core/complete requirements have acceptance evidence; live native transfer verified; complete solo season playable; no unresolved custody, data-loss, authorization or replay blocker; clean setup and judge access reproduced; assets/environment documentation complete. Additional features require their affected invariants and component review to be rerun.
 
-Current evidence consists only of source research and repository/document checks recorded in the changelog and final setup report. CI/test commands must be added alongside working tooling rather than claiming coverage from this planning document.
+Current evidence includes the working commands `pnpm build`, `pnpm test`, `pnpm test:browser`, `pnpm audit:balance` and `pnpm design:fixtures`. They establish the explicitly recorded local behavior. CI is defined but not yet executed remotely; real Twitch and OBS milestones remain separate.

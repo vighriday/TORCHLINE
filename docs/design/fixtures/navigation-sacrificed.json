@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "2026-10-26.1",
+  "worldId": "design-fixture-ark",
+  "worldVersion": 3,
+  "gameVersion": 3,
+  "rulesVersion": "ark-v2",
+  "mode": "simulation",
+  "host": "Fixture community A",
+  "handoffPending": false,
+  "chapter": 1,
+  "phase": "ready",
+  "title": "Radiation Storm",
+  "recap": "Sacrifice navigation: committed by Fixture community A.",
+  "resources": {
+    "passengers": 216,
+    "hull": 65,
+    "power": 50,
+    "oxygen": 65,
+    "navigation": 0,
+    "supplies": 50
+  },
+  "systems": [
+    {
+      "id": "hull",
+      "integrity": 65,
+      "condition": "damaged",
+      "marks": [
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:1",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:3",
+      "severity": "stable"
+    },
+    {
+      "id": "navigation",
+      "integrity": 0,
+      "condition": "destroyed",
+      "marks": [
+        {
+          "kind": "sacrifice",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:3",
+      "severity": "lost"
+    },
+    {
+      "id": "lifeSupport",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "shields",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "cargo",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "habitat",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "reactor",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    }
+  ],
+  "obligations": [
+    {
+      "id": "design-fixture-ark:3:blind-jump",
+      "kind": "blind-jump",
+      "dueChapter": 2,
+      "originEventId": "design-fixture-ark:3",
+      "status": "pending"
+    }
+  ],
+  "challenge": null,
+  "choices": [],
+  "votes": {},
+  "participantCount": 0,
+  "outcome": null,
+  "endingReason": null,
+  "events": [
+    {
+      "id": "design-fixture-ark:1",
+      "chapter": 1,
+      "summary": "Radiation Storm: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:1"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:1"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:2",
+      "chapter": 1,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:3",
+      "chapter": 1,
+      "summary": "Sacrifice navigation: committed by Fixture community A.",
+      "resourceDelta": {
+        "hull": -5,
+        "power": -10,
+        "navigation": -70
+      },
+      "cues": [
+        {
+          "kind": "sacrifice",
+          "systemId": "navigation",
+          "eventId": "design-fixture-ark:3"
+        },
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:3"
+        }
+      ],
+      "causes": []
+    }
+  ],
+  "capabilities": {
+    "canStart": false,
+    "canCloseChallenge": false,
+    "canCommit": false,
+    "canPause": false,
+    "canResume": false
+  }
+}

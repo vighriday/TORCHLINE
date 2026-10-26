@@ -1,6 +1,6 @@
 # Feasibility, concept gaps and risks
 
-Assessment date: 2026-10-26. The platform documentation supports the core design. No account, deployment, Twitch integration, playtest or stress-test evidence exists yet. Priority expresses consequence and dependency, not a statistical estimate of failure.
+Assessment date: 2026-10-26. The platform documentation supports the core design. Local gameplay/database/browser and provider-contract evidence now exists in [implementation status](../planning/implementation-status.md). No genuine account/raid, deployment, actual OBS, human playtest or load/soak evidence exists yet. Priority expresses consequence and dependency, not a statistical estimate of failure.
 
 ## Feasibility conclusion
 

@@ -1,0 +1,77 @@
+{
+  "rulesVersion": "ark-v2",
+  "dimensions": "All authored choices × route solved/skipped × five valid repair subsets; scan ordering and equivalent valid routes collapsed. Timed phases and allocation are not implemented.",
+  "terminalPaths": 2398,
+  "endings": {
+    "colony": 964,
+    "partial": 1304,
+    "wreck": 130
+  },
+  "endingChapters": {
+    "colony:chapter-5": 964,
+    "partial:chapter-5": 1304,
+    "wreck:chapter-4": 10,
+    "wreck:chapter-5": 120
+  },
+  "wreckCauses": {
+    "The hull broke apart.": 86,
+    "Life support exhausted its oxygen reserve.": 44
+  },
+  "decisions": 3164,
+  "unaffordableChoices": 0,
+  "witnesses": {
+    "colony": {
+      "path": [
+        "chapter-1:burn-navigation;challenge=skipped",
+        "chapter-2:chart-route;challenge=skipped",
+        "chapter-3:repair-life;challenge=skipped",
+        "chapter-4:salvage;challenge=skipped",
+        "chapter-5:land;challenge=skipped"
+      ],
+      "resources": {
+        "passengers": 216,
+        "hull": 10,
+        "power": 15,
+        "oxygen": 40,
+        "navigation": 60,
+        "supplies": 45
+      },
+      "reason": "A viable colony survived the journey."
+    },
+    "partial": {
+      "path": [
+        "chapter-1:burn-navigation;challenge=skipped",
+        "chapter-2:chart-route;challenge=skipped",
+        "chapter-3:repair-life;challenge=skipped",
+        "chapter-4:jettison;challenge=skipped",
+        "chapter-5:land;challenge=skipped"
+      ],
+      "resources": {
+        "passengers": 216,
+        "hull": 40,
+        "power": 15,
+        "oxygen": 45,
+        "navigation": 60,
+        "supplies": 0
+      },
+      "reason": "Survivors landed, but population or supplies cannot support a viable colony."
+    },
+    "wreck": {
+      "path": [
+        "chapter-1:burn-navigation;challenge=skipped",
+        "chapter-2:manual-flight;challenge=skipped",
+        "chapter-3:repair-life;challenge=skipped",
+        "chapter-4:salvage;challenge=skipped"
+      ],
+      "resources": {
+        "passengers": 216,
+        "hull": 0,
+        "power": 30,
+        "oxygen": 45,
+        "navigation": 0,
+        "supplies": 80
+      },
+      "reason": "The hull broke apart."
+    }
+  }
+}

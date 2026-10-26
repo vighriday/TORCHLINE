@@ -1,6 +1,6 @@
 # Architecture decision records
 
-All decisions below are **proposed for product/architecture review** as of 2026-10-26. They establish a coherent recommendation, not a claim that implementation or testing has occurred. Update status after review and record a replacement ADR when changing a material decision.
+ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original proposed status describes the earlier planning snapshot; approval is recorded here. Runtime behavior still requires implementation evidence. Record a replacement ADR when changing a material decision.
 
 | ADR | Decision | Stress-review coverage |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ All decisions below are **proposed for product/architecture review** as of 2026-
 | [0005](0005-presentation-and-live-delivery.md) | SVG/DOM presentation, SSE reads and HTTP commands | D4, D5 |
 | [0006](0006-deterministic-gameplay-and-validation.md) | Deterministic authored gameplay and layered validation | D9, D11, D14 |
 | [0007](0007-hosting-security-and-growth.md) | Always-on hosting, scoped access and evidence-led growth | D13, D17 |
+| [0008](0008-balanced-consequences-and-physical-state.md) | Reachable catastrophe, meaningful challenge rewards and persistent physical state | D4, D9, D11, D14–16 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

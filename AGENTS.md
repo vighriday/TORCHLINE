@@ -2,7 +2,7 @@
 
 ## Current stage
 
-Research and repository planning. Do not implement the application until the user has reviewed the approach and requested development. Decisions marked proposed describe the intended implementation, not completed behavior.
+Implementation authorized on 2026-10-26 after architecture review. Retain the approved stack and separation of game, hosted episodes and custody. Prioritize the working gameplay slice and early Twitch verification; preserve genuine raid handoff as a separate live acceptance milestone. Mark implemented versus simulated versus unverified behavior explicitly.
 
 ## Source of truth
 
@@ -15,6 +15,8 @@ Research and repository planning. Do not implement the application until the use
 - The user requested an ambitious full-product plan with progressive delivery. Do not impose a team size, hourly budget, or proof-of-concept-only ceiling.
 - Check each architectural decision against every component in `docs/architecture/decision-stress-review.md`; distinguish design review from executed tests.
 - The persistent game must remain engaging on one channel. Raids authorize signature custody transfers; they do not gate chapters or consequences. Viewer gameplay must include cooperative problem solving beyond aggregate votes and resource changes.
+- Claude Design owns the final UI/UX, art direction and animations. Build a functional reference frontend with versioned presentation contracts, persistent system condition and semantic visual events; keep final visual treatment replaceable.
+- Exhaustively audit authored decisions and challenge outcomes when balancing content. Viewer challenge success must alter canonical state, future choices and persistent ship condition, not just presentation.
 
 ## Privacy
 

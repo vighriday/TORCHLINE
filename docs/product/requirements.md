@@ -1,6 +1,6 @@
 # Product requirements
 
-Status: proposed for review. Owner roles below indicate responsibility, not staffing assignments. Updated 2026-10-26.
+Status: approved product direction with implementation underway, 2026-10-26. [Current evidence](../planning/implementation-status.md) distinguishes working foundations from unfinished requirements. Claude Design owns final UI/UX, art and motion; the reference frontend consumes stable physical-state and challenge contracts. Owner roles below indicate responsibility, not staffing assignments.
 
 ## Product thesis
 

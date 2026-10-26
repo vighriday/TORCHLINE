@@ -1,6 +1,10 @@
 # Data model and interface contracts
 
-Status: implementation design, 2026-10-26. These are proposed schemas and routes, not existing endpoints.
+Status: target design with an implemented first slice, 2026-10-26. Actual schemas are the SQL migrations; actual routes are in `apps/server`. See [implementation status](../planning/implementation-status.md) for which parts of this wider contract are complete.
+
+The implemented world row uses an application `revision` for gameplay, hosting and custody writes; the engine state's `version` sequences gameplay events only. `WorldPresentation.worldVersion` is the concurrency revision; `gameVersion` is the replay sequence. Custody and hosting do not silently insert game actions or reset physical state. Gameplay replay verifies recorded accepted commands and their derived event effects under immutable rules; custody has a separate atomic audit trail.
+
+Physical system state, scars, challenge reward event IDs and future cause links are canonical. The presentation contract supplies stable system IDs and derived severity for Claude Design. See [frontend contracts](frontend-contracts.md).
 
 ## Core records
 

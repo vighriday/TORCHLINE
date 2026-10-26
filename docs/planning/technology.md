@@ -1,6 +1,6 @@
 # Technology choices
 
-Status: recommended for review, checked 2026-10-26. Dependencies have not been installed. Pin supported stable versions and the package manager in the first implementation commit; commit a lockfile after compatibility checks. Avoid unverified claims about the latest patch release.
+Status: approved and instantiated, 2026-10-26. Dependencies and package manager are pinned in workspace manifests and `pnpm-lock.yaml`; Node 24.22.1 was downloaded locally from the official distribution and checksum-verified. Type-check, build and local integration/browser evidence are recorded in [implementation status](implementation-status.md). Versions are chosen/tested pins, not claims that every dependency is the newest release.
 
 The [component decision review](../architecture/decision-stress-review.md) is part of this recommendation. Each selection must work with the entire product rather than just its local feature.
 

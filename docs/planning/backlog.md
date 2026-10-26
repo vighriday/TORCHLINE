@@ -1,6 +1,6 @@
 # Implementation backlog
 
-Status: all application items are **not started**. Updated 2026-10-26. Roles express responsibility only. Requirements IDs refer to [the PRD](../product/requirements.md); gates refer to [the roadmap](roadmap.md).
+Status: implementation underway, updated 2026-10-26. B01–B05, B09–B11, B13/B14/B16/B17 have substantial local implementation/evidence; completion is limited to the behaviors in [the status report](implementation-status.md). B06/B07 have tested provider/HTTP contracts but genuine OAuth/chat/callback remain unverified; B12 authentic raid is not complete. Allocation, timers, production hardening and final Claude Design integration remain open. Roles express responsibility only.
 
 ## Foundation and integration
 

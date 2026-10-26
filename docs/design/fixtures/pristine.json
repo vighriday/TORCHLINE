@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "2026-10-26.1",
+  "worldId": "design-fixture-ark",
+  "worldVersion": 0,
+  "gameVersion": 0,
+  "rulesVersion": "ark-v2",
+  "mode": "simulation",
+  "host": "Fixture community A",
+  "handoffPending": false,
+  "chapter": 0,
+  "phase": "ready",
+  "title": "The Ark Protocol",
+  "recap": "216 passengers. Five chapters. One world that persists between broadcasts.",
+  "resources": {
+    "passengers": 216,
+    "hull": 80,
+    "power": 60,
+    "oxygen": 65,
+    "navigation": 70,
+    "supplies": 50
+  },
+  "systems": [
+    {
+      "id": "hull",
+      "integrity": 80,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "navigation",
+      "integrity": 70,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "lifeSupport",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "shields",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "cargo",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "habitat",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "reactor",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    }
+  ],
+  "obligations": [],
+  "challenge": null,
+  "choices": [],
+  "votes": {},
+  "participantCount": 0,
+  "outcome": null,
+  "endingReason": null,
+  "events": [],
+  "capabilities": {
+    "canStart": false,
+    "canCloseChallenge": false,
+    "canCommit": false,
+    "canPause": false,
+    "canResume": false
+  }
+}

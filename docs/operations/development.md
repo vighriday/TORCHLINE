@@ -1,6 +1,6 @@
 # Development guide
 
-Status: repository preparation only. No application dependencies, install scripts, Docker files, test runners or startup commands exist yet. This document defines the implementation setup to create after review.
+Status: the initial workspace, native PostgreSQL helper, build/test commands and reference application are implemented. Follow [the README quick start](../../README.md) for tested commands and [current status](../planning/implementation-status.md) for remaining work. The sequence below records the broader setup target; a container option is not implemented yet.
 
 ## Workspace structure to establish
 

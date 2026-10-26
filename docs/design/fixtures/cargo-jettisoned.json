@@ -1,0 +1,393 @@
+{
+  "schemaVersion": "2026-10-26.1",
+  "worldId": "design-fixture-ark",
+  "worldVersion": 12,
+  "gameVersion": 12,
+  "rulesVersion": "ark-v2",
+  "mode": "simulation",
+  "host": "Fixture community A",
+  "handoffPending": false,
+  "chapter": 4,
+  "phase": "ready",
+  "title": "The Colony Debt",
+  "recap": "Use cargo to brace the hull: committed by Fixture community A.",
+  "resources": {
+    "passengers": 216,
+    "hull": 50,
+    "power": 15,
+    "oxygen": 60,
+    "navigation": 60,
+    "supplies": 10
+  },
+  "systems": [
+    {
+      "id": "hull",
+      "integrity": 50,
+      "condition": "repaired",
+      "marks": [
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:1",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:4",
+          "chapter": 2,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:7",
+          "chapter": 3,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:10",
+          "chapter": 4,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "repair",
+          "eventId": "design-fixture-ark:12",
+          "chapter": 4,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:12",
+      "severity": "compromised"
+    },
+    {
+      "id": "navigation",
+      "integrity": 60,
+      "condition": "repaired",
+      "marks": [
+        {
+          "kind": "sacrifice",
+          "eventId": "design-fixture-ark:3",
+          "chapter": 1,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "repair",
+          "eventId": "design-fixture-ark:6",
+          "chapter": 2,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:6",
+      "severity": "stable"
+    },
+    {
+      "id": "lifeSupport",
+      "integrity": 100,
+      "condition": "repaired",
+      "marks": [
+        {
+          "kind": "damage",
+          "eventId": "design-fixture-ark:7",
+          "chapter": 3,
+          "community": "Fixture community A"
+        },
+        {
+          "kind": "repair",
+          "eventId": "design-fixture-ark:9",
+          "chapter": 3,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:9",
+      "severity": "stable"
+    },
+    {
+      "id": "shields",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "cargo",
+      "integrity": 30,
+      "condition": "damaged",
+      "marks": [
+        {
+          "kind": "jettison",
+          "eventId": "design-fixture-ark:12",
+          "chapter": 4,
+          "community": "Fixture community A"
+        }
+      ],
+      "lastEventId": "design-fixture-ark:12",
+      "severity": "compromised"
+    },
+    {
+      "id": "habitat",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    },
+    {
+      "id": "reactor",
+      "integrity": 100,
+      "condition": "operational",
+      "marks": [],
+      "lastEventId": null,
+      "severity": "stable"
+    }
+  ],
+  "obligations": [
+    {
+      "id": "design-fixture-ark:3:blind-jump",
+      "kind": "blind-jump",
+      "dueChapter": 2,
+      "originEventId": "design-fixture-ark:3",
+      "status": "applied"
+    },
+    {
+      "id": "design-fixture-ark:6:supply-debt",
+      "kind": "supply-debt",
+      "dueChapter": 4,
+      "originEventId": "design-fixture-ark:6",
+      "status": "applied"
+    },
+    {
+      "id": "design-fixture-ark:7:leak",
+      "kind": "leak",
+      "dueChapter": 4,
+      "originEventId": "design-fixture-ark:7",
+      "status": "avoided"
+    }
+  ],
+  "challenge": null,
+  "choices": [],
+  "votes": {},
+  "participantCount": 0,
+  "outcome": null,
+  "endingReason": null,
+  "events": [
+    {
+      "id": "design-fixture-ark:1",
+      "chapter": 1,
+      "summary": "Radiation Storm: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:1"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:1"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:2",
+      "chapter": 1,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:3",
+      "chapter": 1,
+      "summary": "Sacrifice navigation: committed by Fixture community A.",
+      "resourceDelta": {
+        "hull": -5,
+        "power": -10,
+        "navigation": -70
+      },
+      "cues": [
+        {
+          "kind": "sacrifice",
+          "systemId": "navigation",
+          "eventId": "design-fixture-ark:3"
+        },
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:3"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:4",
+      "chapter": 2,
+      "summary": "The Blind Jump: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:4"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:4"
+        }
+      ],
+      "causes": [
+        "design-fixture-ark:3"
+      ]
+    },
+    {
+      "id": "design-fixture-ark:5",
+      "chapter": 2,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:6",
+      "chapter": 2,
+      "summary": "Rebuild navigation: committed by Fixture community A.",
+      "resourceDelta": {
+        "power": -15,
+        "navigation": 60,
+        "supplies": -25
+      },
+      "cues": [
+        {
+          "kind": "repair",
+          "systemId": "navigation",
+          "eventId": "design-fixture-ark:6"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:7",
+      "chapter": 3,
+      "summary": "Life Support Rupture: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10,
+        "oxygen": -25
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:7"
+        },
+        {
+          "kind": "damage",
+          "systemId": "lifeSupport",
+          "eventId": "design-fixture-ark:7"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:7"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:8",
+      "chapter": 3,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:9",
+      "chapter": 3,
+      "summary": "Restore life support: committed by Fixture community A.",
+      "resourceDelta": {
+        "power": -20,
+        "oxygen": 25
+      },
+      "cues": [
+        {
+          "kind": "repair",
+          "systemId": "lifeSupport",
+          "eventId": "design-fixture-ark:9"
+        }
+      ],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:10",
+      "chapter": 4,
+      "summary": "The Colony Debt: inherited systems and due consequences applied.",
+      "resourceDelta": {
+        "hull": -10
+      },
+      "cues": [
+        {
+          "kind": "damage",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:10"
+        },
+        {
+          "kind": "chapter-arrived",
+          "eventId": "design-fixture-ark:10"
+        }
+      ],
+      "causes": [
+        "design-fixture-ark:6",
+        "design-fixture-ark:7",
+        "design-fixture-ark:9"
+      ]
+    },
+    {
+      "id": "design-fixture-ark:11",
+      "chapter": 4,
+      "summary": "The host opened the final decision. Completed viewer repairs persist.",
+      "resourceDelta": {},
+      "cues": [],
+      "causes": []
+    },
+    {
+      "id": "design-fixture-ark:12",
+      "chapter": 4,
+      "summary": "Use cargo to brace the hull: committed by Fixture community A.",
+      "resourceDelta": {
+        "hull": 15,
+        "oxygen": -5,
+        "supplies": -15
+      },
+      "cues": [
+        {
+          "kind": "repair",
+          "systemId": "hull",
+          "eventId": "design-fixture-ark:12"
+        },
+        {
+          "kind": "sacrifice",
+          "systemId": "cargo",
+          "eventId": "design-fixture-ark:12"
+        }
+      ],
+      "causes": []
+    }
+  ],
+  "capabilities": {
+    "canStart": false,
+    "canCloseChallenge": false,
+    "canCommit": false,
+    "canPause": false,
+    "canResume": false
+  }
+}

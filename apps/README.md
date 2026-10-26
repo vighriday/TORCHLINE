@@ -1,8 +1,8 @@
 # Application boundaries
 
-Planned after architecture review:
+Implemented functional boundaries:
 
 - `server/`: long-running Fastify service, authenticated HTTP, signed Twitch ingress, durable work, application coordination and live read feeds.
 - `web/`: React dashboard, OBS overlay, history and a visibly isolated simulation interface.
 
-No application code or package manifests exist yet. See [system design](../docs/architecture/system-design.md) and [development guide](../docs/operations/development.md).
+The reference UI is replaceable by Claude Design. See [implementation status](../docs/planning/implementation-status.md), [system design](../docs/architecture/system-design.md), and [the design handoff](../docs/design/README.md).

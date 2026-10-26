@@ -1,6 +1,6 @@
 # Delivery roadmap
 
-Plan date: 2026-10-26. This is a dependency-led plan for the full product direction, not a staffing estimate or a fixed-hour schedule. No team size, daily development capacity, or broadcaster availability is assumed. Reassess scope using completed evidence each day.
+Plan date: 2026-10-26. Architecture review is complete and implementation is underway. [Current evidence](implementation-status.md) records G1 gameplay progress, G2 adapter/UI work, and G3a independent custody checks. G2 live/OBS and G3b authentic raid remain unsatisfied external gates. No team size, daily capacity, or broadcaster availability is assumed.
 
 ## Outcome and ordering
 
@@ -8,7 +8,7 @@ Deliver an engaging persistent community game, then demonstrate its signature au
 
 | Gate | Deliverable | Required evidence | Dependency |
 | --- | --- | --- | --- |
-| G0: Review | Requirements, architecture, stack, risk register, repository | User reviews the proposed approach before application development | Current phase |
+| G0: Review | Requirements, architecture, stack, risk register, repository | Approved 2026-10-26; gameplay refinements and Claude Design boundary incorporated | Complete |
 | G1: Domain foundation | Deterministic world, chapter lifecycle, representative consequence, puzzle template, simulator | Save/reload, solo progression, route-solution check, reference replay, terminal path | G0 |
 | G2: Hosted live play | Twitch login/grants, chat adapter, deployed ingress, private controls, OBS feed | Genuine chat affects a hosted episode; actual OBS/SSE smoke and reconnect; missing consent handled | G0; can be developed alongside G1 |
 | G3a: Custody correctness | Intent/proof/accept state machine, database constraints, isolated handoff harness | Duplicate, target-busy, expired, simultaneous accept and crash cases pass on real PostgreSQL | G1; Twitch fixtures available independently |

@@ -1,14 +1,22 @@
 # The Ark Protocol: game design
 
-Status: proposed content and balancing contract, version `ark-v1`. Numerical examples are design fixtures, not measured playtest results. Updated 2026-10-26.
+Status: revised balancing contract, version `ark-v2`; implementation authorized 2026-10-26. Numerical balance is checked by exhaustive authored-tree analysis; entertainment and difficulty require playtesting. `ark-v1` is archived as an executable audit fixture, not used for new worlds.
+
+## Baseline defect and revision
+
+`node scripts/audit-legacy.mjs` enumerates all 32 original authored decision paths with zero allocation and no challenge bonuses: 28 colonies, four partial endings, zero wrecks. Final minima are hull 55, oxygen 50 and passengers 162. The original non-damaging challenge bonuses cannot introduce catastrophe. Optional power allocation was not exhaustively enumerated; its resource and affordability effects are a separate policy, not evidence that the authored failure tree worked.
+
+Version 2 introduces cumulative arrival damage, persistent leaks, expensive repairs, colony population viability, and landing damage dependent on inherited navigation. Challenge rewards directly change canonical resources and systems. No random death or hidden timer is introduced. All previewed damage and later hazards must be visible to active players and passive spectators.
 
 ## Season and world
 
 A colony ship carries 216 passengers through five chapters. Each chapter can be hosted by the current creator or inherited after a verified raid. Delayed effects advance by **chapter**, not by handoff count or real elapsed time; one creator can play the entire season. Handoffs occur at chapter boundaries.
 
-Initial state: passengers 216, hull 80, power 60, oxygen 65, navigation 70, supplies 50. Hull, power, oxygen and navigation use integer values from 0 to 100; passengers range from 0 to 216; supplies from 0 to 999. Every gain has an authored source and every spend checks affordability. No passive offline drain. Each world stores its immutable rules/content version and seed.
+Initial state: passengers 216, hull 80, power 60, oxygen 65, navigation 70, supplies 50. Hull, power, oxygen and navigation use integer values from 0 to 100; passengers range from 0 to 216; supplies from 0 to 999. Every gain has an authored source and every spend checks affordability. No passive offline drain. Each world stores its immutable rules/content version. Seeded content variation is planned; the current season is fixed and needs no seed. A viable colony requires at least 120 passengers and 30 supplies; survivors below either threshold receive the partial-survival ending.
 
 ## Chapter loop
+
+The implemented slice uses `ready -> challenge -> decision -> ready`, with `paused` and `ended` states. Arrival applies atomically when the host starts a chapter. Challenge investigation, route solving and work orders share one host-controlled window; closing it opens advisory voting and commitment. There is no automatic timer, separate inspection phase or allocation yet. The expanded loop below is the full-product target.
 
 `READY -> ARRIVAL -> INVESTIGATION -> CHALLENGE -> ALLOCATION -> VOTING -> AWAITING_COMMIT -> RESOLVED -> READY`
 
@@ -17,6 +25,8 @@ Phases without configured interactions are explicitly skipped and logged. Arriva
 Pause stores the prior phase and remaining time. Resume creates a new participation window; messages sent during the pause or an old window are rejected. Vote totals already accepted stay visible. A parked world is persistent and inactive; resuming it requires the same custodian and an empty active channel slot.
 
 ## Audience and creator authority
+
+Current commands are `!scan`, `!route`, `!patch` and `!vote`. Inspection, allocation and bot status/history replies in the table below are planned expansions. Pause/resume already creates a fresh window, but there is no timer duration to preserve in this slice.
 
 | Interaction | Rule | Effect |
 | --- | --- | --- |
@@ -41,7 +51,11 @@ Polls and resource meters alone do not provide enough sustained audience agency.
 
 Parallel clue discovery lets several viewers contribute distinct information. One viewer can scan every node sequentially, and the creator can use the same dashboard controls when alone. Revealed clues are public. There is no claim of private or origin-specific information. Candidate paths have bounded length, per-account cooldowns and a cap on displayed failures. Correct solutions close the challenge once; further submissions cannot farm rewards.
 
-In chapter 3, a solved bypass circuit unlocks a repair costing 10 power instead of 15. Failure or timeout preserves the ordinary repair and cabin-sealing choices. In chapter 4, a route-planning variant can reveal a lower-risk salvage path; the ordinary salvage action remains available. These are two applications of one validated puzzle template, not claims of two independently implemented game engines.
+Route completion has chapter-specific mechanical rewards. Chapter 1 restores shield routing (+15 hull and +10 recovered capacitor power), preventing blind-jump damage in chapter 2 and reducing debris damage in chapter 4. Chapter 2 jury-rigs navigation (+20 navigation) and reduces the cost of charting the route. Chapter 4 unlocks precision salvage (five hull damage and no oxygen loss instead of fifteen hull and ten oxygen). Chapter 5 aligns landing beacons (+15 navigation and +5 hull). Each reward is applied once and updates persistent physical condition.
+
+Chapter 3 uses a cooperative repair work order. Viewers scan the damaged nodes, then patch A and B in either order; C requires both. A restores four oxygen, B repairs four hull, and C recovers five power and restores another ten oxygen. Completing the work order physically repairs life support, prevents the chapter-4 leak, and reduces the final repair choice from twenty to ten power. Each task is globally claimable once, not once per account; replaying/spamming a command cannot farm resources. One person can complete the same work order, and the broadcaster can participate through the same domain commands.
+
+The challenge window remains under broadcaster control in the first functional slice. Timer/cooldown enforcement, allocation and automatic phase deadlines are separate implementation gates and must not be implied by the reference interface. Failure/skip preserves ordinary choices rather than forcing an arbitrary death.
 
 Author each graph with at least one verified solution. Generate variation only from checked, seeded configurations. Persist clues, accepted candidate order, solver attribution and outcome for replay. Default challenge time is 90 seconds, adjustable or pausable by the creator; no reflex-speed gameplay depends on broadcast latency. The reference journey below assumes no challenge bonus. Full-season playtests must assess whether the puzzles produce collaboration, whether people understand submissions on mobile, and whether the strategic choices remain consequential after bonuses.
 
@@ -49,26 +63,28 @@ Author each graph with at least one verified solution. Generate variation only f
 
 | Chapter | Crisis and branching | Decisions and future effects |
 | --- | --- | --- |
-| 1: Radiation Storm | Choose what the emergency shields consume | Burn navigation: navigation becomes 0, passengers preserved, create chapter-2 blind-jump obligation. Seal rear bay: lose up to 30 passengers, navigation preserved, record the loss for the next community's recap. |
-| 2: Blind Jump / Safe Corridor | If navigation is 0, inherit the blind-jump crisis; otherwise encounter a supply opportunity | Blind jump: spend 30 supplies and 15 power to set navigation to 60, or manual flight loses 25 hull. Safe corridor: collect 10 supplies from a derelict at a cost of 10 hull, or pass safely with no resource change. Register a chapter-4 supply check with the resource-spend provenance. |
-| 3: Life Support Rupture | Arrival reduces oxygen by 25; terminal checks run immediately | Spend 15 power to set oxygen to at least 60, or seal affected cabins: lose up to 24 passengers and restore oxygen to at least 50. Optional bounded repair allocation and a clue about colony supply requirements deepen audience participation. |
-| 4: The Colony Debt | If supplies remain below 25, activate the conditional shortage; otherwise offer optional preparation | Salvage station: gain 20 supplies, lose 10 hull. Conserve: no change, with colony risk clearly shown. If supplies are already sufficient, reinforce hull by 10 at a cost of 10 supplies, or conserve. |
-| 5: Arrival | Final state determines viable landing options | Standard landing costs no further resources. Optional emergency burn spends 10 power to restore 5 hull before landing if the world is still viable. Resolve the ending and show each contributing community. |
+| 1: Radiation Storm | Arrival costs ten hull; route challenge restores shield routing | Burn navigation: navigation becomes zero, spend ten power and five hull, preserve passengers. Seal habitat: lose 48 passengers, ten hull and five oxygen; keep navigation. Both leave physical scars. |
+| 2: Blind Jump / Safe Corridor | Crisis is fixed at arrival from inherited navigation; unshielded blind arrival costs ten hull | Blind: chart route costs 25 supplies (20 with survey solved) and 15 power, restoring navigation to 60; manual flight loses 25 hull (ten if survey solved) and ten oxygen. Safe corridor: salvage gains 15 supplies and costs 15 hull/five power; bypass costs five power. Survey completion jury-rigs navigation by 20. |
+| 3: Life Support Rupture | Arrival costs ten hull and 25 oxygen, damaging life support | Repair: spend twenty power (ten after full cooperative work order) and gain 25 oxygen, restoring life support. Seal cabins: lose 60 passengers and gain five oxygen, leaving damaged life support leaking unless viewers already repaired it. |
+| 4: The Colony Debt | Debris costs ten hull (five with repaired shields); damaged life support leaks fifteen oxygen | Salvage: gain thirty supplies, lose fifteen hull/ten oxygen, or five hull/no oxygen with precision route solved. Jettison cargo: spend fifteen supplies, gain fifteen hull, lose five oxygen, leaving a cargo scar. Supply shortage is visibly attributed below thirty crates. |
+| 5: Atmospheric Entry | Arrival consumes fifteen oxygen; beacon challenge improves hull/navigation | Standard landing loses ten hull with navigation at least forty, otherwise 25; spend up to ten remaining supplies on landing. Emergency burn requires fifteen power, loses three hull with sufficient navigation or ten otherwise, and spends up to fifteen supplies. The exact projected ending is visible before commitment. |
 
 Hull losses clamp to zero and can end the season. Spending choices are disabled when unaffordable. No-cost alternatives exist but are not guaranteed to save a critically damaged world. Environmental changes and consequences use explicit ordering; a terminal world cannot continue by choosing an option after death.
 
-The reference path with allocation budget zero yields: chapter 1 navigation 0; chapter 2 repair leaves supplies 20 and power 45; chapter 3 repair leaves oxygen 60 and power 30; chapter 4 salvage leaves supplies 40 and hull 70; chapter 5 establishes a colony with 216 passengers. This is the first deterministic content fixture. Other branches must also be tested, including repair unaffordability and terminal outcomes.
+Reference path without challenge rewards: burn navigation, chart route, repair life support, salvage, standard landing. Final state is passengers 216, hull ten, power fifteen, oxygen forty, navigation sixty, supplies 45: colony, but with little structural margin. Burn/manual/repair/salvage can wreck the Ark in chapter 4. Burn/manual/seal/jettison exhausts oxygen on atmospheric arrival; a viewer completing just repair A changes that same journey to survival if the host then uses emergency braking. Sealing habitat and cabins can leave fewer than 120 passengers even with adequate supplies.
+
+The implemented analyzer covers **2,398 terminal branches: 964 colonies, 1,304 partial survivals and 130 wrecks**. Wrecks include 86 hull failures and 44 oxygen failures. It enumerates every authored choice, route success/skip and five valid repair subsets; equivalent scan orders/routes are collapsed. These are branch counts, not player probabilities or a playtest. Timed phases and allocation are outside this enumeration because they are not implemented yet. [Machine-readable report](../reports/balance-ark-v2.json)
 
 ## Consequences and lineage
 
-An obligation has a stable ID, originating event ID, source chapter/community, due chapter, authored predicate, effect type and status. On arrival, evaluate due obligations by `(dueChapter, consequenceId)` using the predeclared content version. Record `applied`, `avoided`, or `superseded` explicitly. An avoided shortage is meaningful history, not a silently deleted debt.
+Implemented obligations have a stable ID, originating event ID, kind, due chapter and `pending`, `applied` or `avoided` status. The originating event supplies source chapter/community; authored predicates and effects live in immutable rules. The full-product contract adds explicit supersession where one consequence replaces another. An avoided shortage is meaningful history, not a silently deleted debt.
 
 Avoid charging the same damage twice: destroyed navigation is the current state and the source of a future crisis; it is not another automatic navigation penalty. Show the cause chain from navigation sacrifice to repair expenditure to the later supply check. If several spends contributed to a threshold, list them rather than attributing the entire shortage to one creator.
 
 ## Endings and continuity
 
-- **Colony established:** five chapters completed, at least one passenger, hull and oxygen above zero, and at least 30 supplies.
-- **Partial survival:** five chapters completed with passengers/hull/oxygen above zero but fewer than 30 supplies.
+- **Colony established:** five chapters completed, at least 120 passengers, hull and oxygen above zero, and at least 30 supplies.
+- **Partial survival:** five chapters completed with passengers/hull/oxygen above zero, but below the passenger or supply viability threshold.
 - **Wreck:** hull, oxygen or passengers reaches zero before a viable landing. Preserve the final state and history; do not reset the same world.
 
 Power or navigation at zero imposes explicit crisis constraints, not an undocumented instant loss. A new world is a new identity. A salvage/rescue chapter is a planned expansion of wreck continuity, not required to make terminal persistence honest.
@@ -77,6 +93,8 @@ Power or navigation at zero imposes explicit crisis constraints, not an undocume
 
 The overlay prioritizes the ship, current crisis, two clear decisions, phase timer, participation totals and inherited consequence. Keep all six resources available but emphasize the two or three relevant to the current choice. Use text/icons with color; animations should read without sound. The receiving overlay includes a short community recap and visibly retains damage.
 
-Build original SVG/CSS ship systems and readable React UI first; add Canvas particles or richer rendering when profiling and art direction justify them. Avoid making the cinematic handoff a substitute for actual committed state.
+Claude Design will provide the final UI/UX, animation and art direction. The implementation supplies a functional reference frontend, semantic presentation contract, fixtures and replaceable Ark/challenge renderer interfaces. Do not embed visual interpretation in game rules or treat the reference interface as the final design.
+
+Each physical system persists integrity, condition, accumulated scars and last-change provenance. Hull integrity, oxygen reserves and life-support condition are distinct: a temporarily replenished oxygen tank does not repair a leaking system. Sacrificed navigation, sealed habitats, restored shields and jettisoned cargo remain visible across chapters, save/reload and custody changes. A repair changes the current condition while retaining the scar history. See [frontend contracts](../architecture/frontend-contracts.md).
 
 Expand with authored mission variants, seeded crisis decks, specialization through allocation, multi-hop consequences, rescue episodes and a visual history timeline. Private per-viewer clues and verified incoming-viewer roles need a separate identity/interaction design: Twitch chat is public and raid notifications do not identify individual raiders. Do not imply either capability in the initial season.

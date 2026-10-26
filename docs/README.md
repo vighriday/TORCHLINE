@@ -1,6 +1,6 @@
 # Documentation
 
-Research checked **2026-10-26**. All specifications describe proposed behavior until implementation and acceptance evidence are recorded. The full product is planned; delivery order follows dependencies and measured progress, without assumed staffing or fixed development hours.
+Research checked **2026-10-26**. Architecture is approved and the first gameplay foundation is implemented. [Implementation status](planning/implementation-status.md) distinguishes tested local behavior from the wider target and external verification. Delivery follows dependencies and measured progress without assumed staffing or fixed development hours.
 
 ## Review sequence
 
@@ -22,5 +22,8 @@ Research checked **2026-10-26**. All specifications describe proposed behavior u
 | [Deployment runbook](operations/deployment.md) | Proposed hosting, configuration, operations, and recovery |
 | [Decision register](decisions/README.md) | Proposed architecture decisions and revisit triggers |
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
+| [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
+| [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
+| [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
 
 The local source concept remains outside version control. No document in this index requires it to run, test, or judge the future application.

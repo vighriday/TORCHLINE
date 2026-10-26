@@ -1,6 +1,6 @@
 # Security and privacy
 
-No production application is running yet. The following requirements govern the planned implementation.
+The functional application runs locally and is not production-certified or deployed. Implemented security boundaries and remaining hardening are recorded in [implementation status](docs/planning/implementation-status.md). The following requirements govern development and release.
 
 - Twitch credentials and refresh tokens stay on the server. Encrypt persisted credentials with a separately managed key and redact them from logs.
 - Use authorization code OAuth, one-time state validation, secure HTTP-only sessions, CSRF protection, and server-side custody checks.

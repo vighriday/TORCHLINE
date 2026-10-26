@@ -1,6 +1,6 @@
 # System architecture
 
-Status: proposed after component review, 2026-10-26. No runtime has been built or benchmarked. See [decision stress review](decision-stress-review.md) for alternatives and falsification checks.
+Status: approved architecture with a working first slice, 2026-10-26. Core gameplay, persistence, browser delivery and isolated custody are implemented and locally tested; production throughput and genuine Twitch/OBS behavior remain unverified. See [implementation status](../planning/implementation-status.md) and [decision stress review](decision-stress-review.md).
 
 ## Three separate responsibilities
 

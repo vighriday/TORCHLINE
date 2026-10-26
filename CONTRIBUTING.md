@@ -1,6 +1,6 @@
 # Contributing
 
-TORCHLINE is currently in product and architecture review. Begin with the [documentation index](docs/README.md) and [backlog](docs/planning/backlog.md).
+TORCHLINE has an approved architecture and a working functional slice. Begin with the [implementation status](docs/planning/implementation-status.md), [documentation index](docs/README.md) and [backlog](docs/planning/backlog.md).
 
 ## Development workflow
 
@@ -17,7 +17,7 @@ Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `
 - Inspect `git diff --cached` and the staged file list.
 - Confirm private concept notes and `.env` files are absent. Never use `git add -f` to bypass exclusions.
 - Check asset provenance, API permissions, and generated files.
-- Run checks appropriate to the change. Planned application checks are documented in the validation plan; they do not exist yet.
+- Run checks appropriate to the change: `pnpm build`, `pnpm test`, affected browser scenarios and `pnpm check:repo`. Use an isolated development database; tests create disposable schemas.
 - Do not call a mock delivery a live Twitch test or a target a benchmark.
 
 ## Licensing

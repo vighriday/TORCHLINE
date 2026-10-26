@@ -57,4 +57,6 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 
 ## Research limits
 
-No live Twitch calls, credentials, broadcaster accounts, deployment or event fixtures were exercised. GitHub history inspection was read-only and found no refs. Current repo visibility was not established. The Devpost judging dates and FAQ deadline conversion disagree across pages; the plan records rather than silently resolves them. No exhaustive prior-art search, trademark clearance, legal interpretation, capacity benchmark or cost quote is claimed.
+During the initial research no live calls or event fixtures were exercised. The implementation now has signed-event and provider-contract fixtures; see [current evidence](../planning/implementation-status.md). No genuine Twitch account/raid or deployment is claimed. GitHub inspection found no refs at setup; visibility was not established. The Devpost judging dates and FAQ deadline conversion disagree. No exhaustive prior-art search, trademark clearance, legal interpretation, capacity benchmark or cost quote is claimed.
+
+Implementation tooling references: [GitHub checkout](https://github.com/actions/checkout), [Node setup action](https://github.com/actions/setup-node), and [Node TypeScript support](https://nodejs.org/api/typescript.html). The workflow is defined but has not run remotely.
