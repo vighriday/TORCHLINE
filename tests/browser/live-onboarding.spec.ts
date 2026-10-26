@@ -29,19 +29,6 @@ test('operator bot setup stays accessible after accidental creator sign-in and r
         { name: 'torchline_session', value: token, url: baseUrl, httpOnly: true, sameSite: 'Lax' },
       ]);
       await page.goto(baseUrl);
-      await expect(page.getByText('Twitch creator session', { exact: true })).toBeVisible();
-      const setup = page.getByLabel('Bot setup secret', { exact: true });
-      await expect(setup).toBeVisible();
-      await setup.fill('wrong-fixture-key');
-      await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
-      await expect(page.getByRole('alert')).toContainText('Operator authorization required');
-      await page
-        .getByRole('button', { name: 'Disconnect Twitch authorization', exact: true })
-        .click();
-      await expect(
-        page.getByRole('link', { name: 'Connect creator with Twitch', exact: true }),
-      ).toBeVisible();
-      await setup.fill(config.botSetupSecret);
       let authorization: URL | undefined;
       await page.route('https://id.twitch.tv/oauth2/authorize**', async (route) => {
         authorization = new URL(route.request().url());
@@ -50,6 +37,33 @@ test('operator bot setup stays accessible after accidental creator sign-in and r
           body: 'Fixture Twitch consent; no real provider request.',
         });
       });
+      await expect(page.getByText('Twitch creator session', { exact: true })).toBeVisible();
+      const setup = page.getByLabel('Bot setup secret', { exact: true });
+      await expect(setup).toBeVisible();
+      await setup.fill('wrong-fixture-key');
+      await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
+      await expect(page.getByRole('alert')).toContainText('Operator authorization required');
+      await setup.fill(config.botSetupSecret);
+      await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
+      await expect(page).toHaveURL(/id\.twitch\.tv\/oauth2\/authorize/);
+      const denial = await page.goto(
+        `${baseUrl}/auth/twitch/callback?code=99&state=${authorization!.searchParams.get('state')}`,
+      );
+      expect(denial?.status()).toBe(403);
+      await expect(
+        page.getByRole('heading', { name: 'Bot authorization needs another step' }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(/The Twitch account "fixture_99" is still connected/),
+      ).toBeVisible();
+      await page.getByRole('link', { name: 'Return to TORCHLINE', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Disconnect Twitch authorization', exact: true })
+        .click();
+      await expect(
+        page.getByRole('link', { name: 'Connect creator with Twitch', exact: true }),
+      ).toBeVisible();
+      await setup.fill(config.botSetupSecret);
       await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
       await expect(page).toHaveURL(/id\.twitch\.tv\/oauth2\/authorize/);
       expect(authorization!.searchParams.get('scope')).toContain('user:bot');

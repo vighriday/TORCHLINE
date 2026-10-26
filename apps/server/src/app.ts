@@ -43,6 +43,12 @@ export interface AppConfig {
   botUserId?: string;
 }
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!,
+  );
 const denied = (code: string, message: string): never => {
   throw new DomainError(code, message);
 };
@@ -78,12 +84,34 @@ export async function createApp(
       reply.header('Cache-Control', 'no-store');
     return payload;
   });
-  app.setErrorHandler((err, _request, reply) => {
+  app.setErrorHandler((err, request, reply) => {
     const error = err as Error & { code?: string };
+    const botRoleError =
+      error instanceof DomainError &&
+      ['BOT_CREATOR_CONNECTED', 'BOT_CREATOR_HISTORY'].includes(error.code);
+    if (
+      botRoleError &&
+      request.url.split('?')[0] === '/auth/twitch/callback' &&
+      request.headers.accept?.includes('text/html')
+    ) {
+      const recovery =
+        error.code === 'BOT_CREATOR_CONNECTED'
+          ? 'Return to TORCHLINE in the intended bot account’s window. Check the displayed account name, choose “Disconnect Twitch authorization” (signing out alone does not disconnect it), then enter the bot setup key and authorize again.'
+          : 'Keep this account as a creator. Sign into a separate Twitch account in a private browser window and use TORCHLINE’s dedicated bot setup form.';
+      return reply
+        .code(403)
+        .type('text/html; charset=utf-8')
+        .send(
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>TORCHLINE · Bot connection</title></head><body><main><h1>Bot authorization needs another step</h1><p>${escapeHtml(error.message)}</p><p>${escapeHtml(recovery)}</p><p><a href="/">Return to TORCHLINE</a></p></main></body></html>`,
+        );
+    }
     if (error instanceof DomainError)
       return reply
         .code(
-          ['FORBIDDEN', 'HOST_REQUIRED', 'MODE_MISMATCH', 'INVALID_SIGNATURE'].includes(error.code)
+          botRoleError ||
+            ['FORBIDDEN', 'HOST_REQUIRED', 'MODE_MISMATCH', 'INVALID_SIGNATURE'].includes(
+              error.code,
+            )
             ? 403
             : error.code === 'UNAUTHENTICATED'
               ? 401
@@ -468,10 +496,15 @@ export async function createApp(
             [identity.user_id],
           )
         ).rowCount;
-        if (account?.connected || hasHistory)
+        if (hasHistory)
           denied(
-            'FORBIDDEN',
-            'Use a dedicated bot account. If this account was connected as a creator by mistake, disconnect it first; accounts with world history cannot become the bot.',
+            'BOT_CREATOR_HISTORY',
+            `The Twitch account "${identity.login ?? identity.user_id}" has Ark or handoff history and must remain a creator. Use a separate bot account. No worlds or history were deleted.`,
+          );
+        if (account?.connected)
+          denied(
+            'BOT_CREATOR_CONNECTED',
+            `The Twitch account "${identity.login ?? identity.user_id}" is still connected as a creator. Disconnect its Twitch authorization in TORCHLINE before authorizing it as the bot. Signing out alone does not disconnect it.`,
           );
         const previous = (await c.query("SELECT id FROM oauth_grants WHERE role='bot'")).rows[0];
         if (previous && previous.id !== identity.user_id)

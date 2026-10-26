@@ -4,6 +4,12 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Bot consent recovery feedback — 2026-10-26
+
+- Split bot-role denials into active creator connection versus existing Ark/handoff history, and identify the account Twitch actually authorized.
+- Added a readable browser recovery page with a return link and explicit disconnect instructions. Signing out and disconnecting are distinct actions; the existing operator/OAuth checks and world-history protections remain enforced.
+- Extended the onboarding browser journey through this denial and retry, and added escaped-output/no-authority-change coverage. Genuine bot delivery remains unverified until dedicated consent and real chat testing succeed.
+
 ### Live verification tooling and runbooks — 2026-10-26
 
 - Added real-service preflight for public HTTPS, anonymous/unsigned denials, actual app/grant validation, EventSub reads and live delivery/custody evidence. Reports only sanitized metadata and keeps prerequisites separate from failures; it sends no chat or synthetic proof.

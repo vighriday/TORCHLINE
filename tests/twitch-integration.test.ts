@@ -7,6 +7,46 @@ import { createApp } from '../apps/server/src/app.ts';
 import { twitchLifecycle } from '../apps/server/src/twitch-lifecycle.ts';
 import { authorize, browserHeader, liveConfig, providerFixture, tick } from './twitch-provider.ts';
 
+it('renders an escaped, non-mutating browser recovery page for an active creator in the bot flow', () =>
+  database(async (store) => {
+    await store.ensureCreator('99', 'Accidental creator', 'live');
+    const provider = providerFixture();
+    const fetcher: typeof provider.fetcher = async (input, init) => {
+      const response = await provider.fetcher(input, init);
+      if (String(input).endsWith('/validate'))
+        return Response.json({ ...(await response.json()), login: '<img src=x onerror=alert(1)>' });
+      return response;
+    };
+    const app = await createApp(store, liveConfig, { fetcher, workers: false });
+    provider.attach(app);
+    try {
+      const start = await app.inject({
+        method: 'POST',
+        url: '/api/operator/bot-authorization',
+        headers: { ...browserHeader, authorization: `Bearer ${liveConfig.botSetupSecret}` },
+        payload: {},
+      });
+      const state = new URL(start.json().url).searchParams.get('state');
+      const response = await app.inject({
+        url: `/auth/twitch/callback?code=99&state=${state}`,
+        headers: {
+          accept: 'text/html',
+          cookie: `torchline_oauth=${start.cookies.find((cookie) => cookie.name === 'torchline_oauth')!.value}`,
+        },
+      });
+      expect(response.statusCode).toBe(403);
+      expect(response.headers['content-type']).toContain('text/html');
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(response.body).toContain('&lt;img');
+      expect(response.body).not.toContain('<img');
+      expect(response.body).toContain('Return to TORCHLINE');
+      expect((await store.creator('99'))?.connected).toBe(true);
+      expect((await store.pool.query('SELECT 1 FROM oauth_grants')).rowCount).toBe(0);
+    } finally {
+      await app.close();
+    }
+  }));
+
 it.each([false, true])(
   'requires explicit disconnection and no world history to recover an accidental creator registration as the bot (world=%s)',
   (hasWorld) =>
@@ -25,7 +65,10 @@ it.each([false, true])(
       try {
         const creator = await authorize(app, '99');
         expect(creator.response.statusCode).toBe(302);
-        expect((await authorize(app, '99', true)).response.statusCode).toBe(403);
+        const connected = (await authorize(app, '99', true)).response;
+        expect(connected.statusCode).toBe(403);
+        expect(connected.json()).toMatchObject({ error: 'BOT_CREATOR_CONNECTED' });
+        expect(connected.json().message).toContain('fixture_99');
         if (hasWorld)
           expect(
             (
@@ -49,6 +92,7 @@ it.each([false, true])(
         ).toBe(200);
         const bot = await authorize(app, '99', true);
         expect(bot.response.statusCode).toBe(hasWorld ? 403 : 302);
+        if (hasWorld) expect(bot.response.json()).toMatchObject({ error: 'BOT_CREATOR_HISTORY' });
         expect((await store.creator('99'))?.connected).toBe(false);
         expect(
           (await store.pool.query("SELECT 1 FROM oauth_grants WHERE role='bot'")).rowCount,
