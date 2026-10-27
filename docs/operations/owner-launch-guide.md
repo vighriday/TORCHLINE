@@ -54,7 +54,7 @@ The generated `.local/ngrok.yml` is ignored. Do not paste the token into chat, a
 
 Request inspection stays disabled because OAuth callbacks contain sensitive one-use codes. The official [ngrok installation guide](https://ngrok.com/download/windows) explains obtaining an account and credential. If your assigned domain differs, use that domain consistently in stages 3–5.
 
-**Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE in **LIVE MODE**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
+**Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE with **TWITCH MODE · LIVE VERIFICATION PENDING**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
 
 For permanent hosting, use the cloud instructions below instead of running a tunnel. Choose the final HTTPS origin before editing Twitch's redirect address.
 
@@ -96,11 +96,13 @@ Restart the live service after configuration changes. Run `pnpm twitch:doctor:li
 
 ## 5. Connect the broadcaster
 
-At the public origin, in the broadcaster browser choose **Connect creator with Twitch**. Check the Twitch account name and approve the requested `channel:bot` access. After the callback the page should show **hriday29 — Twitch creator session** and the command deck.
+At the public origin, in the broadcaster browser choose **Connect creator with Twitch** on the cinematic title. Check the Twitch account name and approve the requested `channel:bot` access. After the callback, open **Captain / hriday29** and confirm **Twitch creator session**. If you have no active Ark, the title offers **Create an Ark**.
+
+Before creating an Ark, open the **Captain** menu and choose **Broadcast setup** for integration checks, **Open Hangar** for saved worlds or **Open Relay** for incoming offers. Once an Ark is active, the left navigation provides those workspaces and **Captain tools** contains session and OBS-link controls. The cinematic presentation does not replace account setup or grant any viewer authority.
 
 If already signed in with the correct account, keep that session. Do not disconnect a working account as a routine setup step. A redirect mismatch means stage 3 and `TWITCH_REDIRECT_URI` disagree. “Invalid state” usually means the one-use flow expired or was reused; start fresh from the site in the same browser.
 
-**Confirm:** Bridge shows creator controls. Signing out removes the browser session; **Disconnect Twitch authorization** in Broadcast removes that account's TORCHLINE authorization and subscriptions while preserving its worlds. They are different operations.
+**Confirm:** creating or resuming your Ark opens Bridge with creator controls. Signing out removes the browser session; **Disconnect Twitch authorization** in Broadcast removes that account's TORCHLINE authorization and subscriptions while preserving its worlds. They are different operations.
 
 ## 6. Confirm or authorize the dedicated bot
 
