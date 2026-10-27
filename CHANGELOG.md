@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-27 — Cinematic renderer foundation
+
+- Restored richer Claude Design ship geometry, procedural surface/glow treatment, canonical detached cargo/sealed sectors/damage and bounded chapter/event effects. No game rules or authority changed.
+- Added effect baselining/deduplication, particle/geometry bounds, adaptive resolution and complete GPU cleanup. Full title/flight consumers are a separate integration step; native OBS remains unverified.
+
 ## 2026-10-27 — Continuation evidence
 
 - Recorded the full runtime rollout's successful CI, 77 automated tests, six Chromium journeys, current real-provider grant/subscription checks and exact external dependencies. Both local services run from the reviewed source with migration 007.

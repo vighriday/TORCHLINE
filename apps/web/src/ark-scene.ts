@@ -1,267 +1,398 @@
-import * as THREE from 'three';
-import type { Resources, ShipSystem, SystemId } from '@torchline/contracts';
-import { conditionColor, markSeed } from './visual-state.ts';
+import * as T from 'three';
+import type {
+  Resources,
+  ShipSystem,
+  WorldPresentation,
+  VisualCue,
+  SystemId,
+} from '@torchline/contracts';
+import { markSeed } from './visual-state.ts';
+import {
+  buildArk,
+  disposeObjects,
+  glowTexture,
+  fresnelVertex,
+  fresnelFragment,
+} from './ark-model.ts';
 
-// Cosmetic renderer only. No commands, timers, network, or gameplay transitions.
+type PublicEvent = WorldPresentation['events'][number];
+type Particle = { p: T.Vector3; v: T.Vector3; age: number; life: number; color: T.Color };
 export function createArkScene(
   container: HTMLElement,
   onContextLost: () => void,
   onReady: () => void,
+  view: 'panel' | 'flight' | 'title' = 'panel',
 ) {
-  const renderer = new THREE.WebGLRenderer({
+  const renderer = new T.WebGLRenderer({
     antialias: true,
     alpha: true,
     powerPreference: 'default',
   });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-  renderer.setClearColor(0x07080b, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.outputColorSpace = T.SRGBColorSpace;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  renderer.setClearColor(0x05060a, 0);
   container.append(renderer.domElement);
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(34, 2, 0.1, 160);
-  camera.position.set(24, 15, 33);
-  camera.lookAt(0, 0, 0);
-  scene.add(new THREE.HemisphereLight(0xcde8ff, 0x282131, 2.3));
-  const sun = new THREE.DirectionalLight(0xffdbaf, 3.5);
-  sun.position.set(-8, 12, 15);
-  scene.add(sun);
-  const rim = new THREE.DirectionalLight(0x69b9e5, 3);
-  rim.position.set(10, -5, -10);
+  const scene = new T.Scene(),
+    camera = new T.PerspectiveCamera(30, 2, 0.1, 2400);
+  const glow = glowTexture();
+  const ark = buildArk(glow);
+  scene.add(ark.ship);
+  scene.add(new T.HemisphereLight(0x819bb6, 0x07080b, 0.85));
+  const key = new T.DirectionalLight(0xffdfbb, 2.5);
+  key.position.set(30, 22, 26);
+  scene.add(key);
+  const rim = new T.DirectionalLight(0x7fd6ff, 2);
+  rim.position.set(-30, 10, -30);
   scene.add(rim);
-  const ship = new THREE.Group();
-  scene.add(ship);
-  const groups = {} as Record<SystemId, THREE.Group>;
-  const materials = {} as Record<SystemId, THREE.MeshStandardMaterial>;
-  const ids: SystemId[] = [
-    'hull',
-    'reactor',
-    'habitat',
-    'lifeSupport',
-    'cargo',
-    'navigation',
-    'shields',
-  ];
-  for (const id of ids) {
-    const group = new THREE.Group();
-    ship.add(group);
-    groups[id] = group;
-    materials[id] = new THREE.MeshStandardMaterial({
-      color: 0x71818c,
-      metalness: 0.65,
-      roughness: 0.48,
-    });
+  const flash = new T.PointLight(0xff7046, 0, 40, 2);
+  scene.add(flash);
+  const starGeometry = new T.BufferGeometry(),
+    positions = new Float32Array(1400 * 3),
+    colors = new Float32Array(1400 * 3);
+  for (let i = 0; i < 1400; i++) {
+    positions.set(
+      [
+        (markSeed(`star-x${i}`) - 0.5) * 1100,
+        (markSeed(`star-y${i}`) - 0.5) * 600,
+        -80 - markSeed(`star-z${i}`) * 800,
+      ],
+      i * 3,
+    );
+    const v = 0.35 + markSeed(`lum${i}`) * 0.65;
+    colors.set([v, v * 0.91, v * 0.83], i * 3);
   }
-  const mesh = (
-    id: SystemId,
-    geometry: THREE.BufferGeometry,
-    position: [number, number, number],
-    material: THREE.Material = materials[id],
-  ) => {
-    const object = new THREE.Mesh(geometry, material);
-    object.position.set(...position);
-    groups[id].add(object);
-    return object;
-  };
-  const cylinder = (radius: number, length: number, segments = 16) => {
-    const geometry = new THREE.CylinderGeometry(radius, radius, length, segments);
-    geometry.rotateZ(Math.PI / 2);
-    return geometry;
-  };
-  mesh('hull', cylinder(0.8, 19), [0, 0, 0]);
-  for (let x = -8; x <= 8; x += 2) mesh('hull', cylinder(0.9, 0.13), [x, 0, 0]);
-  const bow = mesh('hull', new THREE.ConeGeometry(0.85, 3, 8), [10.5, 0, 0]);
-  bow.rotation.z = -Math.PI / 2;
-  mesh('hull', new THREE.BoxGeometry(2, 0.6, 1.1), [8, 0.8, 0]);
-  mesh('reactor', new THREE.SphereGeometry(1.6, 24, 16), [-10, 0, 0]);
-  for (const x of [-10.8, -10, -9.2]) {
-    const ring = mesh('reactor', new THREE.TorusGeometry(1.65, 0.1, 8, 40), [x, 0, 0]);
-    ring.rotation.y = Math.PI / 2;
+  starGeometry.setAttribute('position', new T.BufferAttribute(positions, 3));
+  starGeometry.setAttribute('color', new T.BufferAttribute(colors, 3));
+  const stars = new T.Points(
+    starGeometry,
+    new T.PointsMaterial({
+      size: 1.5,
+      map: glow,
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      sizeAttenuation: false,
+      blending: T.AdditiveBlending,
+    }),
+  );
+  scene.add(stars);
+  const rockGeometry = new T.IcosahedronGeometry(1, 0);
+  const rocks = new T.InstancedMesh(
+    rockGeometry,
+    new T.MeshStandardMaterial({ color: 0x545056, roughness: 0.95, flatShading: true }),
+    42,
+  );
+  scene.add(rocks);
+  const debris = new T.InstancedMesh(
+    new T.BoxGeometry(1.5, 0.2, 0.8),
+    new T.MeshStandardMaterial({ color: 0x77716a, metalness: 0.7, roughness: 0.7 }),
+    30,
+  );
+  scene.add(debris);
+  const object = new T.Object3D();
+  const planet = new T.Mesh(
+    new T.SphereGeometry(38, 40, 24),
+    new T.MeshStandardMaterial({ color: 0x215565, emissive: 0x0a2830, roughness: 0.9 }),
+  );
+  planet.position.set(20, -38, -65);
+  scene.add(planet);
+  const atmosphere = new T.Mesh(
+    new T.SphereGeometry(39, 32, 20),
+    new T.ShaderMaterial({
+      vertexShader: fresnelVertex,
+      fragmentShader: fresnelFragment,
+      uniforms: { color: { value: new T.Color(0x8fdce4) }, strength: { value: 1.1 } },
+      transparent: true,
+      blending: T.AdditiveBlending,
+      depthWrite: false,
+      side: T.BackSide,
+    }),
+  );
+  atmosphere.position.copy(planet.position);
+  scene.add(atmosphere);
+  const trailPositions = new Float32Array(120 * 6);
+  for (let i = 0; i < 120; i++) {
+    const x = (markSeed(`warp-x${i}`) - 0.5) * 150,
+      y = (markSeed(`warp-y${i}`) - 0.5) * 60,
+      z = -30 - markSeed(`warp-z${i}`) * 90;
+    trailPositions.set([x, y, z, x + 16, y, z], i * 6);
   }
-  mesh('reactor', cylinder(0.8, 1.6), [-11.5, 0, 0]);
-  const fireMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffb24f,
+  const trailGeometry = new T.BufferGeometry();
+  trailGeometry.setAttribute('position', new T.BufferAttribute(trailPositions, 3));
+  const trailMaterial = new T.LineBasicMaterial({
+    color: 0xc3e4ed,
     transparent: true,
-    opacity: 0.65,
+    opacity: 0,
     depthWrite: false,
+    blending: T.AdditiveBlending,
   });
-  const fire = mesh('reactor', new THREE.ConeGeometry(0.7, 5, 20), [-14, 0, 0], fireMaterial);
-  fire.rotation.z = Math.PI / 2;
-  const innerFire = mesh(
-    'reactor',
-    new THREE.ConeGeometry(0.35, 3.5, 16),
-    [-13.2, 0, 0],
-    new THREE.MeshBasicMaterial({ color: 0xffe6b3 }),
+  scene.add(new T.LineSegments(trailGeometry, trailMaterial));
+  const particleGeometry = new T.BufferGeometry(),
+    particlePositions = new Float32Array(320 * 3),
+    particleColors = new Float32Array(320 * 3);
+  particleGeometry.setAttribute('position', new T.BufferAttribute(particlePositions, 3));
+  particleGeometry.setAttribute('color', new T.BufferAttribute(particleColors, 3));
+  particleGeometry.setDrawRange(0, 0);
+  const particles = new T.Points(
+    particleGeometry,
+    new T.PointsMaterial({
+      size: 0.48,
+      map: glow,
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      blending: T.AdditiveBlending,
+    }),
   );
-  innerFire.rotation.z = Math.PI / 2;
-  groups.habitat.position.x = 1.5;
-  const habitatRing = mesh('habitat', new THREE.TorusGeometry(4.5, 0.4, 12, 72), [0, 0, 0]);
-  habitatRing.rotation.y = Math.PI / 2;
-  for (let i = 0; i < 4; i++) {
-    const spoke = mesh('habitat', new THREE.BoxGeometry(0.25, 9, 0.25), [0, 0, 0]);
-    spoke.rotation.x = (i * Math.PI) / 2;
-  }
-  const windowsMaterial = new THREE.MeshBasicMaterial({ color: 0x8fdce4 });
-  const windows = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(0.09, 0.12, 0.2),
-    windowsMaterial,
-    80,
-  );
-  const matrix = new THREE.Matrix4();
-  for (let i = 0; i < 80; i++) {
-    const a = (i / 80) * Math.PI * 2;
-    matrix.makeTranslation(0.4, 4.5 * Math.cos(a), 4.5 * Math.sin(a));
-    windows.setMatrixAt(i, matrix);
-  }
-  groups.habitat.add(windows);
-  for (let z = -1; z <= 1; z++) mesh('lifeSupport', cylinder(0.46, 3.5, 12), [-4, 1.5, z]);
-  const cargoPods: THREE.Mesh[] = [];
-  for (let x = 0; x < 3; x++)
-    for (let z = 0; z < 2; z++)
-      cargoPods.push(
-        mesh('cargo', new THREE.BoxGeometry(1.5, 1.35, 1.3), [4 + x * 1.7, -1.55, z * 1.5 - 0.75]),
-      );
-  for (let x = 0; x < 3; x++)
-    mesh('cargo', new THREE.BoxGeometry(0.12, 2.5, 3.2), [4 + x * 1.7, -1.3, 0]);
-  mesh('navigation', new THREE.BoxGeometry(0.15, 3, 0.15), [11, 1.5, 0]);
-  const dish = mesh(
-    'navigation',
-    new THREE.SphereGeometry(1.3, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.4),
-    [11, 3, 0],
-  );
-  dish.rotation.z = -0.6;
-  mesh(
-    'navigation',
-    new THREE.SphereGeometry(0.13, 8, 8),
-    [11, 3.8, 0],
-    new THREE.MeshBasicMaterial({ color: 0x8fdce4 }),
-  );
-  const shieldMaterial = new THREE.MeshBasicMaterial({
+  particles.frustumCulled = false;
+  scene.add(particles);
+  const active: Particle[] = [];
+  const scanMaterial = new T.MeshBasicMaterial({
     color: 0x8fdce4,
-    wireframe: true,
     transparent: true,
-    opacity: 0.045,
+    opacity: 0,
     depthWrite: false,
+    blending: T.AdditiveBlending,
   });
-  const shield = mesh('shields', new THREE.SphereGeometry(1, 32, 16), [0, 0, 0], shieldMaterial);
-  shield.scale.set(15, 6, 6);
-  // A single bounded background point cloud; no textures, bloom, or particle emitters.
-  const stars = new Float32Array(480 * 3);
-  for (let i = 0; i < 480; i++) {
-    stars[i * 3] = (markSeed(`x${i}`) - 0.5) * 120;
-    stars[i * 3 + 1] = (markSeed(`y${i}`) - 0.5) * 65;
-    stars[i * 3 + 2] = -20 - markSeed(`z${i}`) * 45;
-  }
-  const starGeometry = new THREE.BufferGeometry();
-  starGeometry.setAttribute('position', new THREE.BufferAttribute(stars, 3));
-  scene.add(
-    new THREE.Points(
-      starGeometry,
-      new THREE.PointsMaterial({ color: 0x9cabbc, size: 0.055, transparent: true, opacity: 0.6 }),
-    ),
-  );
-  let marksKey = '';
-  const scars = new THREE.Group();
-  ship.add(scars);
-  function disposeTree(root: THREE.Object3D) {
-    const geometries = new Set<THREE.BufferGeometry>();
-    const materialSet = new Set<THREE.Material>();
-    root.traverse((object) => {
-      if (object instanceof THREE.Mesh || object instanceof THREE.Points) {
-        geometries.add(object.geometry);
-        for (const material of Array.isArray(object.material) ? object.material : [object.material])
-          materialSet.add(material);
-      }
-    });
-    geometries.forEach((g) => g.dispose());
-    materialSet.forEach((m) => m.dispose());
-  }
-  function update(systems: ShipSystem[], resources: Resources) {
-    for (const system of systems) {
-      const lost = system.condition === 'destroyed';
-      materials[system.id].color.set(conditionColor(system));
-      materials[system.id].emissive.set(lost ? 0x55140d : 0x000000);
-      if (system.id === 'navigation') groups.navigation.rotation.z = lost ? -0.28 : 0;
-      if (system.id === 'cargo')
-        cargoPods.forEach((pod) => {
-          pod.visible = !lost;
-        });
-      if (system.id === 'shields')
-        shieldMaterial.opacity = lost ? 0 : (system.integrity / 100) * 0.065;
-    }
-    windows.count = Math.round(Math.min(1, resources.passengers / 180) * 80);
-    fire.scale.y = 0.4 + (Math.max(0, resources.power) / 100) * 0.6;
-    innerFire.scale.y = fire.scale.y;
-    const key = JSON.stringify(systems.map((s) => [s.id, s.marks]));
-    if (key !== marksKey) {
-      marksKey = key;
-      disposeTree(scars);
-      scars.clear();
-      const scarAnchors: Record<SystemId, [number, number, number]> = {
-        hull: [0, 0.8, 0.4],
-        reactor: [-10, 1, 1],
-        habitat: [1.5, 3, 3],
-        lifeSupport: [-4, 2, 1],
-        cargo: [6, -1, 1.5],
-        navigation: [11, 2, 0.5],
-        shields: [0, 3, 4],
-      };
-      for (const system of systems)
-        for (const mark of system.marks.slice(-8)) {
-          const [x, y, z] = scarAnchors[system.id];
-          const scar = new THREE.Mesh(
-            new THREE.BoxGeometry(0.7, 0.06, 0.09),
-            new THREE.MeshBasicMaterial({ color: mark.kind === 'repair' ? 0x8fdce4 : 0xf57865 }),
-          );
-          scar.position.set(
-            x + (markSeed(mark.eventId) - 0.5) * 2,
-            y + (markSeed(mark.eventId + 'y') - 0.5),
-            z,
-          );
-          scar.rotation.z = markSeed(mark.eventId) * 2;
-          scars.add(scar);
-        }
-    }
-  }
-  let disposed = false,
+  const scan = new T.Mesh(new T.TorusGeometry(6.4, 0.035, 6, 64), scanMaterial);
+  scan.rotation.y = Math.PI / 2;
+  scene.add(scan);
+  let chapter = 0,
+    arrival = 0,
+    scanTime = -1,
+    shake = 0,
+    painted = false,
+    disposed = false,
     visible = false,
     frame = 0,
-    timer: ReturnType<typeof setTimeout> | undefined,
-    angle = 0;
-  let painted = false;
+    t = 0,
+    last = 0,
+    leakCarry = 0,
+    navLost = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let initialized = false;
+  const seen = new Set<string>();
+  const focus = new T.Vector3(),
+    desiredFocus = new T.Vector3();
+  let frames = 0,
+    metricAt = 0;
+  let slowSamples = 0,
+    pixelRatio = Math.min(devicePixelRatio || 1, 1.5);
+  function emit(at: T.Vector3, color: number, count: number, speed: number, life = 1.3) {
+    for (let i = 0; i < count && active.length < 320; i++) {
+      const seed = `${t}:${i}:${active.length}`;
+      active.push({
+        p: at.clone(),
+        v: new T.Vector3(
+          (markSeed(seed + 'x') - 0.5) * speed,
+          (markSeed(seed + 'y') - 0.3) * speed,
+          (markSeed(seed + 'z') - 0.5) * speed,
+        ),
+        age: 0,
+        life: life * (0.6 + markSeed(seed)),
+        color: new T.Color(color),
+      });
+    }
+  }
+  function cue(c: VisualCue) {
+    const at = ark.position(c.systemId ?? 'hull');
+    container.dataset.lastCue = c.kind;
+    desiredFocus.copy(at).multiplyScalar(0.12);
+    // An oxygen/passenger loss does not physically explode an intact hull.
+    if (c.kind === 'world-ended' && !ark.wreck) return;
+    if (['damage', 'sacrifice', 'world-ended'].includes(c.kind)) {
+      flash.position.copy(at).add(new T.Vector3(0, 2, 3));
+      flash.color.set(c.kind === 'sacrifice' ? 0xffa45f : 0xff6945);
+      flash.intensity = c.kind === 'world-ended' ? 130 : 60;
+      shake = c.kind === 'world-ended' ? 0.18 : 0.08;
+      emit(
+        at,
+        c.kind === 'sacrifice' ? 0xffba76 : 0xff7048,
+        c.kind === 'world-ended' ? 120 : 45,
+        9,
+      );
+    }
+    if (['repair', 'challenge-solved', 'discovery'].includes(c.kind)) {
+      scanTime = 0;
+      emit(at, 0x8fdce4, c.kind === 'discovery' ? 12 : 40, 2.2, 1.8);
+    }
+    if (c.kind === 'chapter-arrived') arrival = 2.2;
+  }
+  function update(
+    systems: ShipSystem[],
+    resources: Resources,
+    nextChapter = 0,
+    events: PublicEvent[] = [],
+  ) {
+    ark.update(systems, resources);
+    chapter = nextChapter;
+    navLost = systems.some((s) => s.id === 'navigation' && s.condition === 'destroyed');
+    container.dataset.environment = ark.wreck ? 'wreck' : String(chapter);
+    rocks.visible = chapter === 2 && !ark.wreck;
+    debris.visible = chapter === 4 || ark.wreck;
+    planet.visible = atmosphere.visible = chapter === 5 && !ark.wreck;
+    const fresh = events.filter((e) => !seen.has(e.id));
+    for (const event of events) seen.add(event.id);
+    if (initialized && fresh.length <= 3)
+      for (const event of fresh) for (const c of event.cues.slice(-8)) cue(c);
+    initialized = true;
+    // The projection is a bounded tail, so the cosmetic dedupe set is bounded too.
+    if (seen.size > 96) {
+      seen.clear();
+      events.forEach((e) => seen.add(e.id));
+    }
+  }
   const stop = () => {
     cancelAnimationFrame(frame);
     if (timer) clearTimeout(timer);
     frame = 0;
     timer = undefined;
+    last = 0;
   };
-  const draw = () => {
+  function draw(now: number) {
     if (disposed || !visible || document.hidden) {
       stop();
       return;
     }
-    angle += 0.002;
-    ship.rotation.y = Math.sin(angle) * 0.045;
-    groups.habitat.rotation.x += 0.003;
+    const dt = last ? Math.min(0.06, (now - last) / 1000) : 1 / 30;
+    last = now;
+    t += dt;
+    const yaw = ((-27 + Math.sin(t * 0.08) * 4) * Math.PI) / 180,
+      pitch = ((10 + Math.sin(t * 0.11) * 1.5) * Math.PI) / 180;
+    const aspect = camera.aspect;
+    const base = view === 'title' ? 53 : view === 'flight' ? 48 : 51;
+    const radius = base * Math.max(1, 1.65 / aspect);
+    camera.position.set(
+      Math.sin(yaw) * Math.cos(pitch) * radius,
+      Math.sin(pitch) * radius,
+      Math.cos(yaw) * Math.cos(pitch) * radius,
+    );
+    focus.lerp(desiredFocus, 0.06);
+    desiredFocus.multiplyScalar(0.97);
+    camera.lookAt(focus);
+    if (shake > 0) {
+      camera.position.x += Math.sin(t * 21) * shake;
+      camera.position.y += Math.cos(t * 18) * shake;
+      shake = Math.max(0, shake - dt * 0.15);
+    }
+    if (arrival > 0) {
+      arrival = Math.max(0, arrival - dt);
+      const k = arrival / 2.2;
+      ark.ship.position.x = -70 * k * k * k;
+      camera.fov = 30 + 12 * Math.sin(k * Math.PI);
+      trailMaterial.opacity = k * 0.65;
+    } else {
+      ark.ship.position.x = 0;
+      camera.fov = 30;
+      trailMaterial.opacity = 0;
+    }
+    camera.updateProjectionMatrix();
+    if (arrival > 0) {
+      for (let i = 0; i < 120; i++) {
+        trailPositions[i * 6] -= dt * 90;
+        trailPositions[i * 6 + 3] = trailPositions[i * 6] + 12 + arrival * 12;
+        if (trailPositions[i * 6] < -80) trailPositions[i * 6] += 160;
+      }
+      trailGeometry.attributes.position.needsUpdate = true;
+    }
+    ark.ship.rotation.y = Math.sin(t * 0.1) * 0.025;
+    ark.animate(t, dt);
+    stars.rotation.y += dt * 0.0008;
+    flash.intensity *= Math.pow(0.03, dt);
+    for (const cloud of [rocks, debris])
+      if (cloud.visible) {
+        for (let i = 0; i < cloud.count; i++) {
+          const speed = 1 + markSeed(`velocity${i}`) * 2,
+            x = ((((markSeed(`rx${i}`) * 180 - t * speed) % 180) + 180) % 180) - 90,
+            y = (markSeed(`ry${i}`) - 0.5) * 55,
+            z = -15 - markSeed(`rz${i}`) * 100;
+          object.position.set(x, y, z);
+          object.rotation.set(t * 0.06 + i, i * 0.5 + t * 0.02, 0);
+          object.scale.setScalar(0.4 + markSeed(`rs${i}`) * 2.5);
+          object.updateMatrix();
+          cloud.setMatrixAt(i, object.matrix);
+        }
+        cloud.instanceMatrix.needsUpdate = true;
+      }
+    if (planet.visible) planet.rotation.y += dt * 0.005;
+    if (scanTime >= 0) {
+      scanTime += dt;
+      const k = scanTime / 1.8;
+      scan.position.x = -16 + k * 32;
+      scanMaterial.opacity = Math.sin(Math.min(1, k) * Math.PI) * 0.6;
+      if (k >= 1) {
+        scanTime = -1;
+        scanMaterial.opacity = 0;
+      }
+    }
+    if (ark.leaking || navLost || ark.wreck) {
+      leakCarry += dt;
+      const interval = ark.leaking ? 0.12 : 0.25;
+      if (leakCarry > interval) {
+        leakCarry = 0;
+        const id: SystemId = ark.leaking ? 'lifeSupport' : navLost ? 'navigation' : 'hull';
+        emit(ark.position(id), ark.leaking ? 0xa7dae5 : 0xff8c4a, 1, ark.leaking ? 1.1 : 2.2, 2.2);
+      }
+    }
+    for (let i = active.length - 1; i >= 0; i--) {
+      const p = active[i];
+      p.age += dt;
+      if (p.age >= p.life) {
+        active.splice(i, 1);
+        continue;
+      }
+      p.p.addScaledVector(p.v, dt);
+      p.v.multiplyScalar(1 - dt * 0.3);
+    }
+    active.forEach((p, i) => {
+      particlePositions.set(p.p.toArray(), i * 3);
+      const fade = 1 - p.age / p.life;
+      particleColors.set([p.color.r * fade, p.color.g * fade, p.color.b * fade], i * 3);
+    });
+    particleGeometry.setDrawRange(0, active.length);
+    particleGeometry.attributes.position.needsUpdate = true;
+    particleGeometry.attributes.color.needsUpdate = true;
     renderer.render(scene, camera);
+    frames++;
     if (!painted) {
       painted = true;
       onReady();
     }
-    timer = setTimeout(() => {
-      frame = requestAnimationFrame(draw);
-    }, 1000 / 30);
-  };
+    if (now - metricAt > 1000) {
+      const fps = (frames * 1000) / (now - metricAt);
+      slowSamples = fps < 18 && painted ? slowSamples + 1 : 0;
+      if (slowSamples >= 2 && pixelRatio > 0.5) {
+        pixelRatio = Math.max(0.5, pixelRatio * 0.75);
+        renderer.setPixelRatio(pixelRatio);
+        container.dataset.pixelRatio = pixelRatio.toFixed(2);
+        slowSamples = 0;
+      }
+      container.dataset.drawCalls = String(renderer.info.render.calls);
+      container.dataset.triangles = String(renderer.info.render.triangles);
+      container.dataset.particles = String(active.length);
+      container.dataset.fps = String(Math.round((frames * 1000) / (now - metricAt)));
+      frames = 0;
+      metricAt = now;
+    }
+    timer = setTimeout(
+      () => {
+        frame = requestAnimationFrame(draw);
+      },
+      Math.max(0, 1000 / 30 - (performance.now() - now)),
+    );
+  }
   const resume = () => {
     stop();
     if (!disposed && visible && !document.hidden) frame = requestAnimationFrame(draw);
   };
   const resize = new ResizeObserver(() => {
-    const width = container.clientWidth,
-      height = container.clientHeight;
-    if (!width || !height) return;
-    renderer.setSize(width, height);
-    camera.aspect = width / height;
-    camera.position.set(24, 15, Math.max(33, (33 * 1.8) / camera.aspect));
+    const w = container.clientWidth,
+      h = container.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
   });
   resize.observe(container);
@@ -286,9 +417,7 @@ export function createArkScene(
       intersection.disconnect();
       document.removeEventListener('visibilitychange', resume);
       renderer.domElement.removeEventListener('webglcontextlost', lost);
-      disposeTree(scene);
-      // Shield's placeholder material is never attached to a mesh.
-      materials.shields.dispose();
+      disposeObjects(scene);
       renderer.dispose();
       renderer.forceContextLoss();
       renderer.domElement.remove();
