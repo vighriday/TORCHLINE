@@ -441,7 +441,11 @@ function App() {
               )}
             </section>
             <ResourceMeters world={world} />
-            <ArkView key={`ark:${world.worldId}`} systems={world.systems} resources={world.resources} />
+            <ArkView
+              key={`ark:${world.worldId}`}
+              systems={world.systems}
+              resources={world.resources}
+            />
             <ParticipationGuide world={world} />
             {world.handoffPending && (
               <div className="notice">
