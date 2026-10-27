@@ -1,6 +1,6 @@
 # Frontend and Claude Design integration contract
 
-Status: functional contract implemented, 2026-10-26. Claude Design owns final layout, UI/UX, art and animation. The reference browser application establishes behavior and data boundaries; it is not the final visual treatment. [Seven generated fixtures](../design/README.md) exercise the contract. Actual OBS and usability/accessibility acceptance remain pending.
+Status: contract implemented; Claude Design exports integrated on 2026-10-27. [ADR 0011](../decisions/0011-claude-design-integration.md) preserves transport and authority while adapting the six surfaces into typed React. [Seven generated fixtures](../design/README.md) exercise the contract at both broadcast sizes. Actual OBS and owner usability/accessibility acceptance remain pending.
 
 ## Boundaries
 
@@ -32,3 +32,9 @@ Provide fixtures for pristine, navigation-sacrificed, leaking, repaired-but-scar
 The reference interface always shows the current goal, phase, one-sentence crisis, available commands, challenge progress and the most recent consequence. Explain the landing threshold before it becomes fatal. Mobile Twitch viewers participate through short chat commands; no additional sign-in, drag interaction or private browser tab is required. Essential clues and feedback must be legible on a 720p broadcast, with text/icon states, high contrast, reduced motion and no reliance on sound/color alone.
 
 Schema/package: `packages/contracts`. Projection: server application boundary. Final rendering: replaceable components in `apps/web`. Contract fixtures and consumer tests must accompany later design integration. Richer animations/assets can be added without replacing the engine, persistence or Twitch adapter.
+
+## Integrated consumers
+
+`ArkView` and lazy `ark-scene.ts` share physical systems/resources; stable event IDs position persistent marks. DOM summaries preserve all seven system records even when WebGL is active. Reduced motion or screens at most 700px use SVG. A failed context returns to SVG. The canvas is decorative, one per visible workspace, limited to 30 FPS and DPR 1.5; hidden/offscreen animation stops and unmount disposes geometry/materials/renderer. No textures or postprocessing are allocated. First-frame readiness gates hiding the schematic.
+
+`DeckViews` supplies navigation, resource telemetry, all-six-resource forecasts, participation guidance, bounded Archive, actual Relay progress and a separate read-only broadcast composition. Archive explicitly labels the recent 30 non-vote events; richer historical snapshots are not fabricated. Overlay status/recap never imply native raid verification. `main.tsx` retains the existing HTTP/SSE controller and operator/creator flows. The schema version is unchanged because no wire fields or mutation authority changed.

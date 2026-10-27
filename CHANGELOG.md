@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Canonical command deck and broadcast integration — 2026-10-27
+
+- Adapted Claude Design into typed React Bridge, Relay, Hangar, Broadcast and Archive views while preserving the working HTTP/SSE controller, creator/bot setup, gameplay commands, park/resume, overlays and consented custody flow.
+- Added shared cinematic/SVG Ark views from canonical physical systems and permanent marks, locally served fonts, reduced-motion/mobile fallback, bounded 30 FPS/DPR, visibility suspension, context-loss recovery and GPU disposal. No prototype runtime, client rules, sample creators or fake timers/votes ship in the application.
+- Improved keyboard route building, phase guidance, actual six-resource forecasts and private OBS-link copying. Relay reflects persisted proof/consent states; Archive labels its bounded canonical log instead of inventing history or replay attestations.
+- Preserved all 54 engine/storage/Twitch-authority tests and the existing browser journeys. Expanded to five browser journeys covering seven engine-derived ship states at 720p/1080p, non-overlapping broadcast composition, all workspaces at 320–1440px, keyboard, reduced motion, local assets and graphics recovery. Visual QA caught and fixed first-frame blanking and reconnect-status layout overlap. Actual OBS, real chat/output and native raid remain separate gates.
+
 ### Claude Design integration review — 2026-10-27
 
 - Reviewed all six visual surfaces and four JavaScript references. Recorded the canonical-state mapping, prototype differences, provenance, source checksums and all thirteen component boundaries in ADR 0011 and the design review.

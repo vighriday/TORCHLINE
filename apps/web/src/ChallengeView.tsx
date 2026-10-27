@@ -5,6 +5,7 @@ export interface ChallengeRendererProps {
   interactive: boolean;
   onCommand: (command: Command) => void;
   busy: boolean;
+  compact?: boolean;
 }
 const positions: Record<string, [number, number]> = {
   S: [40, 115],
@@ -14,10 +15,19 @@ const positions: Record<string, [number, number]> = {
   D: [410, 180],
   T: [570, 115],
 };
-export function ChallengeView({ challenge, interactive, onCommand, busy }: ChallengeRendererProps) {
+export function ChallengeView({
+  challenge,
+  interactive,
+  onCommand,
+  busy,
+  compact = false,
+}: ChallengeRendererProps) {
   const [route, setRoute] = useState('');
   return (
-    <section className="panel" aria-label="Cooperative challenge">
+    <section
+      className={`panel challenge-panel ${compact ? 'compact-challenge' : ''}`}
+      aria-label="Cooperative challenge"
+    >
       <div className="section-heading">
         <h2>{challenge.title}</h2>
         <span className="badge">
@@ -48,7 +58,10 @@ export function ChallengeView({ challenge, interactive, onCommand, busy }: Chall
             })}
             {challenge.nodes.map((n) => (
               <g key={n.id} transform={`translate(${positions[n.id][0]} ${positions[n.id][1]})`}>
-                <circle r="22" className={n.revealed ? 'revealed' : ''} />
+                <circle
+                  r="25"
+                  className={`${n.revealed ? 'revealed' : ''} ${n.id === challenge.blockedNode ? 'blocked-node' : n.id === challenge.requiredNode ? 'required-node' : ''}`}
+                />
                 <text textAnchor="middle" y="5">
                   {n.id}
                 </text>
@@ -57,61 +70,91 @@ export function ChallengeView({ challenge, interactive, onCommand, busy }: Chall
           </svg>
         </>
       )}
-      <div className="clues">
-        {challenge.nodes
-          .filter(
-            (n) => !['S', 'T'].includes(n.id) && (challenge.kind !== 'work-order' || n.id !== 'D'),
-          )
-          .map((node) => (
-            <article key={node.id}>
-              <strong>
-                {node.id} · {node.patched ? 'Patched' : node.revealed ? 'Discovered' : 'Unknown'}
-              </strong>
-              <p>{node.clue ?? `Chat: !scan ${node.id}`}</p>
-              {interactive && !node.revealed && (
-                <button
-                  disabled={busy}
-                  onClick={() => onCommand({ type: 'scan', node: node.id as 'A' })}
-                >
-                  Scan {node.id}
-                </button>
-              )}
-              {interactive && challenge.kind === 'work-order' && node.revealed && !node.patched && (
-                <button
-                  disabled={busy}
-                  onClick={() => onCommand({ type: 'patch', node: node.id as 'A' })}
-                >
-                  Patch {node.id}
-                </button>
-              )}
-            </article>
-          ))}
-      </div>
+      {(!compact || challenge.kind === 'work-order') && (
+        <div className="clues">
+          {challenge.nodes
+            .filter(
+              (n) =>
+                !['S', 'T'].includes(n.id) && (challenge.kind !== 'work-order' || n.id !== 'D'),
+            )
+            .map((node) => (
+              <article key={node.id} className={node.patched ? 'task-complete' : ''}>
+                <strong>
+                  {node.id} · {node.patched ? 'Patched' : node.revealed ? 'Discovered' : 'Unknown'}
+                </strong>
+                <p>{node.clue ?? `Chat: !scan ${node.id}`}</p>
+                {interactive && !node.revealed && (
+                  <button
+                    disabled={busy}
+                    onClick={() => onCommand({ type: 'scan', node: node.id as 'A' })}
+                  >
+                    Scan {node.id}
+                  </button>
+                )}
+                {interactive &&
+                  challenge.kind === 'work-order' &&
+                  node.revealed &&
+                  !node.patched && (
+                    <button
+                      disabled={busy}
+                      onClick={() => onCommand({ type: 'patch', node: node.id as 'A' })}
+                    >
+                      Patch {node.id}
+                    </button>
+                  )}
+              </article>
+            ))}
+        </div>
+      )}
       {challenge.kind === 'route' && interactive && (
-        <div className="route-entry">
-          <label>
-            Candidate route
-            <input
-              aria-label="Candidate route"
-              value={route}
-              onChange={(e) => setRoute(e.target.value)}
-              placeholder="S A C T"
-              maxLength={24}
-            />
-          </label>
-          <button
-            disabled={busy || challenge.solved || !route.trim()}
-            onClick={() =>
-              onCommand({
-                type: 'route',
-                nodes: route.trim().toUpperCase().split(/\s+/) as (
-                  'S' | 'A' | 'B' | 'C' | 'D' | 'T'
-                )[],
-              })
-            }
-          >
-            Submit route
-          </button>
+        <div className="route-builder">
+          <p className="muted">
+            Build a route in order, or type it below. Discover the required and unsafe relays before
+            submitting.
+          </p>
+          <div className="buttons" aria-label="Route node shortcuts">
+            {challenge.nodes.map((node) => (
+              <button
+                key={node.id}
+                disabled={busy || challenge.solved}
+                onClick={() =>
+                  setRoute((previous) =>
+                    `${previous} ${node.id}`.trim().split(/\s+/).slice(-6).join(' '),
+                  )
+                }
+              >
+                Add {node.id}
+              </button>
+            ))}
+            <button disabled={!route || busy} onClick={() => setRoute('')}>
+              Clear route
+            </button>
+          </div>
+          <div className="route-entry">
+            <label>
+              Candidate route
+              <input
+                aria-label="Candidate route"
+                value={route}
+                onChange={(e) => setRoute(e.target.value)}
+                placeholder="S … T"
+                maxLength={24}
+              />
+            </label>
+            <button
+              disabled={busy || challenge.solved || !route.trim()}
+              onClick={() =>
+                onCommand({
+                  type: 'route',
+                  nodes: route.trim().toUpperCase().split(/\s+/) as (
+                    'S' | 'A' | 'B' | 'C' | 'D' | 'T'
+                  )[],
+                })
+              }
+            >
+              Submit route
+            </button>
+          </div>
         </div>
       )}
       <p className="muted">

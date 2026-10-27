@@ -86,7 +86,15 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   const target = await targetContext.newPage();
   await target.goto('/');
   await target.getByRole('button', { name: 'Use simulation beta' }).click();
+  await target
+    .getByRole('navigation', { name: 'Command deck' })
+    .getByRole('button', { name: /Relay/ })
+    .click();
   await target.getByLabel('Accept incoming world offers').check();
+  await page
+    .getByRole('navigation', { name: 'Command deck' })
+    .getByRole('button', { name: /Relay/ })
+    .click();
   await page.getByRole('button', { name: 'Prepare handoff', exact: true }).click();
   await page.getByRole('button', { name: 'Inject simulated raid evidence' }).click();
   await target.getByRole('button', { name: 'Accept inherited Ark' }).click();

@@ -38,6 +38,10 @@ test('operator bot setup confirms the named account and converts an accidental c
         });
       });
       await expect(page.getByText('Twitch creator session', { exact: true })).toBeVisible();
+      await page
+        .getByRole('navigation', { name: 'Command deck' })
+        .getByRole('button', { name: /Broadcast/ })
+        .click();
       const setup = page.getByLabel('Bot setup secret', { exact: true });
       await expect(setup).toBeVisible();
       await setup.fill('wrong-fixture-key');
