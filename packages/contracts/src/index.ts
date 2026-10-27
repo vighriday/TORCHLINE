@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const RULES_VERSION = 'ark-v2' as const;
+export const CURRENT_RULES_VERSION = 'ark-v3' as const;
+export type RulesVersion = typeof RULES_VERSION | typeof CURRENT_RULES_VERSION;
 export const PRESENTATION_VERSION = '2026-10-26.1' as const;
 export const SYSTEM_IDS = [
   'hull',
@@ -15,7 +17,23 @@ export type SystemId = (typeof SYSTEM_IDS)[number];
 export type ResourceId = 'passengers' | 'hull' | 'power' | 'oxygen' | 'navigation' | 'supplies';
 export type Resources = Record<ResourceId, number>;
 export type Ending = 'colony' | 'partial' | 'wreck';
-export type Phase = 'ready' | 'challenge' | 'decision' | 'paused' | 'ended';
+export type Phase =
+  | 'ready'
+  | 'investigation'
+  | 'challenge'
+  | 'allocation'
+  | 'decision'
+  | 'awaiting-commit'
+  | 'paused'
+  | 'ended';
+export interface CooperationState {
+  budget: number;
+  investigation: boolean;
+  inspections: Record<string, 'engine' | 'cargo' | 'life'>;
+  preferences: Record<string, { hull: number; oxygen: number }>;
+  plan: { hull: number; oxygen: number };
+  closedByEventId: string | null;
+}
 export type SystemCondition =
   'operational' | 'damaged' | 'destroyed' | 'sealed' | 'repaired' | 'jury-rigged';
 export interface Actor {
@@ -55,7 +73,7 @@ export interface SystemPresentation extends ShipSystem {
 }
 export interface WorldState {
   id: string;
-  rulesVersion: typeof RULES_VERSION;
+  rulesVersion: RulesVersion;
   version: number;
   chapter: number;
   phase: Phase;
@@ -70,10 +88,33 @@ export interface WorldState {
   votes: Record<string, string>;
   outcome: Ending | null;
   endingReason: string | null;
+  cooperation?: CooperationState;
 }
 const NodeId = z.enum(['S', 'A', 'B', 'C', 'D', 'T']);
 export const CommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('start') }).strict(),
+  z
+    .object({
+      type: z.literal('configure-cooperation'),
+      budget: z.number().int().min(0).max(10),
+      investigation: z.boolean(),
+    })
+    .strict(),
+  z.object({ type: z.literal('inspect'), area: z.enum(['engine', 'cargo', 'life']) }).strict(),
+  z.object({ type: z.literal('close-investigation') }).strict(),
+  z
+    .object({
+      type: z.literal('allocate'),
+      hull: z.number().int().min(0).max(5),
+      oxygen: z.number().int().min(0).max(5),
+    })
+    .strict()
+    .refine(
+      (v) => v.hull + v.oxygen >= 1 && v.hull + v.oxygen <= 5,
+      'Assign one to five preference points.',
+    ),
+  z.object({ type: z.literal('close-allocation') }).strict(),
+  z.object({ type: z.literal('close-voting') }).strict(),
   z.object({ type: z.literal('scan'), node: NodeId }).strict(),
   z.object({ type: z.literal('route'), nodes: z.array(NodeId).min(2).max(6) }).strict(),
   z.object({ type: z.literal('patch'), node: z.enum(['A', 'B', 'C']) }).strict(),
@@ -107,7 +148,7 @@ export interface WorldEvent {
   id: string;
   worldId: string;
   sequence: number;
-  rulesVersion: typeof RULES_VERSION;
+  rulesVersion: RulesVersion;
   commandId: string;
   command: Command;
   actor: Actor;
@@ -144,7 +185,7 @@ export interface WorldPresentation {
   schemaVersion: typeof PRESENTATION_VERSION;
   worldId: string;
   worldVersion: number;
-  rulesVersion: typeof RULES_VERSION;
+  rulesVersion: RulesVersion;
   mode: 'simulation' | 'live';
   host: string;
   gameVersion: number;
@@ -160,6 +201,20 @@ export interface WorldPresentation {
   choices: ChoicePresentation[];
   votes: Record<string, number>;
   participantCount: number;
+  cooperation?: {
+    budget: number;
+    investigation: boolean;
+    inspections: Record<string, number>;
+    allocations: number;
+    plan: { hull: number; oxygen: number };
+    closed: boolean;
+  };
+  clock?: {
+    deadlineAt: string | null;
+    remainingMs: number | null;
+    serverAt: string;
+    recoveryReason: string | null;
+  };
   outcome: Ending | null;
   endingReason: string | null;
   events: Pick<WorldEvent, 'id' | 'chapter' | 'summary' | 'resourceDelta' | 'cues' | 'causes'>[];
@@ -169,6 +224,9 @@ export interface WorldPresentation {
     canCommit: boolean;
     canPause: boolean;
     canResume: boolean;
+    canCloseInvestigation?: boolean;
+    canCloseAllocation?: boolean;
+    canCloseVoting?: boolean;
   };
 }
 export interface TwitchIntegrationStatus {

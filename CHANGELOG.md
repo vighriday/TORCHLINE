@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-27 — Immutable cooperation rules
+
+- Added ark-v3 investigation priorities, fixed-budget repair preferences, combined consequence previews and explicit vote freezing. Existing ark-v2 histories retain their original rules.
+- Added exhaustive allocation arithmetic and regression tests for real consequences, affordability, lethal overkill, caps and replay. Runtime adoption/timing follows separately; no additional live verification is claimed.
+
 All meaningful product, architecture, and development changes are recorded here. Dates use Asia/Calcutta. No application release has been published.
 
 ## Unreleased
