@@ -187,6 +187,42 @@ export interface TwitchIntegrationStatus {
     custodyChanges: number;
   };
 }
+export interface RecordedWorldEvent {
+  id: string;
+  sequence: number;
+  chapter: number;
+  at: string;
+  community: { id: string; label: string };
+  summary: string;
+  resourceDelta: Partial<Resources>;
+  cues: VisualCue[];
+  causes: string[];
+}
+export interface CustodyStep {
+  id: string;
+  at: string;
+  source: { id: string; label: string };
+  target: { id: string; label: string };
+  mode: 'simulation' | 'live';
+}
+export interface WorldHistoryPage {
+  schemaVersion: 'world-records-2026-10-27.1';
+  worldId: string;
+  throughSequence: number;
+  events: RecordedWorldEvent[];
+  nextCursor: number | null;
+  custody: CustodyStep[];
+  nextCustodyCursor: string | null;
+}
+export interface HandoffPreview {
+  schemaVersion: 'world-records-2026-10-27.1';
+  intentId: string;
+  status: 'prepared' | 'verified';
+  expiresAt: string;
+  source: { id: string; label: string };
+  target: { id: string; label: string };
+  world: WorldPresentation;
+}
 export class DomainError extends Error {
   readonly code: string;
   constructor(code: string, message: string) {

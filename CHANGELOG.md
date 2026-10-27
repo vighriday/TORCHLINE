@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Complete records and inheritance previews — 2026-10-27
+
+- Added creator-only, paginated gameplay/custody history and read-only inspection of parked and terminal worlds. History omits individual ballots, actor identifiers, raw commands and proof payloads; the former custodian loses future record access after transfer.
+- Added exact frozen-Ark previews for the two parties of a current offer, with connected consent, mode, expiry, revision and current source custody checked under the existing lock order. Cancellation, acceptance, opt-out and disconnect end preview access.
+- Connected Archive, Hangar and Relay to actual records; complete event pages and community lineage replace the recent-tail limitation. Normal dashboard/OBS snapshots now query a bounded event tail.
+- Added six PostgreSQL/API permission, paging and revocation tests; all 60 tests across nine files and five browser journeys pass, including receiver inspection before simulated acceptance. Simulator evidence now uses the database clock to avoid application/database timing races; native proof rules are unchanged.
+
 ### Owner launch walkthrough and honest verification — 2026-10-27
 
 - Added a beginner launch guide covering the existing accounts/app, HTTPS restoration, exact redirect/configuration, creator/bot consent, subscriptions, real chat, private OBS links, native raid acceptance and proposed always-on hosting. No production deployment or purchase occurred.

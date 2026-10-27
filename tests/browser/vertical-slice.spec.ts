@@ -97,6 +97,14 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
     .click();
   await page.getByRole('button', { name: 'Prepare handoff', exact: true }).click();
   await page.getByRole('button', { name: 'Inject simulated raid evidence' }).click();
+  await target.getByRole('button', { name: 'Inspect offered Ark' }).click();
+  await expect(target.locator('.handoff-inspector [data-system=navigation]')).toHaveAttribute(
+    'data-condition',
+    'destroyed',
+  );
+  await expect(target.getByRole('region', { name: 'Incoming Ark preview' })).toContainText(
+    'frozen Ark on offer',
+  );
   await target.getByRole('button', { name: 'Accept inherited Ark' }).click();
   await expect(target.locator('[data-system=navigation]')).toHaveAttribute(
     'data-condition',

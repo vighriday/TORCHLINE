@@ -15,6 +15,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0009](0009-bot-delivery-and-account-boundaries.md) | Durable bot output, explicit account roles and private diagnostics | D6–8, D10, D11, D17 |
 | [0010](0010-explicit-empty-account-bot-conversion.md) | Named, one-use confirmation for an empty creator's bot conversion | D6–8, D11, D17 |
 | [0011](0011-claude-design-integration.md) | Canonical React design integration and optional bounded cinematic Ark | D3–5, all C1–C13 |
+| [0012](0012-scoped-world-records.md) | Complete paginated world records and consent-scoped incoming previews | D5, D7, D10, D16, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

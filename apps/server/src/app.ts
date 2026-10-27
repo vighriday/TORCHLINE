@@ -8,7 +8,13 @@ import { resolve } from 'node:path';
 import { z } from 'zod';
 import { CommandRequestSchema, DomainError } from '@torchline/contracts';
 import type { Command } from '@torchline/contracts';
-import { Store, participantIdentity } from '@torchline/storage';
+import {
+  Store,
+  participantIdentity,
+  readWorldRecord,
+  readWorldHistory,
+  readHandoffPreview,
+} from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import {
   authorizationUrl,
@@ -207,7 +213,7 @@ export async function createApp(
       );
   };
   const snapshot = async (creator: Creator, readonly = false) => {
-    const world = await store.active(creator.id);
+    const world = await store.active(creator.id, true);
     const bot = (await store.pool.query("SELECT id FROM oauth_grants WHERE role='bot' LIMIT 1"))
       .rows[0];
     const details =
@@ -299,6 +305,31 @@ export async function createApp(
   app.post('/api/worlds', async (request) => ({
     id: await store.create(await currentCreator(request)),
   }));
+  app.get('/api/worlds/:id/view', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    return presentWorld(await readWorldRecord(store, creator, id));
+  });
+  app.get('/api/worlds/:id/history', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const query = z
+      .object({
+        before: z.coerce.number().int().min(1).max(2147483647).optional(),
+        through: z.coerce.number().int().min(0).max(2147483646).optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(50),
+        custodyBefore: NodeText.optional(),
+      })
+      .strict()
+      .parse(request.query);
+    return readWorldHistory(store, creator, id, query);
+  });
+  app.get('/api/handoffs/:id/preview', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const preview = await readHandoffPreview(store, creator, id);
+    return { ...preview, world: presentWorld(preview.world) };
+  });
   app.post('/api/worlds/:id/commands', async (request) => {
     const creator = await currentCreator(request);
     const { id } = z.object({ id: NodeText }).parse(request.params);
@@ -373,13 +404,18 @@ export async function createApp(
       const intent = (await store.handoffs(creator.id)).find((h) => h.id === id);
       if (!intent || intent.mode !== 'simulation')
         denied('FORBIDDEN', 'Not a party to this simulated handoff.');
+      const simulationAt = (
+        await store.pool.query('SELECT greatest(clock_timestamp(),$1::timestamptz) AS at', [
+          intent!.prepared_at,
+        ])
+      ).rows[0].at as Date;
       await store.observeRaid({
         messageId: `simulation:${id}`,
         mode: 'simulation',
         sourceId: intent!.source_id,
         targetId: intent!.target_id,
         subscriptionId: 'simulation-only',
-        notificationAt: new Date().toISOString(),
+        notificationAt: simulationAt.toISOString(),
       });
     } else if (action === 'accept') {
       const intent = (await store.handoffs(creator.id)).find((item) => item.id === id);

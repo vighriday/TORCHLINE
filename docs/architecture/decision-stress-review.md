@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0012](../decisions/0012-scoped-world-records.md) records the C1–C13 review for complete history and temporary offer previews. Six executed PostgreSQL/API regressions and the extended preview-to-accept browser journey cover the stated read boundaries; no genuine native raid evidence is implied.
+
 The [2026-10-27 design integration review](../design/integration-review.md) checks the Claude Design adaptation and optional cinematic renderer against all C1–C13. [ADR 0011](../decisions/0011-claude-design-integration.md) revises D4 while retaining SVG/DOM information and interaction. Its design constraints are separate from executed browser and OBS evidence.
 
 | ID | Component | Critical workload or invariant |

@@ -5,6 +5,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { DomainError } from '@torchline/contracts';
 import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
 import { applyCommand, createWorld } from '@torchline/engine';
+export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
 
 export interface Creator {
   id: string;
@@ -220,7 +221,7 @@ export class Store {
       return id;
     });
   }
-  async get(id: string): Promise<StoredWorld> {
+  async get(id: string, recentOnly = false): Promise<StoredWorld> {
     const row = (
       await this.pool.query(
         'SELECT w.*,c.label FROM worlds w JOIN creators c ON c.id=w.custodian_id WHERE w.id=$1',
@@ -230,17 +231,19 @@ export class Store {
     if (!row) error('NOT_FOUND', 'World not found.');
     const events = (
       await this.pool.query(
-        'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
+        recentOnly
+          ? "SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 AND event->'command'->>'type'<>'vote' ORDER BY sequence DESC LIMIT 30"
+          : 'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
         [id, row.state.version],
       )
     ).rows.map((row) => row.event);
-    return { ...row, events };
+    return { ...row, events: recentOnly ? events.reverse() : events };
   }
-  async active(channel: string): Promise<StoredWorld | null> {
+  async active(channel: string, recentOnly = false): Promise<StoredWorld | null> {
     const row = (
       await this.pool.query('SELECT world_id FROM channel_slots WHERE channel_id=$1', [channel])
     ).rows[0];
-    return row ? this.get(row.world_id) : null;
+    return row ? this.get(row.world_id, recentOnly) : null;
   }
   async library(channel: string) {
     return (

@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ResourceId, Resources, WorldPresentation } from '@torchline/contracts';
+import type {
+  ResourceId,
+  Resources,
+  WorldPresentation,
+  RecordedWorldEvent,
+} from '@torchline/contracts';
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
+import { useWorldHistory } from './useWorldHistory.ts';
 export type Workspace = 'bridge' | 'relay' | 'hangar' | 'broadcast' | 'archive';
 const destinations: { id: Workspace; label: string; detail: string }[] = [
   { id: 'bridge', label: 'Bridge', detail: 'Play & cooperate' },
@@ -202,6 +208,10 @@ export function ConsequenceSignal({ world }: { world: WorldPresentation }) {
   );
 }
 export function WorldArchive({ world }: { world: WorldPresentation }) {
+  const { record, error, loading, load } = useWorldHistory(world.worldId);
+  const events: (WorldPresentation['events'][number] &
+    Partial<Pick<RecordedWorldEvent, 'at' | 'community'>>)[] =
+    record?.events ?? world.events.slice().reverse();
   return (
     <section className="archive-view">
       <div className="workspace-title">
@@ -228,45 +238,96 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
         </div>
       </section>
       <section className="panel">
-        <h3>Ship log</h3>
-        <p className="muted">
-          The latest 30 recorded world events. Open a system above to explore its permanent damage,
-          repairs and community marks.
-        </p>
-        <ol className="history">
-          {world.events
-            .slice()
-            .reverse()
-            .map((event) => (
-              <li key={event.id} id={`event-${event.id}`}>
-                <span className="event-chapter">CH {String(event.chapter).padStart(2, '0')}</span>
+        <h3>Communities that carried this Ark</h3>
+        {record?.custody.length ? (
+          <ol className="history">
+            {record.custody.map((step) => (
+              <li key={step.id}>
+                <span className="event-chapter">{step.mode === 'simulation' ? 'SIM' : 'LIVE'}</span>
                 <div>
-                  <strong>{event.summary}</strong>
+                  <strong>
+                    {step.source.label} → {step.target.label}
+                  </strong>
                   <small>
-                    {Object.entries(event.resourceDelta)
-                      .map(([key, n]) => `${key} ${n! > 0 ? '+' : ''}${n}`)
-                      .join(' · ') || 'World state recorded'}
+                    <time dateTime={step.at}>{new Date(step.at).toLocaleString()}</time>
                   </small>
-                  {event.causes.length > 0 && (
-                    <small>
-                      Inherited cause:{' '}
-                      {event.causes.map((cause) => {
-                        const origin = world.events.find((item) => item.id === cause);
-                        return origin ? (
-                          <a key={cause} href={`#event-${cause}`}>
-                            {origin.summary}{' '}
-                          </a>
-                        ) : (
-                          <span key={cause}>Earlier chapter record </span>
-                        );
-                      })}
-                    </small>
-                  )}
-                  <small className="event-id">Event {event.id}</small>
                 </div>
               </li>
             ))}
+          </ol>
+        ) : (
+          <p>{loading ? 'Loading custody record…' : 'No completed custody transfers recorded.'}</p>
+        )}
+        {record?.nextCustodyCursor && (
+          <button disabled={loading} onClick={() => void load('custody')}>
+            Load earlier communities
+          </button>
+        )}
+      </section>
+      <section className="panel">
+        <h3>Ship log</h3>
+        <p className="muted">
+          {record
+            ? 'The saved record across every chapter. Votes are summarized in decisions; individual ballots stay private.'
+            : 'Loading the complete saved record…'}{' '}
+          Open a system above to explore permanent damage and repairs.
+        </p>
+        {error && <p role="status">{error}</p>}
+        {record && world.gameVersion > record.throughSequence && (
+          <p>
+            New chapter activity is available.{' '}
+            <button disabled={loading} onClick={() => void load('refresh')}>
+              Refresh ship log
+            </button>
+          </p>
+        )}
+        <ol className="history">
+          {events.map((event) => (
+            <li key={event.id} id={`event-${event.id}`}>
+              <span className="event-chapter">CH {String(event.chapter).padStart(2, '0')}</span>
+              <div>
+                <strong>{event.summary}</strong>
+                {event.at && event.community && (
+                  <small>
+                    <time dateTime={event.at}>{new Date(event.at).toLocaleString()}</time> ·{' '}
+                    {event.community.label}
+                  </small>
+                )}
+                <small>
+                  {Object.entries(event.resourceDelta)
+                    .map(([key, n]) => `${key} ${n! > 0 ? '+' : ''}${n}`)
+                    .join(' · ') || 'World state recorded'}
+                </small>
+                {event.causes.length > 0 && (
+                  <small>
+                    Inherited cause:{' '}
+                    {event.causes.map((cause) => {
+                      const origin = events.find((item) => item.id === cause);
+                      return origin ? (
+                        <a key={cause} href={`#event-${cause}`}>
+                          {origin.summary}{' '}
+                        </a>
+                      ) : (
+                        <span key={cause}>Earlier chapter record </span>
+                      );
+                    })}
+                  </small>
+                )}
+                <small className="event-id">Event {event.id}</small>
+              </div>
+            </li>
+          ))}
         </ol>
+        {record?.nextCursor !== null && record && (
+          <button disabled={loading} onClick={() => void load('events')}>
+            Load earlier events
+          </button>
+        )}
+        {error && (
+          <button disabled={loading} onClick={() => void load('refresh')}>
+            Retry history
+          </button>
+        )}
       </section>
     </section>
   );

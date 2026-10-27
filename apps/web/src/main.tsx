@@ -1,6 +1,7 @@
 import { StrictMode, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { Command } from '@torchline/contracts';
+import type { Command, WorldPresentation } from '@torchline/contracts';
+import { HandoffInspector } from './WorldRecords.tsx';
 import { request } from './api.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { ArkView } from './ArkView.tsx';
@@ -21,6 +22,8 @@ import './styles.css';
 function App() {
   const overlayChannel = location.pathname.match(/^\/overlay\/([^/]+)\//)?.[1];
   const [workspace, setWorkspace] = useState<Workspace>('bridge');
+  const [archiveWorld, setArchiveWorld] = useState<WorldPresentation | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [data, setData] = useState<DashboardSnapshot | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -31,6 +34,23 @@ function App() {
   const [overlayUrl, setOverlayUrl] = useState('');
   const [operatorKey, setOperatorKey] = useState('');
   const [botSetup, setBotSetup] = useState<BotSetupPreview | null>(null);
+  useEffect(() => {
+    if (!data?.me) {
+      setArchiveWorld(null);
+      setPreviewId(null);
+      return;
+    }
+    setArchiveWorld((previous) =>
+      previous && data.worlds?.some((item) => item.id === previous.worldId) ? previous : null,
+    );
+    setPreviewId((previous) =>
+      data.handoffs?.some(
+        (item) => item.id === previous && ['prepared', 'verified'].includes(item.status),
+      )
+        ? previous
+        : null,
+    );
+  }, [data?.me?.id, data?.worlds, data?.handoffs]);
   useEffect(() => {
     if (
       data?.mode === 'live' &&
@@ -116,6 +136,10 @@ function App() {
     }
   }
   const world = data?.world;
+  const archived = archiveWorld?.worldId === world?.worldId ? world : (archiveWorld ?? world);
+  const previewOffer = data?.handoffs?.find(
+    (item) => item.id === previewId && ['prepared', 'verified'].includes(item.status),
+  );
   const send = (command: Command) => {
     if (world)
       void perform(() =>
@@ -529,8 +553,10 @@ function App() {
             </button>
           </div>
         )}
-        {world && workspace === 'archive' && <WorldArchive world={world} />}
-        {!world && workspace === 'archive' && data?.me && (
+        {archived && data?.me && workspace === 'archive' && (
+          <WorldArchive key={archived.worldId} world={archived} />
+        )}
+        {!archived && workspace === 'archive' && data?.me && (
           <section className="panel">
             <h2>No active Ark</h2>
             <p>Resume a vessel from the Hangar to inspect its physical record.</p>
@@ -605,6 +631,11 @@ function App() {
                     <strong>{h.status}</strong> · {h.source_id} → {h.target_id} · {h.mode}
                   </p>
                   <div className="buttons">
+                    {['prepared', 'verified'].includes(h.status) && (
+                      <button disabled={busy} onClick={() => setPreviewId(h.id)}>
+                        Inspect offered Ark
+                      </button>
+                    )}
                     {h.status === 'prepared' && data.mode === 'simulation' && (
                       <button
                         onClick={() =>
@@ -644,6 +675,14 @@ function App() {
                   </div>
                 </article>
               ))}
+              {workspace === 'relay' && previewOffer && (
+                <HandoffInspector
+                  key={previewOffer.id}
+                  id={previewOffer.id}
+                  status={previewOffer.status}
+                  onClose={() => setPreviewId(null)}
+                />
+              )}
               <p className="muted">
                 Genuine native raid verification remains an external milestone. Simulated evidence
                 cannot authorize a live-world transfer.
@@ -659,6 +698,20 @@ function App() {
                     {item.id.slice(0, 8)} · chapter {item.chapter} ·{' '}
                     {item.outcome ?? (item.parked ? 'parked' : 'active')}
                   </span>
+                  <button
+                    disabled={busy}
+                    onClick={() =>
+                      void perform(async () => {
+                        const record = await request<WorldPresentation>(
+                          `/api/worlds/${item.id}/view`,
+                        );
+                        setArchiveWorld(record);
+                        setWorkspace('archive');
+                      })
+                    }
+                  >
+                    Inspect Ark history
+                  </button>
                   {item.parked && !world && (
                     <button
                       onClick={() =>

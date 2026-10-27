@@ -35,6 +35,8 @@ Schema/package: `packages/contracts`. Projection: server application boundary. F
 
 ## Integrated consumers
 
+Complete Archive and inheritance preview use versioned `world-records-2026-10-27.1` DTOs. Current custodians can read `/api/worlds/:id/view` and paginated `/history`; each public page excludes participant identities/ballots and pins the game sequence. `/api/handoffs/:id/preview` returns a read-only `WorldPresentation` only to connected offer parties while source custody, frozen revision, opt-in and expiry remain current. These GETs grant no mutation or native proof authority. See [ADR 0012](../decisions/0012-scoped-world-records.md).
+
 `ArkView` and lazy `ark-scene.ts` share physical systems/resources; stable event IDs position persistent marks. DOM summaries preserve all seven system records even when WebGL is active. Reduced motion or screens at most 700px use SVG. A failed context returns to SVG. The canvas is decorative, one per visible workspace, limited to 30 FPS and DPR 1.5; hidden/offscreen animation stops and unmount disposes geometry/materials/renderer. No textures or postprocessing are allocated. First-frame readiness gates hiding the schematic.
 
 `DeckViews` supplies navigation, resource telemetry, all-six-resource forecasts, participation guidance, bounded Archive, actual Relay progress and a separate read-only broadcast composition. Archive explicitly labels the recent 30 non-vote events; richer historical snapshots are not fabricated. Overlay status/recap never imply native raid verification. `main.tsx` retains the existing HTTP/SSE controller and operator/creator flows. The schema version is unchanged because no wire fields or mutation authority changed.
