@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-27 — Browser baseline and Ark reconciliation fix
+
+- Wait for the persisted chapter phase before recording a browser baseline (GitHub run 40515143258); compare canonical state independently of display clock timestamps.
+- Give sibling Ark and consequence components distinct React keys to prevent stale duplicated ship details.
+
 ## 2026-10-27 — Immutable cooperation rules
 
 - Added ark-v3 investigation priorities, fixed-budget repair preferences, combined consequence previews and explicit vote freezing. Existing ark-v2 histories retain their original rules.

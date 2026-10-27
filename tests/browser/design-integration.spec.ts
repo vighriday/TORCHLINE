@@ -126,7 +126,14 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
       await page.getByRole('button', { name: 'Create an Ark' }).click();
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
       await expect(page.locator('canvas')).toHaveCount(0);
+      await expect
+        .poll(async () => (await (await page.request.get('/api/state')).json()).world.phase)
+        .toBe('challenge');
       const original = (await (await page.request.get('/api/state')).json()).world;
+      const canonical = (world: WorldPresentation) => ({
+        ...world,
+        clock: world.clock ? { ...world.clock, serverAt: 'display-time' } : undefined,
+      });
       await page.getByRole('button', { name: 'Add S', exact: true }).focus();
       await page.keyboard.press('Enter');
       await page.getByRole('button', { name: 'Add A', exact: true }).focus();
@@ -151,7 +158,9 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
           ).toBe(true);
         }
       }
-      expect((await (await page.request.get('/api/state')).json()).world).toEqual(original);
+      expect(canonical((await (await page.request.get('/api/state')).json()).world)).toEqual(
+        canonical(original),
+      );
       await page.setViewportSize({ width: 1440, height: 1000 });
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.getByRole('region', { name: 'Persistent Ark condition' }).scrollIntoViewIfNeeded();
@@ -183,7 +192,9 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
         await expect(page.locator('.ark-schematic')).toHaveCSS('opacity', '1');
       }
       expect(external).toEqual([]);
-      expect((await (await page.request.get('/api/state')).json()).world).toEqual(original);
+      expect(canonical((await (await page.request.get('/api/state')).json()).world)).toEqual(
+        canonical(original),
+      );
       await page.getByRole('button', { name: 'Open final decision' }).click();
       await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
       [overlay] = await Promise.all([

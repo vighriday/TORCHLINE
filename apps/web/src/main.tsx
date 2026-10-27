@@ -441,7 +441,7 @@ function App() {
               )}
             </section>
             <ResourceMeters world={world} />
-            <ArkView key={world.worldId} systems={world.systems} resources={world.resources} />
+            <ArkView key={`ark:${world.worldId}`} systems={world.systems} resources={world.resources} />
             <ParticipationGuide world={world} />
             {world.handoffPending && (
               <div className="notice">
@@ -547,7 +547,7 @@ function App() {
                 </div>
               </section>
             )}
-            <ConsequenceSignal key={world.worldId} world={world} />
+            <ConsequenceSignal key={`consequence:${world.worldId}`} world={world} />
             <button className="quiet archive-link" onClick={() => setWorkspace('archive')}>
               Read the Ark’s history
             </button>
