@@ -1,5 +1,7 @@
 # Twitch account setup and verification
 
+For the current ordered beginner walkthrough, use [Get TORCHLINE operational with Twitch](owner-launch-guide.md). As of 2026-10-27 the previous ngrok credential is missing and the development HTTPS origin is offline; restore it before treating the older verification evidence below as current reachability. Dedicated bot setup for a signed-in creator is now under **Broadcast**; incoming offer consent is under **Relay**.
+
 Updated 2026-10-26. Real application credentials, public HTTPS, broadcaster/bot OAuth, named bot conversion, three signed callback challenges and three required enabled subscriptions are verified. Genuine chat effects, visible bot replies, OBS and native raid acceptance remain separate milestones. Never paste secrets, passwords or tokens into chat or Git.
 
 1. Sign in at the [developer console](https://dev.twitch.tv/console/apps) using the app owner's account. Verify email and enable 2FA. Register TORCHLINE as a confidential application in the appropriate game/application integration category.

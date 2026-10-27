@@ -142,7 +142,7 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
         await page.keyboard.press('Enter');
         await expect(button).toHaveAttribute('aria-current', 'page');
         if (name === 'Archive')
-          await expect(page.getByRole('heading', { name: 'Canonical ship log' })).toBeVisible();
+          await expect(page.getByRole('heading', { name: 'Ship log', exact: true })).toBeVisible();
         for (const width of [320, 390, 768, 1440]) {
           await page.setViewportSize({ width, height: 1000 });
           expect(

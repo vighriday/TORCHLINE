@@ -5,6 +5,12 @@ import { parseEnv } from 'node:util';
 import { Store } from '@torchline/storage';
 import { decryptSecret } from '@torchline/twitch';
 const values = new Set<string>();
+if (existsSync('.local/ngrok.yml')) {
+  const credential = readFileSync('.local/ngrok.yml', 'utf8').match(
+    /^\s*authtoken:\s*["']?([\w-]+)/m,
+  )?.[1];
+  if (credential && credential.length >= 16) values.add(credential);
+}
 let live: ReturnType<typeof parseEnv> = {};
 for (const file of ['.env', '.env.live'])
   if (existsSync(file)) {
@@ -93,7 +99,39 @@ for (const name of existsSync('.local') ? readdirSync('.local') : [])
   if (name.endsWith('.log'))
     inspect(readFileSync(join('.local', name)), 'local application/tunnel logs');
 let responses = 0;
-if (live.PUBLIC_BASE_URL?.startsWith('https://')) {
+const artifactsOnly = process.argv.includes('--artifacts-only');
+let publicScan = artifactsOnly
+  ? 'skipped: artifacts-only requested'
+  : 'incomplete: no live HTTPS origin';
+let identified = false;
+if (!artifactsOnly && live.PUBLIC_BASE_URL?.startsWith('https://')) {
+  let probe: Response | undefined;
+  try {
+    probe = await fetch(new URL('/health/live', live.PUBLIC_BASE_URL), {
+      headers: { 'ngrok-skip-browser-warning': 'true' },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    publicScan = 'incomplete: public origin unreachable';
+  }
+  if (probe) {
+    const body = Buffer.from(await probe.arrayBuffer());
+    inspect(body, 'public identity probe');
+    responses++;
+    let identity: { ok?: boolean; mode?: string } = {};
+    try {
+      identity = JSON.parse(body.toString()) ?? {};
+    } catch {
+      /* Tunnel/error HTML is not the app. */
+    }
+    identified = probe.status === 200 && identity.ok === true && identity.mode === 'live';
+    publicScan = identified
+      ? 'completed: selected live application responses'
+      : 'incomplete: origin did not identify the live application';
+  }
+}
+if (identified) {
   const paths = new Set([
     '/',
     '/.env',
@@ -104,11 +142,17 @@ if (live.PUBLIC_BASE_URL?.startsWith('https://')) {
     '/api/twitch/status',
   ]);
   for (const path of paths) {
-    const response = await fetch(new URL(path, live.PUBLIC_BASE_URL), {
-      headers: { 'ngrok-skip-browser-warning': 'true' },
-      redirect: 'manual',
-      signal: AbortSignal.timeout(10000),
-    });
+    let response: Response;
+    try {
+      response = await fetch(new URL(path, live.PUBLIC_BASE_URL), {
+        headers: { 'ngrok-skip-browser-warning': 'true' },
+        redirect: 'manual',
+        signal: AbortSignal.timeout(10000),
+      });
+    } catch {
+      publicScan = 'incomplete: a selected public response was unavailable';
+      break;
+    }
     const body = Buffer.from(await response.arrayBuffer());
     inspect(body, 'public HTTP response');
     responses++;
@@ -124,7 +168,9 @@ if (live.PUBLIC_BASE_URL?.startsWith('https://')) {
 console.log(
   JSON.stringify(
     {
-      result: 'passed',
+      result: artifactsOnly || publicScan.startsWith('completed:') ? 'passed' : 'partial',
+      artifactScan: 'passed',
+      publicScan,
       privateFingerprints: values.size,
       gitObjects: ids.length,
       stagedEntries: index.length,
@@ -137,3 +183,4 @@ console.log(
     2,
   ),
 );
+if (!artifactsOnly && !publicScan.startsWith('completed:')) process.exitCode = 2;

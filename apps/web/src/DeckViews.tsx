@@ -91,7 +91,13 @@ export function ResourceMeters({ world }: { world: WorldPresentation }) {
     </section>
   );
 }
-export function ParticipationGuide({ world }: { world: WorldPresentation }) {
+export function ParticipationGuide({
+  world,
+  broadcast = false,
+}: {
+  world: WorldPresentation;
+  broadcast?: boolean;
+}) {
   return (
     <aside className="participation-guide" aria-label="How to participate">
       <span className="eyebrow">YOUR CHAT. YOUR SHIP.</span>
@@ -132,7 +138,9 @@ export function ParticipationGuide({ world }: { world: WorldPresentation }) {
       </div>
       <small>
         {world.mode === 'simulation'
-          ? 'Simulation inputs below rehearse the same rules.'
+          ? broadcast
+            ? 'Simulation broadcast. The captain sends inputs from the dashboard.'
+            : 'Simulation inputs below rehearse the same rules.'
           : 'Use the broadcaster’s ordinary Twitch chat, including on mobile.'}{' '}
         No raid required to play.
       </small>
@@ -220,10 +228,10 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
         </div>
       </section>
       <section className="panel">
-        <h3>Canonical ship log</h3>
+        <h3>Ship log</h3>
         <p className="muted">
-          The latest 30 non-vote events from this Ark. System records above retain permanent
-          physical marks. Full historical snapshots and custody timelines are future API work.
+          The latest 30 recorded world events. Open a system above to explore its permanent damage,
+          repairs and community marks.
         </p>
         <ol className="history">
           {world.events
@@ -242,9 +250,16 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
                   {event.causes.length > 0 && (
                     <small>
                       Inherited cause:{' '}
-                      {event.causes.map((cause) => (
-                        <span key={cause}>{cause} </span>
-                      ))}
+                      {event.causes.map((cause) => {
+                        const origin = world.events.find((item) => item.id === cause);
+                        return origin ? (
+                          <a key={cause} href={`#event-${cause}`}>
+                            {origin.summary}{' '}
+                          </a>
+                        ) : (
+                          <span key={cause}>Earlier chapter record </span>
+                        );
+                      })}
                     </small>
                   )}
                   <small className="event-id">Event {event.id}</small>
@@ -357,7 +372,7 @@ export function BroadcastOverlay({
             </section>
           </div>
           <div className="overlay-bottom">
-            <ParticipationGuide world={world} />
+            <ParticipationGuide world={world} broadcast />
             <ConsequenceSignal key={world.worldId} world={world} />
           </div>
         </>

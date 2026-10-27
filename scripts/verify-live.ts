@@ -87,7 +87,7 @@ else {
       check(
         'server credentials loaded',
         'blocked',
-        'Restart the live server after saving .env.live.',
+        'The public server could not confirm configuration. Restore HTTPS reachability first; restart only if live configuration changed.',
       );
     const store = new Store(process.env.DATABASE_URL!);
     try {

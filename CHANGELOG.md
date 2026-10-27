@@ -4,6 +4,13 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Owner launch walkthrough and honest verification — 2026-10-27
+
+- Added a beginner launch guide covering the existing accounts/app, HTTPS restoration, exact redirect/configuration, creator/bot consent, subscriptions, real chat, private OBS links, native raid acceptance and proposed always-on hosting. No production deployment or purchase occurred.
+- Rechecked the real Twitch app, creator/bot grants and exact 3/3 subscription metadata successfully. Public probes fail while the owner's ngrok credential remains deferred; actual chat/output, OBS and native transfer remain unverified.
+- Secret scans now identify the live application before claiming public coverage, report partial evidence for an offline/error origin, support explicitly scoped artifact-only scans and include a locally saved ngrok credential when present. Private artifacts pass the configured fingerprint scan. Clarified verifier guidance so an unreachable origin does not automatically imply missing server credentials.
+- Clarified read-only simulation guidance and connected inherited causes to readable ship-log entries. Recorded the complete design/authority review and remaining gates.
+
 ### Canonical command deck and broadcast integration — 2026-10-27
 
 - Adapted Claude Design into typed React Bridge, Relay, Hangar, Broadcast and Archive views while preserving the working HTTP/SSE controller, creator/bot setup, gameplay commands, park/resume, overlays and consented custody flow.

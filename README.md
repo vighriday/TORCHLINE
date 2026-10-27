@@ -10,7 +10,7 @@ The first season, **The Ark Protocol**, follows a damaged colony ship through fi
 
 Architecture approved and the first functional gameplay slice implemented on **October 26, 2026**. The reference application runs locally with PostgreSQL: complete five-chapter gameplay, cooperative challenges, persistent physical damage/repairs, safe choice previews, saving, replay, overlays and isolated simulated custody transfers.
 
-Real Twitch application credentials, broadcaster/bot OAuth, public HTTPS, signed callback challenges and current enabled chat/stream subscriptions are verified. Genuine chat effects, visible bot replies, actual OBS and a native raid remain separate acceptance milestones. Encrypted grants, webhook ingestion, token lifecycle, bot output and custody have local contract tests. Claude Design will supply the final visual experience; the current UI is a functional reference. See [implementation status](docs/planning/implementation-status.md).
+Claude Design exports are integrated into the typed React command deck, shared persistent Ark, cooperative challenges, read-only broadcast view, Relay, Hangar and Archive. SVG remains the accessible fallback; a lazy cinematic renderer adds optional ship motion. Real Twitch application/broadcaster/bot authorization and three signed callback challenges were verified on October 26. The development HTTPS tunnel currently needs its missing ngrok credential restored. Genuine chat effects, visible bot replies, actual OBS and a native raid remain separate acceptance milestones. See [implementation status](docs/planning/implementation-status.md) and the ordered [owner launch guide](docs/operations/owner-launch-guide.md).
 
 Repository: [vighriday/TORCHLINE](https://github.com/vighriday/TORCHLINE).
 
@@ -29,6 +29,7 @@ Repository: [vighriday/TORCHLINE](https://github.com/vighriday/TORCHLINE).
 | [Documentation index](docs/README.md) | Complete documentation map |
 | [Claude Design handoff](docs/design/README.md) | Stable renderer interfaces and seven real-engine state fixtures |
 | [Twitch setup](docs/operations/twitch-setup.md) | Account registration, local secrets, OAuth and live verification |
+| [Owner launch guide](docs/operations/owner-launch-guide.md) | Exact ordered steps, current account status, hosting, OBS and live acceptance |
 
 ## Run the functional slice
 
@@ -57,7 +58,7 @@ One deployment and one database keep operations manageable while preserving stro
 ## Repository layout
 
 ```text
-apps/                 executable server and reference browser application
+apps/                 executable server and React command deck / OBS view
 packages/             engine, contracts, storage and Twitch adapters
 assets/               asset provenance and future original/licensed visuals
 tests/                domain, concurrency, integration and browser tests

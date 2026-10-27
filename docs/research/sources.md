@@ -43,6 +43,10 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 | E11 | [Render web services](https://render.com/docs/web-services), [free limitations](https://render.com/docs/free), [WebSocket alternative](https://render.com/docs/websocket) | Hosting shape, sleep risk and fallback transport support. Deployed SSE behavior is still to be tested. |
 | E12 | [Twurple](https://twurple.js.org/) | Evaluated Twitch API/auth/EventSub SDK alternative |
 | E13 | [ngrok agent configuration](https://ngrok.com/docs/agent/config/) and [TLS](https://ngrok.com/docs/gateway/domains/tls-certificates/) | Development tunnel, disabled request inspector and automatic public TLS; production hosting remains separate |
+| E14 | [Three.js cleanup](https://threejs.org/manual/pages/cleanup.html), [resource disposal](https://threejs.org/manual/pages/how-to-dispose-of-objects.html), [WebGLRenderer](https://threejs.org/docs/pages/WebGLRenderer) | Checked 2026-10-27: explicit geometry/material cleanup, renderer lifecycle and bounded optional cinematic view; not an OBS benchmark |
+| E15 | [OBS Browser Source](https://obsproject.com/kb/browser-source) | Checked 2026-10-27: viewport dimensions, custom FPS, scene visibility/refresh properties and CEF basis; actual installation still needs testing |
+| E16 | [Render Node version](https://render.com/docs/node-version), [deployment controls](https://render.com/docs/deploys), [health checks](https://render.com/docs/health-checks) | Checked 2026-10-27 for the proposed owner hosting procedure; no deployment executed |
+| E17 | [Google Fonts repository](https://github.com/google/fonts), [ngrok Windows installation](https://ngrok.com/download/windows) | Checked 2026-10-27: local OFL font provenance and official signed development tunnel download; credential remains an owner dependency |
 
 ## Competition and adjacent products
 

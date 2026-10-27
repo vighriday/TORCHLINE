@@ -1,6 +1,6 @@
 # Implementation backlog
 
-Status: implementation underway, updated 2026-10-26. B01–B05, B09–B11, B13/B14/B16/B17 have substantial local implementation/evidence; completion is limited to the behaviors in [the status report](implementation-status.md). B06 has real app/broadcaster/bot authorization and named conversion plus tested role/refresh/disconnect contracts. B07 has three genuine signed challenges and enabled current chat/stream subscriptions; actual chat effects and visible bot output remain unverified. B12 authentic raid is not complete. Allocation, timers, production hardening and final Claude Design integration remain open. Roles express responsibility only.
+Status: implementation underway, updated 2026-10-26. B01–B05, B09–B11, B13/B14/B16/B17 have substantial local implementation/evidence; completion is limited to the behaviors in [the status report](implementation-status.md). B06 has real app/broadcaster/bot authorization and named conversion plus tested role/refresh/disconnect contracts. B07 has three genuine signed challenges and enabled current chat/stream subscriptions; actual chat effects and visible bot output remain unverified. B12 authentic raid is not complete. The supplied Claude Design surfaces are integrated through canonical contracts. Allocation, timers, production hardening, full historical views, owner visual review and actual OBS remain open. Roles express responsibility only.
 
 ## Foundation and integration
 

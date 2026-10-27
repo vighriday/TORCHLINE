@@ -24,7 +24,10 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
 | [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
+| [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
+| [Design integration review](design/integration-review.md) | Six-surface mapping, excluded prototype logic and thirteen-component stress review |
 | [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
 | [Public capability and authority review](reviews/2026-10-26-public-authority.md) | All route/component boundaries, four reproduced defects, evidence and pruning recommendations |
+| [Design and launch authority review](reviews/2026-10-27-design-integration.md) | Integrated consumers, resolved visual defects, exact verification scope and deferred public HTTPS |
 
 The local source concept remains outside version control. No document in this index requires it to run, test, or judge the future application.
