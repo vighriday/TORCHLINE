@@ -2,7 +2,10 @@ import { Pool } from 'pg';
 import type { PoolClient } from 'pg';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
-import { DomainError } from '@torchline/contracts';
+import { DomainError, CURRENT_RULES_VERSION } from '@torchline/contracts';
+import { syncEpisode } from './episodes.ts';
+import type { EpisodeClock } from './episodes.ts';
+export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
 import { applyCommand, createWorld } from '@torchline/engine';
 export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
@@ -23,6 +26,7 @@ export interface StoredWorld {
   frozen_by: string | null;
   label: string;
   events: WorldEvent[];
+  clock?: EpisodeClock;
 }
 export interface Handoff {
   id: string;
@@ -123,6 +127,35 @@ export class Store {
         "UPDATE eventsub_inbox SET processed_at=now(),error='AUTH_ENDED' WHERE processed_at IS NULL AND payload->>'channelId'=$1",
         [channel],
       );
+      const world = (
+        await c.query(
+          'SELECT w.* FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w',
+          [channel],
+        )
+      ).rows[0];
+      if (world && !world.frozen_by && !['ready', 'paused', 'ended'].includes(world.state.phase)) {
+        const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
+        const next = applyCommand(
+          world.state,
+          { type: 'pause' },
+          { id: 'authorization-recovery', role: 'host', community: channel },
+          { commandId: `disconnect:${world.revision}`, at: at.toISOString() },
+        );
+        await syncEpisode(c, world.state, next.state, at);
+        await c.query('UPDATE worlds SET state=$2,revision=revision+1 WHERE id=$1', [
+          world.id,
+          next.state,
+        ]);
+        await c.query('INSERT INTO world_events(world_id,sequence,event) VALUES($1,$2,$3)', [
+          world.id,
+          next.event.sequence,
+          next.event,
+        ]);
+        await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [
+          world.id,
+          world.revision + 1,
+        ]);
+      }
     });
     const pending = (
       await this.pool.query(
@@ -162,7 +195,7 @@ export class Store {
         row &&
         row.mode === 'live' &&
         !row.frozen_by &&
-        ['challenge', 'decision'].includes(row.state.phase) &&
+        ['investigation', 'challenge', 'allocation', 'decision'].includes(row.state.phase) &&
         row.state.windowOpenedAt &&
         Date.parse(timestamp) >= Date.parse(row.state.windowOpenedAt);
       let duplicate = false;
@@ -173,7 +206,17 @@ export class Store {
             [channel, chatMessageId],
           )
         ).rowCount;
-      const accepted = eligible && !duplicate;
+      const clock = row
+        ? (await c.query('SELECT deadline_at FROM episode_clocks WHERE world_id=$1', [row.id]))
+            .rows[0]
+        : null;
+      // Cutoff is both provider-time and durable receipt-time: delayed past-cutoff messages
+      // cannot enter a closed window. Already accepted work is drained before closing.
+      const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
+      const withinDeadline =
+        !clock?.deadline_at ||
+        (Date.parse(timestamp) < clock.deadline_at.getTime() && at < clock.deadline_at);
+      const accepted = eligible && !duplicate && withinDeadline;
       const participantId =
         accepted && participantKey ? participantIdentity(row.id, actorId, participantKey) : actorId;
       const payload = accepted
@@ -209,7 +252,7 @@ export class Store {
       if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [owner.id])).rowCount)
         error('CHANNEL_BUSY', 'Park or finish the current world first.');
       const id = randomUUID();
-      const state = createWorld(id);
+      const state = createWorld(id, CURRENT_RULES_VERSION);
       await c.query('INSERT INTO worlds(id,mode,custodian_id,state) VALUES($1,$2,$3,$4)', [
         id,
         owner.mode,
@@ -232,12 +275,18 @@ export class Store {
     const events = (
       await this.pool.query(
         recentOnly
-          ? "SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 AND event->'command'->>'type'<>'vote' ORDER BY sequence DESC LIMIT 30"
+          ? "SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 AND event->'command'->>'type' NOT IN ('vote','allocate','inspect') ORDER BY sequence DESC LIMIT 30"
           : 'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
         [id, row.state.version],
       )
     ).rows.map((row) => row.event);
-    return { ...row, events: recentOnly ? events.reverse() : events };
+    const clock = (
+      await this.pool.query(
+        'SELECT * FROM episode_clocks WHERE world_id=$1 AND input_window=$2 AND phase=$3',
+        [id, row.state.window, row.state.phase],
+      )
+    ).rows[0];
+    return { ...row, events: recentOnly ? events.reverse() : events, clock };
   }
   async active(channel: string, recentOnly = false): Promise<StoredWorld | null> {
     const row = (
@@ -268,11 +317,37 @@ export class Store {
           channel,
           id,
         ]);
-      } else
+      } else {
+        if (!['ready', 'paused', 'ended'].includes(row.state.phase)) {
+          if (
+            (
+              await c.query(
+                "SELECT 1 FROM eventsub_inbox WHERE processed_at IS NULL AND payload->>'kind'='chat' AND payload->>'worldId'=$1 LIMIT 1",
+                [id],
+              )
+            ).rowCount
+          )
+            error('INPUT_PENDING', 'Wait for accepted chat before parking.');
+          const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
+          const next = applyCommand(
+            row.state,
+            { type: 'pause' },
+            { id: channel, role: 'host', community: channel },
+            { commandId: `park:${row.revision}`, at: at.toISOString() },
+          );
+          await syncEpisode(c, row.state, next.state, at);
+          await c.query('UPDATE worlds SET state=$2 WHERE id=$1', [id, next.state]);
+          await c.query('INSERT INTO world_events(world_id,sequence,event) VALUES($1,$2,$3)', [
+            id,
+            next.event.sequence,
+            next.event,
+          ]);
+        }
         await c.query('DELETE FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
           channel,
           id,
         ]);
+      }
       await c.query('UPDATE worlds SET revision=revision+1 WHERE id=$1', [id]);
       await c.query(
         'INSERT INTO outbox(world_id,revision) SELECT id,revision FROM worlds WHERE id=$1',
@@ -288,6 +363,7 @@ export class Store {
     commandId: string,
     command: Command,
     ingress?: { id: string; window: number },
+    due?: { window: number; recovery?: { remainingMs: number; reason: string } },
   ) {
     await this.transaction(async (c) => {
       await this.lockChannels(c, [actor.community]);
@@ -310,11 +386,20 @@ export class Store {
           );
           return;
         }
-      } else if (['close-challenge', 'commit', 'pause'].includes(command.type)) {
+      } else if (
+        [
+          'close-investigation',
+          'close-challenge',
+          'close-allocation',
+          'close-voting',
+          'commit',
+          'pause',
+        ].includes(command.type)
+      ) {
         if (
           (
             await c.query(
-              "SELECT 1 FROM eventsub_inbox WHERE processed_at IS NULL AND payload->>'worldId'=$1 LIMIT 1",
+              "SELECT 1 FROM eventsub_inbox WHERE processed_at IS NULL AND payload->>'kind'='chat' AND payload->>'worldId'=$1 LIMIT 1",
               [id],
             )
           ).rowCount
@@ -348,10 +433,38 @@ export class Store {
         error('WORLD_PARKED', 'Resume this world before playing.');
       if (row.revision !== expectedRevision)
         error('STALE_VERSION', 'The world changed. Refresh and try again.');
+      const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
+      if (
+        !ingress &&
+        ['inspect', 'scan', 'route', 'patch', 'allocate', 'vote'].includes(command.type)
+      ) {
+        const clock = (
+          await c.query('SELECT deadline_at FROM episode_clocks WHERE world_id=$1', [id])
+        ).rows[0];
+        if (clock?.deadline_at && clock.deadline_at <= at)
+          error('WINDOW_CLOSED', 'The server deadline has passed. Wait for the next phase.');
+      }
+      if (due) {
+        const clock = (
+          await c.query('SELECT deadline_at FROM episode_clocks WHERE world_id=$1 FOR UPDATE', [id])
+        ).rows[0];
+        if (
+          row.state.window !== due.window ||
+          !clock?.deadline_at ||
+          (!due.recovery && clock.deadline_at > at)
+        )
+          return;
+      }
       const next = applyCommand(row.state, command, actor, {
         commandId,
-        at: new Date().toISOString(),
+        at: at.toISOString(),
       });
+      await syncEpisode(c, row.state, next.state, at);
+      if (due?.recovery)
+        await c.query(
+          'UPDATE episode_clocks SET remaining_ms=$2,recovery_reason=$3 WHERE world_id=$1',
+          [id, due.recovery.remainingMs, due.recovery.reason],
+        );
       await c.query('UPDATE worlds SET state=$2,revision=revision+1,updated_at=now() WHERE id=$1', [
         id,
         next.state,
@@ -367,9 +480,10 @@ export class Store {
       );
       await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [id, row.revision + 1]);
       if (ingress)
-        await c.query('UPDATE eventsub_inbox SET processed_at=now() WHERE message_id=$1', [
-          ingress.id,
-        ]);
+        await c.query(
+          'UPDATE eventsub_inbox SET processed_at=now(),error=NULL WHERE message_id=$1',
+          [ingress.id],
+        );
     });
     return this.get(id);
   }
@@ -554,6 +668,8 @@ export class Store {
         'UPDATE worlds SET custodian_id=$2,frozen_by=NULL,revision=revision+1 WHERE id=$1',
         [intent.world_id, receiver.id],
       );
+      // Ready-boundary custody inherits game rules and scars, not the previous host's pacing.
+      await c.query('DELETE FROM episode_clocks WHERE world_id=$1', [intent.world_id]);
       await c.query('UPDATE raid_proofs SET consumed_by=$2 WHERE message_id=$1', [
         intent.proof_id,
         intent.id,

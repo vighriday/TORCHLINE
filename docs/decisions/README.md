@@ -17,6 +17,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0011](0011-claude-design-integration.md) | Canonical React design integration and optional bounded cinematic Ark | D3–5, all C1–C13 |
 | [0012](0012-scoped-world-records.md) | Complete paginated world records and consent-scoped incoming previews | D5, D7, D10, D16, all C1–C13 |
 | [0013](0013-versioned-cooperation.md) | Immutable cooperation rules, bounded allocation and explicit vote freezing | D9, D11, D15–16, all C1–C13 |
+| [0014](0014-durable-episode-policy.md) | Persisted phase deadlines, worker fencing and scoped input recovery | D5, D7–11, D15–17, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

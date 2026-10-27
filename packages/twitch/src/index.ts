@@ -214,15 +214,19 @@ export function parseChatCommand(text: string): Command | null {
   const [name, ...args] = text.trim().split(/\s+/);
   const verb = name.toLowerCase();
   const candidate =
-    verb === '!scan' && args.length === 1
-      ? { type: 'scan', node: args[0].toUpperCase() }
-      : verb === '!patch' && args.length === 1
-        ? { type: 'patch', node: args[0].toUpperCase() }
-        : verb === '!route'
-          ? { type: 'route', nodes: args.map((n) => n.toUpperCase()) }
-          : verb === '!vote' && args.length === 1
-            ? { type: 'vote', option: args[0] }
-            : null;
+    verb === '!inspect' && args.length === 1
+      ? { type: 'inspect', area: args[0].toLowerCase() }
+      : verb === '!allocate' && args.length === 2 && args.every((a) => /^[0-5]$/.test(a))
+        ? { type: 'allocate', hull: Number(args[0]), oxygen: Number(args[1]) }
+        : verb === '!scan' && args.length === 1
+          ? { type: 'scan', node: args[0].toUpperCase() }
+          : verb === '!patch' && args.length === 1
+            ? { type: 'patch', node: args[0].toUpperCase() }
+            : verb === '!route'
+              ? { type: 'route', nodes: args.map((n) => n.toUpperCase()) }
+              : verb === '!vote' && args.length === 1
+                ? { type: 'vote', option: args[0] }
+                : null;
   if (!candidate) return null;
   const parsed = CommandSchema.safeParse(candidate);
   return parsed.success ? parsed.data : null;

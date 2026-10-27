@@ -154,7 +154,7 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
         });
         expect(started.statusCode).toBe(200);
         expect(started.json().world.resources.hull).toBe(70);
-        expect(started.json().world.schemaVersion).toBe('2026-10-26.1');
+        expect(started.json().world.schemaVersion).toBe('2026-10-27.1');
         expect(started.json().world.events[0]).not.toHaveProperty('actor');
         expect(started.json().world).not.toHaveProperty('state');
         const malformed = await app.inject({

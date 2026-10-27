@@ -438,7 +438,9 @@ export function applyCommand(
             : 'A';
     if (Object.values(counts).some(Boolean)) {
       s.challenge.scanned.push(node);
-      s.challenge.contributions[`inspection:${node}`] = 'shared-investigation';
+      s.challenge.contributions[`inspection:${node}`] = Object.keys(co.inspections)
+        .sort()
+        .find((key) => co.inspections[key] === area)!;
       cues.push({ kind: 'discovery', eventId: id });
     }
     s.phase = 'challenge';

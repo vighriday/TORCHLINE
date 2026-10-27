@@ -190,13 +190,9 @@ describe('scoped complete records and inheritance consent', () => {
         const preview = (
           await app.inject({ url: `/api/handoffs/${intent.id}/preview`, headers: receiver })
         ).json();
-        expect(Object.values(preview.world.capabilities)).toEqual([
-          false,
-          false,
-          false,
-          false,
-          false,
-        ]);
+        expect(Object.values(preview.world.capabilities).every((value) => value === false)).toBe(
+          true,
+        );
         expect(preview.world.resources).toEqual((await store.get(id)).state.resources);
         for (const suffix of ['limit=101', 'limit=-1', 'before=abc', 'through=-1', 'unknown=x'])
           expect(

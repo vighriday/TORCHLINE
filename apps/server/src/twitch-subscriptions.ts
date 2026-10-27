@@ -450,7 +450,19 @@ export function twitchSubscriptions(
         (sub) =>
           sub.type === type && sub.status === 'enabled' && sub.current && sub.providerConfirmed,
       );
+    const inbox = (
+      await store.pool.query(
+        `SELECT count(*) FILTER(WHERE processed_at IS NULL)::integer AS pending,count(*) FILTER(WHERE processed_at IS NULL AND attempts>0)::integer AS retrying,count(*) FILTER(WHERE error='RETRY_EXHAUSTED')::integer AS quarantined,min(received_at) FILTER(WHERE processed_at IS NULL) AS oldest FROM eventsub_inbox WHERE payload->>'channelId'=$1`,
+        [channel],
+      )
+    ).rows[0];
     return {
+      inbox: {
+        pending: inbox.pending,
+        retrying: inbox.retrying,
+        quarantined: inbox.quarantined,
+        oldestAt: inbox.oldest?.toISOString() ?? null,
+      },
       botAuthorized: Boolean(botId),
       chatReady: Boolean(botId) && ready('channel.chat.message'),
       raidReady: ready('channel.raid'),

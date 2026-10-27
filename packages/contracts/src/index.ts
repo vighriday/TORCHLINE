@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const RULES_VERSION = 'ark-v2' as const;
 export const CURRENT_RULES_VERSION = 'ark-v3' as const;
 export type RulesVersion = typeof RULES_VERSION | typeof CURRENT_RULES_VERSION;
-export const PRESENTATION_VERSION = '2026-10-26.1' as const;
+export const PRESENTATION_VERSION = '2026-10-27.1' as const;
 export const SYSTEM_IDS = [
   'hull',
   'navigation',
@@ -230,6 +230,7 @@ export interface WorldPresentation {
   };
 }
 export interface TwitchIntegrationStatus {
+  inbox?: { pending: number; retrying: number; quarantined: number; oldestAt: string | null };
   botAuthorized: boolean;
   chatReady: boolean;
   raidReady: boolean;

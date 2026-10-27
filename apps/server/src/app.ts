@@ -14,6 +14,9 @@ import {
   readWorldRecord,
   readWorldHistory,
   readHandoffPreview,
+  advanceEpisodes,
+  recoverEpisodes,
+  configureEpisode,
 } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import {
@@ -250,7 +253,14 @@ export async function createApp(
   };
   app.get('/health/live', async () => ({ ok: true, mode: config.mode }));
   app.get('/health/ready', async () => {
-    await store.pool.query('SELECT name FROM schema_migrations LIMIT 1');
+    if (
+      !(
+        await store.pool.query(
+          "SELECT 1 FROM schema_migrations WHERE name='007_episode_clocks.sql'",
+        )
+      ).rowCount
+    )
+      denied('NOT_CONFIGURED', 'Database migration required.');
     return { ok: true };
   });
   app.get('/api/state', async (request, reply) => {
@@ -334,7 +344,9 @@ export async function createApp(
     const creator = await currentCreator(request);
     const { id } = z.object({ id: NodeText }).parse(request.params);
     const body = CommandRequestSchema.parse(request.body);
-    const participation = ['scan', 'route', 'patch', 'vote'].includes(body.command.type);
+    const participation = ['inspect', 'allocate', 'scan', 'route', 'patch', 'vote'].includes(
+      body.command.type,
+    );
     await store.command(
       id,
       {
@@ -694,6 +706,30 @@ export async function createApp(
             },
           ],
         );
+      } else if (subscription.type === 'stream.offline') {
+        const world = await store.active(channel, true);
+        const eligible =
+          world &&
+          !world.frozen_by &&
+          !['ready', 'paused', 'ended'].includes(world.state.phase) &&
+          world.state.windowOpenedAt &&
+          Date.parse(notification.timestamp) >= Date.parse(world.state.windowOpenedAt);
+        await store.pool.query(
+          'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at) VALUES($1,$2,$3,$4) ON CONFLICT(message_id) DO NOTHING',
+          [
+            notification.id,
+            subscription.type,
+            eligible
+              ? {
+                  kind: 'offline',
+                  worldId: world.id,
+                  channelId: channel,
+                  window: world.state.window,
+                }
+              : { kind: 'presence', channelId: channel },
+            eligible ? null : new Date(),
+          ],
+        );
       } else
         await store.pool.query(
           'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at) VALUES($1,$2,$3,now()) ON CONFLICT(message_id) DO NOTHING',
@@ -817,9 +853,61 @@ export async function createApp(
     await load();
     return stream(request, reply, load);
   });
+  app.post('/api/worlds/:id/timing', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const duration = z.number().int().min(15).max(1800).nullable();
+    const durations = z
+      .object({
+        investigation: duration,
+        challenge: duration,
+        allocation: duration,
+        decision: duration,
+      })
+      .strict()
+      .parse(request.body);
+    await configureEpisode(store, creator, id, durations);
+    return { ok: true };
+  });
+  app.post('/api/twitch/retry-inputs', async (request) => {
+    z.object({}).strict().parse(request.body);
+    const creator = await currentCreator(request);
+    if (creator.mode !== 'live')
+      denied('MODE_MISMATCH', 'Live input recovery requires a live creator.');
+    const retried = await store.transaction(async (c) => {
+      await store.lockChannels(c, [creator.id]);
+      const connected = (
+        await c.query("SELECT 1 FROM creators WHERE id=$1 AND connected AND mode='live'", [
+          creator.id,
+        ])
+      ).rowCount;
+      if (!connected) denied('FORBIDDEN', 'Creator authorization ended.');
+      const world = (
+        await c.query(
+          'SELECT w.* FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w',
+          [creator.id],
+        )
+      ).rows[0];
+      if (!world || world.frozen_by) return 0;
+      return (
+        (
+          await c.query(
+            `UPDATE eventsub_inbox SET processed_at=NULL,attempts=0,next_attempt_at=clock_timestamp(),error=NULL WHERE error='RETRY_EXHAUSTED' AND payload->>'kind'='chat' AND payload->>'channelId'=$1 AND payload->>'worldId'=$2 AND (payload->>'window')::integer=$3`,
+            [creator.id, world.id, world.state.window],
+          )
+        ).rowCount ?? 0
+      );
+    });
+    return { retried };
+  });
   let busy = false;
-  const tick = async () => {
-    if (busy) return;
+  let workersReady = options.workers === false;
+  let startupRecovering = options.workers !== false;
+  let recoveryWorldIds: string[] = [];
+  let workerLease: import('pg').PoolClient | undefined;
+  let activeTick: Promise<void> | undefined;
+  const processTick = async () => {
+    if (busy || !workersReady) return;
     busy = true;
     try {
       await store.expire(config.mode);
@@ -827,7 +915,7 @@ export async function createApp(
         config.mode === 'live'
           ? (
               await store.pool.query(
-                'SELECT * FROM eventsub_inbox WHERE processed_at IS NULL ORDER BY received_at,message_id LIMIT 30',
+                'SELECT * FROM eventsub_inbox WHERE processed_at IS NULL AND next_attempt_at<=clock_timestamp() ORDER BY received_at,message_id LIMIT 30',
               )
             ).rows
           : [];
@@ -835,6 +923,24 @@ export async function createApp(
         try {
           if (item.payload.kind === 'raid') {
             await store.observeRaid({ messageId: item.message_id, mode: 'live', ...item.payload });
+            await store.pool.query(
+              'UPDATE eventsub_inbox SET processed_at=now() WHERE message_id=$1',
+              [item.message_id],
+            );
+          } else if (item.payload.kind === 'offline') {
+            const world = await store.get(item.payload.worldId, true);
+            if (
+              world.state.window === item.payload.window &&
+              !['ready', 'paused', 'ended'].includes(world.state.phase)
+            )
+              await store.command(
+                world.id,
+                { id: 'stream-presence', role: 'host', community: item.payload.channelId },
+                'live',
+                world.revision,
+                `offline:${item.message_id}`,
+                { type: 'pause' },
+              );
             await store.pool.query(
               'UPDATE eventsub_inbox SET processed_at=now() WHERE message_id=$1',
               [item.message_id],
@@ -853,15 +959,32 @@ export async function createApp(
             );
           }
         } catch (e) {
-          if (e instanceof DomainError && e.code !== 'STALE_VERSION')
+          if (e instanceof DomainError && !['STALE_VERSION', 'INPUT_PENDING'].includes(e.code))
             await store.pool.query(
               'UPDATE eventsub_inbox SET processed_at=now(),error=$2 WHERE message_id=$1',
               [item.message_id, e.code],
             );
-          else if (!(e instanceof DomainError))
-            app.log.error('Inbox dependency failure; event retained for retry.');
+          else {
+            await store.pool.query(
+              `UPDATE eventsub_inbox SET attempts=attempts+1,next_attempt_at=clock_timestamp()+least(60,power(2,least(attempts,6))) * interval '1 second',processed_at=CASE WHEN attempts>=7 THEN clock_timestamp() ELSE NULL END,error=CASE WHEN attempts>=7 THEN 'RETRY_EXHAUSTED' ELSE 'DEPENDENCY_RETRY' END WHERE message_id=$1 AND processed_at IS NULL`,
+              [item.message_id],
+            );
+            if (!(e instanceof DomainError))
+              app.log.error('Inbox dependency failure; event retained for retry.');
+          }
         }
       }
+      if (startupRecovering) {
+        await recoverEpisodes(store, config.mode, undefined, recoveryWorldIds);
+        startupRecovering = Boolean(
+          (
+            await store.pool.query(
+              'SELECT 1 FROM episode_clocks e JOIN worlds w ON w.id=e.world_id JOIN creators c ON c.id=w.custodian_id WHERE w.mode=$1 AND c.connected AND e.deadline_at IS NOT NULL AND w.id=ANY($2::text[]) LIMIT 1',
+              [config.mode, recoveryWorldIds],
+            )
+          ).rowCount,
+        );
+      } else await advanceEpisodes(store, config.mode);
       const outbox = (
         await store.pool.query(
           'SELECT o.id FROM outbox o JOIN worlds w ON w.id=o.world_id WHERE o.delivered_at IS NULL AND w.mode=$1 ORDER BY o.id LIMIT 200',
@@ -879,14 +1002,42 @@ export async function createApp(
       busy = false;
     }
   };
+  const tick = () =>
+    (activeTick ??= processTick().finally(() => {
+      activeTick = undefined;
+    }));
   let interval: ReturnType<typeof setInterval> | undefined;
   let validationInterval: ReturnType<typeof setInterval> | undefined;
   let botInterval: ReturnType<typeof setInterval> | undefined;
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
+      workerLease = await store.pool.connect();
+      const lease = await workerLease.query(
+        "SELECT pg_try_advisory_lock(hashtext(current_database()),hashtext('torchline:worker:v1:'||current_schema()||':'||$1)) AS acquired",
+        [config.mode],
+      );
+      if (!lease.rows[0].acquired) {
+        workerLease.release();
+        workerLease = undefined;
+        throw new Error('Another TORCHLINE worker owns this database/schema/mode.');
+      }
+      workerLease.on('error', () => {
+        workersReady = false;
+        app.log.error('Worker lease lost; closing this process.');
+        void app.close();
+      });
       await lifecycle.validateGrants(true);
       await botSetup.expire();
       await botReplies.recover();
+      recoveryWorldIds = (
+        await store.pool.query(
+          'SELECT e.world_id FROM episode_clocks e JOIN worlds w ON w.id=e.world_id WHERE w.mode=$1 AND e.deadline_at IS NOT NULL',
+          [config.mode],
+        )
+      ).rows.map((row) => row.world_id);
+      await recoverEpisodes(store, config.mode, undefined, recoveryWorldIds);
+      startupRecovering = recoveryWorldIds.length > 0;
+      workersReady = true;
       void subscriptions
         .reconcileAll()
         .catch(() => app.log.error('Subscription reconciliation failed.'));
@@ -911,10 +1062,22 @@ export async function createApp(
   app.decorate('tick', tick);
   app.decorate('botTick', botReplies.tick);
   app.addHook('onClose', async () => {
+    workersReady = false;
     if (interval) clearInterval(interval);
     if (validationInterval) clearInterval(validationInterval);
     if (botInterval) clearInterval(botInterval);
+    await activeTick;
     await botReplies.close();
+    if (workerLease) {
+      await workerLease
+        .query(
+          "SELECT pg_advisory_unlock(hashtext(current_database()),hashtext('torchline:worker:v1:'||current_schema()||':'||$1))",
+          [config.mode],
+        )
+        .catch(() => {});
+      workerLease.release();
+      workerLease = undefined;
+    }
   });
   const publicDir = resolve('apps/web/dist');
   if (existsSync(publicDir)) {

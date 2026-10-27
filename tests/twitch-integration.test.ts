@@ -574,7 +574,12 @@ it('disconnects local authority, queued input and overlay access while preservin
       });
       expect(disconnected.json()).toEqual({ disconnected: true, providerRevoked: true });
       await tick(app);
-      expect((await store.get(id)).state).toEqual(before);
+      expect((await store.get(id)).state).toMatchObject({
+        phase: 'paused',
+        resumePhase: before.phase,
+        resources: before.resources,
+        systems: before.systems,
+      });
       expect((await app.inject({ url: '/api/state', headers: creator.headers })).statusCode).toBe(
         401,
       );

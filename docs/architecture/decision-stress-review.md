@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0014](../decisions/0014-durable-episode-policy.md) checks persisted clocks, restart/park/offline recovery, window cutoffs, worker fencing and scoped retry against C1–C13. SQL/provider-fixture/browser evidence remains distinct from native Twitch and OBS acceptance.
+
 [ADR 0013](../decisions/0013-versioned-cooperation.md) checks versioned investigation, allocation and vote freezing against C1–C13. Its executed evidence covers pure rules; runtime rollout and persisted episode timing have separate integration gates.
 
 [ADR 0012](../decisions/0012-scoped-world-records.md) records the C1–C13 review for complete history and temporary offer previews. Six executed PostgreSQL/API regressions and the extended preview-to-accept browser journey cover the stated read boundaries; no genuine native raid evidence is implied.

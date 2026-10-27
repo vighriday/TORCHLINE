@@ -1644,3 +1644,57 @@ footer {
   border-top: 1px solid #66503b;
   margin-top: 22px;
 }
+/* Episode controls share the Claude Design panel, type and spacing system. */
+.phase-clock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.3rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line, #314348);
+  background: rgba(14, 27, 30, 0.86);
+}
+.phase-clock small {
+  flex-basis: 100%;
+  opacity: 0.8;
+}
+.episode-settings form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+}
+.episode-settings label {
+  display: grid;
+  gap: 0.4rem;
+}
+.episode-settings .checkbox-label {
+  display: flex;
+  align-items: center;
+}
+.cooperation-panel .command-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.broadcast-overlay .cooperation-panel {
+  padding: 0.65rem;
+}
+.compact-clock {
+  padding: 0.35rem 0.6rem;
+  font: 12px var(--mono);
+  white-space: nowrap;
+}
+.compact-cooperation {
+  border-left: 2px solid var(--amber);
+  padding: 0.3rem 0.6rem;
+  margin: 0 0 0.6rem;
+}
+.compact-cooperation h3 {
+  font: 13px var(--mono);
+  margin: 0 0 0.25rem;
+}
+.compact-cooperation p {
+  font-size: 12px;
+  margin: 0;
+}

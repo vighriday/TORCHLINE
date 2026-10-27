@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-27 — Hosted cooperation and durable recovery
+
+- New Arks explicitly use ark-v3; old Arks retain replay-compatible ark-v2. Twitch/simulator parsing and designed React/mobile/overlay views support investigation, normalized allocation and frozen advice. Presentation is versioned 2026-10-27.1.
+- Persisted phase deadlines, standard/manual pacing, early host closure, paused remaining time, pause-before-park, explicit resume and restart recovery. Story choices never auto-commit.
+- Added database/schema/mode worker fencing, signed offline pause handling, disconnect pause, persisted input backoff/quarantine and narrowly scoped current-window recovery diagnostics/controls.
+- Fixed a 720p overflow from the new episode details; the broadcast uses a compact header clock and aggregate plan while the dashboard keeps full explanations.
+- Native OBS remains unverified: both computer-use entry points failed before initialization. HTTPS and real chat/raid acceptance still require the deferred tunnel credential and real-service session.
+
 ## 2026-10-27 — Browser baseline and Ark reconciliation fix
 
 - Wait for the persisted chapter phase before recording a browser baseline (GitHub run 40515143258); compare canonical state independently of display clock timestamps.

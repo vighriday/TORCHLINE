@@ -8,7 +8,7 @@ The first season, **The Ark Protocol**, follows a damaged colony ship through fi
 
 ## Project status
 
-Architecture approved and the first functional gameplay slice implemented on **October 26, 2026**. The reference application runs locally with PostgreSQL: complete five-chapter gameplay, cooperative challenges, persistent physical damage/repairs, safe choice previews, saving, replay, overlays and isolated simulated custody transfers.
+Architecture approved and the first functional gameplay slice implemented on **October 26, 2026**. The reference application runs locally with PostgreSQL: complete five-chapter gameplay, cooperative investigation/challenges/allocation, persistent physical damage/repairs, combined choice previews, persisted phase timing and recovery, complete history, overlays and isolated simulated custody transfers. New Arks use ark-v3; existing worlds retain ark-v2 replay semantics.
 
 Claude Design exports are integrated into the typed React command deck, shared persistent Ark, cooperative challenges, read-only broadcast view, Relay, Hangar and Archive. SVG remains the accessible fallback; a lazy cinematic renderer adds optional ship motion. Real Twitch application/broadcaster/bot authorization and three signed callback challenges were verified on October 26. The development HTTPS tunnel currently needs its missing ngrok credential restored. Genuine chat effects, visible bot replies, actual OBS and a native raid remain separate acceptance milestones. See [implementation status](docs/planning/implementation-status.md) and the ordered [owner launch guide](docs/operations/owner-launch-guide.md).
 

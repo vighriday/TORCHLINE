@@ -6,6 +6,7 @@ import { request } from './api.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
+import { CooperationView, EpisodeSettings, PhaseClock } from './EpisodeView.tsx';
 import {
   BroadcastOverlay,
   ChoiceForecast,
@@ -407,13 +408,33 @@ function App() {
                   )}
                   {world.capabilities.canCloseChallenge && (
                     <button disabled={busy} onClick={() => send({ type: 'close-challenge' })}>
-                      Open final decision
+                      {world.cooperation?.budget ? 'Open crew allocation' : 'Open final decision'}
                     </button>
                   )}
                   {world.capabilities.canPause && (
-                    <button disabled={busy} onClick={() => send({ type: 'pause' })}>
-                      Pause
-                    </button>
+                    <>
+                      {world.capabilities.canCloseInvestigation && (
+                        <button
+                          disabled={busy}
+                          onClick={() => send({ type: 'close-investigation' })}
+                        >
+                          Open cooperative challenge
+                        </button>
+                      )}
+                      {world.capabilities.canCloseAllocation && (
+                        <button disabled={busy} onClick={() => send({ type: 'close-allocation' })}>
+                          Lock repairs & open decision
+                        </button>
+                      )}
+                      {world.capabilities.canCloseVoting && (
+                        <button disabled={busy} onClick={() => send({ type: 'close-voting' })}>
+                          Freeze advisory votes
+                        </button>
+                      )}
+                      <button disabled={busy} onClick={() => send({ type: 'pause' })}>
+                        Pause
+                      </button>
+                    </>
                   )}
                   {world.capabilities.canResume && (
                     <button disabled={busy} onClick={() => send({ type: 'resume' })}>
@@ -441,12 +462,23 @@ function App() {
               )}
             </section>
             <ResourceMeters world={world} />
+            <PhaseClock world={world} />
+            <EpisodeSettings
+              key={`${world.worldId}:${world.chapter}`}
+              world={world}
+              busy={busy}
+              onCommand={send}
+              onTiming={(durations) =>
+                void perform(() => request(`/api/worlds/${world.worldId}/timing`, durations))
+              }
+            />
             <ArkView
               key={`ark:${world.worldId}`}
               systems={world.systems}
               resources={world.resources}
             />
             <ParticipationGuide world={world} />
+            <CooperationView world={world} />
             {world.handoffPending && (
               <div className="notice">
                 Handoff prepared. World mutations are frozen until the receiver accepts or the
@@ -505,7 +537,7 @@ function App() {
             {world.choices.length > 0 && (
               <section className="panel decision-panel">
                 <h2>
-                  {world.phase === 'decision'
+                  {['decision', 'awaiting-commit'].includes(world.phase)
                     ? 'Commit a consequential choice'
                     : 'Upcoming decision · previews update with repairs'}
                 </h2>
@@ -793,6 +825,25 @@ function App() {
                         {data.integration.details.botReplies.failed} failed,{' '}
                         {data.integration.details.botReplies.uncertain} uncertain.
                       </p>
+                      {data.integration.details.inbox && (
+                        <p>
+                          Input recovery: {data.integration.details.inbox.pending} pending ·{' '}
+                          {data.integration.details.inbox.retrying} retrying ·{' '}
+                          {data.integration.details.inbox.quarantined} quarantined.{' '}
+                          {data.integration.details.inbox.oldestAt &&
+                            `Oldest pending: ${new Date(data.integration.details.inbox.oldestAt).toLocaleString()}.`}
+                        </p>
+                      )}
+                      {Boolean(data.integration.details.inbox?.quarantined) && (
+                        <button
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(() => request('/api/twitch/retry-inputs', {}))
+                          }
+                        >
+                          Retry quarantined chat in the current window
+                        </button>
+                      )}
                     </div>
                   )}
                   <button
@@ -822,7 +873,7 @@ function App() {
           </section>
         )}
         <footer>
-          TORCHLINE / THE ARK PROTOCOL · authored rules ark-v2 · design by Claude Design
+          TORCHLINE / THE ARK PROTOCOL · versioned authored rules · design by Claude Design
         </footer>
       </div>
     </main>

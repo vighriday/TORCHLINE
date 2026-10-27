@@ -25,13 +25,14 @@ async function owned(c: PoolClient, creator: Creator, id: string) {
 async function projected(c: PoolClient, row: Omit<StoredWorld, 'events'>): Promise<StoredWorld> {
   const events = (
     await c.query(
-      "SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 AND event->'command'->>'type'<>'vote' ORDER BY sequence DESC LIMIT 30",
+      "SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 AND event->'command'->>'type' NOT IN ('vote','allocate','inspect') ORDER BY sequence DESC LIMIT 30",
       [row.id, row.state.version],
     )
   ).rows
     .map((item) => item.event)
     .reverse();
-  return { ...row, events };
+  const clock = (await c.query('SELECT * FROM episode_clocks WHERE world_id=$1', [row.id])).rows[0];
+  return { ...row, events, clock };
 }
 export async function readWorldRecord(
   store: Store,
@@ -58,7 +59,7 @@ export async function readWorldHistory(
     const events = (
       await c.query(
         `SELECT e.event,p.label AS community_label FROM world_events e LEFT JOIN creators p ON p.id=e.event->'actor'->>'community'
-      WHERE e.world_id=$1 AND e.sequence<=$2 AND ($3::integer IS NULL OR e.sequence<$3) AND e.event->'command'->>'type'<>'vote'
+      WHERE e.world_id=$1 AND e.sequence<=$2 AND ($3::integer IS NULL OR e.sequence<$3) AND e.event->'command'->>'type' NOT IN ('vote','allocate','inspect')
       ORDER BY e.sequence DESC LIMIT $4`,
         [id, through, query.before ?? null, query.limit + 1],
       )

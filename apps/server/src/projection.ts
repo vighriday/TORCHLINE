@@ -1,11 +1,14 @@
 import { PRESENTATION_VERSION, SYSTEM_IDS } from '@torchline/contracts';
 import type { WorldPresentation } from '@torchline/contracts';
 import { getPuzzle, previewChoices, TITLES } from '@torchline/engine';
+import { normalizeAllocation } from '@torchline/engine';
 import type { StoredWorld } from '@torchline/storage';
 
 export function presentWorld(world: StoredWorld, hostControls = false): WorldPresentation {
   const s = world.state;
-  const publicEvents = world.events.filter((event) => event.command.type !== 'vote').slice(-30);
+  const publicEvents = world.events
+    .filter((event) => !['vote', 'allocate', 'inspect'].includes(event.command.type))
+    .slice(-30);
   const last = publicEvents.at(-1);
   const votes: Record<string, number> = {};
   for (const option of Object.values(s.votes)) votes[option] = (votes[option] ?? 0) + 1;
@@ -38,12 +41,45 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
     })),
     obligations: s.obligations,
     challenge: getPuzzle(s),
-    choices: s.phase === 'decision' || s.phase === 'challenge' ? previewChoices(s) : [],
+    choices: ['awaiting-commit', 'allocation', 'decision', 'challenge'].includes(s.phase)
+      ? previewChoices(s)
+      : [],
     votes,
     participantCount: new Set([
       ...Object.keys(s.votes),
       ...Object.values(s.challenge.contributions),
+      ...Object.keys(s.cooperation?.inspections ?? {}),
+      ...Object.keys(s.cooperation?.preferences ?? {}),
     ]).size,
+    ...(s.cooperation
+      ? {
+          cooperation: {
+            budget: s.cooperation.budget,
+            investigation: s.cooperation.investigation,
+            inspections: Object.fromEntries(
+              ['engine', 'cargo', 'life'].map((area) => [
+                area,
+                Object.values(s.cooperation!.inspections).filter((v) => v === area).length,
+              ]),
+            ),
+            allocations: Object.keys(s.cooperation.preferences).length,
+            plan: s.cooperation.closedByEventId
+              ? s.cooperation.plan
+              : normalizeAllocation(s.cooperation.preferences, s.cooperation.budget),
+            closed: Boolean(s.cooperation.closedByEventId),
+          },
+        }
+      : {}),
+    ...(world.clock
+      ? {
+          clock: {
+            deadlineAt: world.clock.deadline_at?.toISOString() ?? null,
+            remainingMs: world.clock.remaining_ms,
+            serverAt: new Date().toISOString(),
+            recoveryReason: world.clock.recovery_reason,
+          },
+        }
+      : {}),
     outcome: s.outcome,
     endingReason: s.endingReason,
     events: publicEvents.map(({ id, chapter, summary, resourceDelta, cues, causes }) => ({
@@ -57,7 +93,10 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
     capabilities: {
       canStart: enabled && s.phase === 'ready',
       canCloseChallenge: enabled && s.phase === 'challenge',
-      canCommit: enabled && s.phase === 'decision',
+      canCommit: enabled && ['decision', 'awaiting-commit'].includes(s.phase),
+      canCloseInvestigation: enabled && s.phase === 'investigation',
+      canCloseAllocation: enabled && s.phase === 'allocation',
+      canCloseVoting: enabled && s.rulesVersion === 'ark-v3' && s.phase === 'decision',
       canPause: enabled && !['ended', 'paused'].includes(s.phase),
       canResume: enabled && s.phase === 'paused',
     },

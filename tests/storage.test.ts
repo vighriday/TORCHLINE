@@ -57,7 +57,12 @@ describe('real PostgreSQL consistency', () => {
           )
         ).rows[0],
       ).toMatchObject({ payload: { kind: 'ignored' } });
-      expect((await store.get(id)).state).toEqual(before.state);
+      expect((await store.get(id)).state).toMatchObject({
+        phase: 'paused',
+        resumePhase: before.state.phase,
+        resources: before.state.resources,
+        systems: before.state.systems,
+      });
       expect((await store.pool.query('SELECT 1 FROM worlds')).rowCount).toBe(1);
     }));
   it('cancels an incoming offer on disconnect and preserves source custody and game state', () =>
@@ -186,6 +191,8 @@ describe('real PostgreSQL consistency', () => {
       expect(inherited.state).toEqual(before.state);
       expect(inherited.state.systems.navigation.condition).toBe('destroyed');
       expect(inherited.custodian_id).toBe(target.id);
+      expect(before.clock).toBeDefined();
+      expect(inherited.clock).toBeUndefined();
       expect(await store.active(creator.id)).toBeNull();
       expect((await store.pool.query('SELECT * FROM custody_events')).rows).toHaveLength(1);
       await expect(
@@ -315,7 +322,7 @@ describe('real PostgreSQL consistency', () => {
         owner.id,
         'viewer-hash',
         { type: 'scan', node: 'A' },
-        new Date().toISOString(),
+        (await store.pool.query('SELECT clock_timestamp() AS at')).rows[0].at.toISOString(),
       );
       await expect(
         store.command(

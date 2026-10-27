@@ -8,6 +8,7 @@ import type {
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
 import { useWorldHistory } from './useWorldHistory.ts';
+import { CooperationView, PhaseClock } from './EpisodeView.tsx';
 export type Workspace = 'bridge' | 'relay' | 'hangar' | 'broadcast' | 'archive';
 const destinations: { id: Workspace; label: string; detail: string }[] = [
   { id: 'bridge', label: 'Bridge', detail: 'Play & cooperate' },
@@ -114,9 +115,15 @@ export function ParticipationGuide({
             ? 'This voyage has ended'
             : world.phase === 'challenge'
               ? 'Discover. Connect. Repair.'
-              : world.phase === 'decision'
-                ? 'Choose what survives.'
-                : 'The next chapter is yours.'}
+              : world.phase === 'investigation'
+                ? 'Discover a shared clue.'
+                : world.phase === 'allocation'
+                  ? 'Choose where repairs matter.'
+                  : world.phase === 'awaiting-commit'
+                    ? 'Advice is locked. Captain decides.'
+                    : world.phase === 'decision'
+                      ? 'Choose what survives.'
+                      : 'The next chapter is yours.'}
       </h3>
       <p>
         {world.handoffPending
@@ -125,11 +132,17 @@ export function ParticipationGuide({
             ? 'Every permanent mark remains in the Ark’s record.'
             : world.phase === 'challenge'
               ? 'Share clues in Twitch chat. Solving the challenge changes resources, ship systems and the choices ahead.'
-              : world.phase === 'decision'
-                ? 'Chat advises; the captain commits. Read the forecast before making a sacrifice.'
-                : world.phase === 'paused'
-                  ? 'The captain has paused the episode. Your progress is safe.'
-                  : 'The captain can start the next chapter. Keep playing here or prepare a handoff at this boundary.'}
+              : world.phase === 'investigation'
+                ? 'Prioritize an area to reveal a real puzzle clue for everyone.'
+                : world.phase === 'allocation'
+                  ? 'Distribute the captain’s fixed reserve. Your latest preference affects real repairs and oxygen.'
+                  : world.phase === 'awaiting-commit'
+                    ? 'Voting is closed. The captain will commit a choice with the locked crew plan.'
+                    : world.phase === 'decision'
+                      ? 'Chat advises; the captain commits. Read the forecast before making a sacrifice.'
+                      : world.phase === 'paused'
+                        ? 'The captain has paused the episode. Your progress is safe.'
+                        : 'The captain can start the next chapter. Keep playing here or prepare a handoff at this boundary.'}
       </p>
       <div className="command-strip">
         <code>
@@ -137,9 +150,13 @@ export function ParticipationGuide({
             ? world.challenge?.kind === 'work-order'
               ? '!scan A · !patch A'
               : '!scan A · !route <path>'
-            : world.phase === 'decision'
-              ? '!vote 1 · !vote 2'
-              : '!status · !history'}
+            : world.phase === 'investigation'
+              ? '!inspect engine · !inspect life · !inspect cargo'
+              : world.phase === 'allocation'
+                ? '!allocate 3 2 (hull / oxygen)'
+                : world.phase === 'decision'
+                  ? '!vote 1 · !vote 2'
+                  : '!status · !history'}
         </code>
       </div>
       <small>
@@ -366,6 +383,7 @@ export function BroadcastOverlay({
           <span className="eyebrow">TORCHLINE / THE ARK PROTOCOL</span>
           <h1>{world?.title ?? 'Awaiting the Ark'}</h1>
         </div>
+        {world && <PhaseClock world={world} compact />}
         <div className="overlay-host">
           {world?.host ?? 'READ-ONLY BROADCAST'}
           <span className="badge">
@@ -391,6 +409,7 @@ export function BroadcastOverlay({
               readOnly
             />
             <section className="overlay-context">
+              <CooperationView world={world} compact />
               <span className="eyebrow">
                 CHAPTER {world.chapter}/5 · {world.phase} · {world.participantCount} CONTRIBUTORS
               </span>
@@ -404,7 +423,7 @@ export function BroadcastOverlay({
                   compact
                 />
               )}
-              {world.phase === 'decision' && (
+              {['decision', 'awaiting-commit'].includes(world.phase) && (
                 <div className="overlay-choices">
                   {world.choices.map((choice, i) => (
                     <article key={choice.id}>

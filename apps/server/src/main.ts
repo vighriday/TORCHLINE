@@ -8,7 +8,11 @@ const mode = process.env.WORLD_MODE ?? 'simulation';
 if (!['simulation', 'live'].includes(mode))
   throw new Error('WORLD_MODE must be simulation or live.');
 const store = new Store(process.env.DATABASE_URL);
-await store.pool.query('SELECT name FROM schema_migrations LIMIT 1');
+if (
+  !(await store.pool.query("SELECT 1 FROM schema_migrations WHERE name='007_episode_clocks.sql'"))
+    .rowCount
+)
+  throw new Error('Database migration required. Run the migration command for this mode.');
 const app = await createApp(
   store,
   {

@@ -180,6 +180,16 @@ No hosting has been purchased or deployed. Review the provider plan, region and 
 
 ## If something fails
 
+### New episode controls (ark-v3)
+
+Existing Arks keep their original ark-v2 rules. Create a new Ark to use investigation, allocation and timers. At a ready chapter boundary, set a repair reserve (0–10 power), optionally enable investigation, then save crew settings. Timing defaults to 30/90/45/60 seconds for investigation/challenge/allocation/voting; select and save Manual to close every phase yourself. The authenticated timing API also supports custom 15–1800-second durations. No timer makes the final story choice.
+
+During investigation viewers use `!inspect engine`, `!inspect cargo` or `!inspect life`. Close it to reveal the chosen real clue. During allocation use `!allocate 3 2` for three hull and two oxygen preference points (1–5 total). The shared plan divides the declared reserve, not an audience-sized reward. Lock repairs, collect `!vote 1`/`!vote 2`, then commit. Power and useful repairs apply together with the choice; the preview includes the result. Oxygen recovery does not repair a leaking machine. Reserve settings reset each chapter.
+
+Pause, park, authorization disconnect and verified offline delivery stop the current episode; returning online never resumes automatically. After a server restart, check the recovery explanation and click Resume. Pre-cutoff accepted chat drains before closure. Messages first received after the deadline are rejected. Broadcast diagnostics show pending/retrying/quarantined input; retry is available only for quarantined chat still in your current window. It never resends uncertain bot replies or reuses raid evidence.
+
+Actual installed OBS verification was attempted on October 27, but computer-use initialization failed before any app action. Chromium overlay coverage does not replace your OBS browser-source, cookie refresh and frame-time check in stage 9. Restoring the ngrok credential and a real two-broadcaster raid remain external dependencies; no new account registration is needed for the already validated grants.
+
 | Symptom | Check next |
 | --- | --- |
 | ngrok offline / `ERR_NGROK_4018` | Saved ngrok account credential and `--config .local/ngrok.yml`; local port 3001 must also be running |
