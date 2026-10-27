@@ -4,6 +4,11 @@ All meaningful product, architecture, and development changes are recorded here.
 
 ## Unreleased
 
+### Claude Design integration review — 2026-10-27
+
+- Reviewed all six visual surfaces and four JavaScript references. Recorded the canonical-state mapping, prototype differences, provenance, source checksums and all thirteen component boundaries in ADR 0011 and the design review.
+- Preserve original exports in the ignored local design workspace; version curated adaptations instead. Added locally served, licensed design fonts. Application integration and its verification are recorded in subsequent increments.
+
 ### Genuine Twitch bot and callback milestone — 2026-10-26
 
 - Verified real broadcaster and bot identities/scopes after owner consent and the named account conversion. Received three genuine signed webhook challenges; Twitch reports current chat/online/offline subscriptions enabled with the expected bot, callback, version and conditions.

@@ -44,3 +44,6 @@ test-results/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Owner-provided design workspace; curated TypeScript adaptations are versioned.
+/frontend-design/

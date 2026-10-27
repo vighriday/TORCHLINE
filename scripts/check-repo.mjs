@@ -24,6 +24,7 @@ const skip = new Set([
   'dist',
   'internal',
   '.pnpm-store',
+  'frontend-design',
 ]);
 let markdown = 0;
 const broken = [];
