@@ -6,9 +6,8 @@ import type {
   RecordedWorldEvent,
 } from '@torchline/contracts';
 import { ArkView } from './ArkView.tsx';
-import { ChallengeView } from './ChallengeView.tsx';
+import { FlightDeck } from './FlightDeck.tsx';
 import { useWorldHistory } from './useWorldHistory.ts';
-import { CooperationView, PhaseClock } from './EpisodeView.tsx';
 export type Workspace = 'bridge' | 'relay' | 'hangar' | 'broadcast' | 'archive';
 const destinations: { id: Workspace; label: string; detail: string }[] = [
   { id: 'bridge', label: 'Bridge', detail: 'Play & cooperate' },
@@ -377,97 +376,26 @@ export function BroadcastOverlay({
   mode?: string;
 }) {
   return (
-    <main className="broadcast-overlay">
-      <header>
-        <div>
+    <main className="broadcast-overlay immersive-broadcast">
+      {world ? (
+        <FlightDeck key={world.worldId} world={world} readonly error={error} />
+      ) : (
+        <section className="broadcast-waiting">
+          <span className="torch-emblem" aria-hidden="true" />
           <span className="eyebrow">TORCHLINE / THE ARK PROTOCOL</span>
-          <h1>{world?.title ?? 'Awaiting the Ark'}</h1>
-        </div>
-        {world && <PhaseClock world={world} compact />}
-        <div className="overlay-host">
-          {world?.host ?? 'READ-ONLY BROADCAST'}
-          <span className="badge">
+          <h1>No active Ark</h1>
+          <p>
+            The captain can create, resume or accept a world. This read-only source follows the
+            channel.
+          </p>
+          <small>
             {mode === 'live'
               ? 'LIVE WORLD · VERIFICATION PENDING'
               : 'SIMULATION · NOT TWITCH FOOTAGE'}
-          </span>
-          {error && (
-            <span role="status" className="overlay-connection">
-              {error}
-            </span>
-          )}
-        </div>
-      </header>
-      {world ? (
-        <>
-          <ResourceMeters world={world} />
-          <div className="overlay-scene">
-            <ArkView
-              key={world.worldId}
-              systems={world.systems}
-              resources={world.resources}
-              readOnly
-            />
-            <section className="overlay-context">
-              <CooperationView world={world} compact />
-              <span className="eyebrow">
-                CHAPTER {world.chapter}/5 · {world.phase} · {world.participantCount} CONTRIBUTORS
-              </span>
-              <p className="overlay-recap">{world.recap}</p>
-              {world.challenge && world.phase === 'challenge' && (
-                <ChallengeView
-                  challenge={world.challenge}
-                  interactive={false}
-                  onCommand={() => {}}
-                  busy={false}
-                  compact
-                />
-              )}
-              {['decision', 'awaiting-commit'].includes(world.phase) && (
-                <div className="overlay-choices">
-                  {world.choices.map((choice, i) => (
-                    <article key={choice.id}>
-                      <strong>
-                        {i + 1}. {choice.label}
-                      </strong>
-                      <span>{world.votes[choice.id] ?? 0} votes</span>
-                      <p>{choice.description}</p>
-                      {!choice.available && <small>{choice.unavailableReason}</small>}
-                    </article>
-                  ))}
-                </div>
-              )}
-              {world.outcome && (
-                <div className="ending">
-                  <h2>
-                    {world.outcome === 'colony'
-                      ? 'Colony established'
-                      : world.outcome === 'wreck'
-                        ? 'Ark lost'
-                        : 'Partial survival'}
-                  </h2>
-                  <p>{world.endingReason}</p>
-                </div>
-              )}
-            </section>
-          </div>
-          <div className="overlay-bottom">
-            <ParticipationGuide world={world} broadcast />
-            <ConsequenceSignal key={world.worldId} world={world} />
-          </div>
-        </>
-      ) : (
-        <section className="panel overlay-waiting">
-          <h2>No active Ark</h2>
-          <p>
-            The captain can create, resume or accept a world. This read-only source follows the
-            channel automatically.
-          </p>
+          </small>
+          {error && <p role="status">{error}</p>}
         </section>
       )}
-      <footer>
-        THE STREAM ENDS. THE WORLD DOESN’T. <span>Read-only broadcast · progress persists</span>
-      </footer>
     </main>
   );
 }

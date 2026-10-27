@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { database } from '../helpers.ts';
 import { authorize, liveConfig, providerFixture } from '../twitch-provider.ts';
 import { createApp } from '../../apps/server/src/app.ts';
+import { disclose } from './ui.ts';
 
 test('operator bot setup confirms the named account and converts an accidental creator without a disconnect loop', async ({
   page,
@@ -37,11 +38,9 @@ test('operator bot setup confirms the named account and converts an accidental c
           body: 'Fixture Twitch consent; no real provider request.',
         });
       });
+      await disclose(page, '.title-captain-menu');
       await expect(page.getByText('Twitch creator session', { exact: true })).toBeVisible();
-      await page
-        .getByRole('navigation', { name: 'Command deck' })
-        .getByRole('button', { name: /Broadcast/ })
-        .click();
+      await page.getByRole('button', { name: 'Broadcast setup', exact: true }).click();
       const setup = page.getByLabel('Bot setup secret', { exact: true });
       await expect(setup).toBeVisible();
       await setup.fill('wrong-fixture-key');

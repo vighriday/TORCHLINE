@@ -1,11 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import type { Resources, ShipSystem, SystemId } from '@torchline/contracts';
+import type { Resources, ShipSystem, SystemId, WorldPresentation } from '@torchline/contracts';
 import { conditionColor, markSeed, shipDescription, systemLabels } from './visual-state.ts';
 export interface ArkRendererProps {
   systems: ShipSystem[];
   resources: Resources;
   reducedMotion?: boolean;
   readOnly?: boolean;
+  variant?: 'panel' | 'flight' | 'title';
+  chapter?: number;
+  events?: WorldPresentation['events'];
 }
 const anchors: Record<SystemId, [number, number]> = {
   hull: [550, 255],
@@ -175,6 +178,9 @@ export function ArkView({
   resources,
   reducedMotion = false,
   readOnly = false,
+  variant = 'panel',
+  chapter = 0,
+  events = [],
 }: ArkRendererProps) {
   const [cinematic, setCinematic] = useState(() => {
     try {
@@ -190,11 +196,19 @@ export function ArkView({
   const controller = useRef<Awaited<
     ReturnType<(typeof import('./ark-scene.ts'))['createArkScene']>
   > | null>(null);
-  const current = useRef({ systems, resources });
-  current.current = { systems, resources };
+  const current = useRef({ systems, resources, chapter, events });
+  current.current = { systems, resources, chapter, events };
   useEffect(() => {
     const query = matchMedia('(prefers-reduced-motion: reduce), (max-width: 700px)');
-    const update = () => setEligible(!query.matches && !reducedMotion);
+    const update = () => {
+      let savedReduction = false;
+      try {
+        savedReduction = localStorage.getItem('torchline.motion') === 'reduced';
+      } catch {
+        /* Optional local preference. */
+      }
+      setEligible(!query.matches && !reducedMotion && !savedReduction);
+    };
     update();
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
@@ -212,9 +226,15 @@ export function ArkView({
           () => {
             if (!cancelled) setReady(true);
           },
+          variant,
         );
         controller.current = scene;
-        scene.update(current.current.systems, current.current.resources);
+        scene.update(
+          current.current.systems,
+          current.current.resources,
+          current.current.chapter,
+          current.current.events,
+        );
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -225,12 +245,12 @@ export function ArkView({
       controller.current = null;
       setReady(false);
     };
-  }, [cinematic, eligible, failed]);
+  }, [cinematic, eligible, failed, variant]);
   useEffect(() => {
-    controller.current?.update(systems, resources);
-  }, [systems, resources]);
+    controller.current?.update(systems, resources, chapter, events);
+  }, [systems, resources, chapter, events]);
   return (
-    <section className="panel ark-panel" aria-label="Persistent Ark condition">
+    <section className={`panel ark-panel ark-${variant}`} aria-label="Persistent Ark condition">
       <div className="section-heading">
         <div>
           <span className="eyebrow">THE ARK PROTOCOL</span>
@@ -262,39 +282,44 @@ export function ArkView({
           <span>{ready ? 'CINEMATIC TELEMETRY' : 'SYSTEM SCHEMATIC'}</span>
         </div>
       </div>
-      <div className="system-list" aria-label="Ship system conditions">
-        {systems.map((system) => (
-          <details
-            key={system.id}
-            className={`system-state condition-${system.condition}`}
-            data-system={system.id}
-            data-condition={system.condition}
-          >
-            <summary>
-              <strong>{systemLabels[system.id]}</strong>
-              <span>
-                {system.condition} · {system.integrity}%
-              </span>
-              <small>
-                {system.marks.length} recorded {system.marks.length === 1 ? 'change' : 'changes'}
-              </small>
-            </summary>
-            <ul>
-              {system.marks.length === 0 ? (
-                <li>No recorded changes.</li>
-              ) : (
-                system.marks.map((mark, i) => (
-                  <li key={`${mark.eventId}-${i}`}>
-                    Chapter {mark.chapter} · {mark.kind} · {mark.community}
-                  </li>
-                ))
-              )}
-            </ul>
-          </details>
-        ))}
-      </div>
+      <details className="system-inspector" open={variant === 'panel'}>
+        <summary>
+          Ship condition · {systems.reduce((sum, s) => sum + s.marks.length, 0)} permanent marks
+        </summary>
+        <div className="system-list" aria-label="Ship system conditions">
+          {systems.map((system) => (
+            <details
+              key={system.id}
+              className={`system-state condition-${system.condition}`}
+              data-system={system.id}
+              data-condition={system.condition}
+            >
+              <summary>
+                <strong>{systemLabels[system.id]}</strong>
+                <span>
+                  {system.condition} · {system.integrity}%
+                </span>
+                <small>
+                  {system.marks.length} recorded {system.marks.length === 1 ? 'change' : 'changes'}
+                </small>
+              </summary>
+              <ul>
+                {system.marks.length === 0 ? (
+                  <li>No recorded changes.</li>
+                ) : (
+                  system.marks.map((mark, i) => (
+                    <li key={`${mark.eventId}-${i}`}>
+                      Chapter {mark.chapter} · {mark.kind} · {mark.community}
+                    </li>
+                  ))
+                )}
+              </ul>
+            </details>
+          ))}
+        </div>
+      </details>
       {!readOnly && (
-        <p className="muted renderer-note">
+        <p className={`muted renderer-note ${failed ? 'renderer-failed' : ''}`}>
           Repairs restore function; the physical record remains.{' '}
           {failed
             ? 'Cinematic graphics unavailable; schematic active.'

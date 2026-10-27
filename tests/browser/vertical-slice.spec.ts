@@ -1,3 +1,4 @@
+import { chooseSimulation, disclose } from './ui.ts';
 import { expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { Store } from '@torchline/storage';
@@ -44,10 +45,11 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Use simulation alpha' }).click();
+  await chooseSimulation(page, 'alpha');
   await page.getByRole('button', { name: 'Create an Ark' }).click();
   await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
   await expect(page.locator('[data-resource=hull]')).toHaveText('70');
+  await disclose(page, '.simulation-console');
   await page.getByRole('textbox', { name: 'Chat command' }).fill('!scan A');
   await page.getByRole('button', { name: 'Send simulated input' }).click();
   await expect(page.getByText('A · Discovered', { exact: true })).toBeVisible();
@@ -55,6 +57,7 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   await page.getByRole('textbox', { name: 'Chat command' }).fill('!scan C');
   await page.getByRole('button', { name: 'Send simulated input' }).click();
   await expect(page.getByText('C · Discovered', { exact: true })).toBeVisible();
+  await disclose(page, '.route-tools');
   await page.getByLabel('Candidate route').fill('S A C T');
   await page.getByRole('button', { name: 'Submit route' }).click();
   await expect(page.locator('[data-resource=hull]')).toHaveText('85');
@@ -72,6 +75,7 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
     'destroyed',
   );
   await page.screenshot({ path: '.local/screenshots/vertical-slice.png', fullPage: true });
+  await disclose(page, '.captain-console');
   await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
   const [overlay] = await Promise.all([
     page.waitForEvent('popup'),
@@ -85,11 +89,9 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   const targetContext = await browser.newContext();
   const target = await targetContext.newPage();
   await target.goto('/');
-  await target.getByRole('button', { name: 'Use simulation beta' }).click();
-  await target
-    .getByRole('navigation', { name: 'Command deck' })
-    .getByRole('button', { name: /Relay/ })
-    .click();
+  await chooseSimulation(target, 'beta');
+  await disclose(target, '.title-captain-menu');
+  await target.getByRole('button', { name: 'Open Relay', exact: true }).click();
   await target.getByLabel('Accept incoming world offers').check();
   await page
     .getByRole('navigation', { name: 'Command deck' })
@@ -130,7 +132,7 @@ test('mobile reference layout has no horizontal overflow and supports solo play'
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Use simulation gamma' }).click();
+  await chooseSimulation(page, 'gamma');
   await page.getByRole('button', { name: 'Create an Ark' }).click();
   await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Radiation Storm', exact: true })).toBeVisible();

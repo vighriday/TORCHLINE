@@ -2,7 +2,7 @@
 
 The owner supplied six Claude Design HTML surfaces and four JavaScript reference exports on 2026-10-27. Unmodified originals remain in the ignored local `frontend-design/` workspace. [SHA-256 inventory](../docs/design/source-checksums.txt) identifies the reviewed exports without distributing the export runtime, synthetic gameplay data, duplicate uploads or screenshots.
 
-The [integration review](../docs/design/integration-review.md) records the mapping to curated TypeScript/React components. Ship geometry and schematic styling are adapted from the supplied Ark references. No external model, texture, stock image or remote script is required.
+The [integration review](../docs/design/integration-review.md) records the mapping to curated TypeScript/React components. Ship geometry, title/flight composition, animation direction and schematic styling are adapted from the supplied Ark references. Metal panels and glow sprites are generated locally in `ark-model.ts`; no external model, texture, stock image or remote script is required. The prototype engine, synthetic participants and export runtime are excluded.
 
 The browser serves three unmodified static font files locally. Each includes the upstream SIL Open Font License in `apps/web/public/fonts/`:
 

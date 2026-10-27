@@ -4,21 +4,12 @@ import type { Command, WorldPresentation } from '@torchline/contracts';
 import { HandoffInspector } from './WorldRecords.tsx';
 import { request } from './api.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
-import { ArkView } from './ArkView.tsx';
-import { ChallengeView } from './ChallengeView.tsx';
-import { CooperationView, EpisodeSettings, PhaseClock } from './EpisodeView.tsx';
-import {
-  BroadcastOverlay,
-  ChoiceForecast,
-  ConsequenceSignal,
-  DeckNav,
-  ParticipationGuide,
-  RelayProgress,
-  ResourceMeters,
-  WorldArchive,
-} from './DeckViews.tsx';
+import { TitleScreen } from './TitleScreen.tsx';
+import { FlightDeck } from './FlightDeck.tsx';
+import { BroadcastOverlay, DeckNav, RelayProgress, WorldArchive } from './DeckViews.tsx';
 import type { Workspace } from './DeckViews.tsx';
 import './styles.css';
+import './game.css';
 
 function App() {
   const overlayChannel = location.pathname.match(/^\/overlay\/([^/]+)\//)?.[1];
@@ -152,8 +143,116 @@ function App() {
       );
   };
   if (overlayChannel) return <BroadcastOverlay world={world} error={error} mode={data?.mode} />;
+  if (!botSetup && (!data?.me || (!world && workspace === 'bridge')))
+    return (
+      <TitleScreen
+        mode={data?.mode}
+        ready={Boolean(data)}
+        busy={busy}
+        label={
+          data?.me
+            ? 'Create an Ark'
+            : data?.mode === 'live'
+              ? 'Connect creator with Twitch'
+              : 'Launch the Ark'
+        }
+        error={error}
+        onLaunch={() => {
+          if (data?.me) void perform(() => request('/api/worlds', {}));
+          else if (data?.mode === 'live') location.assign('/auth/twitch');
+          else
+            void perform(async () => {
+              await request('/api/simulator/login', { channel: 'alpha' });
+              const state = await request<DashboardSnapshot>('/api/state');
+              if (!state.world) await request('/api/worlds', {});
+            });
+        }}
+      >
+        {data?.me ? (
+          <details key="captain" className="title-accounts title-captain-menu">
+            <summary>Captain / {data.me.label}</summary>
+            <div className="title-captain-access">
+              <span>
+                {data.mode === 'live' ? 'Twitch creator session' : 'Simulated creator session'}
+              </span>
+              <button onClick={() => setWorkspace('hangar')}>Open Hangar</button>
+              <button onClick={() => setWorkspace('relay')}>Open Relay</button>
+              <button onClick={() => setWorkspace('broadcast')}>Broadcast setup</button>
+              <button onClick={() => void perform(() => request('/auth/logout', {}))}>
+                Sign out
+              </button>
+            </div>
+          </details>
+        ) : data?.mode === 'simulation' ? (
+          <details key="simulation" className="title-accounts">
+            <summary>Choose another simulated captain</summary>
+            <p>Separate local communities. No Twitch messages are sent.</p>
+            <div className="buttons">
+              {['alpha', 'beta', 'gamma'].map((channel) => (
+                <button
+                  key={channel}
+                  onClick={() => void perform(() => request('/api/simulator/login', { channel }))}
+                >
+                  Use simulation {channel}
+                </button>
+              ))}
+            </div>
+          </details>
+        ) : data?.mode === 'live' ? (
+          <>
+            <p className="title-connection-status">
+              {data.integration.botAuthorized
+                ? 'Dedicated bot authorization is current. Connect the broadcaster to finish channel setup.'
+                : 'Connect your creator account. Dedicated bot setup is available below.'}
+            </p>
+            <details className="title-accounts">
+              <summary>Dedicated bot setup · operator access</summary>
+              <p>
+                {data.integration.botAuthorized
+                  ? 'Use a separate private-browser session if you need to replace the dedicated bot.'
+                  : 'Use a private browser signed into your dedicated bot account. The setup key is separate from the Twitch client secret.'}
+              </p>
+              <label>
+                Bot setup secret
+                <input
+                  type="password"
+                  autoComplete="off"
+                  value={operatorKey}
+                  onChange={(e) => setOperatorKey(e.target.value)}
+                />
+              </label>
+              <button
+                disabled={busy || !operatorKey}
+                onClick={() =>
+                  void perform(async () => {
+                    const result = await request<{ url: string }>(
+                      '/api/operator/bot-authorization',
+                      {},
+                      { Authorization: `Bearer ${operatorKey}` },
+                    );
+                    setOperatorKey('');
+                    location.assign(result.url);
+                  })
+                }
+              >
+                Authorize the dedicated bot
+              </button>
+            </details>
+          </>
+        ) : (
+          <span>Establishing flight deck connection…</span>
+        )}
+      </TitleScreen>
+    );
+
   return (
-    <main className={data?.me ? 'app command-shell' : 'app docking'}>
+    <main
+      className={
+        data?.me
+          ? `app command-shell ${world && workspace === 'bridge' ? 'flight-shell' : ''}`
+          : 'app docking'
+      }
+    >
       <a className="skip-link" href="#deck-content">
         Skip to game
       </a>
@@ -216,43 +315,6 @@ function App() {
             </button>
           </section>
         )}
-        {!overlayChannel && !data?.me && (
-          <section className="panel welcome">
-            <h2>Persistent gameplay flight deck</h2>
-            <p>
-              Play five chapters, solve shared challenges, and leave a ship with lasting
-              consequences. Raids are optional; the whole season works on one channel.
-            </p>
-            {data?.mode !== 'live' ? (
-              <>
-                <p>Choose a simulated creator. These accounts never connect to Twitch.</p>
-                <div className="buttons">
-                  {['alpha', 'beta', 'gamma'].map((channel) => (
-                    <button
-                      key={channel}
-                      onClick={() =>
-                        void perform(() => request('/api/simulator/login', { channel }))
-                      }
-                    >
-                      Use simulation {channel}
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <a className="button" href="/auth/twitch">
-                  Connect creator with Twitch
-                </a>
-                <p>
-                  {data.integration.botAuthorized
-                    ? 'Dedicated bot authorization is current. Connect the broadcaster to finish channel setup.'
-                    : 'The dedicated bot still needs separate authorization.'}
-                </p>
-              </>
-            )}
-          </section>
-        )}
         {!overlayChannel && data?.mode === 'live' && (
           <section
             className="panel operator-panel"
@@ -299,65 +361,68 @@ function App() {
           </section>
         )}
         {!overlayChannel && data?.me && (
-          <section className="panel toolbar">
-            <div>
-              <strong>{data.me.label}</strong>
-              <p>
-                {data.mode === 'simulation'
-                  ? 'Simulated creator session'
-                  : 'Twitch creator session'}
-              </p>
-            </div>
-            <div className="buttons">
-              {!world && (
+          <details className="captain-console" open={!world || workspace === 'broadcast'}>
+            <summary>Captain tools</summary>
+            <section className="panel toolbar">
+              <div>
+                <strong>{data.me.label}</strong>
+                <p>
+                  {data.mode === 'simulation'
+                    ? 'Simulated creator session'
+                    : 'Twitch creator session'}
+                </p>
+              </div>
+              <div className="buttons">
+                {!world && (
+                  <button
+                    disabled={busy}
+                    onClick={() => void perform(() => request('/api/worlds', {}))}
+                  >
+                    Create an Ark
+                  </button>
+                )}
                 <button
                   disabled={busy}
-                  onClick={() => void perform(() => request('/api/worlds', {}))}
+                  onClick={() =>
+                    void perform(async () => {
+                      const result = await request<{ url: string }>('/api/overlay-grant', {});
+                      setOverlayUrl(result.url);
+                    })
+                  }
                 >
-                  Create an Ark
+                  Generate / rotate OBS link
                 </button>
-              )}
-              <button
-                disabled={busy}
-                onClick={() =>
-                  void perform(async () => {
-                    const result = await request<{ url: string }>('/api/overlay-grant', {});
-                    setOverlayUrl(result.url);
-                  })
-                }
-              >
-                Generate / rotate OBS link
-              </button>
-              {overlayUrl && (
-                <>
-                  <button
-                    onClick={() =>
-                      void (
-                        navigator.clipboard?.writeText(overlayUrl) ??
-                        Promise.reject(new Error('Clipboard unavailable'))
-                      )
-                        .then(() =>
-                          setNotice('OBS link copied. Keep this read-only access link private.'),
+                {overlayUrl && (
+                  <>
+                    <button
+                      onClick={() =>
+                        void (
+                          navigator.clipboard?.writeText(overlayUrl) ??
+                          Promise.reject(new Error('Clipboard unavailable'))
                         )
-                        .catch(() =>
-                          setError(
-                            'Clipboard unavailable. Copy the destination of Open read-only overlay.',
-                          ),
-                        )
-                    }
-                  >
-                    Copy OBS link
-                  </button>
-                  <a href={overlayUrl} target="_blank" rel="noreferrer">
-                    Open read-only overlay
-                  </a>
-                </>
-              )}
-              <button onClick={() => void perform(() => request('/auth/logout', {}))}>
-                Sign out
-              </button>
-            </div>
-          </section>
+                          .then(() =>
+                            setNotice('OBS link copied. Keep this read-only access link private.'),
+                          )
+                          .catch(() =>
+                            setError(
+                              'Clipboard unavailable. Copy the destination of Open read-only overlay.',
+                            ),
+                          )
+                      }
+                    >
+                      Copy OBS link
+                    </button>
+                    <a href={overlayUrl} target="_blank" rel="noreferrer">
+                      Open read-only overlay
+                    </a>
+                  </>
+                )}
+                <button onClick={() => void perform(() => request('/auth/logout', {}))}>
+                  Sign out
+                </button>
+              </div>
+            </section>
+          </details>
         )}
         {!world && data?.me && workspace === 'bridge' && (
           <section className="panel empty-deck">
@@ -374,220 +439,57 @@ function App() {
           </section>
         )}
         {world && workspace === 'bridge' && (
-          <div className="bridge-view">
-            <section className="panel chapter-banner">
-              <div>
-                <span className="eyebrow">
-                  Chapter {world.chapter}/5 · {world.phase} · {world.participantCount} contributors
-                </span>
-                <h2>{world.title}</h2>
-                <p aria-live="polite">{world.recap}</p>
-                <small>
-                  World {world.worldId.slice(0, 8)} · host {world.host} · revision{' '}
-                  {world.worldVersion}
-                </small>
-              </div>
-              {world.outcome && (
-                <div className={`ending ${world.outcome}`}>
-                  <strong>
-                    {world.outcome === 'colony'
-                      ? 'Colony established'
-                      : world.outcome === 'wreck'
-                        ? 'Ark lost'
-                        : 'Partial survival'}
-                  </strong>
-                  <p>{world.endingReason}</p>
-                </div>
-              )}
-              {!overlayChannel && (
-                <div className="buttons">
-                  {world.capabilities.canStart && (
-                    <button disabled={busy} onClick={() => send({ type: 'start' })}>
-                      Start chapter {world.chapter + 1}
-                    </button>
-                  )}
-                  {world.capabilities.canCloseChallenge && (
-                    <button disabled={busy} onClick={() => send({ type: 'close-challenge' })}>
-                      {world.cooperation?.budget ? 'Open crew allocation' : 'Open final decision'}
-                    </button>
-                  )}
-                  {world.capabilities.canPause && (
-                    <>
-                      {world.capabilities.canCloseInvestigation && (
-                        <button
-                          disabled={busy}
-                          onClick={() => send({ type: 'close-investigation' })}
-                        >
-                          Open cooperative challenge
-                        </button>
-                      )}
-                      {world.capabilities.canCloseAllocation && (
-                        <button disabled={busy} onClick={() => send({ type: 'close-allocation' })}>
-                          Lock repairs & open decision
-                        </button>
-                      )}
-                      {world.capabilities.canCloseVoting && (
-                        <button disabled={busy} onClick={() => send({ type: 'close-voting' })}>
-                          Freeze advisory votes
-                        </button>
-                      )}
-                      <button disabled={busy} onClick={() => send({ type: 'pause' })}>
-                        Pause
-                      </button>
-                    </>
-                  )}
-                  {world.capabilities.canResume && (
-                    <button disabled={busy} onClick={() => send({ type: 'resume' })}>
-                      Resume
-                    </button>
-                  )}
-                  <button
-                    disabled={busy || world.handoffPending}
-                    onClick={() =>
-                      void perform(() =>
-                        request(`/api/worlds/${world.worldId}/hosting`, { resume: false }),
-                      )
-                    }
+          <FlightDeck
+            key={world.worldId}
+            world={world}
+            busy={busy}
+            onCommand={send}
+            onArchive={() => setWorkspace('archive')}
+            onPark={() =>
+              void perform(() => request(`/api/worlds/${world.worldId}/hosting`, { resume: false }))
+            }
+            onTiming={(durations) =>
+              void perform(() => request(`/api/worlds/${world.worldId}/timing`, durations))
+            }
+            simulator={
+              data?.mode === 'simulation' && !world.outcome ? (
+                <section className="simulator-panel">
+                  <h2>Simulated viewer input</h2>
+                  <p>Same server rules as chat. This rehearsal never sends Twitch messages.</p>
+                  <form
+                    className="chat-form"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void perform(async () => {
+                        await request('/api/simulator/commands', { actor, text: chat });
+                        setChat('');
+                      });
+                    }}
                   >
-                    Park / archive Ark
-                  </button>
-                </div>
-              )}
-              {world.phase === 'challenge' && (
-                <p className="phase-guidance">
-                  {world.challenge?.solved
-                    ? 'Challenge reward secured. Open the decision when your crew is ready.'
-                    : 'Keep this window open while chat solves the challenge. Closing it ends further discovery and repairs for this chapter.'}
-                </p>
-              )}
-            </section>
-            <ResourceMeters world={world} />
-            <PhaseClock world={world} />
-            <EpisodeSettings
-              key={`${world.worldId}:${world.chapter}`}
-              world={world}
-              busy={busy}
-              onCommand={send}
-              onTiming={(durations) =>
-                void perform(() => request(`/api/worlds/${world.worldId}/timing`, durations))
-              }
-            />
-            <ArkView
-              key={`ark:${world.worldId}`}
-              systems={world.systems}
-              resources={world.resources}
-            />
-            <ParticipationGuide world={world} />
-            <CooperationView world={world} />
-            {world.handoffPending && (
-              <div className="notice">
-                Handoff prepared. World mutations are frozen until the receiver accepts or the
-                intent ends.
-              </div>
-            )}
-            {world.challenge && (
-              <ChallengeView
-                challenge={world.challenge}
-                interactive={
-                  !overlayChannel && world.phase === 'challenge' && !world.handoffPending
-                }
-                onCommand={send}
-                busy={busy}
-              />
-            )}
-            {!overlayChannel && data?.mode === 'simulation' && !world.outcome && (
-              <section className="panel simulator-panel">
-                <h2>Simulated viewer input</h2>
-                <p>
-                  Exercises the same command grammar and game rules as Twitch input. No Twitch
-                  messages are sent.
-                </p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void perform(async () => {
-                      await request('/api/simulator/commands', { actor, text: chat });
-                      setChat('');
-                    });
-                  }}
-                  className="chat-form"
-                >
-                  <label>
-                    Participant alias
-                    <input
-                      value={actor}
-                      onChange={(e) => setActor(e.target.value)}
-                      maxLength={40}
-                    />
-                  </label>
-                  <label>
-                    Chat command
-                    <input
-                      aria-label="Chat command"
-                      value={chat}
-                      onChange={(e) => setChat(e.target.value)}
-                      placeholder="!scan A"
-                      maxLength={160}
-                    />
-                  </label>
-                  <button disabled={busy || !chat}>Send simulated input</button>
-                </form>
-              </section>
-            )}
-            {world.choices.length > 0 && (
-              <section className="panel decision-panel">
-                <h2>
-                  {['decision', 'awaiting-commit'].includes(world.phase)
-                    ? 'Commit a consequential choice'
-                    : 'Upcoming decision · previews update with repairs'}
-                </h2>
-                <p>
-                  Audience votes advise the host. Exact resource previews include challenge rewards
-                  already earned.
-                </p>
-                <div className="choices">
-                  {world.choices.map((choice, index) => (
-                    <article key={choice.id}>
-                      <h3>
-                        {index + 1}. {choice.label}
-                      </h3>
-                      <p>{choice.description}</p>
-                      <small>
-                        Chat: !vote {index + 1} · {world.votes[choice.id] ?? 0} votes
-                      </small>
-                      {choice.preview && (
-                        <>
-                          <ChoiceForecast
-                            resources={choice.preview.resources}
-                            current={world.resources}
-                          />
-                          {choice.preview.warnings.map((warning) => (
-                            <p className="warning" key={warning}>
-                              {warning}
-                            </p>
-                          ))}
-                        </>
-                      )}
-                      {!choice.available && <p className="warning">{choice.unavailableReason}</p>}
-                      {!overlayChannel && (
-                        <button
-                          disabled={busy || !world.capabilities.canCommit || !choice.available}
-                          onClick={() => send({ type: 'commit', option: choice.id })}
-                        >
-                          Commit {choice.label}
-                          {choice.preview?.outcome === 'wreck' ? ' — wreck forecast' : ''}
-                        </button>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              </section>
-            )}
-            <ConsequenceSignal key={`consequence:${world.worldId}`} world={world} />
-            <button className="quiet archive-link" onClick={() => setWorkspace('archive')}>
-              Read the Ark’s history
-            </button>
-          </div>
+                    <label>
+                      Participant alias
+                      <input
+                        value={actor}
+                        onChange={(e) => setActor(e.target.value)}
+                        maxLength={40}
+                      />
+                    </label>
+                    <label>
+                      Chat command
+                      <input
+                        aria-label="Chat command"
+                        value={chat}
+                        onChange={(e) => setChat(e.target.value)}
+                        placeholder="!scan A"
+                        maxLength={160}
+                      />
+                    </label>
+                    <button disabled={busy || !chat}>Send simulated input</button>
+                  </form>
+                </section>
+              ) : null
+            }
+          />
         )}
         {archived && data?.me && workspace === 'archive' && (
           <WorldArchive key={archived.worldId} world={archived} />

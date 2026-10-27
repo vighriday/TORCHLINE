@@ -1,3 +1,4 @@
+import { chooseSimulation, disclose } from './ui.ts';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
@@ -75,20 +76,21 @@ test('all physical-state fixtures remain legible in read-only 720p and 1080p com
             height: true,
           });
           const bounds = await page.evaluate(() => {
-            const resource = document.querySelector('.resources')!.getBoundingClientRect();
-            const scene = document.querySelector('.overlay-scene')!.getBoundingClientRect();
-            const bottom = document.querySelector('.overlay-bottom')!.getBoundingClientRect();
-            const context = document.querySelector('.overlay-context')!.getBoundingClientRect();
+            const footer = document.querySelector('.flight-footer')!.getBoundingClientRect();
+            const vitals = document.querySelector('.game-vitals')!.getBoundingClientRect();
+            const context = document
+              .querySelector('.flight-mission, .game-ending')
+              ?.getBoundingClientRect();
             return {
-              telemetryAboveShip: resource.bottom <= scene.top,
-              shipAboveInstructions: scene.bottom <= bottom.top,
-              contextInside: context.bottom <= bottom.top,
+              vitalsAboveFooter: vitals.bottom <= footer.top,
+              contextInside: !context || context.bottom <= footer.top,
+              footerInside: footer.bottom <= innerHeight,
             };
           });
-          expect(bounds, `${name} composition has no overlapping information`).toEqual({
-            telemetryAboveShip: true,
-            shipAboveInstructions: true,
+          expect(bounds, `${name} cinematic HUD has no overlapping information`).toEqual({
+            vitalsAboveFooter: true,
             contextInside: true,
+            footerInside: true,
           });
           if (name === 'leaking' || name === 'navigation-sacrificed')
             await page.screenshot({ path: `.local/screenshots/overlay-${name}-${size.width}.png` });
@@ -122,7 +124,7 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.setViewportSize({ width: 1440, height: 1000 });
       await page.goto('/');
-      await page.getByRole('button', { name: 'Use simulation alpha' }).click();
+      await chooseSimulation(page, 'alpha');
       await page.getByRole('button', { name: 'Create an Ark' }).click();
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
       await expect(page.locator('canvas')).toHaveCount(0);
@@ -134,6 +136,7 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
         ...world,
         clock: world.clock ? { ...world.clock, serverAt: 'display-time' } : undefined,
       });
+      await disclose(page, '.route-tools');
       await page.getByRole('button', { name: 'Add S', exact: true }).focus();
       await page.keyboard.press('Enter');
       await page.getByRole('button', { name: 'Add A', exact: true }).focus();
@@ -196,6 +199,7 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
         canonical(original),
       );
       await page.getByRole('button', { name: 'Open final decision' }).click();
+      await disclose(page, '.captain-console');
       await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
       [overlay] = await Promise.all([
         page.waitForEvent('popup'),
@@ -206,7 +210,9 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
         { width: 1920, height: 1080 },
       ]) {
         await overlay.setViewportSize(size);
-        await expect(overlay.getByText('1. Sacrifice navigation', { exact: true })).toBeVisible();
+        await expect(
+          overlay.getByRole('heading', { name: 'Sacrifice navigation', exact: true }),
+        ).toBeVisible();
         await expect(overlay.getByRole('button')).toHaveCount(0);
         expect(
           await overlay.evaluate(
@@ -216,11 +222,11 @@ test('keyboard cooperation, responsive workspaces, reduced motion and graphics r
           ),
         ).toBe(true);
         const clear = await overlay
-          .locator('.overlay-context')
+          .locator('.flight-decision-zone')
           .evaluate(
             (element) =>
               element.getBoundingClientRect().bottom <=
-              document.querySelector('.overlay-bottom')!.getBoundingClientRect().top,
+              document.querySelector('.flight-footer')!.getBoundingClientRect().top,
           );
         expect(clear).toBe(true);
       }

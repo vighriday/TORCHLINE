@@ -180,6 +180,8 @@ export function createArkScene(
     metricAt = 0;
   let slowSamples = 0,
     pixelRatio = Math.min(devicePixelRatio || 1, 1.5);
+  delete container.dataset.lastCue;
+  container.dataset.pixelRatio = pixelRatio.toFixed(2);
   function emit(at: T.Vector3, color: number, count: number, speed: number, life = 1.3) {
     for (let i = 0; i < count && active.length < 320; i++) {
       const seed = `${t}:${i}:${active.length}`;
@@ -385,6 +387,8 @@ export function createArkScene(
   }
   const resume = () => {
     stop();
+    frames = 0;
+    metricAt = performance.now();
     if (!disposed && visible && !document.hidden) frame = requestAnimationFrame(draw);
   };
   const resize = new ResizeObserver(() => {

@@ -122,6 +122,8 @@ The [2026-10-27 design integration review](../design/integration-review.md) chec
 
 ## Composition failures that individual library reviews miss
 
+The cinematic title/flight restoration is reviewed against C1–C13 in [ADR 0015](../decisions/0015-cinematic-game-presentation.md). It keeps the approved stack, controller, rules, persistence and authority. Decorative event effects are baselined/deduplicated and bounded; SVG/DOM remain usable without graphics. Executed browser checks and measured software-renderer limitations belong to the rollout evidence, separately from this design review.
+
 | Combination | Failure scenario | Required mitigation/evidence |
 | --- | --- | --- |
 | Fastify + HMAC + Zod | Default JSON parser changes bytes before signature calculation | Route-specific raw parser; tamper tests with whitespace and Unicode; parse only after verification |

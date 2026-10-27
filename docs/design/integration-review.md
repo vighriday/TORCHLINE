@@ -4,16 +4,18 @@ Reviewed 2026-10-27. The local exports are reference inputs; all production valu
 
 | Supplied surface | Production adaptation |
 | --- | --- |
-| Creator Dashboard | Bridge shell, chapter objective, resource telemetry, cooperation and consequential choices; scoped creator tools |
+| Creator Dashboard | Full-screen Bridge, chapter objective, telemetry, cooperation and consequential choices; scoped tools in accessible menus |
 | ArkView | Shared modular Ark, seven system conditions, permanent damage/repair/sacrifice marks; schematic plus optional cinematic renderer |
 | ChallengeView | Six canonical graph nodes, server-revealed clues, real signal costs, keyboard route submission and work orders |
-| Live Overlay | Read-only broadcast composition with current crisis, resource telemetry and real Twitch command guidance |
+| Live Overlay | Cinematic title/launch choreography and a shared read-only game HUD with current crisis, real telemetry and Twitch command guidance |
 | World Inheritance | Relay with preparation, authentic evidence and acceptance states; no fake streams, counts or proof controls in live mode |
-| World History | Current Ark's bounded canonical log, causal references and permanent system record; no fabricated replay attestation |
+| World History | Paginated public event/custody history, causal references and permanent system record; no fabricated replay attestation |
 | `ark3d.js` | Geometry/art direction adapted into a typed, bounded renderer with complete cleanup |
 | `support.js`, `torchline-data.js`, `torchline-sim.js` | Reference only. Export runtime, fictional data and competing client rules excluded |
 
-The visual language retains Tektur headings, Saira body text, Kode Mono telemetry, amber/cyan status accents, dark panels, modular ship geometry and restrained motion. Fonts are served locally with their OFL licenses. No external font or renderer CDN is required by the application.
+The visual language retains Tektur headings, Saira body text, Kode Mono telemetry, amber/cyan accents, metallic title treatment and the supplied modular ship. The October 27 screenshot review exposed a real gap: the earlier adaptation reduced the game's cinematic title and flight composition to dashboard panels. [ADR 0015](../decisions/0015-cinematic-game-presentation.md) restores the title, ship-centered flight HUD, rotating habitat, chapter environments, engine glow, scan/repair sweeps and recorded consequence effects. Fonts are served locally with their OFL licenses. No external font, texture or renderer CDN is required.
+
+`TitleScreen` launches an actual saved simulation or the existing Twitch OAuth route. The clearly labeled unsaved vessel on that screen has no votes, accounts or world history. `FlightDeck` renders both the interactive captain view and read-only broadcast view from the same canonical projection. Settings and simulation input are disclosures rather than permanent dashboard panels; phase changes close the simulation drawer so it cannot cover the next decision. `ChallengeView` foregrounds the graph and keeps reward detail and text route entry available by keyboard. Small screens use a flowing layout and SVG instead of shrinking a desktop canvas.
 
 ## Cross-component decision review
 
@@ -31,12 +33,12 @@ This is a design review. Executed checks are recorded separately in the implemen
 | C8 Live projection | Existing snapshots/SSE and revisions remain authoritative; renderer lifecycle follows world identity. No per-message animation fan-out. |
 | C9 Dashboard | Semantic navigation, labels, visible next actions, preserved functional controls and actionable errors. Responsive layout, keyboard access and reduced motion. |
 | C10 OBS | Separate read-only composition; capability exchange stays in URL fragment and existing secure session. One optional canvas, 30 FPS target and bounded DPR. Actual OBS remains an external test. |
-| C11 History/replay | Only projected events/causes and permanent marks shown. Last 30 non-vote events explicitly labeled; no fabricated full history or replay validation. |
+| C11 History/replay | Projection keeps a bounded tail; authenticated Archive pages the full public event/custody record. Renderer baselines history and deduplicates effects. No fabricated replay validation. |
 | C12 Validation | Existing real PostgreSQL/simulation/OAuth journeys retained; add responsive, overlay, fallback, reduced-motion and render-state coverage. Simulated evidence remains visibly separate. |
 | C13 Operations | Lazy local renderer assets; no runtime CDN or new network service. Original reference workspace ignored. Stable build and secret scans remain release gates. |
 
 ## Limits
 
-The current contract does not expose a recipient's incoming ship snapshot before acceptance, complete custody lineage or historical chapter snapshots. Relay and Archive explain these limits. Adding a read API later requires party/current-custodian checks, expiration and disconnect tests; a client-side prototype cannot fill that gap safely.
+Relay now reads the frozen incoming ship through the party-scoped, expiring preview API; Archive reads complete public event and custody pages under current-custodian authority. Neither grants mutations or native raid proof. Rich historical chapter snapshots and a dedicated custody-arrival animation cue remain future contract work; the current view preserves the inherited physical state and next explicit chapter start animates arrival.
 
 Performance claims require measurement. Chromium screenshots, frame limits and cleanup tests do not prove the actual OBS browser's GPU performance or native mobile Twitch usability.

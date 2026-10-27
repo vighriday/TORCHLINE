@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-27 — Playable cinematic title and flight HUD
+
+- Restored the supplied metallic title/launch choreography and ship-centered game screen in typed React. Captain and read-only broadcast views share real resources, phase clocks, puzzles, allocation, advisory votes, consequences and persistent ship condition.
+- Connected recorded discovery, repair, sacrifice, damage and chapter events to bounded effects; reload preserves damage without replaying history. Kept setup/history/custody tools, accessible route entry, reduced motion, mobile SVG and graphics failure recovery.
+- Corrected account-menu state reuse and simulation drawer overlap found by browser journeys. No backend, game rules, schema, grant or authority changed.
+- Added cinematic launch/effect/reload coverage and updated design contracts/provenance. A measured software fallback sample reached 22 FPS at DPR 0.5; actual OBS and native Twitch play remain unverified.
+- Verified production build/typecheck, 77 tests across twelve files and all seven Chromium journeys. Repository/format/artifact-secret checks pass; both local services serve the current build. Public HTTPS remains offline.
+
 ## 2026-10-27 — Cinematic renderer foundation
 
 - Restored richer Claude Design ship geometry, procedural surface/glow treatment, canonical detached cargo/sealed sectors/damage and bounded chapter/event effects. No game rules or authority changed.

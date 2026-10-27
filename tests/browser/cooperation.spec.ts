@@ -1,3 +1,4 @@
+import { chooseSimulation, disclose } from './ui.ts';
 import { expect, test } from '@playwright/test';
 import { database } from '../helpers.ts';
 import { createApp } from '../../apps/server/src/app.ts';
@@ -24,8 +25,9 @@ test('designed cooperation, exact allocation forecasts and frozen advice work on
       await page.setViewportSize({ width: 390, height: 844 });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/');
-      await page.getByRole('button', { name: 'Use simulation alpha' }).click();
+      await chooseSimulation(page, 'alpha');
       await page.getByRole('button', { name: 'Create an Ark' }).click();
+      await disclose(page, '.episode-configuration');
       await page.getByLabel('Repair reserve').fill('5');
       await page.getByLabel('Investigate a shared clue').check();
       await page.getByRole('button', { name: 'Save crew settings' }).click();
@@ -34,6 +36,7 @@ test('designed cooperation, exact allocation forecasts and frozen advice work on
         page.getByRole('heading', { name: 'Choose where the crew investigates' }),
       ).toBeVisible();
       const input = async (text: string) => {
+        await disclose(page, '.simulation-console');
         await page.getByRole('textbox', { name: 'Chat command' }).fill(text);
         await page.getByRole('button', { name: 'Send simulated input' }).click();
       };
@@ -41,8 +44,10 @@ test('designed cooperation, exact allocation forecasts and frozen advice work on
       await page.getByRole('button', { name: 'Open cooperative challenge' }).click();
       await expect(page.getByText('C · Discovered', { exact: true })).toBeVisible();
       await page.getByRole('button', { name: 'Open crew allocation' }).click();
+      await expect(page.locator('.phase-allocation')).toBeVisible();
       await input('!allocate 3 2');
       await expect(page.getByText(/3 hull repairs · 2 oxygen units/)).toBeVisible();
+      await disclose(page, '.captain-console');
       await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
       const href = await page
         .getByRole('link', { name: 'Open read-only overlay' })
@@ -53,6 +58,7 @@ test('designed cooperation, exact allocation forecasts and frozen advice work on
       ).toBeVisible();
       await expect(overlay.getByRole('button')).toHaveCount(0);
       await page.getByRole('button', { name: 'Lock repairs & open decision' }).click();
+      await expect(page.locator('.phase-decision')).toBeVisible();
       await input('!vote 2');
       await page.getByRole('button', { name: 'Freeze advisory votes' }).click();
       await expect(page.getByRole('timer')).toHaveText('Awaiting captain');

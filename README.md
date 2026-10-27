@@ -10,7 +10,7 @@ The first season, **The Ark Protocol**, follows a damaged colony ship through fi
 
 Architecture approved and the first functional gameplay slice implemented on **October 26, 2026**. The reference application runs locally with PostgreSQL: complete five-chapter gameplay, cooperative investigation/challenges/allocation, persistent physical damage/repairs, combined choice previews, persisted phase timing and recovery, complete history, overlays and isolated simulated custody transfers. New Arks use ark-v3; existing worlds retain ark-v2 replay semantics.
 
-Claude Design exports are integrated into the typed React command deck, shared persistent Ark, cooperative challenges, read-only broadcast view, Relay, Hangar and Archive. SVG remains the accessible fallback; a lazy cinematic renderer adds optional ship motion. Real Twitch application/broadcaster/bot authorization and three signed callback challenges were verified on October 26. The development HTTPS tunnel currently needs its missing ngrok credential restored. Genuine chat effects, visible bot replies, actual OBS and a native raid remain separate acceptance milestones. See [implementation status](docs/planning/implementation-status.md) and the ordered [owner launch guide](docs/operations/owner-launch-guide.md).
+Claude Design exports are integrated into a cinematic game title, ship-centered React flight deck, cooperative challenges, shared read-only broadcast HUD, Relay, Hangar and Archive. The lazy local renderer maps actual chapter/events and persistent condition to ship damage, repairs, environments and bounded effects; SVG remains the accessible/mobile fallback. Real Twitch application/broadcaster/bot authorization and three signed callback challenges were verified on October 26. The development HTTPS tunnel currently needs its missing ngrok credential restored. Genuine chat effects, visible bot replies, actual OBS and a native raid remain separate acceptance milestones. See [implementation status](docs/planning/implementation-status.md) and the ordered [owner launch guide](docs/operations/owner-launch-guide.md).
 
 Repository: [vighriday/TORCHLINE](https://github.com/vighriday/TORCHLINE).
 
@@ -43,7 +43,7 @@ pnpm build
 pnpm dev
 ```
 
-Open **http://localhost:3000** and choose **simulation alpha**. Create an Ark, start a chapter, discover clues, submit a route or repair work order, and commit a choice. A raid is never needed to finish the season. Use separate browser profiles for two simulated creators when rehearsing custody. The receiver must opt in and have no active world.
+Open **http://localhost:3000** and choose **Launch the Ark** (or press Enter). This opens an actual saved simulation as alpha. **Choose another simulated captain** selects beta/gamma for separate local communities. Start a chapter, discover clues, submit a route or repair work order, and commit a choice. Crew/pacing settings and simulation chat are expandable controls. A raid is never needed to finish the season. Use separate browser profiles for two simulated creators when rehearsing custody. The receiver must opt in and have no active world.
 
 On this workspace's original Node 22 installation, first select the checksum-verified local Node 24 runtime for the current shell: `$env:PATH = "$PWD\.tools\node24;$env:PATH"`. A clean checkout should install Node 24 normally. Stop this project's private database with `pnpm db:down`. `PG_BIN` can override the local PostgreSQL binary directory.
 

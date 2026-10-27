@@ -6,6 +6,7 @@ export interface ChallengeRendererProps {
   onCommand: (command: Command) => void;
   busy: boolean;
   compact?: boolean;
+  hud?: boolean;
 }
 const positions: Record<string, [number, number]> = {
   S: [40, 115],
@@ -21,11 +22,12 @@ export function ChallengeView({
   onCommand,
   busy,
   compact = false,
+  hud = false,
 }: ChallengeRendererProps) {
   const [route, setRoute] = useState('');
   return (
     <section
-      className={`panel challenge-panel ${compact ? 'compact-challenge' : ''}`}
+      className={`panel challenge-panel ${compact ? 'compact-challenge' : ''} ${hud ? 'hud-challenge' : ''}`}
       aria-label="Cooperative challenge"
     >
       <div className="section-heading">
@@ -35,7 +37,14 @@ export function ChallengeView({
         </span>
       </div>
       <p>{challenge.prompt}</p>
-      <p className="reward">Mechanical reward: {challenge.reward}</p>
+      {hud ? (
+        <details className="challenge-reward">
+          <summary>What solving changes</summary>
+          <p className="reward">{challenge.reward}</p>
+        </details>
+      ) : (
+        <p className="reward">Mechanical reward: {challenge.reward}</p>
+      )}
       {challenge.kind === 'route' && (
         <>
           <div className="constraint-row">
@@ -107,55 +116,59 @@ export function ChallengeView({
         </div>
       )}
       {challenge.kind === 'route' && interactive && (
-        <div className="route-builder">
-          <p className="muted">
-            Build a route in order, or type it below. Discover the required and unsafe relays before
-            submitting.
-          </p>
-          <div className="buttons" aria-label="Route node shortcuts">
-            {challenge.nodes.map((node) => (
+        <details className="route-tools" open={!hud}>
+          <summary>Plot a route</summary>
+          <div className="route-builder">
+            <p className="muted">
+              Build a route in order, or type it below. Discover the required and unsafe relays
+              before submitting.
+            </p>
+            <div className="buttons" aria-label="Route node shortcuts">
+              {challenge.nodes.map((node) => (
+                <button
+                  key={node.id}
+                  aria-label={`Add ${node.id}`}
+                  disabled={busy || challenge.solved}
+                  onClick={() =>
+                    setRoute((previous) =>
+                      `${previous} ${node.id}`.trim().split(/\s+/).slice(-6).join(' '),
+                    )
+                  }
+                >
+                  {hud ? node.id : `Add ${node.id}`}
+                </button>
+              ))}
+              <button disabled={!route || busy} onClick={() => setRoute('')}>
+                Clear route
+              </button>
+            </div>
+            <div className="route-entry">
+              <label>
+                Candidate route
+                <input
+                  aria-label="Candidate route"
+                  value={route}
+                  onChange={(e) => setRoute(e.target.value)}
+                  placeholder="S … T"
+                  maxLength={24}
+                />
+              </label>
               <button
-                key={node.id}
-                disabled={busy || challenge.solved}
+                disabled={busy || challenge.solved || !route.trim()}
                 onClick={() =>
-                  setRoute((previous) =>
-                    `${previous} ${node.id}`.trim().split(/\s+/).slice(-6).join(' '),
-                  )
+                  onCommand({
+                    type: 'route',
+                    nodes: route.trim().toUpperCase().split(/\s+/) as (
+                      'S' | 'A' | 'B' | 'C' | 'D' | 'T'
+                    )[],
+                  })
                 }
               >
-                Add {node.id}
+                Submit route
               </button>
-            ))}
-            <button disabled={!route || busy} onClick={() => setRoute('')}>
-              Clear route
-            </button>
+            </div>
           </div>
-          <div className="route-entry">
-            <label>
-              Candidate route
-              <input
-                aria-label="Candidate route"
-                value={route}
-                onChange={(e) => setRoute(e.target.value)}
-                placeholder="S … T"
-                maxLength={24}
-              />
-            </label>
-            <button
-              disabled={busy || challenge.solved || !route.trim()}
-              onClick={() =>
-                onCommand({
-                  type: 'route',
-                  nodes: route.trim().toUpperCase().split(/\s+/) as (
-                    'S' | 'A' | 'B' | 'C' | 'D' | 'T'
-                  )[],
-                })
-              }
-            >
-              Submit route
-            </button>
-          </div>
-        </div>
+        </details>
       )}
       <p className="muted">
         Mobile Twitch viewers use !scan, !route or !patch in chat. One person can solve this; larger
