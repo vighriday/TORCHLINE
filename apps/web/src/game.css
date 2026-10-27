@@ -9,6 +9,10 @@
   background: #05060a;
   color: #eeece6;
 }
+.ark-title .schematic-label,
+.ark-flight .schematic-label {
+  display: none;
+}
 .title-nebula,
 .flight-nebula {
   position: absolute;

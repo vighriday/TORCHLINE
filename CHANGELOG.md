@@ -7,6 +7,7 @@
 - Corrected account-menu state reuse and simulation drawer overlap found by browser journeys. No backend, game rules, schema, grant or authority changed.
 - Added cinematic launch/effect/reload coverage and updated design contracts/provenance. A measured software fallback sample reached 22 FPS at DPR 0.5; actual OBS and native Twitch play remain unverified.
 - Verified production build/typecheck, 77 tests across twelve files and all seven Chromium journeys. Repository/format/artifact-secret checks pass; both local services serve the current build. Public HTTPS remains offline.
+- Follow-up visual QA removes cropped decorative topology captions from the full-screen SVG fallback; the accessible ship description and physical records remain available.
 
 ## 2026-10-27 — Cinematic renderer foundation
 
