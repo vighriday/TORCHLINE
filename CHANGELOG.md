@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-27 — Continuation evidence
+
+- Recorded the full runtime rollout's successful CI, 77 automated tests, six Chromium journeys, current real-provider grant/subscription checks and exact external dependencies. Both local services run from the reviewed source with migration 007.
+
 ## 2026-10-27 — Hosted cooperation and durable recovery
 
 - New Arks explicitly use ark-v3; old Arks retain replay-compatible ark-v2. Twitch/simulator parsing and designed React/mobile/overlay views support investigation, normalized allocation and frozen advice. Presentation is versioned 2026-10-27.1.

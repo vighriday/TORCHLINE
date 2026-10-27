@@ -22,6 +22,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Deployment runbook](operations/deployment.md) | Proposed hosting, configuration, operations, and recovery |
 | [Decision register](decisions/README.md) | Proposed architecture decisions and revisit triggers |
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
+| [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
 | [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
 | [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
