@@ -36,3 +36,5 @@ jobs:
       - run: pnpm audit:balance && pnpm design:fixtures
       - run: pnpm check:repo
       - run: git diff --exit-code -- docs/reports docs/design/fixtures
+      - run: docker build --build-arg SOURCE_REVISION=${{ github.sha }} -t torchline:check .
+      - run: node scripts/smoke-container.mjs torchline:check

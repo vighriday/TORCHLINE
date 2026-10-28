@@ -1,0 +1,18 @@
+# Allowlist: private inputs, machine tooling and credentials never enter build context.
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.json
+!apps/
+!apps/**
+!packages/
+!packages/**
+!scripts/
+!scripts/migrate.ts
+**/node_modules
+**/dist
+**/.env*
+**/[Ii][Dd][Ee][Aa].[Tt][Xx][Tt]
+**/.local
+**/.tools

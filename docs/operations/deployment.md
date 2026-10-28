@@ -4,6 +4,19 @@ Status: cloud deployment remains proposed. The local app and isolated PostgreSQL
 
 ## Recommended topology
 
+### Candidate image and release order
+
+`Dockerfile` pins Node/pnpm, typechecks/builds the browser in a separate stage and runs only production dependencies as a non-root user. `.dockerignore` allowlists source inputs; no credentials/private concept/local tools enter the image. Linux CI builds it and runs `node scripts/smoke-container.mjs torchline:check` against a disposable schema. Docker is not installed on this Windows machine; see the release report for actual CI results.
+
+1. Review a green commit and build `docker build --build-arg SOURCE_REVISION=COMMIT -t torchline:COMMIT .`. Record the resulting image digest. Scan it with the chosen hosting/registry scanner before release; version tags alone do not freeze base-image bytes.
+2. Provision approved PostgreSQL/HTTPS service and runtime secrets. Use `NODE_ENV=production`, `WORLD_MODE=live`, `HOST=0.0.0.0`, provider `PORT`, HTTPS `PUBLIC_BASE_URL`, exact `TWITCH_REDIRECT_URI`, `DATABASE_URL` with trusted remote TLS, independent session/token/operator/EventSub secrets and the registered Twitch credentials. Retain the existing token key when migrating saved grants. Keep the backup key in the operator secret store.
+3. Create and drill an encrypted pre-release backup. Run **one** migration job from this image: `node scripts/migrate.ts` with the target `DATABASE_URL`. Do not run migrations concurrently in every replica.
+4. Start **one replica** with the same configuration. No local volume holds authoritative state. Give graceful shutdown at least 15 seconds and disable proxy buffering for SSE. `/health/ready` must pass before traffic. Container smoke exercises a read-only filesystem, dropped Linux capabilities and no-new-privileges; configure equivalent host restrictions where supported.
+5. Register the exact new OAuth callback in the Twitch developer console; verify callback delivery/subscriptions, actual chat/replies, private OBS source/reconnect and consented native raid using the live checklist. A healthy container cannot prove these external integrations.
+6. Keep the prior compatible image digest for rollback. Additive migration 008 is retained during code rollback; do not reverse data or reset delivery deduplication. After recovery explicitly resume paused episodes and inspect uncertain outbound sends.
+
+The image contains a migration CLI but no pg_dump/restore utilities or backup key. Run backup operations from a trusted operator checkout/tooling environment as documented in [backup and restore](backup-and-restore.md). No public restore/admin endpoint is added.
+
 One always-on Render web service serves the Fastify API and static browser build. Use managed PostgreSQL 17 in the same region where supported. Bind the app to the provider's `PORT` on `0.0.0.0`; terminate public HTTPS at the provider edge. Keep all authoritative data and work in PostgreSQL. The web service filesystem holds only immutable build assets.
 
 Render supports long-running web services and managed TLS URLs. Its free service has idle spin-down behavior, so use an appropriate always-on plan for live demonstration and judging. This recommendation is about service properties, not a price quote. [Web service documentation](https://render.com/docs/web-services), [free-tier limitations](https://render.com/docs/free)

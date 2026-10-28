@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — Reproducible release image
+
+- Added a pinned multi-stage application image, allowlisted build context, production-only runtime dependencies, non-root user, readiness healthcheck and source revision label.
+- Added Linux CI image build/smoke against an isolated schema: migrations, private-path/dev-tool exclusion, read-only filesystem, assets/security/anonymous denial and graceful shutdown. Local Docker and cloud deployment are unavailable; CI results are recorded separately.
+- Documented migration/start/verify/rollback order and the single-replica limitation. No registry publish, hosting provision or production deployment occurred.
+
 ## 2026-10-28 — Runtime and feed boundaries
 
 - Added validated production HTTPS/DB TLS, independent keys, exact OAuth redirect and bounded operational configuration; startup failures redact dependency details.
