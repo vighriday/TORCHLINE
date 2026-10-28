@@ -4,6 +4,7 @@
 
 - Carry the title's saved reduced-motion preference into every flight-deck CSS effect, alongside the existing SVG fallback and system preference. Browser coverage checks actual animation styles after reload.
 - Crew command guidance respects repair prerequisites: A and B must be patched before suggesting C. Exclude the unused work-order D node. These are presentation suggestions; server rules and permissions remain authoritative.
+- Source `b1574e9` passes CI 40732891048: 91 tests, eight browser journeys, fixture consistency and release-image smoke. Real HTTPS serves matching current build assets; public overlay and ten-response secret checks pass. Native chat/OBS/raid and owner visual acceptance remain open.
 
 ## 2026-10-28 — Playable encounter presentation
 

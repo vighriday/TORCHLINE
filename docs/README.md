@@ -30,6 +30,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |
 | [October 28 release readiness](reports/2026-10-28-release-readiness.md) | Executed reliability/security/container evidence and remaining external release gates |
 | [Design integration review](design/integration-review.md) | Six-surface mapping, excluded prototype logic and thirteen-component stress review |
+| [Encounter presentation review](design/encounter-review.md) | Actual encounter motion, persistent ship inspection, relay interaction, recording and honest visual/native limits |
 | [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
 | [Public capability and authority review](reviews/2026-10-26-public-authority.md) | All route/component boundaries, four reproduced defects, evidence and pruning recommendations |
 | [Design and launch authority review](reviews/2026-10-27-design-integration.md) | Integrated consumers, resolved visual defects, exact verification scope and deferred public HTTPS |

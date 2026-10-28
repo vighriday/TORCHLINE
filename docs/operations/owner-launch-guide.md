@@ -11,7 +11,7 @@ Updated 2026-10-28. For the configured accounts start with the shorter [live rel
 | Broadcaster | `hriday29` previously completed real creator consent. Recheck the displayed account after sign-in. |
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
-| Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev` after key registration. Native ngrok remains quarantined. Save the exact new callback in Twitch to resolve the observed `redirect_mismatch`. Simulation stays on 3000. |
+| Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev`. Callback mismatch is corrected; fresh real creator sign-in and first live Ark are observed. Native ngrok remains unused. Simulation stays on 3000. |
 | Real gameplay chat, visible bot output, actual OBS, native raid | Implemented paths with local tests; owner-operated acceptance is still required. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 

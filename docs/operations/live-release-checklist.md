@@ -15,7 +15,7 @@ Intended origin: `https://education-slather-reps.ngrok-free.dev`. The computer/d
 
 ## 2. Confirm OAuth and subscriptions
 
-**Current blocker:** Twitch returned `redirect_mismatch` to the old offline hostname. The running server was independently checked: its sign-in redirect sends the new callback below. Update the existing app's console allowlist, then begin a fresh sign-in from the current home page; do not refresh the old error/callback URL.
+**Completed on the current machine:** the owner corrected the console callback; a fresh real creator session and the first live Ark were observed afterward. The earlier `redirect_mismatch` is resolved. Keep the exact callback below if registering/recovering the app later; begin sign-in from the current home page rather than an old callback URL.
 
 In [Twitch developer apps](https://dev.twitch.tv/console/apps), Manage the existing TORCHLINE app. OAuth Redirect URLs must include exactly `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Click Add if shown, then Save; refresh Manage and confirm it remains listed. Keep **Confidential** and the existing client ID/secret; no second app is needed for the bot. [Twitch registration reference](https://dev.twitch.tv/docs/authentication/register-app/).
 
@@ -27,7 +27,7 @@ Engineering runs `pnpm twitch:verify:live`: real grants, all provider subscripti
 
 A live baseline is already saved locally. Keep it, or deliberately start a new session with `pnpm live:acceptance begin --replace`.
 
-1. Create/resume a live Ark as the broadcaster. Start chapter 1; finish/close investigation first if enabled. **During the open navigation challenge**, type `!scan A` in the broadcaster's actual Twitch chat. Confirm its clue appears and the private applied-action counter increases. If that phase ended, use the command displayed for the active phase.
+1. Resume the existing live Ark. The new flight deck's **Open Twitch chat** action opens the broadcaster's actual chat directly; the adjacent command updates with the legal phase. During an open challenge, scan a still-unknown relay. During a decision, vote before advice freezes. If chapter 1 has ended, do not create another Ark just to test an obsolete scan. Confirm the actual clue/advice and private applied-action counter change. Copying a command alone does not send it.
 2. Type `!status`; confirm a visible reply from `hriday_29` in that same Twitch channel. Queries within ten seconds can intentionally coalesce. Accepted API sends alone do not prove visibility.
 3. Run `pnpm live:acceptance check`. New signed chat, persisted engine action and native accepted-reply counters must increase. No raw chat, participant IDs, grants or capability URLs are exported. Observe the actual consequence/reply as well as counters.
 
