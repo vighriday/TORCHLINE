@@ -12,6 +12,10 @@ Railway, Fly or a managed VM can substitute if they provide the same contract: p
 
 ## Pre-deployment gate
 
+Runtime configuration now rejects ambiguous mode, non-HTTPS public/production origin, mismatched live redirect, reused secrets, invalid limits and remote production PostgreSQL without `sslmode=verify-full`. Install the provider's trusted certificate through its documented mechanism when the system trust store is insufficient. Do not bypass certificate verification. Local loopback HTTP remains permitted outside production so a tunnel can start. Default bind remains `127.0.0.1`; a hosted service must explicitly set `HOST=0.0.0.0`.
+
+Authenticated live feeds default to eight per channel / 256 per process with `FEED_MAX_PER_CHANNEL` / `FEED_MAX_TOTAL` overrides. These are guardrails, not platform capacity. Close unused OBS/browser views when 429 is returned. Keep edge request/connection controls in the deployment review, especially for unsigned ingress and durable rejection growth.
+
 - Confirm approved hosting budget and region, current service limits, supported PostgreSQL baseline and backup retention.
 - Build from a pinned commit/lockfile; include immutable content versions and original/licensed assets.
 - Provision separate live and simulator environments/databases. Restrict simulator routes to simulation mode.

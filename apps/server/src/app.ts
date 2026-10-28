@@ -54,6 +54,7 @@ export interface AppConfig {
   eventsubSecret?: string;
   botUserId?: string;
   inputPolicy?: InputPolicy;
+  feedLimits?: { perChannel: number; total: number };
 }
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 const escapeHtml = (value: string) =>
@@ -70,7 +71,7 @@ const NodeText = z.string().min(1).max(80);
 export async function createApp(
   store: Store,
   config: AppConfig,
-  options: { fetcher?: Fetcher; workers?: boolean; logger?: boolean } = {},
+  options: { fetcher?: Fetcher; workers?: boolean; logger?: boolean; onFatal?: () => void } = {},
 ) {
   const fetcher = options.fetcher ?? fetch;
   const lifecycle = twitchLifecycle(store, config, fetcher);
@@ -83,6 +84,8 @@ export async function createApp(
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
     bodyLimit: 65536,
+    requestTimeout: 15000,
+    connectionTimeout: 20000,
     forceCloseConnections: true,
     logger: options.logger
       ? {
@@ -92,9 +95,16 @@ export async function createApp(
       : false,
   });
   await app.register(cookie);
+  const securityHeaders = {
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'Content-Security-Policy':
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    ...(secure ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}),
+  };
   app.addHook('onSend', async (request, reply, payload) => {
-    reply.header('X-Content-Type-Options', 'nosniff');
-    reply.header('Referrer-Policy', 'no-referrer');
+    reply.headers(securityHeaders);
     if (/^\/(api|auth|integrations|overlay)(\/|$)/.test(request.url))
       reply.header('Cache-Control', 'no-store');
     return payload;
@@ -792,9 +802,25 @@ export async function createApp(
     return { ok: true };
   });
   const subscribers = new Set<() => Promise<void>>();
-  const stream = (request: FastifyRequest, reply: FastifyReply, load: () => Promise<unknown>) => {
+  const feedCounts = new Map<string, number>();
+  const endFeeds = new Set<() => void>();
+  const feedLimits = config.feedLimits ?? { perChannel: 8, total: 256 };
+  const stream = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    channel: string,
+    load: () => Promise<unknown>,
+  ) => {
+    const count = feedCounts.get(channel) ?? 0;
+    if (count >= feedLimits.perChannel || subscribers.size >= feedLimits.total)
+      return reply.code(429).header('Retry-After', '5').send({
+        error: 'FEED_LIMIT',
+        message: 'Too many live views. Close an unused view and reconnect.',
+      });
+    feedCounts.set(channel, count + 1);
     reply.hijack();
     reply.raw.writeHead(200, {
+      ...securityHeaders,
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
@@ -808,12 +834,14 @@ export async function createApp(
       sending = true;
       try {
         const body = JSON.stringify(await load());
+        if (closed) return;
         if (body !== last) {
           last = body;
           if (reply.raw.writableLength > 262144) reply.raw.end();
           else reply.raw.write(`event: snapshot\ndata: ${body}\n\n`);
         }
       } catch {
+        if (closed) return;
         reply.raw.write('event: unavailable\ndata: {}\n\n');
         reply.raw.end();
       } finally {
@@ -821,6 +849,8 @@ export async function createApp(
       }
     };
     subscribers.add(send);
+    const end = () => reply.raw.end();
+    endFeeds.add(end);
     void send();
     const heartbeat = setInterval(() => {
       if (!closed) reply.raw.write(': heartbeat\n\n');
@@ -830,11 +860,15 @@ export async function createApp(
       closed = true;
       clearInterval(heartbeat);
       subscribers.delete(send);
+      endFeeds.delete(end);
+      const remaining = (feedCounts.get(channel) ?? 1) - 1;
+      if (remaining) feedCounts.set(channel, remaining);
+      else feedCounts.delete(channel);
     });
   };
   app.get('/api/live/events', async (request, reply) => {
     const creator = await currentCreator(request);
-    return stream(request, reply, async () => snapshot(await currentCreator(request)));
+    return stream(request, reply, creator.id, async () => snapshot(await currentCreator(request)));
   });
   app.get('/overlay/:channel/events', async (request, reply) => {
     const { channel } = z.object({ channel: NodeText }).parse(request.params);
@@ -855,7 +889,7 @@ export async function createApp(
       return snapshot(creator!, true);
     };
     await load();
-    return stream(request, reply, load);
+    return stream(request, reply, channel, load);
   });
   app.post('/api/worlds/:id/timing', async (request) => {
     const creator = await currentCreator(request);
@@ -1028,6 +1062,7 @@ export async function createApp(
       workerLease.on('error', () => {
         workersReady = false;
         app.log.error('Worker lease lost; closing this process.');
+        options.onFatal?.();
         void app.close();
       });
       await lifecycle.validateGrants(true);
@@ -1066,6 +1101,7 @@ export async function createApp(
   app.decorate('tick', tick);
   app.decorate('botTick', botReplies.tick);
   app.addHook('onClose', async () => {
+    for (const end of endFeeds) end();
     workersReady = false;
     if (interval) clearInterval(interval);
     if (validationInterval) clearInterval(validationInterval);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — Runtime and feed boundaries
+
+- Added validated production HTTPS/DB TLS, independent keys, exact OAuth redirect and bounded operational configuration; startup failures redact dependency details.
+- Added same-origin browser policy, framing/device restrictions, request timeouts and per-channel/global authenticated feed ceilings with disconnect cleanup. Existing Claude Design rendering and read-only OBS authority remain intact.
+- Added real HTTP feed-flood/slot-reuse tests and actual subprocess kill/replacement checks: ship state/resources survive, interrupted timing pauses once and worker ownership can be reacquired. Linux CI separately checks graceful SIGTERM; Windows termination is not labeled graceful.
+
 ## 2026-10-28 — Verified encrypted recovery
 
 - Added operator-only consistent PostgreSQL snapshots encrypted with an independent AES-GCM key; credentials never enter command arguments or plaintext dump files. Restore authenticates before SQL, refuses the source/nonempty targets and verifies all table fingerprints plus versioned world replay.
