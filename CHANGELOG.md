@@ -1,10 +1,15 @@
 # Changelog
 
+## 2026-10-28 — Candidate evidence recorded
+
+- Implementation `9750048` passes GitHub Actions 40678887999: all 90 tests, seven browser journeys, fixture consistency, real release image build and restricted-container smoke with graceful SIGTERM. Local dependency audit and 15-fingerprint artifact scan pass.
+- Both local stores/services are current and ready. Real grants and exact 3/3 subscription metadata validate; HTTPS recovery, real chat/bot visibility, native OBS, native raid and production hosting/remote-backup/soak gates remain explicitly open. Recorded the final review and essential owner checklist without changing gameplay/design.
+
 ## 2026-10-28 — Honest live acceptance tooling
 
 - Prepared project-only OpenSSH HTTPS fallback after Windows Defender quarantined native ngrok; verified the official server fingerprint. The executable was not restored/exempted. Public-key registration is the remaining account dependency, so preview reachability is reported offline.
 - Real-service diagnostic now shares all-page subscription pagination and labels historical callback delivery explicitly; added repeated-cursor regression. Added timestamp-baselined aggregate chat/action/send/linked-transfer evidence and an expiring read-only public Chromium overlay probe with no trace/capability output.
-- Added current owner checklist, deployment readiness/authority report and superseding status. Real grants and3/3 subscription metadata validate; zero applied chat/accepted send/live custody remains the honest native evidence. Public overlay/OBS/native raid acceptance is pending.
+- Added current owner checklist, deployment readiness/authority report and superseding status. Real grants and 3/3 subscription metadata validate; zero applied chat/accepted send/live custody remains the honest native evidence. Public overlay/OBS/native raid acceptance is pending.
 
 ## 2026-10-28 — Linux shutdown correction
 

@@ -8,7 +8,7 @@ Windows Defender quarantined `.tools/ngrok/ngrok.exe` as `Trojan:Win32/Kepavll!r
 
 1. Open `E:\Projects\TORCHLINE\.local\ngrok-ssh.pub` in a text editor; copy its single public-key line.
 2. In the same ngrok account open [SSH Public Keys](https://dashboard.ngrok.com/ssh-keys), Add/New key, label it TORCHLINE and paste that public line. Keep `.local/ngrok-ssh` (without `.pub`) private. The authtoken does not authenticate SSH.
-3. Tell the engineering session it is registered, or run `pnpm live:ssh` in the existing Node24 terminal while the live service runs. The helper pins ngrok's published server fingerprint, ignores global SSH config, exposes only live port3001 and retries network loss. Authorization/host-key failures stop. No request inspection interface runs.
+3. Tell the engineering session it is registered, or run `pnpm live:ssh` in the existing Node24 terminal while the live service runs. The helper pins ngrok's published server fingerprint, ignores global SSH config, exposes only live port 3001 and retries network loss. Authorization/host-key failures stop. No request inspection interface runs.
 4. Confirm [live health](https://education-slather-reps.ngrok-free.dev/health/live) returns JSON `ok: true, mode: live` and [readiness](https://education-slather-reps.ngrok-free.dev/health/ready) returns `ok: true`. An ngrok error page is a failed test.
 
 Intended origin: `https://education-slather-reps.ngrok-free.dev`. The computer/database/live process/SSH connection must remain running. The existing native `live:tunnel` helper is retained for other trusted installations; do not reinstall/restore the quarantined file for this checklist. This is development ingress, not permanent hosting.
@@ -25,7 +25,7 @@ Engineering runs `pnpm twitch:verify:live`: real grants, all provider subscripti
 
 A live baseline is already saved locally. Keep it, or deliberately start a new session with `pnpm live:acceptance begin --replace`.
 
-1. Create/resume a live Ark as the broadcaster. Start chapter1; finish/close investigation first if enabled. **During the open navigation challenge**, type `!scan A` in the broadcaster's actual Twitch chat. Confirm its clue appears and the private applied-action counter increases. If that phase ended, use the command displayed for the active phase.
+1. Create/resume a live Ark as the broadcaster. Start chapter 1; finish/close investigation first if enabled. **During the open navigation challenge**, type `!scan A` in the broadcaster's actual Twitch chat. Confirm its clue appears and the private applied-action counter increases. If that phase ended, use the command displayed for the active phase.
 2. Type `!status`; confirm a visible reply from `hriday_29` in that same Twitch channel. Queries within ten seconds can intentionally coalesce. Accepted API sends alone do not prove visibility.
 3. Run `pnpm live:acceptance check`. New signed chat, persisted engine action and native accepted-reply counters must increase. No raw chat, participant IDs, grants or capability URLs are exported. Observe the actual consequence/reply as well as counters.
 
@@ -45,4 +45,4 @@ Run `pnpm live:acceptance check` and retain its new linked-transfer count plus p
 
 ## Permanent deployment
 
-Select/approve the hosting account, always-on plan/region, durable PostgreSQL and backup retention, then follow [deployment](deployment.md) and [backup/restore](backup-and-restore.md). No cloud service/purchase exists. Register the permanent exact OAuth origin and repeat steps2–5 there. Preserve existing token/session/backup keys in an owner-controlled secret store.
+Select/approve the hosting account, always-on plan/region, durable PostgreSQL and backup retention, then follow [deployment](deployment.md) and [backup/restore](backup-and-restore.md). No cloud service/purchase exists. Register the permanent exact OAuth origin and repeat steps 2–5 there. Preserve existing token/session/backup keys in an owner-controlled secret store.

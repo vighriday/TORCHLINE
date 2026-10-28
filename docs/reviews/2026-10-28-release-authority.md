@@ -32,7 +32,9 @@ Scope: current `feat/gameplay-foundation`, reliability/runtime/recovery/verifica
 | C12 Validation | Real PostgreSQL/HTTP/subprocess, isolated provider fixtures, browser and Linux restricted-container checks; no fixtures in live DB |
 | C13 Operations | Context allowlist, non-root production deps/read-only image, graceful SIGTERM, no known audit advisories; SSH registration/hosting/remote backups remain gates |
 
-Executed evidence: [Linux CI40677463127](https://github.com/vighriday/TORCHLINE/actions/runs/40677463127) passes 89 automated tests, seven browser journeys, unchanged balance/design fixtures, image build and restricted-container smoke. One additional pagination regression and its affected provider-contract suite pass locally; the current release report records the final head's result.
+Executed evidence: [Linux CI 40677463127](https://github.com/vighriday/TORCHLINE/actions/runs/40677463127) passes 89 automated tests, seven browser journeys, unchanged balance/design fixtures, image build and restricted-container smoke. One additional pagination regression and its affected provider-contract suite pass locally; the current release report records the final head's result.
+
+Final implementation `9750048` passes [CI 40678887999](https://github.com/vighriday/TORCHLINE/actions/runs/40678887999): all 90 tests, seven browser journeys, fixture consistency and restricted release-image smoke. No genuine live chat/reply/OBS/raid claim is derived from that workflow.
 
 Configured-secret scans cover Git/index/working files, built assets and selected local logs with 15 private fingerprints, including the independent backup key. Current public scanning cannot pass while HTTPS is offline. Do not equate an artifact-only scan with deployed exposure verification. No credentials/raw private concept/capability URLs were staged. No global Git/SSH config, provider visibility, branch history, security exclusion or external account permission was changed.
 
