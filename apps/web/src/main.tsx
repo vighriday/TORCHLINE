@@ -10,6 +10,7 @@ import { BroadcastOverlay, DeckNav, RelayProgress, WorldArchive } from './DeckVi
 import type { Workspace } from './DeckViews.tsx';
 import './styles.css';
 import './game.css';
+import './encounter.css';
 
 function App() {
   const overlayChannel = location.pathname.match(/^\/overlay\/([^/]+)\//)?.[1];

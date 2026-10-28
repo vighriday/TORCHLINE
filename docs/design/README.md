@@ -1,5 +1,7 @@
 # Claude Design handoff
 
+See the [October 28 encounter review](encounter-review.md) for the owner-requested game presentation revision, actual-motion checks and remaining visual/native acceptance. It retains this presentation contract and the original design vocabulary.
+
 The owner-supplied Claude Design exports are now adapted into the typed React application. This directory contains the canonical fixtures and [integration review](integration-review.md); [ADR 0011](../decisions/0011-claude-design-integration.md) records the renderer boundaries. The ignored local `frontend-design/` workspace preserves the original exports; production does not load its runtime, simulator or fictional data. Actual OBS and owner visual/usability acceptance remain open.
 
 Start with [the presentation contract](../architecture/frontend-contracts.md), then inspect the generated fixtures:

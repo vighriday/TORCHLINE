@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-28 — Playable encounter presentation
+
+- Reopened presentation work after owner review: added visible radiation-front motion, chapter atmosphere/sector transmission, ship-attached persistent-system inspection and clearer mission/reward presentation using the existing Claude Design scene and React contracts.
+- Added keyboard/pointer relay interaction through canonical commands and a Crew Uplink with direct native Twitch chat and current-command copying. No automatic chat, fake participation, engine rule or authority change.
+- Preserved read-only OBS, mobile/SVG, reduced motion, graphics failure recovery, persisted scars and no historical effect replay. New test compares composited moving frames, checks inspection leaves state unchanged and relay discovery persists across reload.
+- Production build/typecheck, 91 automated tests and all eight Chromium journeys pass locally. Native OBS, genuine chat/replies/raid and owner visual acceptance remain separate gates; source CI is recorded independently.
+
 ## 2026-10-28 — Current frontend asset delivery
 
 - Fixed startup-enumerated static routes serving SPA HTML for newly rebuilt JS/CSS names. Public dist files now resolve through the existing static plugin at request time; missing assets/API paths return404 and creator mutations remain authenticated.

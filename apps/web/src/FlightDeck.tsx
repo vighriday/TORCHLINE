@@ -4,6 +4,7 @@ import type { Command, ResourceId, WorldPresentation } from '@torchline/contract
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
 import { CooperationView, EpisodeSettings, PhaseClock } from './EpisodeView.tsx';
+import { EncounterLayer, CrewUplink, encounterObjectives } from './EncounterLayer.tsx';
 
 const chapters = [
   'Awaiting launch',
@@ -221,6 +222,7 @@ export function FlightDeck({
       data-world={world.worldId}
     >
       <div className="flight-nebula" aria-hidden="true" />
+      <EncounterLayer world={world} readonly={readonly} />
       <ArkView
         key={`flight:${world.worldId}`}
         systems={world.systems}
@@ -256,7 +258,7 @@ export function FlightDeck({
           <strong>{world.host}</strong>
           <small>
             {world.participantCount} contributors ·{' '}
-            {world.mode === 'simulation' ? 'SIMULATION' : 'LIVE · VERIFICATION PENDING'}
+            {world.mode === 'simulation' ? 'SIMULATION' : 'TWITCH WORLD'}
           </small>
         </div>
       </aside>
@@ -383,6 +385,7 @@ export function FlightDeck({
                   busy={busy}
                   compact={readonly}
                   hud
+                  displayTitle={encounterObjectives[world.chapter]}
                 />
               )}
             </section>
@@ -394,7 +397,7 @@ export function FlightDeck({
           )}
         </>
       )}
-      {event && (
+      {event && !event.cues.some((c) => c.kind === 'chapter-arrived') && (
         <div
           className={`cinematic-consequence cue-${event.cues.at(-1)?.kind}`}
           key={event.id}
@@ -415,22 +418,26 @@ export function FlightDeck({
         </div>
       )}
       <footer className="flight-footer">
-        <div className="flight-guidance">
-          <span>
-            {world.phase === 'challenge'
-              ? world.chapter === 3
-                ? '!scan A · !patch A'
-                : '!scan A · !route <path>'
-              : world.phase === 'investigation'
-                ? '!inspect engine · !inspect cargo · !inspect life'
-                : world.phase === 'allocation'
-                  ? '!allocate 3 2 · HULL / OXYGEN'
-                  : deciding
-                    ? '!vote 1 · !vote 2'
-                    : '!status · !history'}
-          </span>
-          <p>{world.recap}</p>
-        </div>
+        {readonly ? (
+          <div className="flight-guidance">
+            <span>
+              {world.phase === 'challenge'
+                ? world.chapter === 3
+                  ? '!scan A · !patch A'
+                  : '!scan A · !route <path>'
+                : world.phase === 'investigation'
+                  ? '!inspect engine · !inspect cargo · !inspect life'
+                  : world.phase === 'allocation'
+                    ? '!allocate 3 2 · HULL / OXYGEN'
+                    : world.phase === 'decision'
+                      ? '!vote 1 · !vote 2'
+                      : '!status · !history'}
+            </span>
+            <p>{world.recap}</p>
+          </div>
+        ) : (
+          <CrewUplink world={world} />
+        )}
         {!readonly && (
           <div className="flight-actions">
             {world.capabilities.canCloseChallenge && (

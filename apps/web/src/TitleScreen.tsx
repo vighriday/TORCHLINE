@@ -87,6 +87,11 @@ export function TitleScreen({
           </span>
         </button>
         <p>216 passengers · 5 chapters · every captain inherits the last one’s choices</p>
+        {mode === 'live' && label === 'Create an Ark' && (
+          <p className="launch-instruction">
+            Create your saved voyage, then launch chapter 1 from the flight deck.
+          </p>
+        )}
         {error && (
           <p className="error" role="alert">
             {error}
@@ -100,7 +105,7 @@ export function TitleScreen({
             ? 'TWITCH MODE · LIVE VERIFICATION PENDING'
             : 'SIMULATION · LOCAL SAVED GAME'}
         </span>
-        <span>Unsaved Ark visualization</span>
+        <span>PRELAUNCH VESSEL · AWAITING DEPARTURE</span>
         <button
           className="motion-switch"
           aria-pressed={reduced}

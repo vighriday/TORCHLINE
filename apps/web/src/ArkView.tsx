@@ -192,6 +192,7 @@ export function ArkView({
   const [eligible, setEligible] = useState(false);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
+  const [focusedSystem, setFocusedSystem] = useState<SystemId | null>(null);
   const mount = useRef<HTMLDivElement>(null);
   const controller = useRef<Awaited<
     ReturnType<(typeof import('./ark-scene.ts'))['createArkScene']>
@@ -227,6 +228,20 @@ export function ArkView({
             if (!cancelled) setReady(true);
           },
           variant,
+          variant === 'flight'
+            ? (points) => {
+                const stage = element.parentElement;
+                if (!stage) return;
+                for (const marker of stage.querySelectorAll<HTMLElement>('[data-anchor]')) {
+                  const p = points[marker.dataset.anchor!];
+                  marker.hidden = !p?.visible;
+                  if (p) {
+                    marker.style.left = `${p.x}%`;
+                    marker.style.top = `${p.y}%`;
+                  }
+                }
+              }
+            : undefined,
         );
         controller.current = scene;
         scene.update(
@@ -249,6 +264,10 @@ export function ArkView({
   useEffect(() => {
     controller.current?.update(systems, resources, chapter, events);
   }, [systems, resources, chapter, events]);
+  const focused = systems.find((s) => s.id === focusedSystem);
+  useEffect(() => {
+    controller.current?.focus(focusedSystem);
+  }, [focusedSystem, ready]);
   return (
     <section className={`panel ark-panel ark-${variant}`} aria-label="Persistent Ark condition">
       <div className="section-heading">
@@ -277,11 +296,71 @@ export function ArkView({
       <div className={`ark-stage ${ready ? 'scene-ready' : ''}`}>
         <Schematic systems={systems} resources={resources} />
         <div ref={mount} className="ark-canvas" aria-hidden="true" />
+        {variant === 'flight' &&
+          ready &&
+          systems
+            .filter((s) => ['lifeSupport', 'navigation', 'cargo', 'shields'].includes(s.id))
+            .map((system) =>
+              readOnly ? (
+                <span
+                  key={system.id}
+                  className={`ship-anchor condition-${system.condition}`}
+                  data-anchor={system.id}
+                >
+                  <i aria-hidden="true" />
+                  {systemLabels[system.id]} <b>{system.integrity}%</b>
+                </span>
+              ) : (
+                <button
+                  key={system.id}
+                  className={`ship-anchor condition-${system.condition}`}
+                  data-anchor={system.id}
+                  aria-label={`Inspect ${systemLabels[system.id]}`}
+                  aria-pressed={focusedSystem === system.id}
+                  onClick={() => {
+                    const next = focusedSystem === system.id ? null : system.id;
+                    setFocusedSystem(next);
+                    controller.current?.focus(next);
+                  }}
+                >
+                  <i aria-hidden="true" />
+                  {systemLabels[system.id]} <b>{system.integrity}%</b>
+                </button>
+              ),
+            )}
         <div className="ark-telemetry" aria-hidden="true">
           <span>ARK / PERSISTENT VESSEL</span>
           <span>{ready ? 'CINEMATIC TELEMETRY' : 'SYSTEM SCHEMATIC'}</span>
         </div>
       </div>
+      {variant === 'flight' && !readOnly && focused && (
+        <aside className="ship-focus-card" aria-label="Selected ship system">
+          <div>
+            <span className="eyebrow">LIVE SYSTEM TELEMETRY</span>
+            <button
+              aria-label="Close ship inspection"
+              onClick={() => {
+                setFocusedSystem(null);
+                controller.current?.focus(null);
+              }}
+            >
+              ×
+            </button>
+          </div>
+          <h3>
+            {systemLabels[focused.id]} <strong>{focused.integrity}%</strong>
+          </h3>
+          <p>
+            {focused.condition} · {focused.marks.length} permanent changes
+          </p>
+          <p>
+            {focused.marks.length
+              ? `${focused.marks.at(-1)!.kind} recorded in chapter ${focused.marks.at(-1)!.chapter}.`
+              : 'No permanent modifications recorded.'}
+          </p>
+          <small>This condition travels with the Ark.</small>
+        </aside>
+      )}
       <details className="system-inspector" open={variant === 'panel'}>
         <summary>
           Ship condition · {systems.reduce((sum, s) => sum + s.marks.length, 0)} permanent marks

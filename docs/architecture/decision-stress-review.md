@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0022](../decisions/0022-encounter-presentation.md) checks the owner-requested encounter presentation, projected ship inspection and chat onboarding against all C1–C13. Local pixels/real-engine/browser checks are distinct from native chat/OBS/raid and owner visual acceptance. [ADR 0021](../decisions/0021-current-static-assets.md) separately reviews current public asset delivery and route authority.
+
 The [October 28 release authority review](../reviews/2026-10-28-release-authority.md) covers every current public route family, operational verification capability and C1–C13. ADRs 0018–0020 add encrypted recovery, runtime boundaries and reproducible packaging. Executed image/SQL/browser evidence is separate from the pending live acceptance session.
 
 [ADR 0017](../decisions/0017-bounded-input-and-history.md) checks persisted input limits, channel fairness, indexed history and temporary overlay expiry against C1–C13. Real PostgreSQL regressions establish bounded admission/query behavior; deployed soak and native participation remain separate gates.

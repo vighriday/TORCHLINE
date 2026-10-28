@@ -7,6 +7,7 @@ export interface ChallengeRendererProps {
   busy: boolean;
   compact?: boolean;
   hud?: boolean;
+  displayTitle?: string;
 }
 const positions: Record<string, [number, number]> = {
   S: [40, 115],
@@ -23,28 +24,26 @@ export function ChallengeView({
   busy,
   compact = false,
   hud = false,
+  displayTitle,
 }: ChallengeRendererProps) {
   const [route, setRoute] = useState('');
   return (
     <section
       className={`panel challenge-panel ${compact ? 'compact-challenge' : ''} ${hud ? 'hud-challenge' : ''}`}
       aria-label="Cooperative challenge"
+      data-kind={challenge.kind}
     >
       <div className="section-heading">
-        <h2>{challenge.title}</h2>
+        <h2>{displayTitle ?? challenge.title}</h2>
         <span className="badge">
           {challenge.solved ? 'Solved · reward persisted' : 'Cooperation open'}
         </span>
       </div>
-      <p>{challenge.prompt}</p>
-      {hud ? (
-        <details className="challenge-reward">
-          <summary>What solving changes</summary>
-          <p className="reward">{challenge.reward}</p>
-        </details>
-      ) : (
-        <p className="reward">Mechanical reward: {challenge.reward}</p>
-      )}
+      <p className="challenge-prompt">{challenge.prompt}</p>
+      <p className="reward">
+        {hud ? 'SUCCESS → ' : 'Mechanical reward: '}
+        {challenge.reward}
+      </p>
       {challenge.kind === 'route' && (
         <>
           <div className="constraint-row">
@@ -52,12 +51,24 @@ export function ChallengeView({
             <span>Required: {challenge.requiredNode ?? 'scan to discover'}</span>
             <span>Unsafe: {challenge.blockedNode ?? 'scan to discover'}</span>
           </div>
-          <svg viewBox="0 0 610 230" role="img" aria-label="Relay connections and signal costs">
+          {hud && interactive && (
+            <p className="relay-hint">SELECT A RELAY TO DISCOVER ITS SIGNAL</p>
+          )}
+          <svg viewBox="0 0 610 230" role="group" aria-label="Relay connections and signal costs">
             {challenge.edges.map((e) => {
               const a = positions[e.from],
                 b = positions[e.to];
               return (
-                <g key={e.from + e.to}>
+                <g
+                  key={e.from + e.to}
+                  className={
+                    challenge.solved
+                      ? 'signal-solved'
+                      : challenge.scanned.includes(e.from) || challenge.scanned.includes(e.to)
+                        ? 'signal-discovered'
+                        : ''
+                  }
+                >
                   <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} />
                   <text className="edge-cost" x={(a[0] + b[0]) / 2} y={(a[1] + b[1]) / 2 - 5}>
                     {e.cost}
@@ -66,7 +77,32 @@ export function ChallengeView({
               );
             })}
             {challenge.nodes.map((n) => (
-              <g key={n.id} transform={`translate(${positions[n.id][0]} ${positions[n.id][1]})`}>
+              <g
+                key={n.id}
+                transform={`translate(${positions[n.id][0]} ${positions[n.id][1]})`}
+                role={
+                  interactive && !['S', 'T'].includes(n.id) && !n.revealed ? 'button' : undefined
+                }
+                tabIndex={interactive && !['S', 'T'].includes(n.id) && !n.revealed ? 0 : undefined}
+                aria-label={`Scan relay ${n.id}`}
+                aria-disabled={busy || undefined}
+                onClick={() => {
+                  if (interactive && !busy && !['S', 'T'].includes(n.id) && !n.revealed)
+                    onCommand({ type: 'scan', node: n.id as 'A' });
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === 'Enter' || e.key === ' ') &&
+                    interactive &&
+                    !busy &&
+                    !['S', 'T'].includes(n.id) &&
+                    !n.revealed
+                  ) {
+                    e.preventDefault();
+                    onCommand({ type: 'scan', node: n.id as 'A' });
+                  }
+                }}
+              >
                 <circle
                   r="25"
                   className={`${n.revealed ? 'revealed' : ''} ${n.id === challenge.blockedNode ? 'blocked-node' : n.id === challenge.requiredNode ? 'required-node' : ''}`}
@@ -87,7 +123,10 @@ export function ChallengeView({
                 !['S', 'T'].includes(n.id) && (challenge.kind !== 'work-order' || n.id !== 'D'),
             )
             .map((node) => (
-              <article key={node.id} className={node.patched ? 'task-complete' : ''}>
+              <article
+                key={node.id}
+                className={`${node.patched ? 'task-complete' : ''} ${node.revealed ? 'clue-revealed' : 'clue-hidden'}`}
+              >
                 <strong>
                   {node.id} · {node.patched ? 'Patched' : node.revealed ? 'Discovered' : 'Unknown'}
                 </strong>

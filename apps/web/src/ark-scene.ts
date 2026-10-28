@@ -22,6 +22,7 @@ export function createArkScene(
   onContextLost: () => void,
   onReady: () => void,
   view: 'panel' | 'flight' | 'title' = 'panel',
+  onAnchors?: (points: Record<string, { x: number; y: number; visible: boolean }>) => void,
 ) {
   const renderer = new T.WebGLRenderer({
     antialias: true,
@@ -78,6 +79,51 @@ export function createArkScene(
     }),
   );
   scene.add(stars);
+  // Authored encounter scenery, never an independent damage simulation.
+  const sun = new T.Sprite(
+    new T.SpriteMaterial({
+      map: glow,
+      color: 0xff8c32,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false,
+      blending: T.AdditiveBlending,
+    }),
+  );
+  sun.position.set(-48, 15, -65);
+  sun.scale.set(100, 100, 1);
+  scene.add(sun);
+  const stormGeometry = new T.BufferGeometry(),
+    stormPositions = new Float32Array(90 * 6);
+  for (let i = 0; i < 90; i++) {
+    const x = (markSeed(`storm-x${i}`) - 0.5) * 180,
+      y = (markSeed(`storm-y${i}`) - 0.5) * 80,
+      z = -20 - markSeed(`storm-z${i}`) * 75;
+    stormPositions.set([x, y, z, x + 12, y - 2, z], i * 6);
+  }
+  stormGeometry.setAttribute('position', new T.BufferAttribute(stormPositions, 3));
+  const stormMaterial = new T.LineBasicMaterial({
+    color: 0xffb26d,
+    transparent: true,
+    opacity: 0.24,
+    depthWrite: false,
+    blending: T.AdditiveBlending,
+  });
+  const storm = new T.LineSegments(stormGeometry, stormMaterial);
+  scene.add(storm);
+  const front = new T.Mesh(
+    new T.TorusGeometry(24, 0.08, 5, 100),
+    new T.MeshBasicMaterial({
+      color: 0xffae65,
+      transparent: true,
+      opacity: 0.18,
+      depthWrite: false,
+      blending: T.AdditiveBlending,
+    }),
+  );
+  front.position.set(-28, 6, -52);
+  front.rotation.y = 0.55;
+  scene.add(front);
   const rockGeometry = new T.IcosahedronGeometry(1, 0);
   const rocks = new T.InstancedMesh(
     rockGeometry,
@@ -180,6 +226,9 @@ export function createArkScene(
     metricAt = 0;
   let slowSamples = 0,
     pixelRatio = Math.min(devicePixelRatio || 1, 1.5);
+  let anchorAt = 0,
+    totalFrames = 0;
+  let selected: SystemId | null = null;
   delete container.dataset.lastCue;
   container.dataset.pixelRatio = pixelRatio.toFixed(2);
   function emit(at: T.Vector3, color: number, count: number, speed: number, life = 1.3) {
@@ -235,6 +284,17 @@ export function createArkScene(
     rocks.visible = chapter === 2 && !ark.wreck;
     debris.visible = chapter === 4 || ark.wreck;
     planet.visible = atmosphere.visible = chapter === 5 && !ark.wreck;
+    sun.visible = storm.visible = front.visible = chapter === 1 && !ark.wreck;
+    key.color.set(chapter === 1 ? 0xffc28c : chapter === 3 ? 0xa1d4df : 0xffdfbb);
+    container.dataset.encounter =
+      [
+        'deep-space',
+        'radiation-front',
+        'vesper-shoals',
+        'life-support',
+        'derelict-field',
+        'colony-approach',
+      ][chapter] ?? 'deep-space';
     const fresh = events.filter((e) => !seen.has(e.id));
     for (const event of events) seen.add(event.id);
     if (initialized && fresh.length <= 3)
@@ -272,7 +332,8 @@ export function createArkScene(
       Math.cos(yaw) * Math.cos(pitch) * radius,
     );
     focus.lerp(desiredFocus, 0.06);
-    desiredFocus.multiplyScalar(0.97);
+    if (selected) desiredFocus.copy(ark.position(selected)).multiplyScalar(0.28);
+    else desiredFocus.multiplyScalar(0.97);
     camera.lookAt(focus);
     if (shake > 0) {
       camera.position.x += Math.sin(t * 21) * shake;
@@ -301,7 +362,19 @@ export function createArkScene(
     }
     ark.ship.rotation.y = Math.sin(t * 0.1) * 0.025;
     ark.animate(t, dt);
-    stars.rotation.y += dt * 0.0008;
+    stars.rotation.y += dt * 0.0025;
+    stars.position.x = -(t * (view === 'title' ? 0.6 : 1.8)) % 90;
+    if (storm.visible) {
+      for (let i = 0; i < 90; i++) {
+        stormPositions[i * 6] += dt * (20 + markSeed(`storm-speed${i}`) * 25);
+        if (stormPositions[i * 6] > 100) stormPositions[i * 6] -= 200;
+        stormPositions[i * 6 + 3] = stormPositions[i * 6] + 12;
+      }
+      stormGeometry.attributes.position.needsUpdate = true;
+      front.scale.setScalar(0.7 + ((t * 0.1) % 0.7));
+      (front.material as T.MeshBasicMaterial).opacity = 0.13 * (1 - ((t * 0.1) % 0.7));
+      sun.material.opacity = 0.55 + Math.sin(t * 0.4) * 0.06;
+    }
     flash.intensity *= Math.pow(0.03, dt);
     for (const cloud of [rocks, debris])
       if (cloud.visible) {
@@ -357,6 +430,29 @@ export function createArkScene(
     particleGeometry.attributes.position.needsUpdate = true;
     particleGeometry.attributes.color.needsUpdate = true;
     renderer.render(scene, camera);
+    totalFrames++;
+    if (onAnchors && now - anchorAt > 150) {
+      const points: Record<string, { x: number; y: number; visible: boolean }> = {};
+      for (const id of [
+        'reactor',
+        'lifeSupport',
+        'habitat',
+        'navigation',
+        'cargo',
+        'shields',
+        'hull',
+      ] as SystemId[]) {
+        const p = ark.position(id).project(camera);
+        points[id] = {
+          x: (p.x + 1) * 50,
+          y: (1 - p.y) * 50,
+          visible:
+            p.z > -1 && p.z < 1 && Math.abs(p.x) < 0.95 && Math.abs(p.y) < 0.9 && arrival === 0,
+        };
+      }
+      onAnchors(points);
+      anchorAt = now;
+    }
     frames++;
     if (!painted) {
       painted = true;
@@ -372,6 +468,7 @@ export function createArkScene(
         slowSamples = 0;
       }
       container.dataset.drawCalls = String(renderer.info.render.calls);
+      container.dataset.frames = String(totalFrames);
       container.dataset.triangles = String(renderer.info.render.triangles);
       container.dataset.particles = String(active.length);
       container.dataset.fps = String(Math.round((frames * 1000) / (now - metricAt)));
@@ -414,6 +511,9 @@ export function createArkScene(
   renderer.domElement.addEventListener('webglcontextlost', lost);
   return {
     update,
+    focus(system: SystemId | null) {
+      selected = system;
+    },
     dispose() {
       disposed = true;
       stop();

@@ -120,7 +120,9 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   await expect(overlay.getByRole('heading', { name: 'No active Ark' })).toBeVisible();
   await target.getByRole('button', { name: 'Start chapter 2', exact: true }).click();
   await expect(target.locator('[data-resource=hull]')).toHaveText('80');
-  await expect(target.getByRole('heading', { name: 'The Blind Jump', exact: true })).toBeVisible();
+  await expect(
+    target.getByRole('heading', { name: 'The Blind Jump', level: 1, exact: true }),
+  ).toBeVisible();
   await target.screenshot({ path: '.local/screenshots/inherited-ark.png', fullPage: true });
   expect(errors).toEqual([]);
   await overlay.close();
@@ -135,7 +137,9 @@ test('mobile reference layout has no horizontal overflow and supports solo play'
   await chooseSimulation(page, 'gamma');
   await page.getByRole('button', { name: 'Create an Ark' }).click();
   await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Radiation Storm', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Radiation Storm', level: 1, exact: true }),
+  ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: '.local/screenshots/mobile-reference.png', fullPage: true });
 });
