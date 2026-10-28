@@ -4,7 +4,7 @@ Updated 2026-10-28. App/credentials and broadcaster `hriday29` / bot `hriday_29`
 
 ## 1. Restore public HTTPS
 
-Windows Defender quarantined `.tools/ngrok/ngrok.exe` as `Trojan:Win32/Kepavll!rfn`. It has not been restored or exempted. The preview is **offline**. Use the prepared Windows OpenSSH transport:
+**Completed on the current machine:** the owner registered the project public key and Windows OpenSSH restored HTTPS. Public health/readiness, authority denials, ten selected secret-response probes and the read-only Chromium overlay connection pass. No live Ark exists yet. Keep this machine and its processes awake. The native ngrok file quarantined by Windows Defender remains unused. For a later restart or new machine:
 
 1. Open `E:\Projects\TORCHLINE\.local\ngrok-ssh.pub` in a text editor; copy its single public-key line.
 2. In the same ngrok account open [SSH Public Keys](https://dashboard.ngrok.com/ssh-keys), Add/New key, label it TORCHLINE and paste that public line. Keep `.local/ngrok-ssh` (without `.pub`) private. The authtoken does not authenticate SSH.
@@ -15,7 +15,9 @@ Intended origin: `https://education-slather-reps.ngrok-free.dev`. The computer/d
 
 ## 2. Confirm OAuth and subscriptions
 
-In [Twitch developer apps](https://dev.twitch.tv/console/apps), Manage the existing TORCHLINE app. OAuth Redirect URLs must include exactly `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Save. Keep **Confidential** and the existing client ID/secret; no second app is needed for the bot.
+**Current blocker:** Twitch returned `redirect_mismatch` to the old offline hostname. The running server was independently checked: its sign-in redirect sends the new callback below. Update the existing app's console allowlist, then begin a fresh sign-in from the current home page; do not refresh the old error/callback URL.
+
+In [Twitch developer apps](https://dev.twitch.tv/console/apps), Manage the existing TORCHLINE app. OAuth Redirect URLs must include exactly `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Click Add if shown, then Save; refresh Manage and confirm it remains listed. Keep **Confidential** and the existing client ID/secret; no second app is needed for the bot. [Twitch registration reference](https://dev.twitch.tv/docs/authentication/register-app/).
 
 Connect the broadcaster from TORCHLINE in the ordinary browser; confirm the displayed name is `hriday29`. Use Check / repair Twitch subscriptions if private diagnostics do not show chat/online/offline ready. Incoming raid subscription is added after receiver opt-in.
 
@@ -31,7 +33,7 @@ A live baseline is already saved locally. Keep it, or deliberately start a new s
 
 ## 4. Prove OBS connectivity
 
-Engineering can run `pnpm twitch:verify:overlay` after HTTPS works. It makes a separate five-minute read-only capability, privately exchanges it in Chromium, checks actual public SSE/mutation denial, and removes only that grant. It never rotates ordinary links or changes a world; it records no URL, screenshot or trace. **This is not actual OBS CEF.**
+`pnpm twitch:verify:overlay` now passes against actual public HTTPS. It makes a separate five-minute read-only capability, privately exchanges it in Chromium, checks actual public SSE/mutation denial, and removes only that grant. It never rotates ordinary links or changes a world; it records no URL, screenshot or trace. This successful connection currently has no live world to render. **This is not actual OBS CEF.**
 
 In Captain tools choose Generate / rotate OBS link. Copy the private URL. In OBS: Sources → + → Browser → TORCHLINE → paste URL; set 1280×720 or 1920×1080. Keep the URL out of chat/screenshots/Git. Confirm the actual Ark/phase/resources/challenge/damage and absence of creator controls. Apply a legal game action and observe it. Hide/show the scene, refresh the source and briefly interrupt/reconnect networking: current state must return without repeating rewards/damage. Rotate the link once, verify the old source loses access, and update OBS with the new URL.
 

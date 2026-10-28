@@ -7,11 +7,11 @@ Updated 2026-10-28. For the configured accounts start with the shorter [live rel
 | Stage | Evidence and next action |
 | --- | --- |
 | Developer application and credentials | Already configured locally. Keep the existing app and secret; do not create another app just for the bot. |
-| October 27 provider recheck | The real app, one broadcaster grant, one bot grant and all three required subscription configurations still validate. Callback reachability is a separate failing check while the tunnel is offline. |
+| October 28 provider/public recheck | The real app, broadcaster/bot grants and all three exact subscriptions validate. Public HTTPS health/deny/secret probes and Chromium read-only overlay connectivity pass. |
 | Broadcaster | `hriday29` previously completed real creator consent. Recheck the displayed account after sign-in. |
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
-| Current public preview | Offline after Windows Defender quarantined native ngrok. Prepared SSH transport needs the project public key registered; intended origin remains `https://education-slather-reps.ngrok-free.dev`. See the live checklist. Simulation stays on 3000. |
+| Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev` after key registration. Native ngrok remains quarantined. Save the exact new callback in Twitch to resolve the observed `redirect_mismatch`. Simulation stays on 3000. |
 | Real gameplay chat, visible bot output, actual OBS, native raid | Implemented paths with local tests; owner-operated acceptance is still required. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 

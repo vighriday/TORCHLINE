@@ -62,7 +62,7 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 
 ## Research limits
 
-Current October 28 reachability and release evidence supersedes earlier tunnel observations: see [release report](../reports/2026-10-28-release-readiness.md). The native agent is quarantined; no protection bypass or false-positive conclusion is inferred.
+Current October 28 SSH/public HTTPS/Chromium evidence supersedes earlier offline observations: see [release report](../reports/2026-10-28-release-readiness.md). The native agent remains quarantined; no protection bypass or false-positive conclusion is inferred.
 
 During initial research no live calls or event fixtures were exercised. The implementation now has signed-event/provider-contract fixtures, real application/broadcaster/bot authorization checks, three genuine signed callback challenges, enabled current subscriptions and a reachable development HTTPS tunnel; see [current evidence](../planning/implementation-status.md). Genuine chat effects, visible bot output, native raid and actual OBS remain distinct gates. No production deployment is claimed. GitHub was empty at setup and is now confirmed private; visibility has not been changed. The Devpost judging dates and FAQ deadline conversion disagree. No exhaustive prior-art search, trademark clearance, legal interpretation, capacity benchmark or cost quote is claimed.
 
@@ -76,7 +76,8 @@ T4 stream.offline version 1 and T6 webhook handling were rechecked against their
 
 ## 2026-10-28 operations recheck
 
-- [Official ngrok SSH reverse tunnel](https://ngrok.com/docs/gateway/agent/ssh-reverse-tunnel-agent): separate public-key dashboard registration (authtoken is not SSH authentication), hostname forwarding, published India RSA fingerprint, missing inspection and reconnect limitations. The helper supplies bounded reconnect itself; host fingerprint verifies locally. Key registration is pending.
+- [Official ngrok SSH reverse tunnel](https://ngrok.com/docs/gateway/agent/ssh-reverse-tunnel-agent): public-key dashboard registration, hostname forwarding, published India RSA fingerprint and inspection/reconnect limitations. The helper supplies reconnect; after owner key registration, actual pinned SSH/HTTPS and public Chromium overlay verification pass.
+- [Twitch app registration](https://dev.twitch.tv/docs/authentication/register-app/) and [OAuth tokens](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/) rechecked for the observed `redirect_mismatch`. The registered OAuth URL must match the requested callback. Live server's redirect uses the new exact URI; the existing app's console allowlist still needs updating. No state/query/token is reproduced in documentation.
 - [PostgreSQL17 pg_dump](https://www.postgresql.org/docs/17/app-pgdump.html) and [pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html): consistent exported snapshots, custom archives and transactional restoration. Native PG17 fixture plus actual local live scratch restore execute the chosen path.
 - [Ubuntu24 runner inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md): runner-native PostgreSQL version must not be assumed to match the service; CI explicitly uses official PG17 container tools for backup tests.
 - [Node Docker images](https://github.com/nodejs/docker-node): explicit version/Debian slim runtime, non-root user and multi-stage packaging. Actual Linux CI builds and restricts the application container; provider availability/streaming is still a separate acceptance gate.

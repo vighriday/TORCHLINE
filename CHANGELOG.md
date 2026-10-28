@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — SSH HTTPS verified
+
+- Owner registered the prepared SSH public key; restored the live HTTPS origin through Windows OpenSSH with strict pinned host verification. Native ngrok remains quarantined/unused. Restarted the existing private database and live/simulation processes.
+- Real public health/readiness/authority denials, all three exact provider subscriptions and real app/broadcaster/bot grants pass. Ten selected public response secret probes pass with 15 private fingerprints. Actual public Chromium overlay cookie/SSE/read-only checks pass; its temporary grant was removed and no live Ark exists yet.
+- Diagnosed owner-reported `redirect_mismatch`: server sends the new correct callback, so the existing Twitch console allowlist must be updated. No callback state/query was retained. Genuine gameplay chat/replies, OBS CEF and native raid remain unverified; no gameplay/design/code change.
+
 ## 2026-10-28 — Candidate evidence recorded
 
 - Implementation `9750048` passes GitHub Actions 40678887999: all 90 tests, seven browser journeys, fixture consistency, real release image build and restricted-container smoke with graceful SIGTERM. Local dependency audit and 15-fingerprint artifact scan pass.
