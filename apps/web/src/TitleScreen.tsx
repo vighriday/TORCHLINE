@@ -27,6 +27,8 @@ export function TitleScreen({
   label,
   onLaunch,
   error,
+  onRetry,
+  reconnecting,
   children,
 }: {
   mode?: string;
@@ -35,6 +37,8 @@ export function TitleScreen({
   label: string;
   onLaunch: () => void;
   error: string;
+  onRetry: () => void;
+  reconnecting: boolean;
   children: ReactNode;
 }) {
   const [reduced, setReduced] = useState(() => {
@@ -80,7 +84,7 @@ export function TitleScreen({
       </div>
       <div className="title-launch">
         <button className="launch-button" disabled={!ready || busy} onClick={onLaunch}>
-          <kbd>ENTER</kbd>
+          <kbd aria-hidden="true">ENTER</kbd>
           <span>{busy ? 'CONNECTING…' : label}</span>
           <span className="launch-arrow" aria-hidden="true">
             ↗
@@ -93,9 +97,12 @@ export function TitleScreen({
           </p>
         )}
         {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
+          <div className="title-connection-error" role="alert">
+            <p>{error}</p>
+            <button onClick={onRetry} disabled={reconnecting}>
+              Retry connection
+            </button>
+          </div>
         )}
       </div>
       <div className="title-access">{children}</div>

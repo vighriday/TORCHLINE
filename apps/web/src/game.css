@@ -1,4 +1,57 @@
 /* Claude Design's title/flight composition. State and authority remain server-owned. */
+.connection-screen {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at center, #20313b35, transparent 60%), #05060a;
+}
+.connection-screen h1 {
+  font: 900 clamp(32px, 6vw, 68px)/1 var(--display);
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+.connection-screen p {
+  font: 12px/1.6 var(--mono);
+  color: #b7c8d0;
+  max-width: 420px;
+  margin: 0;
+}
+.connection-screen .torch-emblem {
+  flex: 0 0 14px;
+}
+.connection-screen button,
+.title-connection-error button {
+  min-height: 44px;
+  font: 11px var(--mono);
+}
+.title-connection-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  max-width: min(520px, 100%);
+  border: 1px solid #8e61414d;
+  background: #121419ed;
+  color: #d8c9b5;
+  font: 12px/1.5 var(--mono);
+  border-radius: 3px;
+}
+.title-connection-error p {
+  margin: 0;
+}
+.title-connection-error button {
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .title-connection-error {
+    flex-direction: column;
+  }
+}
 .title-screen {
   position: relative;
   isolation: isolate;

@@ -84,6 +84,9 @@ test('encounter motion, ship inspection and relay interaction use real saved sta
       snapshot.mode = 'live';
       snapshot.world.mode = 'live';
       snapshot.world.host = 'hriday29';
+      await page.route('**/api/operator/bot-setup', (route) =>
+        route.fulfill({ json: { pending: null } }),
+      );
       await page.route('**/api/state', (route) => route.fulfill({ json: snapshot }));
       await page.route('**/api/live/events', (route) =>
         route.fulfill({

@@ -47,6 +47,7 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 | E15 | [OBS Browser Source](https://obsproject.com/kb/browser-source) | Checked 2026-10-27: viewport dimensions, custom FPS, scene visibility/refresh properties and CEF basis; actual installation still needs testing |
 | E16 | [Render Node version](https://render.com/docs/node-version), [deployment controls](https://render.com/docs/deploys), [health checks](https://render.com/docs/health-checks) | Checked 2026-10-27 for the proposed owner hosting procedure; no deployment executed |
 | E17 | [Google Fonts repository](https://github.com/google/fonts), [ngrok Windows installation](https://ngrok.com/download/windows) | Checked 2026-10-27: local OFL font provenance and official signed development tunnel download; credential remains an owner dependency |
+| E18 | [ngrok free-plan interstitial](https://ngrok.com/docs/pricing-limits/free-plan-limits) | Checked 2026-10-28: browser warning cookie and documented client request header; real browser-agent API probes reproduced HTML without the header and JSON with it. No pricing/production availability claim |
 
 ## Competition and adjacent products
 

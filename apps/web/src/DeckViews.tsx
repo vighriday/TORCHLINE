@@ -383,15 +383,18 @@ export function BroadcastOverlay({
         <section className="broadcast-waiting">
           <span className="torch-emblem" aria-hidden="true" />
           <span className="eyebrow">TORCHLINE / THE ARK PROTOCOL</span>
-          <h1>No active Ark</h1>
+          <h1>{mode ? 'No active Ark' : 'Connecting to the Ark'}</h1>
           <p>
-            The captain can create, resume or accept a world. This read-only source follows the
-            channel.
+            {mode
+              ? 'The captain can create, resume or accept a world. This read-only source follows the channel.'
+              : 'Establishing the read-only channel connection…'}
           </p>
           <small>
             {mode === 'live'
               ? 'LIVE WORLD · VERIFICATION PENDING'
-              : 'SIMULATION · NOT TWITCH FOOTAGE'}
+              : mode === 'simulation'
+                ? 'SIMULATION · NOT TWITCH FOOTAGE'
+                : 'WAITING FOR CHANNEL STATE'}
           </small>
           {error && <p role="status">{error}</p>}
         </section>

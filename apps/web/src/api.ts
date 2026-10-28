@@ -26,22 +26,53 @@ export interface BotSetupPreview {
   accountLabel: string;
   expiresAt: string;
 }
+export class ConnectionError extends Error {}
+
 export async function request<T = unknown>(
   path: string,
   body?: unknown,
   headers?: Record<string, string>,
 ): Promise<T> {
-  const response = await fetch(path, {
-    method: body === undefined ? 'GET' : 'POST',
-    headers: {
-      ...(body === undefined
-        ? {}
-        : { 'Content-Type': 'application/json', 'X-Torchline-Request': '1' }),
-      ...headers,
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.message ?? 'The request did not complete.');
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method: body === undefined ? 'GET' : 'POST',
+      redirect: 'error',
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        Accept: 'application/json',
+        ...(typeof location !== 'undefined' && /\.ngrok-free\.(app|dev)$/.test(location.hostname)
+          ? { 'ngrok-skip-browser-warning': '1' }
+          : {}),
+        ...(body === undefined
+          ? {}
+          : { 'Content-Type': 'application/json', 'X-Torchline-Request': '1' }),
+        ...headers,
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  } catch {
+    throw new ConnectionError(
+      'Connection interrupted. Reconnect to check your latest saved state.',
+    );
+  }
+  if (
+    !/^application\/(?:json|[\w.+-]+\+json)(?:\s*;|$)/i.test(
+      response.headers.get('content-type') ?? '',
+    )
+  )
+    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new ConnectionError('The connection was interrupted. Please retry the connection.');
+  }
+  if (result === null || typeof result !== 'object')
+    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+  if (!response.ok)
+    throw new Error(
+      typeof result.message === 'string' ? result.message : 'The request did not complete.',
+    );
   return result as T;
 }

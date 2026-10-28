@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0024](../decisions/0024-preview-connection-recovery.md) reviews JSON response handling, initial connection and read-only feed recovery across C1–C13. Real preview interstitial reproduction is separate from local synthetic response-loss and genuine native Twitch acceptance.
+
 [ADR 0023](../decisions/0023-cinematic-startup.md) checks explicit loading/cinematic/fallback states across C1–C13. First-frame and layout checks do not establish native OBS acceptance; graphics readiness never grants authority or advances a phase.
 
 [ADR 0022](../decisions/0022-encounter-presentation.md) checks the owner-requested encounter presentation, projected ship inspection and chat onboarding against all C1–C13. Local pixels/real-engine/browser checks are distinct from native chat/OBS/raid and owner visual acceptance. [ADR 0021](../decisions/0021-current-static-assets.md) separately reviews current public asset delivery and route authority.

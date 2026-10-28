@@ -19,6 +19,9 @@ function App() {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [data, setData] = useState<DashboardSnapshot | null>(null);
   const [error, setError] = useState('');
+  const [connectionError, setConnectionError] = useState('');
+  const [reconnecting, setReconnecting] = useState(false);
+  const [feedEpoch, setFeedEpoch] = useState(0);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [actor, setActor] = useState('crew-one');
@@ -55,38 +58,52 @@ function App() {
   const refresh = useCallback(async () => {
     if (!overlayChannel) {
       const next = await request<DashboardSnapshot>('/api/state');
+      const pending =
+        next.mode === 'live'
+          ? (await request<{ pending: BotSetupPreview | null }>('/api/operator/bot-setup')).pending
+          : null;
       setData(next);
-      if (next.mode === 'live')
-        setBotSetup(
-          (await request<{ pending: BotSetupPreview | null }>('/api/operator/bot-setup')).pending,
-        );
+      setBotSetup(pending);
+      setConnectionError('');
     }
   }, [overlayChannel]);
   useEffect(() => {
-    void refresh().catch((e) => setError(e.message));
+    void refresh().catch((e) => setConnectionError(e.message));
   }, [refresh]);
   useEffect(() => {
     if (overlayChannel || !data?.me) return;
     let active = true;
     const source = new EventSource('/api/live/events');
     source.addEventListener('snapshot', (event) => {
-      if (active) setData(JSON.parse((event as MessageEvent).data));
+      if (!active) return;
+      try {
+        setData(JSON.parse((event as MessageEvent).data));
+        setConnectionError('');
+      } catch {
+        setConnectionError('Connection interrupted. Reconnect to check your latest saved state.');
+      }
     });
     source.addEventListener('unavailable', () => {
       source.close();
       void refresh()
         .then(() => {
-          if (active) setError('');
+          if (active) setConnectionError('Live updates interrupted. Reconnect to resume.');
         })
         .catch(() => {
-          if (active) setError('Connection interrupted. Refresh to reconnect.');
+          if (active)
+            setConnectionError(
+              'Connection interrupted. Reconnect to check your latest saved state.',
+            );
         });
     });
+    source.onerror = () => {
+      if (active) setConnectionError('Connection interrupted. Reconnecting…');
+    };
     return () => {
       active = false;
       source.close();
     };
-  }, [data?.me?.id, overlayChannel, refresh]);
+  }, [data?.me?.id, overlayChannel, refresh, feedEpoch]);
   useEffect(() => {
     if (!overlayChannel) return;
     let source: EventSource | undefined;
@@ -99,8 +116,13 @@ function App() {
       if (stopped) return;
       source = new EventSource(`/overlay/${overlayChannel}/events`);
       source.addEventListener('snapshot', (event) => {
-        setData(JSON.parse((event as MessageEvent).data));
-        setError('');
+        if (stopped) return;
+        try {
+          setData(JSON.parse((event as MessageEvent).data));
+          setError('');
+        } catch {
+          setError('Overlay reconnecting. Check the connection if this persists.');
+        }
       });
       source.addEventListener('unavailable', () => {
         setData(null);
@@ -128,6 +150,20 @@ function App() {
       setBusy(false);
     }
   }
+  async function reconnect() {
+    setReconnecting(true);
+    setError('');
+    setConnectionError('');
+    try {
+      await refresh();
+      setFeedEpoch((epoch) => epoch + 1);
+    } catch (e) {
+      setConnectionError((e as Error).message);
+    } finally {
+      setReconnecting(false);
+    }
+  }
+  const visibleError = error || connectionError;
   const world = data?.world;
   const archived = archiveWorld?.worldId === world?.worldId ? world : (archiveWorld ?? world);
   const previewOffer = data?.handoffs?.find(
@@ -143,7 +179,25 @@ function App() {
         }),
       );
   };
-  if (overlayChannel) return <BroadcastOverlay world={world} error={error} mode={data?.mode} />;
+  if (overlayChannel)
+    return <BroadcastOverlay world={world} error={visibleError} mode={data?.mode} />;
+  if (!data)
+    return (
+      <main className="connection-screen" aria-busy={!visibleError}>
+        <span className="torch-emblem" aria-hidden="true" />
+        <h1>TORCHLINE</h1>
+        {visibleError ? (
+          <>
+            <p role="alert">{visibleError}</p>
+            <button onClick={() => void reconnect()} disabled={reconnecting}>
+              Retry connection
+            </button>
+          </>
+        ) : (
+          <p role="status">Connecting to your flight deck…</p>
+        )}
+      </main>
+    );
   if (!botSetup && (!data?.me || (!world && workspace === 'bridge')))
     return (
       <TitleScreen
@@ -157,7 +211,9 @@ function App() {
               ? 'Connect creator with Twitch'
               : 'Launch the Ark'
         }
-        error={error}
+        error={visibleError}
+        onRetry={() => void reconnect()}
+        reconnecting={reconnecting}
         onLaunch={() => {
           if (data?.me) void perform(() => request('/api/worlds', {}));
           else if (data?.mode === 'live') location.assign('/auth/twitch');
@@ -273,9 +329,12 @@ function App() {
             <small>The Ark Protocol · persistent community survival</small>
           </div>
         </header>
-        {error && (
+        {visibleError && (
           <div role="alert" className="error">
-            {error}
+            {visibleError}
+            <button onClick={() => void reconnect()} disabled={reconnecting}>
+              Retry connection
+            </button>
           </div>
         )}
         {notice && (

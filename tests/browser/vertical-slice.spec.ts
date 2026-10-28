@@ -5,6 +5,10 @@ import { Store } from '@torchline/storage';
 import { createApp } from '../../apps/server/src/app.ts';
 import { randomUUID } from 'node:crypto';
 
+// This journey verifies state/custody across three simultaneous pages. Dedicated
+// cinematic/encounter tests verify moving WebGL; avoid competing software GPUs here.
+test.use({ reducedMotion: 'reduce' });
+
 let store: Store;
 let admin: Store;
 let schema: string;
@@ -86,7 +90,7 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
     'destroyed',
   );
   await expect(overlay.getByRole('button')).toHaveCount(0);
-  const targetContext = await browser.newContext();
+  const targetContext = await browser.newContext({ reducedMotion: 'reduce' });
   const target = await targetContext.newPage();
   await target.goto('/');
   await chooseSimulation(target, 'beta');
