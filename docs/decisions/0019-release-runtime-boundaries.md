@@ -26,4 +26,6 @@ Bound authenticated SSE views per channel (8) and process (256), configurable op
 
 Alternatives: accepting loose env defaults hides deployment mistakes; per-IP feed limits unfairly group viewers behind NAT and depend on proxy trust. Authenticated channel budgets fit the existing read model. Process-local feed counts are correct only for the current one-replica topology; scale-out still needs fan-out and shared admission design. CSP cannot replace output escaping, authorization or capability privacy.
 
+Linux CI exposed a close-order deadlock: Fastify executes close hooks in reverse registration order, so the later pool-close hook waited forever on the earlier worker-lease hook. The bootstrap now explicitly awaits `app.close()` before `store.close()` on normal/fatal shutdown. The subprocess test bounds each stop separately. A Windows process kill could not establish this ordering; Linux CI is the acceptance evidence.
+
 Executed checks and release limits are recorded in the release report. Windows process termination cannot deliver POSIX SIGTERM; local subprocess checks establish durable kill/restart recovery, while Linux CI additionally asserts exit 0 on SIGTERM. A passing Chromium journey is not a native OBS acceptance test. Revisit when adding embedding, external assets, replicas or a provider with different TLS/streaming requirements.

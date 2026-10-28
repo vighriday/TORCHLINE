@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-28 — Linux shutdown correction
+
+- Linux process CI exposed a genuine graceful-shutdown deadlock: the last-registered Fastify close hook ended the PostgreSQL pool before the worker lease hook could release its client. Shutdown now awaits application cleanup before ending the owned pool, including fatal lease loss.
+- Added a bounded per-stop assertion so shutdown failures report their signal/stage instead of hanging the whole recovery test. Windows kill/restart evidence remains distinct from Linux SIGTERM.
+
 ## 2026-10-28 — Reproducible release image
 
 - Added a pinned multi-stage application image, allowlisted build context, production-only runtime dependencies, non-root user, readiness healthcheck and source revision label.

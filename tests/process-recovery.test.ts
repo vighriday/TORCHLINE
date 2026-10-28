@@ -47,6 +47,28 @@ it(
         );
         return { child, exited };
       };
+      const stop = async (server: ReturnType<typeof spawnServer>, signal: NodeJS.Signals) => {
+        server.child.kill(signal);
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          return await Promise.race([
+            server.exited,
+            new Promise<never>((_, reject) => {
+              timer = setTimeout(
+                () =>
+                  reject(
+                    new Error(
+                      `Server failed to exit after ${signal}; shutdown must release the worker lease before closing the pool.`,
+                    ),
+                  ),
+                8000,
+              );
+            }),
+          ]);
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
+      };
       const ready = () =>
         expect
           .poll(
@@ -85,8 +107,7 @@ it(
           );
         const before = (await store.get(id)).state;
         expect(before.chapter).toBe(2);
-        first.child.kill('SIGKILL');
-        await first.exited;
+        await stop(first, 'SIGKILL');
         const replacement = spawnServer();
         await ready();
         await expect.poll(async () => (await store.get(id)).state.phase).toBe('paused');
@@ -95,15 +116,13 @@ it(
         expect(restored.state.resources).toEqual(before.resources);
         expect(restored.clock?.recovery_reason).toContain('restart');
         const revision = restored.revision;
-        replacement.child.kill('SIGTERM');
-        const exit = await replacement.exited;
+        const exit = await stop(replacement, 'SIGTERM');
         // Windows TerminateProcess cannot deliver POSIX SIGTERM. Linux CI asserts graceful exit.
         if (process.platform !== 'win32') expect(exit).toEqual({ code: 0, signal: null });
         const again = spawnServer();
         await ready();
         expect((await store.get(id)).revision).toBe(revision);
-        again.child.kill('SIGTERM');
-        await again.exited;
+        await stop(again, 'SIGTERM');
       } finally {
         await Promise.all(
           children.map(
