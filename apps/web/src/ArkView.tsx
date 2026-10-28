@@ -19,7 +19,7 @@ const anchors: Record<SystemId, [number, number]> = {
   navigation: [985, 245],
   shields: [560, 255],
 };
-function Schematic({ systems, resources }: ArkRendererProps) {
+function Schematic({ systems, resources, hidden }: ArkRendererProps & { hidden: boolean }) {
   const id = useId().replaceAll(':', '');
   return (
     <svg
@@ -27,6 +27,7 @@ function Schematic({ systems, resources }: ArkRendererProps) {
       viewBox="0 0 1200 500"
       role="img"
       aria-label={shipDescription(systems, resources)}
+      aria-hidden={hidden || undefined}
     >
       <defs>
         <linearGradient id={`${id}-metal`} x2="0" y2="1">
@@ -189,7 +190,7 @@ export function ArkView({
       return true;
     }
   });
-  const [eligible, setEligible] = useState(false);
+  const [eligible, setEligible] = useState<boolean | null>(null);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [focusedSystem, setFocusedSystem] = useState<SystemId | null>(null);
@@ -218,6 +219,10 @@ export function ArkView({
     if (!cinematic || !eligible || failed || !mount.current) return;
     let cancelled = false;
     const element = mount.current;
+    // Cosmetic readiness only. A stalled asset/context must not hide the usable fallback forever.
+    const startup = setTimeout(() => {
+      if (!cancelled) setFailed(true);
+    }, 20000);
     void import('./ark-scene.ts')
       .then(({ createArkScene }) => {
         if (cancelled) return;
@@ -225,6 +230,7 @@ export function ArkView({
           element,
           () => setFailed(true),
           () => {
+            clearTimeout(startup);
             if (!cancelled) setReady(true);
           },
           variant,
@@ -252,10 +258,12 @@ export function ArkView({
         );
       })
       .catch(() => {
+        clearTimeout(startup);
         if (!cancelled) setFailed(true);
       });
     return () => {
       cancelled = true;
+      clearTimeout(startup);
       controller.current?.dispose();
       controller.current = null;
       setReady(false);
@@ -265,6 +273,9 @@ export function ArkView({
     controller.current?.update(systems, resources, chapter, events);
   }, [systems, resources, chapter, events]);
   const focused = systems.find((s) => s.id === focusedSystem);
+  const schematic = !cinematic || eligible === false || failed;
+  const sceneReady = !schematic && ready;
+  const loading = !schematic && !sceneReady;
   useEffect(() => {
     controller.current?.focus(focusedSystem);
   }, [focusedSystem, ready]);
@@ -293,11 +304,21 @@ export function ArkView({
           </button>
         )}
       </div>
-      <div className={`ark-stage ${ready ? 'scene-ready' : ''}`}>
-        <Schematic systems={systems} resources={resources} />
+      <div
+        className={`ark-stage ${sceneReady ? 'scene-ready' : schematic ? 'schematic-active' : 'scene-loading'}`}
+        data-renderer={sceneReady ? 'cinematic' : schematic ? 'schematic' : 'loading'}
+        aria-busy={loading}
+      >
+        <Schematic systems={systems} resources={resources} hidden={!schematic} />
         <div ref={mount} className="ark-canvas" aria-hidden="true" />
+        {loading && (
+          <div className="ark-loading" role="status">
+            <span className="visual-uplink" aria-hidden="true" />
+            <span>Bringing the Ark into view</span>
+          </div>
+        )}
         {variant === 'flight' &&
-          ready &&
+          sceneReady &&
           systems
             .filter((s) => ['lifeSupport', 'navigation', 'cargo', 'shields'].includes(s.id))
             .map((system) =>
@@ -306,6 +327,7 @@ export function ArkView({
                   key={system.id}
                   className={`ship-anchor condition-${system.condition}`}
                   data-anchor={system.id}
+                  hidden
                 >
                   <i aria-hidden="true" />
                   {systemLabels[system.id]} <b>{system.integrity}%</b>
@@ -315,6 +337,7 @@ export function ArkView({
                   key={system.id}
                   className={`ship-anchor condition-${system.condition}`}
                   data-anchor={system.id}
+                  hidden
                   aria-label={`Inspect ${systemLabels[system.id]}`}
                   aria-pressed={focusedSystem === system.id}
                   onClick={() => {
@@ -330,7 +353,9 @@ export function ArkView({
             )}
         <div className="ark-telemetry" aria-hidden="true">
           <span>ARK / PERSISTENT VESSEL</span>
-          <span>{ready ? 'CINEMATIC TELEMETRY' : 'SYSTEM SCHEMATIC'}</span>
+          <span>
+            {sceneReady ? 'CINEMATIC TELEMETRY' : loading ? 'VISUAL UPLINK' : 'SYSTEM SCHEMATIC'}
+          </span>
         </div>
       </div>
       {variant === 'flight' && !readOnly && focused && (
@@ -402,9 +427,11 @@ export function ArkView({
           Repairs restore function; the physical record remains.{' '}
           {failed
             ? 'Cinematic graphics unavailable; schematic active.'
-            : !eligible
-              ? 'Schematic active for small screens or reduced motion.'
-              : 'Visual preferences never change the world.'}
+            : loading
+              ? 'Preparing the visual uplink. Your controls and saved world remain available.'
+              : !eligible
+                ? 'Schematic active for small screens or reduced motion.'
+                : 'Visual preferences never change the world.'}
         </p>
       )}
     </section>

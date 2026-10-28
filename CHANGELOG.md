@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — Cinematic startup polish
+
+- Removed the transient full-size schematic during 3D startup. A stable visual-uplink state fades into the first rendered frame; system labels wait for valid projected positions.
+- Preserved intentional schematic, mobile/reduced-motion and graphics-failure behavior, with bounded visual startup and no dependency between graphics readiness and game controls/timers.
+- Added a real delayed-chunk browser regression for visibility, fixed layout, first-frame opacity, graphics loss and zero world writes.
+
 ## 2026-10-28 — Encounter motion and command review
 
 - Carry the title's saved reduced-motion preference into every flight-deck CSS effect, alongside the existing SVG fallback and system preference. Browser coverage checks actual animation styles after reload.
