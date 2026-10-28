@@ -46,6 +46,8 @@ Monitor ingress acknowledgement latency, inbox age/failures, outbox age, accepte
 
 ## Backups and judge availability
 
+The [implemented encrypted backup/restore helper](backup-and-restore.md) now verifies native snapshot restoration, row fingerprints and world replay into an isolated database. The actual local live database scratch drill succeeds; remote backup scheduling and provider recovery remain unverified.
+
 Use provider backups with verified restore instructions, encrypted access, and a tested export/restore path. Keep a sanitized demo seed separately from real world data. Verify retention and recovery point/recovery time from actual provider features before launch; no recovery guarantee is assumed here.
 
 Keep the submitted candidate available across the full conservative judging window in [the submission plan](../planning/hackathon.md). Confirm expiry dates on hosting, database, OAuth grants and shared judge access. Record the submitted commit so future changes do not silently replace the judged artifact.

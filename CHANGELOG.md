@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — Verified encrypted recovery
+
+- Added operator-only consistent PostgreSQL snapshots encrypted with an independent AES-GCM key; credentials never enter command arguments or plaintext dump files. Restore authenticates before SQL, refuses the source/nonempty targets and verifies all table fingerprints plus versioned world replay.
+- A deployment-shaped public-schema test caught and fixed the fresh-database schema collision. Wrong keys, corruption and overwrite protections pass. CI uses matching PG17 CLI tools rather than the runner's changing native PostgreSQL version.
+- Created and successfully restored the actual local live archive into scratch: 25 tables / 25 rows / zero live worlds. Gameplay replay is proven by the separate isolated fixture. Off-machine retention, managed recovery and production RPO/RTO remain external deployment gates.
+
 ## 2026-10-28 — Bounded participation and history
 
 - Added persisted per-viewer/world input budgets, a per-world pending ceiling and fair channel batches. Duplicate deliveries do not spend allowance; stale/unsupported commands are ignored before admission. Fixed offline notifications overtaking previously accepted chat during the initial fairness implementation.

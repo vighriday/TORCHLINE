@@ -19,7 +19,7 @@ for (const file of ['.env', '.env.live'])
     for (const [key, value] of Object.entries(env))
       if (
         value &&
-        /SECRET|TOKEN|PASSWORD/.test(key) &&
+        /SECRET|TOKEN|PASSWORD|ENCRYPTION_KEY/.test(key) &&
         value.length >= 16 &&
         !value.startsWith('REPLACE_')
       )

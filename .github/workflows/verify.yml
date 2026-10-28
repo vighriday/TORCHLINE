@@ -20,6 +20,7 @@ jobs:
       DATABASE_URL: postgresql://torchline:isolated-ci-password@127.0.0.1:5432/torchline
       WORLD_MODE: simulation
       PLAYWRIGHT_BROWSERS_PATH: .local/browsers
+      PG_TOOL_CONTAINER: postgres:17
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

@@ -20,6 +20,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Hackathon plan](planning/hackathon.md) | Organizer requirements, schedule conflict, demo, and evidence |
 | [Development guide](operations/development.md) | Repository structure, future local setup, fixtures, privacy checks |
 | [Deployment runbook](operations/deployment.md) | Proposed hosting, configuration, operations, and recovery |
+| [Backup and restore](operations/backup-and-restore.md) | Encrypted snapshots, isolated recovery, replay checks and external durability gates |
 | [Decision register](decisions/README.md) | Proposed architecture decisions and revisit triggers |
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
 | [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
