@@ -29,6 +29,8 @@
     "live:prepare": "node --env-file-if-exists=.env scripts/prepare-live.ts",
     "db:migrate:live": "node --env-file=.env.live scripts/migrate.ts",
     "start:live": "node --env-file=.env.live apps/server/src/main.ts",
+    "live:tunnel": "node --env-file=.env.live scripts/tunnel-live.ts",
+    "live:origin": "node scripts/set-live-origin.ts",
     "twitch:doctor:live": "node --env-file=.env.live scripts/twitch-doctor.ts",
     "twitch:verify:live": "node --env-file=.env.live scripts/verify-live.ts"
   },

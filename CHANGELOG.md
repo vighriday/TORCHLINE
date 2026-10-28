@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-27 — Restored genuine HTTPS ingress
+
+- Added credential-safe tunnel/origin helpers and included the ngrok environment token in exposure scans. The old hostname belonged to a different account; the current account's assigned origin now reaches the existing live service.
+- Verified real public health/readiness and authorization denials, three fresh signed Twitch callback challenges, exact 3/3 enabled subscriptions and current app/creator/bot grants. Ten selected public response secret probes pass.
+- Genuine chat, accepted/visible bot replies, native OBS and native raid custody remain separate gates; no production gameplay/proof was synthesized. Updated owner steps for the new exact redirect.
+
 ## 2026-10-27 — Playable cinematic title and flight HUD
 
 - Restored the supplied metallic title/launch choreography and ship-centered game screen in typed React. Captain and read-only broadcast views share real resources, phase clocks, puzzles, allocation, advisory votes, consequences and persistent ship condition.

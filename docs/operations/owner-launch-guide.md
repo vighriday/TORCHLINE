@@ -11,7 +11,7 @@ Updated 2026-10-27. Follow these stages in order. OAuth means Twitch's consent s
 | Broadcaster | `hriday29` previously completed real creator consent. Recheck the displayed account after sign-in. |
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
-| Current public preview | The previous tunnel is offline: its saved ngrok credential is missing. Restore it in stage 2. Local simulation is port 3000; live is port 3001. |
+| Current public preview | `https://education-slather-reps.ngrok-free.dev` now forwards to live port 3001 with inspection disabled. The old hostname belongs to another account. Add the new exact OAuth redirect in stage 3. Simulation stays on 3000. |
 | Real gameplay chat, visible bot output, actual OBS, native raid | Implemented paths with local tests; owner-operated acceptance is still required. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 
@@ -23,7 +23,7 @@ For another creator to inherit the Ark, they need their own broadcaster account 
 
 ## 2. Choose and bring up the HTTPS origin
 
-For development, retain `https://snaggy-farah-raspily.ngrok-free.dev` if it is still assigned to your ngrok account. Your computer must remain awake with PostgreSQL, the live server and ngrok running. A localhost URL is not reachable by Twitch.
+The current development origin is `https://education-slather-reps.ngrok-free.dev`. Your computer must remain awake with PostgreSQL, the live server and ngrok running. A localhost URL is not reachable by Twitch.
 
 In a terminal opened at `E:\Projects\TORCHLINE`, select the local runtime and start/check the existing database:
 
@@ -40,19 +40,21 @@ Do not run a second server if port 3001 is already in use by TORCHLINE. Otherwis
 pnpm start:live
 ```
 
-For the missing tunnel credential, sign into the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). Copy your authtoken **only into your terminal**, replacing `YOUR_TOKEN` in this command:
+The credential is already configured as `NGROK_AUTHTOKEN` in ignored `.env.live`. On a fresh machine, obtain it from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken) and add it locally; never paste it into chat or Git. Start the tunnel in another terminal:
 
 ```powershell
-.\.tools\ngrok\ngrok.exe config add-authtoken YOUR_TOKEN --config .local/ngrok.yml
+pnpm live:tunnel
 ```
 
-The generated `.local/ngrok.yml` is ignored. Do not paste the token into chat, a screenshot or Git. In a separate terminal, start the tunnel:
+If ngrok reports ERR_NGROK_320, the hostname belongs to another account. Request this account's assigned origin, then adopt it only after the live health check succeeds:
 
 ```powershell
-.\.tools\ngrok\ngrok.exe http http://127.0.0.1:3001 --url=https://snaggy-farah-raspily.ngrok-free.dev --inspect=false --config .local/ngrok.yml
+pnpm live:tunnel --assigned-domain
+# In another terminal after the endpoint is printed:
+pnpm live:origin
 ```
 
-Request inspection stays disabled because OAuth callbacks contain sensitive one-use codes. The official [ngrok installation guide](https://ngrok.com/download/windows) explains obtaining an account and credential. If your assigned domain differs, use that domain consistently in stages 3–5.
+The helper disables request inspection and keeps credentials out of arguments/logs. After adopting a different origin, restart only the live service, add the printed exact redirect in Twitch and use the same origin in stages 3–5. Existing grants remain valid; browser sessions/OBS URLs must be established on the new origin.
 
 **Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE with **TWITCH MODE · LIVE VERIFICATION PENDING**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
 

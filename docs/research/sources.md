@@ -68,4 +68,6 @@ Implementation tooling references: [GitHub checkout](https://github.com/actions/
 
 ## 2026-10-27 episode integration recheck
 
+Release verification rechecked [Twitch cloud chatbot authentication](https://dev.twitch.tv/docs/chat/authenticating/), [message send/receive](https://dev.twitch.tv/docs/chat/send-receive-messages/), and webhook handling. At-least-once delivery, raw HMAC and prompt durable acknowledgement remain the contract; an accepted native send is not proof of visible chat or OBS. The [official ngrok agent container](https://github.com/ngrok/docker-ngrok) documents `NGROK_AUTHTOKEN`; installed 3.39.13 CLI help confirms `--url`, `--inspect=false` and local configuration. New real public/provider evidence is recorded in ADR 0016 rather than inferred from fixtures.
+
 T4 stream.offline version 1 and T6 webhook handling were rechecked against their current primary pages. A verified current offline subscription can advise a local pause; it is not native raid proof. HTTPS port 443, raw-body HMAC, durable acknowledgement and duplicate-message handling remain required. TORCHLINE now queues offline handling and retries normalized work independently of webhook acknowledgement. This is a documentation check plus local signed-fixture evidence; no genuine offline callback or new live chat was observed in this step.
