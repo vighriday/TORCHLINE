@@ -1,4 +1,4 @@
-import { Store } from '@torchline/storage';
+import { Store, inputPolicy, REQUIRED_MIGRATION } from '@torchline/storage';
 import { createApp } from './app.ts';
 if (!process.env.DATABASE_URL)
   throw new Error('DATABASE_URL missing. Run pnpm db:up and pnpm db:migrate first.');
@@ -9,7 +9,7 @@ if (!['simulation', 'live'].includes(mode))
   throw new Error('WORLD_MODE must be simulation or live.');
 const store = new Store(process.env.DATABASE_URL);
 if (
-  !(await store.pool.query("SELECT 1 FROM schema_migrations WHERE name='007_episode_clocks.sql'"))
+  !(await store.pool.query('SELECT 1 FROM schema_migrations WHERE name=$1', [REQUIRED_MIGRATION]))
     .rowCount
 )
   throw new Error('Database migration required. Run the migration command for this mode.');
@@ -26,6 +26,7 @@ const app = await createApp(
     twitchRedirectUri: process.env.TWITCH_REDIRECT_URI,
     eventsubSecret: process.env.EVENTSUB_SECRET,
     botUserId: process.env.TWITCH_BOT_USER_ID,
+    inputPolicy: inputPolicy(process.env),
   },
   { logger: true },
 );

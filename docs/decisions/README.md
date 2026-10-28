@@ -20,6 +20,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0014](0014-durable-episode-policy.md) | Persisted phase deadlines, worker fencing and scoped input recovery | D5, D7–11, D15–17, all C1–C13 |
 | [0015](0015-cinematic-game-presentation.md) | Supplied cinematic game presentation, canonical visual effects and bounded adaptive renderer | D3–5, all C1–C13 |
 | [0016](0016-live-verification-and-tunnel.md) | Credential-safe live tunnel, exact origin adoption and genuine verification boundaries | D6–8, D13, D17, all C1–C13 |
+| [0017](0017-bounded-input-and-history.md) | Persisted input admission, fair work and indexed public history | D7–11, D16–17, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

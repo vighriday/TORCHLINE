@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0017](../decisions/0017-bounded-input-and-history.md) checks persisted input limits, channel fairness, indexed history and temporary overlay expiry against C1–C13. Real PostgreSQL regressions establish bounded admission/query behavior; deployed soak and native participation remain separate gates.
+
 [ADR 0014](../decisions/0014-durable-episode-policy.md) checks persisted clocks, restart/park/offline recovery, window cutoffs, worker fencing and scoped retry against C1–C13. SQL/provider-fixture/browser evidence remains distinct from native Twitch and OBS acceptance.
 
 [ADR 0013](../decisions/0013-versioned-cooperation.md) checks versioned investigation, allocation and vote freezing against C1–C13. Its executed evidence covers pure rules; runtime rollout and persisted episode timing have separate integration gates.

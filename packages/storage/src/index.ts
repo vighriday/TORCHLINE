@@ -4,6 +4,11 @@ import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { DomainError, CURRENT_RULES_VERSION } from '@torchline/contracts';
 import { syncEpisode } from './episodes.ts';
+import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
+import type { InputPolicy } from './admission.ts';
+export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
+export type { InputPolicy } from './admission.ts';
+export const REQUIRED_MIGRATION = '008_release_hardening.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
@@ -178,9 +183,14 @@ export class Store {
     timestamp: string,
     participantKey?: string,
     chatMessageId?: string,
+    policy: InputPolicy = DEFAULT_INPUT_POLICY,
   ) {
     await this.transaction(async (c) => {
       await this.lockChannels(c, [channel]);
+      if (
+        (await c.query('SELECT 1 FROM eventsub_inbox WHERE message_id=$1', [deliveryId])).rowCount
+      )
+        return;
       const row = (
         await c.query(
           'SELECT w.* FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w',
@@ -216,23 +226,42 @@ export class Store {
       const withinDeadline =
         !clock?.deadline_at ||
         (Date.parse(timestamp) < clock.deadline_at.getTime() && at < clock.deadline_at);
-      const accepted = eligible && !duplicate && withinDeadline;
-      const participantId =
+      const phaseCommands: Record<string, string[]> = {
+        investigation: ['inspect'],
+        challenge: ['scan', 'route', 'patch'],
+        allocation: ['allocate'],
+        decision: ['vote'],
+      };
+      const supported = row && phaseCommands[row.state.phase]?.includes(command.type);
+      const participantId = row
+        ? participantIdentity(row.id, actorId, participantKey ?? channel)
+        : '';
+      const rejection =
+        eligible && !duplicate && withinDeadline && supported
+          ? await admitInput(c, row.id, row.state.window, participantId, at, policy)
+          : null;
+      const accepted = eligible && !duplicate && withinDeadline && supported && !rejection;
+      const appliedParticipantId =
         accepted && participantKey ? participantIdentity(row.id, actorId, participantKey) : actorId;
       const payload = accepted
         ? {
             kind: 'chat',
             worldId: row.id,
             channelId: channel,
-            actorId: participantId,
+            actorId: appliedParticipantId,
             command,
             window: row.state.window,
           }
         : { kind: 'ignored' };
       await c.query(
-        'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at) VALUES($1,$2,$3,$4) ON CONFLICT(message_id) DO NOTHING',
-        [deliveryId, 'channel.chat.message', payload, accepted ? null : new Date()],
+        'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at,error) VALUES($1,$2,$3,$4,$5) ON CONFLICT(message_id) DO NOTHING',
+        [deliveryId, 'channel.chat.message', payload, accepted ? null : at, rejection],
       );
+      if (rejection)
+        await c.query(
+          'INSERT INTO input_rejections(world_id,input_window,reason) VALUES($1,$2,$3) ON CONFLICT(world_id,input_window,reason) DO UPDATE SET dropped=input_rejections.dropped+1',
+          [row.id, row.state.window, rejection],
+        );
     });
   }
   async lockChannels(c: PoolClient, ids: string[]) {
@@ -485,7 +514,7 @@ export class Store {
           [ingress.id],
         );
     });
-    return this.get(id);
+    return this.get(id, Boolean(ingress));
   }
   async handoffs(channel: string): Promise<Handoff[]> {
     return (

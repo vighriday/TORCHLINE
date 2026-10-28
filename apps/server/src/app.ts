@@ -17,8 +17,10 @@ import {
   advanceEpisodes,
   recoverEpisodes,
   configureEpisode,
+  REQUIRED_MIGRATION,
 } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
+import type { InputPolicy } from '@torchline/storage';
 import {
   authorizationUrl,
   BOT_SCOPES,
@@ -51,6 +53,7 @@ export interface AppConfig {
   twitchRedirectUri?: string;
   eventsubSecret?: string;
   botUserId?: string;
+  inputPolicy?: InputPolicy;
 }
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 const escapeHtml = (value: string) =>
@@ -255,9 +258,9 @@ export async function createApp(
   app.get('/health/ready', async () => {
     if (
       !(
-        await store.pool.query(
-          "SELECT 1 FROM schema_migrations WHERE name='007_episode_clocks.sql'",
-        )
+        await store.pool.query('SELECT 1 FROM schema_migrations WHERE name=$1', [
+          REQUIRED_MIGRATION,
+        ])
       ).rowCount
     )
       denied('NOT_CONFIGURED', 'Database migration required.');
@@ -685,6 +688,7 @@ export async function createApp(
                 notification.timestamp,
                 config.sessionSecret,
                 chat.messageId,
+                config.inputPolicy,
               );
           }
         }
@@ -773,10 +777,10 @@ export async function createApp(
     const { channel } = z.object({ channel: NodeText }).parse(request.params);
     const { token } = z.object({ token: z.string().length(64) }).parse(request.body);
     const grant = (
-      await store.pool.query('SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2', [
-        digest(token),
-        channel,
-      ])
+      await store.pool.query(
+        'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
+        [digest(token), channel],
+      )
     ).rowCount;
     if (!grant) denied('FORBIDDEN', 'Overlay link is invalid or revoked.');
     reply.setCookie('torchline_overlay', token, {
@@ -838,10 +842,10 @@ export async function createApp(
       const token = request.cookies.torchline_overlay ?? '';
       if (
         !(
-          await store.pool.query('SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2', [
-            digest(token),
-            channel,
-          ])
+          await store.pool.query(
+            'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
+            [digest(token), channel],
+          )
         ).rowCount
       )
         denied('FORBIDDEN', 'Overlay access revoked.');
@@ -915,7 +919,7 @@ export async function createApp(
         config.mode === 'live'
           ? (
               await store.pool.query(
-                'SELECT * FROM eventsub_inbox WHERE processed_at IS NULL AND next_attempt_at<=clock_timestamp() ORDER BY received_at,message_id LIMIT 30',
+                "WITH due AS (SELECT *,row_number() OVER(PARTITION BY COALESCE(payload->>'channelId',payload->>'targetId','control') ORDER BY received_at,message_id) AS position FROM eventsub_inbox WHERE processed_at IS NULL AND next_attempt_at<=clock_timestamp()) SELECT * FROM due ORDER BY CASE WHEN payload->>'kind'='raid' THEN 0 ELSE 1 END,position,received_at,message_id LIMIT 30",
               )
             ).rows
           : [];
@@ -947,7 +951,7 @@ export async function createApp(
             );
           } else if (item.payload.kind === 'chat') {
             const payload = item.payload;
-            const world = await store.get(payload.worldId);
+            const world = await store.get(payload.worldId, true);
             await store.command(
               world.id,
               { id: payload.actorId, role: 'viewer', community: payload.channelId },

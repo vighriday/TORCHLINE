@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-28 — Bounded participation and history
+
+- Added persisted per-viewer/world input budgets, a per-world pending ceiling and fair channel batches. Duplicate deliveries do not spend allowance; stale/unsupported commands are ignored before admission. Fixed offline notifications overtaking previously accepted chat during the initial fairness implementation.
+- Indexed public history and custody pages; Twitch action projections read a bounded event tail. Complete immutable history and versioned replay remain intact.
+- Added optional expiry for temporary read-only overlay capabilities while preserving ordinary OBS links and creator authority boundaries. Migration 008 applied to both local stores.
+- 85 automated tests across 15 files pass, including concurrent admission, refill/backlog/fairness, a synthetic 50,000-ballot query-plan check and overlay expiry/permissions. This is automated PostgreSQL evidence, not genuine chat or deployed load capacity.
+
 ## 2026-10-27 — Restored genuine HTTPS ingress
 
 - Added credential-safe tunnel/origin helpers and included the ngrok environment token in exposure scans. The old hostname belonged to a different account; the current account's assigned origin now reaches the existing live service.
