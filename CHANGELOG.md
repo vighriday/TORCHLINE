@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-28 — Encounter motion and command review
+
+- Carry the title's saved reduced-motion preference into every flight-deck CSS effect, alongside the existing SVG fallback and system preference. Browser coverage checks actual animation styles after reload.
+- Crew command guidance respects repair prerequisites: A and B must be patched before suggesting C. Exclude the unused work-order D node. These are presentation suggestions; server rules and permissions remain authoritative.
+
 ## 2026-10-28 — Playable encounter presentation
 
 - Reopened presentation work after owner review: added visible radiation-front motion, chapter atmosphere/sector transmission, ship-attached persistent-system inspection and clearer mission/reward presentation using the existing Claude Design scene and React contracts.

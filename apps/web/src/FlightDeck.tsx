@@ -199,6 +199,13 @@ export function FlightDeck({
   readonly?: boolean;
   error?: string;
 }) {
+  const [motionReduced] = useState(() => {
+    try {
+      return localStorage.getItem('torchline.motion') === 'reduced';
+    } catch {
+      return false;
+    }
+  });
   const event = useConsequence(world),
     deciding = ['decision', 'awaiting-commit'].includes(world.phase);
   const phaseCopy =
@@ -217,7 +224,7 @@ export function FlightDeck({
               : 'The next chapter is yours.';
   return (
     <section
-      className={`flight-deck ${readonly ? 'spectator-deck' : 'captain-deck'} phase-${world.phase} chapter-${world.chapter} ${world.outcome ? 'outcome-' + world.outcome : ''}`}
+      className={`flight-deck ${readonly ? 'spectator-deck' : 'captain-deck'} ${motionReduced ? 'motion-reduced' : ''} phase-${world.phase} chapter-${world.chapter} ${world.outcome ? 'outcome-' + world.outcome : ''}`}
       aria-label={readonly ? 'Read-only broadcast' : 'Ark flight deck'}
       data-world={world.worldId}
     >

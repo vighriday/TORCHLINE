@@ -88,7 +88,16 @@ export function CrewUplink({ world }: { world: WorldPresentation }) {
     (n) => !['S', 'T'].includes(n.id) && (!workOrder || n.id !== 'D') && !n.revealed,
   );
   const nextPatch = workOrder
-    ? world.challenge?.nodes.find((n) => ['A', 'B', 'C'].includes(n.id) && n.revealed && !n.patched)
+    ? world.challenge?.nodes.find(
+        (n) =>
+          ['A', 'B', 'C'].includes(n.id) &&
+          n.revealed &&
+          !n.patched &&
+          (n.id !== 'C' ||
+            world.challenge?.nodes
+              .filter((p) => ['A', 'B'].includes(p.id))
+              .every((p) => p.patched)),
+      )
     : undefined;
   const accepting =
     ['investigation', 'challenge', 'allocation', 'decision'].includes(world.phase) &&

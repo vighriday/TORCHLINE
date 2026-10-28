@@ -124,8 +124,29 @@ test('encounter motion, ship inspection and relay interaction use real saved sta
       await expect(
         page.getByRole('button', { name: 'Copy command !scan D', exact: true }),
       ).toHaveCount(0);
-      await page.emulateMedia({ reducedMotion: 'reduce' });
+      snapshot.world.challenge.nodes = snapshot.world.challenge.nodes.map(
+        (node: { id: string }) => ({
+          ...node,
+          revealed: !['A', 'D'].includes(node.id),
+          patched: node.id === 'B',
+        }),
+      );
+      await page.reload();
+      await expect(
+        page.getByRole('button', { name: 'Copy command !scan A', exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Copy command !patch C', exact: true }),
+      ).toHaveCount(0);
+      await page.evaluate(() => localStorage.setItem('torchline.motion', 'reduced'));
+      await page.reload();
       await expect(page.locator('canvas')).toHaveCount(0);
+      await expect(page.locator('.encounter-dust')).toHaveCSS('animation-name', 'none');
+      await page.evaluate(() => localStorage.removeItem('torchline.motion'));
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.reload();
+      await expect(page.locator('canvas')).toHaveCount(0);
+      await expect(page.locator('.encounter-dust')).toHaveCSS('animation-name', 'none');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
