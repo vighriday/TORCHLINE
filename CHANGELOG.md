@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-28 — Current frontend asset delivery
+
+- Fixed startup-enumerated static routes serving SPA HTML for newly rebuilt JS/CSS names. Public dist files now resolve through the existing static plugin at request time; missing assets/API paths return404 and creator mutations remain authenticated.
+- Added a regression for post-start asset creation, JavaScript content type/bytes, missing routes and authority. No engine, storage or Twitch behavior changed.
+
 ## 2026-10-28 — SSH HTTPS verified
 
 - Owner registered the prepared SSH public key; restored the live HTTPS origin through Windows OpenSSH with strict pinned host verification. Native ngrok remains quarantined/unused. Restarted the existing private database and live/simulation processes.

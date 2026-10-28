@@ -1121,10 +1121,11 @@ export async function createApp(
   });
   const publicDir = resolve('apps/web/dist');
   if (existsSync(publicDir)) {
-    await app.register(staticFiles, { root: publicDir, wildcard: false });
+    await app.register(staticFiles, { root: publicDir, wildcard: true });
     app.setNotFoundHandler((request, reply) => {
       if (
         request.method !== 'GET' ||
+        request.url.startsWith('/assets/') ||
         request.url.startsWith('/api/') ||
         request.url.startsWith('/integrations/')
       )

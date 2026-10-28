@@ -24,6 +24,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0018](0018-encrypted-recovery.md) | Authenticated consistent backup and isolated verified restore | D7–8, D10–11, D13, D16–17, all C1–C13 |
 | [0019](0019-release-runtime-boundaries.md) | Strict release configuration, browser policy, feed bounds and process recovery | D2, D5, D7, D10–11, D13, D17, all C1–C13 |
 | [0020](0020-release-container.md) | Reproducible non-root application image and CI smoke | D1–3, D7–8, D11–13, D17, all C1–C13 |
+| [0021](0021-current-static-assets.md) | Current hashed public assets without restart; missing assets stay outside SPA fallback | D2–3, D5, D11, D13, D17, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 
