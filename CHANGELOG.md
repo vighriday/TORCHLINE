@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 — Honest live acceptance tooling
+
+- Prepared project-only OpenSSH HTTPS fallback after Windows Defender quarantined native ngrok; verified the official server fingerprint. The executable was not restored/exempted. Public-key registration is the remaining account dependency, so preview reachability is reported offline.
+- Real-service diagnostic now shares all-page subscription pagination and labels historical callback delivery explicitly; added repeated-cursor regression. Added timestamp-baselined aggregate chat/action/send/linked-transfer evidence and an expiring read-only public Chromium overlay probe with no trace/capability output.
+- Added current owner checklist, deployment readiness/authority report and superseding status. Real grants and3/3 subscription metadata validate; zero applied chat/accepted send/live custody remains the honest native evidence. Public overlay/OBS/native raid acceptance is pending.
+
 ## 2026-10-28 — Linux shutdown correction
 
 - Linux process CI exposed a genuine graceful-shutdown deadlock: the last-registered Fastify close hook ended the PostgreSQL pool before the worker lease hook could release its client. Shutdown now awaits application cleanup before ending the owned pool, including fatal lease loss.

@@ -27,6 +27,8 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
 | [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
+| [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |
+| [October 28 release readiness](reports/2026-10-28-release-readiness.md) | Executed reliability/security/container evidence and remaining external release gates |
 | [Design integration review](design/integration-review.md) | Six-surface mapping, excluded prototype logic and thirteen-component stress review |
 | [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
 | [Public capability and authority review](reviews/2026-10-26-public-authority.md) | All route/component boundaries, four reproduced defects, evidence and pruning recommendations |

@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+The [October 28 release authority review](../reviews/2026-10-28-release-authority.md) covers every current public route family, operational verification capability and C1–C13. ADRs 0018–0020 add encrypted recovery, runtime boundaries and reproducible packaging. Executed image/SQL/browser evidence is separate from the pending live acceptance session.
+
 [ADR 0017](../decisions/0017-bounded-input-and-history.md) checks persisted input limits, channel fairness, indexed history and temporary overlay expiry against C1–C13. Real PostgreSQL regressions establish bounded admission/query behavior; deployed soak and native participation remain separate gates.
 
 [ADR 0014](../decisions/0014-durable-episode-policy.md) checks persisted clocks, restart/park/offline recovery, window cutoffs, worker fencing and scoped retry against C1–C13. SQL/provider-fixture/browser evidence remains distinct from native Twitch and OBS acceptance.

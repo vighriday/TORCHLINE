@@ -4,12 +4,14 @@ import {
   BOT_SCOPES,
   CREATOR_SCOPES,
   decryptSecret,
-  helix,
   requestToken,
   validateToken,
 } from '@torchline/twitch';
 import { DomainError } from '@torchline/contracts';
-import { desiredSubscriptions } from '../apps/server/src/twitch-subscriptions.ts';
+import {
+  desiredSubscriptions,
+  listProviderSubscriptions,
+} from '../apps/server/src/twitch-subscriptions.ts';
 type Check = { name: string; status: 'verified' | 'blocked' | 'failed'; detail: string };
 const checks: Check[] = [];
 const check = (name: string, status: Check['status'], detail: string) =>
@@ -135,11 +137,11 @@ else {
             `${valid} real ${role} grant(s) validated against Twitch with required identity/scopes.`,
           );
       }
-      const page = await helix('eventsub/subscriptions?first=100', client, app.access_token);
+      const provider = await listProviderSubscriptions(client, app.access_token);
       check(
         'Twitch EventSub API',
         'verified',
-        `Real provider returned ${page.data?.length ?? 0} subscription(s) on the first page; this count alone does not verify a channel or callback.`,
+        `Real provider returned ${provider.length} subscription(s) across all pages; this count alone does not verify a channel or callback.`,
       );
       const bot = grants.find((grant) => grant.role === 'bot');
       const creators = (
@@ -152,14 +154,8 @@ else {
           const specs = desiredSubscriptions(creator, bot.id);
           const callback = `${new URL(origin).origin}/integrations/twitch/eventsub`;
           const enabled = specs.filter((spec) =>
-            page.data.some(
-              (sub: {
-                type: string;
-                version: string;
-                status: string;
-                condition: Record<string, string>;
-                transport: { method: string; callback: string };
-              }) =>
+            provider.some(
+              (sub) =>
                 sub.type === spec.type &&
                 sub.version === spec.version &&
                 sub.status === 'enabled' &&
@@ -174,19 +170,19 @@ else {
           check(
             'enabled current channel subscriptions',
             enabled === specs.length ? 'verified' : 'blocked',
-            `${enabled}/${specs.length} required subscriptions enabled with the current bot, version, conditions and callback on the real provider page; later pages are not inspected by this diagnostic.`,
+            `${enabled}/${specs.length} required subscriptions enabled with the current bot, version, conditions and callback across all real provider pages. Enabled metadata does not prove current HTTPS delivery.`,
           );
         }
       const counts = (
         await store.pool.query(
-          'SELECT kind,count(*)::integer AS count FROM integration_deliveries GROUP BY kind',
+          'SELECT kind,count(*)::integer AS count,max(received_at) AS latest FROM integration_deliveries GROUP BY kind',
         )
       ).rows;
       const delivered = (kind: string) => counts.find((row) => row.kind === kind)?.count ?? 0;
       check(
-        'signed callback delivery',
+        'historical signed callback delivery',
         delivered('challenge') ? 'verified' : 'blocked',
-        `${delivered('challenge')} signed challenge delivery record(s) in the separate live database.`,
+        `${delivered('challenge')} historical signed challenge record(s); latest ${counts.find((row) => row.kind === 'challenge')?.latest?.toISOString() ?? 'none'}. Historical delivery does not establish current reachability.`,
       );
       const applied = (
         await store.pool.query(

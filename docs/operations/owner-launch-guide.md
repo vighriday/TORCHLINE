@@ -1,6 +1,6 @@
 # Get TORCHLINE operational with Twitch
 
-Updated 2026-10-27. Follow these stages in order. OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub is Twitch delivering signed events to our server. You do not need to create tokens manually or create a Twitch Extension.
+Updated 2026-10-28. For the configured accounts start with the shorter [live release checklist](live-release-checklist.md), including current SSH recovery and exact remaining steps. OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub delivers signed events to the server. You do not need manual tokens or a Twitch Extension.
 
 ## Your current starting point
 
@@ -11,7 +11,7 @@ Updated 2026-10-27. Follow these stages in order. OAuth means Twitch's consent s
 | Broadcaster | `hriday29` previously completed real creator consent. Recheck the displayed account after sign-in. |
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
-| Current public preview | `https://education-slather-reps.ngrok-free.dev` now forwards to live port 3001 with inspection disabled. The old hostname belongs to another account. Add the new exact OAuth redirect in stage 3. Simulation stays on 3000. |
+| Current public preview | Offline after Windows Defender quarantined native ngrok. Prepared SSH transport needs the project public key registered; intended origin remains `https://education-slather-reps.ngrok-free.dev`. See the live checklist. Simulation stays on 3000. |
 | Real gameplay chat, visible bot output, actual OBS, native raid | Implemented paths with local tests; owner-operated acceptance is still required. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 
@@ -22,6 +22,8 @@ Use your ordinary browser for **hriday29**, the broadcaster who owns the Ark. Us
 For another creator to inherit the Ark, they need their own broadcaster account and TORCHLINE consent. The bot cannot be the receiving creator.
 
 ## 2. Choose and bring up the HTTPS origin
+
+**Current machine:** follow [SSH recovery](live-release-checklist.md#1-restore-public-https). Do not restore the quarantined file or disable protection. Native-agent instructions below are retained for other trusted installations; they are not the active procedure here.
 
 The current development origin is `https://education-slather-reps.ngrok-free.dev`. Your computer must remain awake with PostgreSQL, the live server and ngrok running. A localhost URL is not reachable by Twitch.
 

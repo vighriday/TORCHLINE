@@ -56,6 +56,32 @@ const Page = z.object({
   data: z.array(ProviderSubscription),
   pagination: z.object({ cursor: z.string().optional() }).optional(),
 });
+export async function listProviderSubscriptions(
+  clientId: string,
+  token: string,
+  fetcher: Fetcher = fetch,
+) {
+  const result: Subscription[] = [],
+    cursors = new Set<string>();
+  let cursor: string | undefined;
+  do {
+    const page = Page.parse(
+      await helix(
+        `eventsub/subscriptions?first=100${cursor ? `&after=${encodeURIComponent(cursor)}` : ''}`,
+        clientId,
+        token,
+        {},
+        fetcher,
+      ),
+    );
+    result.push(...page.data);
+    cursor = page.pagination?.cursor;
+    if (cursor && (cursors.has(cursor) || cursors.size >= 100))
+      throw new DomainError('TWITCH_API_FAILED', 'Subscription pagination did not terminate.');
+    if (cursor) cursors.add(cursor);
+  } while (cursor);
+  return result;
+}
 export async function hasCurrentSubscription(
   store: Store,
   config: AppConfig,
@@ -244,25 +270,7 @@ export function twitchSubscriptions(
         'Authorize the dedicated bot with the required permissions.',
       );
     const token = await applicationToken();
-    const provider: Subscription[] = [];
-    const cursors = new Set<string>();
-    let cursor: string | undefined;
-    do {
-      const page = Page.parse(
-        await helix(
-          `eventsub/subscriptions?first=100${cursor ? `&after=${encodeURIComponent(cursor)}` : ''}`,
-          config.twitchClientId!,
-          token,
-          {},
-          fetcher,
-        ),
-      );
-      provider.push(...page.data);
-      cursor = page.pagination?.cursor;
-      if (cursor && (cursors.has(cursor) || cursors.size >= 100))
-        throw new DomainError('TWITCH_API_FAILED', 'Subscription pagination did not terminate.');
-      if (cursor) cursors.add(cursor);
-    } while (cursor);
+    const provider = await listProviderSubscriptions(config.twitchClientId!, token, fetcher);
     const wanted = desiredSubscriptions(creator, botId);
     const matches = (sub: Subscription) =>
       wanted.some(
