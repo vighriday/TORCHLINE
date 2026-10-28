@@ -15,6 +15,8 @@ Intended origin: `https://education-slather-reps.ngrok-free.dev`. The computer/d
 
 ## 2. Confirm OAuth and subscriptions
 
+The preview now checks its connection before showing account/launch actions and fades into 3D without a temporary schematic. If a connection fails, **Retry connection** only reloads the saved state and live feed. It does not repeat a gameplay action or require new Twitch consent. Intentional reduced-motion/mobile and graphics-failure schematic views remain available.
+
 **Completed on the current machine:** the owner corrected the console callback; a fresh real creator session and the first live Ark were observed afterward. The earlier `redirect_mismatch` is resolved. Keep the exact callback below if registering/recovering the app later; begin sign-in from the current home page rather than an old callback URL.
 
 In [Twitch developer apps](https://dev.twitch.tv/console/apps), Manage the existing TORCHLINE app. OAuth Redirect URLs must include exactly `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Click Add if shown, then Save; refresh Manage and confirm it remains listed. Keep **Confidential** and the existing client ID/secret; no second app is needed for the bot. [Twitch registration reference](https://dev.twitch.tv/docs/authentication/register-app/).

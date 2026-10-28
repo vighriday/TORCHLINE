@@ -21,4 +21,14 @@ Recorded a 29-second isolated actual-engine simulation: scanned all relays, subm
 
 Final accessibility/command review carries the title's saved reduced-motion preference through all flight-deck CSS effects and keeps work-order command suggestions behind the actual repair prerequisites. The browser journey checks stored and operating-system motion preferences separately. Canonical rules still enforce every command independently of suggestions.
 
-Final source `b1574e9` passes [CI 40732891048](https://github.com/vighriday/TORCHLINE/actions/runs/40732891048), including 91 tests, all eight browser journeys, fixture consistency and release-image smoke. Public JS/CSS bytes match that source's production build. This evidence establishes delivery and automated behavior; it does not establish owner visual acceptance or native OBS performance.
+Encounter milestone `b1574e9` passes [CI 40732891048](https://github.com/vighriday/TORCHLINE/actions/runs/40732891048), including 91 tests, all eight browser journeys, fixture consistency and release-image smoke. Public JS/CSS bytes match that source's production build. This evidence establishes delivery and automated behavior; it does not establish owner visual acceptance or native OBS performance.
+
+## Startup polish follow-up
+
+The owner then identified a transient full-size schematic before 3D and raw parser text on the title. [ADR 0023](../decisions/0023-cinematic-startup.md) replaces that flash with explicit loading, first-frame fade and intentional accessible fallback. Scene dimensions stay stable and system markers wait for their first projected position. Mobile/reduced-motion, explicit schematic and graphics failure remain valid fallback paths.
+
+[ADR 0024](../decisions/0024-preview-connection-recovery.md) fixes the independently reproduced ngrok HTML response with its documented host-scoped API header and sanitized JSON handling. Initial connection no longer presents a false launch/mode before state arrives. Retry reads the current save and reattaches the live feed; it cannot replay a mutation. Overlay waiting copy and the launch button's accessible name are corrected.
+
+Source `f1a8d4c` passes local build/typecheck, 97 automated tests and 11 browser journeys. The affected three-page custody/mobile journeys also pass after separating their software-GPU work from dedicated motion tests. A real fresh anonymous Chromium profile completed the normal ngrok visit flow without a global request-header override: both application API calls returned JSON with the app's own preview header, 3D became ready, no parser/page errors appeared and no mutation was sent. Actual public overlay still reads the live Ark with zero controls/private diagnostics and denied writes. Source CI is recorded separately; this is Chromium evidence, not native OBS or Twitch gameplay proof.
+
+The same source passes [CI 40738778152](https://github.com/vighriday/TORCHLINE/actions/runs/40738778152), including all 97 tests/11 journeys, fixtures and restricted release-image smoke. No source assertion was disabled or timeout enlarged to obtain this result.

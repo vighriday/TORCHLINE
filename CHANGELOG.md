@@ -5,7 +5,8 @@
 - Reproduced the live JSON error: ngrok returned an HTML warning page to browser-agent API requests. Added its documented header only on free-preview hosts, JSON response validation and short recoverable messages without raw parser/upstream output.
 - Replaced the false initial launch/simulation screen with a branded connection state. Added read-only retry/feed reattachment, separated action errors from transport status and preserved committed state after a lost response. No mutation is automatically retried.
 - Corrected overlay waiting copy and the launch button's accessible name. Added six client regressions and two fault-injected browser journeys; local build/typecheck, all 97 tests and all 11 browser journeys pass.
-- Reviewed an older CI timeout in the three-page custody journey: run that state/permission journey with reduced motion, while dedicated cinematic/encounter tests retain actual moving WebGL checks. A renderer commit's initial CI failed at npm bootstrap with ECONNRESET, before source validation; newer source needs its own complete run.
+- Reviewed an older CI timeout in the three-page custody journey: run that state/permission journey with reduced motion, while dedicated cinematic/encounter tests retain actual moving WebGL checks. A renderer commit's initial CI failed at npm bootstrap with ECONNRESET, before source validation; the completed newer run is recorded below.
+- Final source `f1a8d4c` passes CI 40738778152: 97 tests, 11 browser journeys, unchanged fixtures and restricted image smoke. Real fresh-browser JSON/3D, public read-only overlay and secret/permission probes pass; native Twitch/OBS/raid acceptance remains separate.
 
 ## 2026-10-28 — Cinematic startup polish
 

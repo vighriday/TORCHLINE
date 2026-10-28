@@ -21,6 +21,8 @@ Physical system records contain stable system ID, integrity, current condition, 
 
 All mutation calls carry the expected world version and command ID. The backend enforces identity, mode, role and custody. Renderers never call Twitch directly. A shared client/controller handles SSE reconnect and snapshot replacement; visual components remain unaware of transport.
 
+Initial connection waits for valid state before presenting mode/launch actions. The client rejects unexpected HTML/malformed responses, preserves domain authorization errors and exposes a read-only reconnect action ([ADR 0024](../decisions/0024-preview-connection-recovery.md)). A reconnect refreshes snapshots/feed without replaying a command; a lost response may already have committed. Transport status is separate from action errors. These changes do not alter presentation wire fields/version or authority.
+
 ## Semantic visual cues
 
 The [encounter revision](../decisions/0022-encounter-presentation.md) consumes existing chapter/phase, systems/marks and semantic events without changing wire fields/version. `ArkView` projects passive system positions and local camera focus; `ChallengeView` optionally accepts a display title and forwards relay scans through its existing callback. `EncounterLayer` baselines initial chapter state, shows a dismissible arrival only on chapter change and never issues commands. `CrewUplink` opens native Twitch chat/copies public commands; it does not authenticate or post as a viewer. The OBS variant remains read only with no new buttons.
