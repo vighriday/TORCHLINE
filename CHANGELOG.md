@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 — Manual chat delivery control
+
+- Owner manually sent as the dedicated bot in Twitch and confirmed the message is absent from the broadcaster's view. The missing-delivery problem also occurs outside TORCHLINE's send code; no account/channel/provider cause is yet proven. The independent observer's earlier automatic-reply test remains separate from this owner-observed manual result.
+- Fresh real HTTPS/readiness, grants and exact 3/3 subscriptions validate; native counters remain four signed chats and two accepted sends. Updated owner troubleshooting and a private unsent support draft. Preserved bot role, scopes, world state and protection settings; no application change or live-acceptance pass is claimed.
+
 ## 2026-10-29 — First native bot send accepted
 
 - A fresh real broadcaster query produced a Twitch-accepted bot reply (`is_sent=true`, nonempty message ID) at 09:57 UTC. Twitch's user lookup verifies destination hriday29 and sender hriday_29. Native counters now distinguish three signed deliveries and one accepted send from the earlier rejection; applied gameplay/raid counters remain zero.
