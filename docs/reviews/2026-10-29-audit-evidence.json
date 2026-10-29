@@ -263,5 +263,36 @@
       "sha256": "96104df9c056fc913be81c279c87edd2efccf65bab3d9b5a53b88491cd0e3818",
       "bytes": 419
     }
+  },
+  "publishedHarnessVerification": {
+    "typecheck": "passed",
+    "recoveryDefects": "all three reproduced",
+    "idleFourFeeds": {
+      "ticks": 8,
+      "ms": 2156,
+      "poolQueries": 321,
+      "phase": "ready",
+      "mutations": 0
+    },
+    "ingressRepeat": {
+      "source": "7700316; synthetic signed provider via app.inject and real isolated PostgreSQL; one 500-message concurrent burst, no live capacity claim",
+      "totalMs": 2818,
+      "ackMs": {
+        "p50": 1965,
+        "p95": 1988,
+        "max": 1990
+      },
+      "codes": {
+        "204": 500
+      },
+      "beforeDrain": {
+        "pending": 103,
+        "rejected": 397
+      },
+      "drainMs": 818,
+      "uniqueVotes": 103,
+      "afterPending": 0
+    },
+    "interpretation": "Second burst p95 is just below 2 seconds; original is just above. Neither is a sustained/deployed acceptance result."
   }
 }
