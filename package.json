@@ -18,6 +18,7 @@
     "audit:legacy": "node scripts/audit-legacy.mjs",
     "audit:balance": "node scripts/analyze-balance.ts",
     "design:fixtures": "node scripts/export-design-fixtures.ts",
+    "readme:proof": "node scripts/readme/export-proof.ts",
     "check:repo": "node scripts/check-repo.mjs",
     "check:public-secrets": "node scripts/check-public-secrets.ts",
     "format": "prettier --write apps packages scripts tests package.json tsconfig.json vitest.config.ts playwright.config.ts .github/workflows/verify.yml",

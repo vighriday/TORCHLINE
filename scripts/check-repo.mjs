@@ -38,9 +38,15 @@ function walk(path) {
     markdown++;
     const file = join(path, item.name),
       text = readFileSync(file, 'utf8');
-    for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {
-      const target = match[1].split('#')[0];
-      if (!target || /^(https?:|mailto:)/.test(target)) continue;
+    const targets = [
+      ...[...text.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]),
+      ...[...text.matchAll(/\b(?:src|srcset|href)\s*=\s*["']([^"']+)["']/gi)].map(
+        (match) => match[1],
+      ),
+    ];
+    for (const link of targets) {
+      const target = link.split('#')[0];
+      if (!target || /^(https?:|mailto:|data:)/i.test(target)) continue;
       if (!existsSync(resolve(dirname(file), target))) broken.push(`${file} -> ${target}`);
     }
   }

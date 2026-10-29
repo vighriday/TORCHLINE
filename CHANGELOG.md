@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Story-first README
+
+- Replaced the engineering-heavy entry page with a plain-language game introduction, two real opening choices, a viewer-contribution example, actual gameplay and optional 3D/flight-log exploration.
+- Kept setup, architecture, commands and verification in expandable sections. Added two Mermaid diagrams and clear links to current evidence; real Twitch/OBS/raid gates remain explicit.
+- Extended repository checks to cover HTML image/link references. Added deterministic README proof regeneration and drift checks to CI without new runtime dependencies.
+- Local production build/typecheck, format, repository links, negative missing-image check, media structure/duration, reduced-motion selection and staged credential scan pass. Full source CI is tracked separately; the previously reported run 40737973250 failed at npm bootstrap with ECONNRESET, and newer source f1a8d4c already passed the complete suite.
+
 ## 2026-10-29 — Inspectable README media
 
 - Created original hero artwork and icons, a handoff illustration, actual saved-simulation footage and a native GitHub 3D export of the game vessel. Preserved simulation/pending-live labels and reduced-motion stills; raw captures remain ignored.
