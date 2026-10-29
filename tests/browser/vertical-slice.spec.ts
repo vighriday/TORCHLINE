@@ -111,6 +111,20 @@ test('cooperative play, save/reload, read-only overlay and consented simulated c
   await expect(target.getByRole('region', { name: 'Incoming Ark preview' })).toContainText(
     'frozen Ark on offer',
   );
+  for (const size of [
+    { width: 1280, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await target.setViewportSize(size);
+    expect(await target.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await target.screenshot({
+      path: `.local/screenshots/handoff-preview-${size.width}.png`,
+      fullPage: true,
+    });
+  }
+  await target.setViewportSize({ width: 1280, height: 900 });
   await target.getByRole('button', { name: 'Accept inherited Ark' }).click();
   await expect(target.locator('[data-system=navigation]')).toHaveAttribute(
     'data-condition',

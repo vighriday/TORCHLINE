@@ -4,7 +4,12 @@ import type { Command, ResourceId, WorldPresentation } from '@torchline/contract
 import { ArkView } from './ArkView.tsx';
 import { ChallengeView } from './ChallengeView.tsx';
 import { CooperationView, EpisodeSettings, PhaseClock } from './EpisodeView.tsx';
-import { EncounterLayer, CrewUplink, encounterObjectives } from './EncounterLayer.tsx';
+import {
+  EncounterLayer,
+  CrewUplink,
+  SectorLocator,
+  encounterObjectives,
+} from './EncounterLayer.tsx';
 
 const chapters = [
   'Awaiting launch',
@@ -230,15 +235,18 @@ export function FlightDeck({
     >
       <div className="flight-nebula" aria-hidden="true" />
       <EncounterLayer world={world} readonly={readonly} />
-      <ArkView
-        key={`flight:${world.worldId}`}
-        systems={world.systems}
-        resources={world.resources}
-        chapter={world.chapter}
-        events={world.events}
-        variant="flight"
-        readOnly={readonly}
-      />
+      <div className="flight-vessel">
+        <ArkView
+          key={`flight:${world.worldId}`}
+          systems={world.systems}
+          resources={world.resources}
+          chapter={world.chapter}
+          events={world.events}
+          variant="flight"
+          readOnly={readonly}
+        />
+        <SectorLocator chapter={world.chapter} />
+      </div>
       <header className="flight-heading">
         <div className="chapter-pips" aria-label={`Chapter ${world.chapter} of five`}>
           {[1, 2, 3, 4, 5].map((n) => (
@@ -256,21 +264,23 @@ export function FlightDeck({
             : 'A colony ship. An uncertain future. A community at the controls.'}
         </p>
       </header>
-      <aside className="flight-captain">
-        <span className="captain-avatar" aria-hidden="true">
-          {world.host.slice(0, 1).toUpperCase()}
-        </span>
-        <div>
-          <span>CAPTAIN</span>
-          <strong>{world.host}</strong>
-          <small>
-            {world.participantCount} contributors ·{' '}
-            {world.mode === 'simulation' ? 'SIMULATION' : 'TWITCH WORLD'}
-          </small>
+      <div className="flight-status">
+        <aside className="flight-captain">
+          <span className="captain-avatar" aria-hidden="true">
+            {world.host.slice(0, 1).toUpperCase()}
+          </span>
+          <div>
+            <span>CAPTAIN</span>
+            <strong>{world.host}</strong>
+            <small>
+              {world.participantCount} contributors ·{' '}
+              {world.mode === 'simulation' ? 'SIMULATION' : 'TWITCH WORLD'}
+            </small>
+          </div>
+        </aside>
+        <div className="flight-clock">
+          <PhaseClock world={world} compact />
         </div>
-      </aside>
-      <div className="flight-clock">
-        <PhaseClock world={world} compact />
       </div>
       <Vitals world={world} />
       {world.outcome ? (

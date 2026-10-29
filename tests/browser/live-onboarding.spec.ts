@@ -4,6 +4,43 @@ import { authorize, liveConfig, providerFixture } from '../twitch-provider.ts';
 import { createApp } from '../../apps/server/src/app.ts';
 import { disclose } from './ui.ts';
 
+test('anonymous Twitch launch and bot setup stay separate on phone and tablet', async ({ page }) =>
+  database(async (store) => {
+    const baseUrl = 'http://localhost:3101',
+      config = { ...liveConfig, baseUrl };
+    const provider = providerFixture(config);
+    const app = await createApp(store, config, { workers: false, fetcher: provider.fetcher });
+    provider.attach(app);
+    await app.listen({ port: 3101, host: '127.0.0.1' });
+    try {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(baseUrl);
+      await expect(page.locator('.title-screen')).toBeVisible();
+      for (const size of [
+        { width: 390, height: 844 },
+        { width: 820, height: 1180 },
+      ]) {
+        await page.setViewportSize(size);
+        for (const open of [false, true]) {
+          if (open) await disclose(page, '.title-access .title-accounts');
+          const bounds = await page.evaluate(() => {
+            const launch = document.querySelector('.title-launch')!.getBoundingClientRect();
+            const access = document.querySelector('.title-access')!.getBoundingClientRect();
+            return {
+              separate: launch.bottom <= access.top,
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            };
+          });
+          expect(bounds).toEqual({ separate: true, overflow: false });
+        }
+        await page.locator('.title-access .title-accounts > summary').click();
+      }
+    } finally {
+      await page.goto('about:blank');
+      await app.close();
+    }
+  }));
+
 test('operator bot setup confirms the named account and converts an accidental creator without a disconnect loop', async ({
   page,
   context,

@@ -51,19 +51,6 @@ export function EncounterLayer({
         <div className="encounter-orbit orbit-one" />
         <div className="encounter-orbit orbit-two" />
       </div>
-      <div
-        className="sector-locator"
-        aria-label={`Current sector: ${encounterNames[world.chapter]}`}
-      >
-        <span className="locator-cross" aria-hidden="true">
-          ⌖
-        </span>
-        <span>
-          SECTOR {String(world.chapter).padStart(2, '0')}
-          <b>{encounterNames[world.chapter]}</b>
-        </span>
-        <i aria-hidden="true" />
-      </div>
       {arrival !== null && (
         <section
           className="encounter-transmission"
@@ -78,6 +65,21 @@ export function EncounterLayer({
         </section>
       )}
     </>
+  );
+}
+
+export function SectorLocator({ chapter }: { chapter: number }) {
+  return (
+    <div className="sector-locator" aria-label={`Current sector: ${encounterNames[chapter]}`}>
+      <span className="locator-cross" aria-hidden="true">
+        ⌖
+      </span>
+      <span>
+        SECTOR {String(chapter).padStart(2, '0')}
+        <b>{encounterNames[chapter]}</b>
+      </span>
+      <i aria-hidden="true" />
+    </div>
   );
 }
 

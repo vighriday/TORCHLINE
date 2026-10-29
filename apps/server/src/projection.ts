@@ -73,6 +73,7 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
     ...(world.clock
       ? {
           clock: {
+            durations: world.clock.durations,
             deadlineAt: world.clock.deadline_at?.toISOString() ?? null,
             remainingMs: world.clock.remaining_ms,
             serverAt: new Date().toISOString(),

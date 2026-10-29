@@ -142,7 +142,25 @@ export function EpisodeSettings({
 }) {
   const [budget, setBudget] = useState(world.cooperation?.budget ?? 0);
   const [investigation, setInvestigation] = useState(world.cooperation?.investigation ?? false);
-  const [timed, setTimed] = useState(true);
+  const savedDurations = world.clock?.durations;
+  const savedTiming = savedDurations
+    ? Object.values(savedDurations).every((v) => v === null)
+      ? 'manual'
+      : savedDurations.investigation === 30 &&
+          savedDurations.challenge === 90 &&
+          savedDurations.allocation === 45 &&
+          savedDurations.decision === 60
+        ? 'timed'
+        : 'custom'
+    : 'timed';
+  const [timing, setTiming] = useState(savedTiming);
+  useEffect(() => {
+    setBudget(world.cooperation?.budget ?? 0);
+    setInvestigation(world.cooperation?.investigation ?? false);
+  }, [world.worldId, world.phase, world.cooperation?.budget, world.cooperation?.investigation]);
+  useEffect(() => {
+    setTiming(savedTiming);
+  }, [world.worldId, world.phase, savedTiming]);
   if (!world.cooperation || !world.capabilities.canStart) return null;
   return (
     <section className="panel episode-settings">
@@ -185,23 +203,25 @@ export function EpisodeSettings({
       <div className="buttons">
         <label>
           Next chapter timing
-          <select
-            value={timed ? 'timed' : 'manual'}
-            onChange={(e) => setTimed(e.target.value === 'timed')}
-          >
-            <option value="timed">Timed · 30s / 90s / 45s / 60s</option>
-            <option value="manual">Manual · captain closes each window</option>
+          <select value={timing} onChange={(e) => setTiming(e.target.value)}>
+            <option value="timed">Timed · automatic countdowns</option>
+            <option value="manual">Manual · no countdown</option>
+            {savedTiming === 'custom' && <option value="custom">Custom · keep saved timing</option>}
           </select>
         </label>
         <button
           disabled={busy}
           onClick={() =>
-            onTiming({
-              investigation: timed ? 30 : null,
-              challenge: timed ? 90 : null,
-              allocation: timed ? 45 : null,
-              decision: timed ? 60 : null,
-            })
+            onTiming(
+              timing === 'custom' && savedDurations
+                ? savedDurations
+                : {
+                    investigation: timing === 'timed' ? 30 : null,
+                    challenge: timing === 'timed' ? 90 : null,
+                    allocation: timing === 'timed' ? 45 : null,
+                    decision: timing === 'timed' ? 60 : null,
+                  },
+            )
           }
         >
           Save timing

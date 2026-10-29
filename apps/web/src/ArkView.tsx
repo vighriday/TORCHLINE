@@ -289,9 +289,14 @@ export function ArkView({
         {!readOnly && (
           <button
             className="quiet"
+            disabled={eligible === false}
             aria-pressed={cinematic}
             onClick={() => {
-              const next = !cinematic;
+              const next = failed ? true : !cinematic;
+              if (next) {
+                setFailed(false);
+                setReady(false);
+              }
               setCinematic(next);
               try {
                 localStorage.setItem('torchline.visual', next ? 'cinematic' : 'schematic');
@@ -300,7 +305,13 @@ export function ArkView({
               }
             }}
           >
-            {cinematic ? 'Use schematic view' : 'Use cinematic view'}
+            {eligible === false
+              ? 'Simplified ship view'
+              : failed
+                ? 'Retry 3D view'
+                : cinematic
+                  ? 'Use schematic view'
+                  : 'Use cinematic view'}
           </button>
         )}
       </div>
@@ -326,6 +337,7 @@ export function ArkView({
                 <span
                   key={system.id}
                   className={`ship-anchor condition-${system.condition}`}
+                  style={{ color: conditionColor(system), borderColor: conditionColor(system) }}
                   data-anchor={system.id}
                   hidden
                 >
@@ -336,6 +348,7 @@ export function ArkView({
                 <button
                   key={system.id}
                   className={`ship-anchor condition-${system.condition}`}
+                  style={{ color: conditionColor(system), borderColor: conditionColor(system) }}
                   data-anchor={system.id}
                   hidden
                   aria-label={`Inspect ${systemLabels[system.id]}`}

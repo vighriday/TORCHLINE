@@ -51,7 +51,7 @@ export function DeckNav({
 }
 export function ResourceMeters({ world }: { world: WorldPresentation }) {
   const limits: Record<ResourceId, number> = {
-    passengers: 180,
+    passengers: 216,
     hull: 100,
     power: 100,
     oxygen: 100,

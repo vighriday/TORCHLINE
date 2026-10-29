@@ -12,6 +12,7 @@ import type { Workspace } from './DeckViews.tsx';
 import './styles.css';
 import './game.css';
 import './encounter.css';
+import './hud-layout.css';
 
 function App() {
   const overlayChannel = location.pathname.match(/^\/overlay\/([^/]+)\//)?.[1];
@@ -764,6 +765,12 @@ function App() {
                         {data.integration.details.botReplies.failed} failed,{' '}
                         {data.integration.details.botReplies.uncertain} uncertain.
                       </p>
+                      {data.integration.botRepliesEnabled === false && (
+                        <p className="muted">
+                          Automatic replies are paused by the operator. Chat commands still control
+                          the game; follow their results on the Ark and overlay.
+                        </p>
+                      )}
                       {data.integration.details.lastBotReply && (
                         <p
                           role={

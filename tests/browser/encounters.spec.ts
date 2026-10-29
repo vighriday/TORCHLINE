@@ -55,6 +55,7 @@ test('encounter motion, ship inspection and relay interaction use real saved sta
         .toBeGreaterThan(frames + 8);
       const second = await page.locator('.scene-ready canvas').screenshot();
       expect(Buffer.compare(first, second)).not.toBe(0);
+      await page.screenshot({ path: '.local/screenshots/flight-live-3d.png', fullPage: true });
       const before = await store.get(id);
       const inspect = page.getByRole('button', { name: 'Inspect Navigation', exact: true });
       await expect(inspect).toBeVisible();
@@ -79,6 +80,17 @@ test('encounter motion, ship inspection and relay interaction use real saved sta
       );
       await expect(page.locator('.cinematic-consequence')).toHaveCount(0);
       await expect(page.getByText('A · Discovered', { exact: true })).toBeVisible();
+      // A transient graphics loss must offer a working retry, not a dead view toggle.
+      const beforeGraphicsRetry = (await store.get(id)).state;
+      await expect(page.locator('.scene-ready canvas')).toHaveCount(1, { timeout: 45000 });
+      await page
+        .locator('canvas')
+        .evaluate((canvas) =>
+          canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true })),
+        );
+      await page.getByRole('button', { name: 'Retry 3D view', exact: true }).click();
+      await expect(page.locator('.scene-ready canvas')).toHaveCount(1, { timeout: 45000 });
+      expect((await store.get(id)).state).toEqual(beforeGraphicsRetry);
       // UI-only live projection fixture: exercises the chat destination, not real Twitch consent/delivery.
       const snapshot = await page.evaluate(() => fetch('/api/state').then((r) => r.json()));
       snapshot.mode = 'live';

@@ -9,14 +9,14 @@ export const systemLabels: Record<SystemId, string> = {
   reactor: 'Reactor',
 };
 export const conditionColor = (system: ShipSystem) =>
-  system.condition === 'destroyed'
+  system.condition === 'destroyed' || system.integrity <= 25
     ? '#f57865'
     : system.condition === 'sealed'
       ? '#d5bc72'
-      : ['repaired', 'jury-rigged'].includes(system.condition)
-        ? '#8fdce4'
-        : system.integrity < 60
-          ? '#ffc873'
+      : system.integrity < 60
+        ? '#ffc873'
+        : ['repaired', 'jury-rigged'].includes(system.condition)
+          ? '#8fdce4'
           : '#abb8c2';
 // Stable placement from canonical event IDs; reload and custody changes preserve scars.
 export function markSeed(eventId: string): number {

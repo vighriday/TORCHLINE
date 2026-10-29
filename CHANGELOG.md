@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-29 — Gameplay layout and saved controls
+
+- Replace competing screen offsets with reserved heading, status, vessel, resource, mission and footer regions. Preserve Claude Design's artwork, encounter effects, real game state and handlers. Fix mobile title/setup overlap, utility-page alignment and the 1080p OBS footer; captain content can scroll instead of hiding controls.
+- Restore saved Manual/custom timing without overwriting unrelated drafts; keep passenger capacity and damaged-system warnings consistent. Make graphics retry actually rebuild the scene and label unavailable 3D accurately.
+- Review 145 captures across 29 states/five sizes, eight actual-public title/setup captures, native OBS and incoming-world previews. Add region collision/hit-target, saved-policy, graphics recovery and all-three-ending replay checks. Local build, 107 tests and all 14 browser journeys pass; fixtures remain separate from genuine Twitch gameplay/raid evidence. Record ADR 0030 and the visual review.
+
 ## 2026-10-29 — Independent replies and bounded database recovery
 
 - Add an operator pause for outgoing bot replies while signed incoming chat, canonical gameplay and read-only overlays continue. Preserve the dedicated bot, grants, scopes and native custody requirements; paused/uncertain sends are not presented as delivered chat.

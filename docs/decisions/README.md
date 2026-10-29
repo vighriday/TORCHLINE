@@ -32,6 +32,8 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0026](0026-versioned-preview-releases.md) | Aligned private app versions, explicit preview tags, release notes and source verification | Release metadata, all C1–C13 |
 | [0027](0027-recover-participation-and-overlay.md) | Durable chat-loss pause, admitted-work drain and read-only overlay reconnection | Recovery, all C1–C13 |
 | [0028](0028-local-revocation-and-bot-diagnostics.md) | Session-scoped self-revocation and honest private bot outcomes | Identity/observability, all C1–C13 |
+| [0029](0029-independent-replies-and-database-budgets.md) | Independent outbound replies and bounded runtime/maintenance database work | Reliability/operations, all C1–C13 |
+| [0030](0030-spatial-hud-and-saved-controls.md) | Reserved game UI regions, saved pacing and working graphics recovery | Presentation/reliability, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

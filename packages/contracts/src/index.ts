@@ -210,6 +210,7 @@ export interface WorldPresentation {
     closed: boolean;
   };
   clock?: {
+    durations?: Record<'investigation' | 'challenge' | 'allocation' | 'decision', number | null>;
     deadlineAt: string | null;
     remainingMs: number | null;
     serverAt: string;

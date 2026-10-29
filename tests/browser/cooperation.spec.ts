@@ -31,6 +31,24 @@ test('designed cooperation, exact allocation forecasts and frozen advice work on
       await page.getByLabel('Repair reserve').fill('5');
       await page.getByLabel('Investigate a shared clue').check();
       await page.getByRole('button', { name: 'Save crew settings' }).click();
+      await page.getByLabel('Next chapter timing').selectOption('manual');
+      await page.getByRole('button', { name: 'Save timing', exact: true }).click();
+      await expect
+        .poll(async () => (await store.active('sim-alpha'))?.clock?.durations.challenge)
+        .toBeNull();
+      await page.reload();
+      await disclose(page, '.episode-configuration');
+      await expect(page.getByLabel('Next chapter timing')).toHaveValue('manual');
+      // An operator-defined mixed policy must survive a browser reload/save unchanged.
+      const custom = { investigation: null, challenge: null, allocation: null, decision: 120 };
+      const worldId = (await store.active('sim-alpha'))!.id;
+      const { configureEpisode } = await import('@torchline/storage');
+      await configureEpisode(store, (await store.creator('sim-alpha'))!, worldId, custom);
+      await page.reload();
+      await disclose(page, '.episode-configuration');
+      await expect(page.getByLabel('Next chapter timing')).toHaveValue('custom');
+      await page.getByRole('button', { name: 'Save timing', exact: true }).click();
+      await expect.poll(async () => (await store.get(worldId)).clock?.durations).toEqual(custom);
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
       await expect(
         page.getByRole('heading', { name: 'Choose where the crew investigates' }),

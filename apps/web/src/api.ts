@@ -17,6 +17,7 @@ export interface DashboardSnapshot {
   integration: {
     credentialsConfigured: boolean;
     botAuthorized: boolean;
+    botRepliesEnabled?: boolean;
     publicHttps: boolean;
     genuineRaidVerified: boolean;
     details?: TwitchIntegrationStatus;
