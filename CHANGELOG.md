@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-29 — Bot-account checks completed
+
+- Owner confirmed the correct bot profile, verified email and no block in either direction between broadcaster and bot. Manual Twitch messages still fail cross-account delivery. The underlying provider/account/channel cause remains unproven; visible bot acceptance remains open.
+- Completed the private support draft and updated the current owner action to Twitch support, retaining exact provider timestamps/IDs privately. No request, new chat, wider permission, role change, reset or application fix was sent or claimed.
+
 ## 2026-10-29 — Manual chat delivery control
 
 - Owner manually sent as the dedicated bot in Twitch and confirmed the message is absent from the broadcaster's view. The missing-delivery problem also occurs outside TORCHLINE's send code; no account/channel/provider cause is yet proven. The independent observer's earlier automatic-reply test remains separate from this owner-observed manual result.
