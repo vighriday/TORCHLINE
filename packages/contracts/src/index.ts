@@ -237,6 +237,7 @@ export interface TwitchIntegrationStatus {
   lastReconciledAt: string | null;
   reconcileError: string | null;
   botReplies: { pending: number; sent: number; failed: number; uncertain: number };
+  lastBotReply?: { status: string; code: string | null; at: string } | null;
   subscriptions: { type: string; status: string; current: boolean; providerConfirmed: boolean }[];
   deliveries: {
     challenge: number;

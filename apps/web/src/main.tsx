@@ -764,6 +764,24 @@ function App() {
                         {data.integration.details.botReplies.failed} failed,{' '}
                         {data.integration.details.botReplies.uncertain} uncertain.
                       </p>
+                      {data.integration.details.lastBotReply && (
+                        <p
+                          role={
+                            data.integration.details.lastBotReply.status === 'failed'
+                              ? 'status'
+                              : undefined
+                          }
+                        >
+                          Latest bot reply: {data.integration.details.lastBotReply.status}
+                          {data.integration.details.lastBotReply.code &&
+                            ` · ${data.integration.details.lastBotReply.code}`}
+                          .
+                          {data.integration.details.lastBotReply.code === 'msg_rejected' &&
+                            ' Twitch rejected the message. Check that the bot account can chat in this channel and complete any Twitch verification or rules prompt. Existing failed replies are not resent.'}
+                          {data.integration.details.lastBotReply.status === 'sent' &&
+                            ' Twitch accepted the send; confirm the reply is visible in chat.'}
+                        </p>
+                      )}
                       {data.integration.details.inbox && (
                         <p>
                           Input recovery: {data.integration.details.inbox.pending} pending ·{' '}

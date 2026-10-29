@@ -31,6 +31,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0025](0025-readme-experience.md) | Story-led README, real gameplay media, native GitHub inspection and replay-checked examples | Documentation tooling, all C1–C13 |
 | [0026](0026-versioned-preview-releases.md) | Aligned private app versions, explicit preview tags, release notes and source verification | Release metadata, all C1–C13 |
 | [0027](0027-recover-participation-and-overlay.md) | Durable chat-loss pause, admitted-work drain and read-only overlay reconnection | Recovery, all C1–C13 |
+| [0028](0028-local-revocation-and-bot-diagnostics.md) | Session-scoped self-revocation and honest private bot outcomes | Identity/observability, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

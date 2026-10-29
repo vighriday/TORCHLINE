@@ -184,6 +184,16 @@ it('enforces global bot pacing across channels and marks provider-dropped messag
         (await store.pool.query("SELECT outcome_code FROM bot_replies WHERE status='failed'"))
           .rows[0].outcome_code,
       ).toBe('automod_held');
+      const status = (await app.inject({ url: '/api/twitch/status', headers: b.headers })).json();
+      expect(status.lastBotReply).toMatchObject({ status: 'failed', code: 'automod_held' });
+      expect(status.lastBotReply).not.toHaveProperty('body');
+      expect(status.lastBotReply).not.toHaveProperty('provider_message_id');
+      await store.pool.query(
+        "INSERT INTO bot_replies(id,channel_id,body,status,outcome_code,created_at) VALUES('earlier-rejected','43','fixture','failed','msg_rejected',now()-interval '1 minute'),('earlier-auth','43','fixture','failed','AUTH_UNREADY',now()-interval '2 minutes')",
+      );
+      const grouped = (await app.inject({ url: '/api/twitch/status', headers: b.headers })).json();
+      expect(grouped.botReplies.failed).toBe(3);
+      expect(grouped.lastBotReply.code).toBe('automod_held');
     } finally {
       await app.close();
     }

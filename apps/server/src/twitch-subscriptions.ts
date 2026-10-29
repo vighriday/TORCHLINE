@@ -450,11 +450,13 @@ export function twitchSubscriptions(
     ).rows[0];
     const replies = (
       await store.pool.query(
-        'SELECT status,count(*)::integer AS count FROM bot_replies WHERE channel_id=$1 GROUP BY status',
+        'SELECT status,outcome_code,max(created_at) AS latest_at,count(*)::integer AS count FROM bot_replies WHERE channel_id=$1 GROUP BY status,outcome_code',
         [channel],
       )
     ).rows;
-    const replyCount = (status: string) => replies.find((row) => row.status === status)?.count ?? 0;
+    const replyCount = (status: string) =>
+      replies.filter((row) => row.status === status).reduce((sum, row) => sum + row.count, 0);
+    const lastReply = replies.sort((a, b) => b.latest_at.getTime() - a.latest_at.getTime())[0];
     const ready = (type: string) =>
       subscriptions.some(
         (sub) =>
@@ -484,6 +486,13 @@ export function twitchSubscriptions(
         failed: replyCount('failed'),
         uncertain: replyCount('uncertain'),
       },
+      lastBotReply: lastReply
+        ? {
+            status: lastReply.status,
+            code: lastReply.outcome_code,
+            at: lastReply.latest_at.toISOString(),
+          }
+        : null,
       subscriptions,
       deliveries: {
         challenge: count('challenge'),

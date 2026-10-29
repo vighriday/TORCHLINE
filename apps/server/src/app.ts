@@ -176,7 +176,7 @@ export async function createApp(
     if (request.headers['x-torchline-request'] !== '1')
       denied('FORBIDDEN', 'A same-origin application request is required.');
   });
-  const currentCreator = async (request: FastifyRequest): Promise<Creator> => {
+  const sessionCreator = async (request: FastifyRequest): Promise<Creator> => {
     const token = request.cookies[SessionCookie];
     if (!token) return denied('UNAUTHENTICATED', 'Connect a creator account first.');
     const session = (
@@ -187,6 +187,10 @@ export async function createApp(
     ).rows[0];
     if (!session || session.mode !== config.mode || !session.connected)
       return denied('UNAUTHENTICATED', 'The session ended. Reconnect the creator account.');
+    return session;
+  };
+  const currentCreator = async (request: FastifyRequest): Promise<Creator> => {
+    const session = await sessionCreator(request);
     if (
       config.mode === 'live' &&
       !(
@@ -645,7 +649,8 @@ export async function createApp(
     return subscriptions.status(creator.id);
   });
   app.post('/api/twitch/disconnect', async (request, reply) => {
-    const creator = await currentCreator(request);
+    // A valid local session may revoke its own access even when provider validation is stale.
+    const creator = await sessionCreator(request);
     if (config.mode !== 'live') denied('MODE_MISMATCH', 'Use logout for a simulation session.');
     const grant = (
       await store.pool.query("SELECT encrypted FROM oauth_grants WHERE id=$1 AND role='creator'", [

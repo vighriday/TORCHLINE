@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0028](../decisions/0028-local-revocation-and-bot-diagnostics.md) checks session-only self-revocation and private bot-result diagnostics across C1–C13. Fresh Twitch authority remains required elsewhere; native send rejection and genuine visible reply evidence stay distinct.
+
 [ADR 0027](../decisions/0027-recover-participation-and-overlay.md) reviews audit recovery fixes across C1–C13: durable participation cutoff, admitted-input drain and explicit resume, plus capability-scoped read/feed recovery. Its executed SQL/provider-fixture/browser evidence does not establish actual OBS or native Twitch outage acceptance.
 
 [ADR 0026](../decisions/0026-versioned-preview-releases.md) reviews aligned app versions and explicit source prereleases across C1–C13. Application release labels remain independent of rules, schemas, migrations, world revisions and genuine live acceptance.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-29 — Consent recovery and bot-result diagnostics
+
+- Fix A06: an unexpired same-origin creator session can disconnect its own stale Twitch grant; local cleanup succeeds even if provider revocation fails. Gameplay, custody and private diagnostics still require fresh Twitch authorization. A real-PostgreSQL regression verifies denial boundaries, preserved world and unaffected second creator.
+- Show the latest native bot outcome in private Broadcast diagnostics, without chat bodies or provider message identifiers. Preserve accurate totals across different failure codes and distinguish accepted sends from observed chat visibility.
+- The first genuine signed chat delivery was observed at 09:21 UTC. The bot request reached Twitch but was explicitly rejected with `msg_rejected`; the owner observed no reply. Ordinary public chat restrictions are off. Account-level cause and visible reply acceptance remain unverified; no moderator escalation, bot role change or automatic resend was performed.
+
 ## 2026-10-29 — Audit recovery fixes
 
 - Address A02 with durable chat-loss interruption: freeze the deadline, reject post-cutoff input, drain admitted work, record one replayable pause across restart and require repaired chat before deliberate resume. Waiting on admitted work does not consume the interruption's retry budget. Internal work cannot become Twitch evidence.
