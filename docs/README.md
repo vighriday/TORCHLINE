@@ -1,6 +1,6 @@
 # Documentation
 
-**Latest acceptance record: [October 29 critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [sanitized evidence](reviews/2026-10-29-audit-evidence.json).** The saved game is substantial; genuine chat/OBS/raid acceptance and production deployment are incomplete. New recovery defects and one intermittent browser failure are reproduced. Earlier reports below retain their dated milestone results.
+**Latest: [October 29 recovery/live follow-up](reports/2026-10-29-recovery-and-live-acceptance.md).** Recovery fixes pass 102 tests and twelve browser journeys; public HTTPS/grants/subscriptions validate and genuine chat arrives. Twitch rejected the bot reply; applied chat, visible replies, actual OBS, native raid and production deployment remain incomplete. The [critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [audit evidence](reviews/2026-10-29-audit-evidence.json) retain their historical findings; the follow-up maps fixes and outstanding gates.
 
 Research checked **2026-10-26**. Architecture is approved and the first gameplay foundation is implemented. [Implementation status](planning/implementation-status.md) distinguishes tested local behavior from the wider target and external verification. Delivery follows dependencies and measured progress without assumed staffing or fixed development hours.
 
@@ -32,6 +32,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
 | [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
 | [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |
+| [Existing-account live test](operations/controlled-account-live-test.md) | Verify chat/gameplay/OBS now with hriday29 + hriday_29; add a second broadcaster only for the authentic raid |
 | [October 28 release readiness](reports/2026-10-28-release-readiness.md) | Executed reliability/security/container evidence and remaining external release gates |
 | [Design integration review](design/integration-review.md) | Six-surface mapping, excluded prototype logic and thirteen-component stress review |
 | [Encounter presentation review](design/encounter-review.md) | Actual encounter motion, persistent ship inspection, relay interaction, recording and honest visual/native limits |

@@ -39,12 +39,19 @@ try {
         [baseline.since],
       )
     ).rows[0];
+    const botOutcomes = (
+      await store.pool.query(
+        'SELECT status,outcome_code AS code,count(*)::integer AS count FROM bot_replies WHERE created_at>$1 GROUP BY status,outcome_code ORDER BY status,outcome_code',
+        [baseline.since],
+      )
+    ).rows;
     const report = {
       generatedAt: identity.at.toISOString(),
       since: baseline.since,
       source:
         'Read-only counters in the separate live database since the explicit baseline; no fixture provider or synthetic notification sent.',
       counts,
+      botOutcomes,
       manualEvidenceRequired: [
         'Actual chat reply visibility',
         'Actual OBS CEF render/reconnect',

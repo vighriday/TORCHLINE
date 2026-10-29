@@ -31,7 +31,7 @@ You can play the whole journey on one channel. Or pass the same Ark to another s
 
 > **Where we are:** the full journey works in a saved practice game. Twitch sign-in, event connections and the public game screen have been checked. Real chat gameplay, visible bot replies, OBS and the two-streamer raid test still need live confirmation. [Evidence and next steps](#what-works-today).
 
-> **October 29 audit:** the saved game is real; the complete live experience is unfinished. The preview is currently offline, and new checks found recovery issues plus an intermittent browser failure. [Read the candid audit and completion plan](docs/reviews/2026-10-29-comprehensive-audit.md).
+> **October 29 follow-up:** the preview is back online, recovery fixes pass, and real chat reaches TORCHLINE. Twitch rejected the first bot reply; live gameplay, OBS and the native raid still need proof. [Current results and next steps](docs/reports/2026-10-29-recovery-and-live-acceptance.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md).
 
 ## Make the first choice
 

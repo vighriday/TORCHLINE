@@ -36,6 +36,8 @@
     "live:ssh:prepare": "node scripts/tunnel-ssh.ts --prepare",
     "live:ssh": "node --env-file=.env.live scripts/tunnel-ssh.ts",
     "live:acceptance": "node --env-file=.env.live scripts/live-acceptance.ts",
+    "live:up": "node --env-file=.env.live scripts/live-session.ts up",
+    "live:check": "node --env-file=.env.live scripts/live-session.ts check",
     "twitch:verify:overlay": "node --env-file=.env.live scripts/verify-overlay.ts",
     "backup:prepare": "node scripts/backup.ts prepare",
     "backup:create": "node --env-file=.env.live scripts/backup.ts create",

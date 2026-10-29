@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Existing-account live preparation
+
+- Added `live:up` / `live:check` for the existing local live database, app and registered strict SSH setup. Preserve credentials/acceptance baseline; never kill unknown processes, send chat or manufacture native proof. Read-only acceptance reports now include grouped bot outcomes.
+- Restored public HTTPS, refreshed existing grants through normal lifecycle, verified exact 3/3 subscriptions and public Chromium overlay rendering of the preserved live Ark. Native counters show two signed chats, zero applied actions, one `msg_rejected` send and no native raid. Actual OBS remains unverified.
+- Rewrote current owner guidance around the existing broadcaster/bot, corrected the retired callback and stale no-Ark copy, and documented the precise account test, phase-valid gameplay, OBS and later second-broadcaster raid. No third account is required for chat/OBS; bot/custody requirements remain intact.
+- Added the audit follow-up report with 102 passing automated tests, twelve passing browser journeys, an authenticated actual-live backup/scratch restore and ten-response public secret scan. Permanent hosting, native acceptance and outstanding audit risks remain explicit.
+
 ## 2026-10-29 — Consent recovery and bot-result diagnostics
 
 - Fix A06: an unexpired same-origin creator session can disconnect its own stale Twitch grant; local cleanup succeeds even if provider revocation fails. Gameplay, custody and private diagnostics still require fresh Twitch authorization. A real-PostgreSQL regression verifies denial boundaries, preserved world and unaffected second creator.

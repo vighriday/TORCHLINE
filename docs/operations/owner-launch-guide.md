@@ -1,18 +1,19 @@
 # Get TORCHLINE operational with Twitch
 
-Updated 2026-10-28. For the configured accounts start with the shorter [live release checklist](live-release-checklist.md), including current SSH recovery and exact remaining steps. OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub delivers signed events to the server. You do not need manual tokens or a Twitch Extension.
+Updated 2026-10-29. For the configured accounts start with the [existing-account live test](controlled-account-live-test.md) and shorter [live release checklist](live-release-checklist.md). OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub delivers signed events to the server. You do not need manual tokens or a Twitch Extension.
 
 ## Your current starting point
 
 | Stage | Evidence and next action |
 | --- | --- |
 | Developer application and credentials | Already configured locally. Keep the existing app and secret; do not create another app just for the bot. |
-| October 28 provider/public recheck | The real app, broadcaster/bot grants and all three exact subscriptions validate. Public HTTPS health/deny/secret probes and Chromium read-only overlay connectivity pass. |
+| October 29 provider/public recheck | Public HTTPS restored through existing strict SSH; both grants refreshed by normal startup and all three exact chat/online/offline subscriptions validate. |
 | Broadcaster | `hriday29` previously completed real creator consent. Recheck the displayed account after sign-in. |
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
 | Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev`. Callback mismatch is corrected; fresh real creator sign-in and first live Ark are observed. Native ngrok remains unused. Simulation stays on 3000. |
-| Real gameplay chat, visible bot output, actual OBS, native raid | Implemented paths with local tests; owner-operated acceptance is still required. |
+| Real chat | First signed query delivered October 29. Bot send reached Twitch but was rejected with `msg_rejected`; visible reply and applied gameplay remain pending. |
+| Actual OBS / native raid | Not passed. Use existing two accounts for chat/OBS; a separate consenting broadcaster is needed only for raid acceptance later. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 
 ## 1. Keep the two Twitch accounts separate
@@ -36,27 +37,14 @@ pnpm db:migrate:live
 pnpm build
 ```
 
-Do not run a second server if port 3001 is already in use by TORCHLINE. Otherwise start it in a terminal that stays open:
+Bring up or reuse the existing local live process and pinned SSH tunnel, then check them:
 
 ```powershell
-pnpm start:live
+pnpm live:up
+pnpm live:check
 ```
 
-The credential is already configured as `NGROK_AUTHTOKEN` in ignored `.env.live`. On a fresh machine, obtain it from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken) and add it locally; never paste it into chat or Git. Start the tunnel in another terminal:
-
-```powershell
-pnpm live:tunnel
-```
-
-If ngrok reports ERR_NGROK_320, the hostname belongs to another account. Request this account's assigned origin, then adopt it only after the live health check succeeds:
-
-```powershell
-pnpm live:tunnel --assigned-domain
-# In another terminal after the endpoint is printed:
-pnpm live:origin
-```
-
-The helper disables request inspection and keeps credentials out of arguments/logs. After adopting a different origin, restart only the live service, add the printed exact redirect in Twitch and use the same origin in stages 3–5. Existing grants remain valid; browser sessions/OBS URLs must be established on the new origin.
+The project's SSH public key is already registered. `live:up` checks the build/database/migration, starts missing local live and SSH processes and reuses healthy services. It never kills an unknown process, replaces credentials or changes the acceptance baseline. Private logs/PIDs stay under `.local/`. It uses the already installed Windows SSH client, not the quarantined ngrok executable. For a new machine, follow [SSH key setup](live-release-checklist.md#1-restore-public-https). Exit 2 from `live:check` means some live acceptance evidence is still pending; inspect the individual results.
 
 **Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE with **TWITCH MODE · LIVE VERIFICATION PENDING**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
 
@@ -73,7 +61,7 @@ Open the [Twitch developer console](https://dev.twitch.tv/console/apps), select 
 | Client type | Confidential; credentials stay on our server |
 | OAuth Redirect URL | `https://YOUR_ORIGIN/auth/twitch/callback` |
 
-For the current development domain the exact redirect is `https://snaggy-farah-raspily.ngrok-free.dev/auth/twitch/callback`. Add/save it in the console. Scheme, domain, path and trailing slash must match our configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
+For the current development domain the exact redirect is `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. This was corrected previously; do not reopen an old callback/error tab. Scheme, domain, path and trailing slash must match our configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
 
 Keep your existing Client ID and Client Secret unless there is a reason to rotate them. The Client ID identifies the app publicly in OAuth; the Client Secret is private. A second developer application is unnecessary for the bot.
 
@@ -134,7 +122,7 @@ Webhook URL: `https://YOUR_ORIGIN/integrations/twitch/eventsub`. It accepts auth
 
 ## 8. Verify real cooperative play and bot output
 
-1. In **Bridge**, create an Ark and choose **Start chapter 1**.
+1. In **Bridge**, use the existing live Ark. At chapter 1 **awaiting-commit**, choose your preferred consequence, then start the next chapter at the ready boundary. Create/start chapter 1 only on a fresh account with no Ark. Follow the [phase-specific live steps](controlled-account-live-test.md#2-prove-real-gameplay-without-another-account).
 2. Open that broadcaster's **actual Twitch chat**, using the ordinary Twitch site or mobile app. Send `!scan A` from a participant account. Look for the discovered clue in TORCHLINE and an increase in **chat actions applied** under Broadcast.
 3. Share scans, discover the constraints, and submit a route using `!route` followed by space-separated nodes, such as the path the crew has solved. A successful solution must change canonical resources and repair shields; reloading must preserve it.
 4. Choose **Open final decision**, then send `!vote 1`. Its advisory tally should change. The captain reviews the forecast and commits; chat votes cannot directly commit a sacrifice.

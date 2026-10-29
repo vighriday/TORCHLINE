@@ -1,10 +1,10 @@
 # Live acceptance: essential owner steps
 
-Updated 2026-10-28. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. The candidate is **automated-test verified, live acceptance pending**.
+Updated 2026-10-29. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. Start with the [existing-account walkthrough](controlled-account-live-test.md). First genuine chat reached the app; Twitch rejected the reply with `msg_rejected`. Gameplay, visible replies, actual OBS and native raid still need acceptance.
 
 ## 1. Restore public HTTPS
 
-**Completed on the current machine:** the owner registered the project public key and Windows OpenSSH restored HTTPS. Public health/readiness, authority denials, ten selected secret-response probes and the read-only Chromium overlay connection pass. No live Ark exists yet. Keep this machine and its processes awake. The native ngrok file quarantined by Windows Defender remains unused. For a later restart or new machine:
+**Completed on the current machine:** registered project SSH key restored HTTPS on October 29. Public health/readiness and authority denials pass; one existing live Ark is preserved. Run `pnpm live:up` to reuse/start the existing app/SSH setup and `pnpm live:check` for real provider checks and preserved acceptance counters. Keep this machine and its processes awake. The quarantined native ngrok file remains unused. For a new machine/key:
 
 1. Open `E:\Projects\TORCHLINE\.local\ngrok-ssh.pub` in a text editor; copy its single public-key line.
 2. In the same ngrok account open [SSH Public Keys](https://dashboard.ngrok.com/ssh-keys), Add/New key, label it TORCHLINE and paste that public line. Keep `.local/ngrok-ssh` (without `.pub`) private. The authtoken does not authenticate SSH.
@@ -35,13 +35,13 @@ A live baseline is already saved locally. Keep it, or deliberately start a new s
 
 ## 4. Prove OBS connectivity
 
-`pnpm twitch:verify:overlay` now passes against actual public HTTPS. It makes a separate five-minute read-only capability, privately exchanges it in Chromium, checks actual public SSE/mutation denial, and removes only that grant. It never rotates ordinary links or changes a world; it records no URL, screenshot or trace. This successful connection currently has no live world to render. **This is not actual OBS CEF.**
+`pnpm twitch:verify:overlay` checks actual public HTTPS. It makes a separate five-minute read-only capability, privately exchanges it in Chromium, checks actual public SSE/mutation denial, and removes only that grant. It never rotates ordinary links or changes a world; it records no URL, screenshot or trace. The existing live Ark is available to render. **This is not actual OBS CEF.**
 
 In Captain tools choose Generate / rotate OBS link. Copy the private URL. In OBS: Sources → + → Browser → TORCHLINE → paste URL; set 1280×720 or 1920×1080. Keep the URL out of chat/screenshots/Git. Confirm the actual Ark/phase/resources/challenge/damage and absence of creator controls. Apply a legal game action and observe it. Hide/show the scene, refresh the source and briefly interrupt/reconnect networking: current state must return without repeating rewards/damage. Rotate the link once, verify the old source loses access, and update OBS with the new URL.
 
 ## 5. Prove a native raid handoff
 
-Arrange **two consenting broadcasters**; access remains an external dependency. Receiver connects their account, enables Accept incoming world offers, has no active Ark and verifies its incoming raid subscription. Both must meet real Twitch live/raid requirements; TORCHLINE checks streams before preparation/acceptance.
+Arrange **two consenting broadcasters** later; this remains an external dependency and does not block existing-account tests. Keep `hriday_29` as the bot. Receiver connects their creator account, enables Accept incoming world offers, has no active Ark and verifies its incoming raid subscription. Both must meet real Twitch live/raid requirements; TORCHLINE checks streams before preparation/acceptance. See [computer/phone and OBS options](controlled-account-live-test.md#4-authentic-raid--only-when-a-second-broadcaster-is-available).
 
 At a ready chapter boundary, source prepares an offer to receiver. Perform Twitch's native raid. TORCHLINE must observe signed native evidence; receiver inspects and accepts once. Confirm the exact world/resources/physical systems/scars/history moved intact, source lost command authority and its overlay stopped showing that Ark. Duplicate notifications/acceptance must not transfer twice. Continue ordinary chapter play on receiver. Chat, simulator events or screenshots never unlock a live transfer.
 
