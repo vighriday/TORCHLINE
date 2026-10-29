@@ -1,5 +1,7 @@
 # Documentation
 
+**Latest acceptance record: [October 29 critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [sanitized evidence](reviews/2026-10-29-audit-evidence.json).** The saved game is substantial; genuine chat/OBS/raid acceptance and production deployment are incomplete. New recovery defects and one intermittent browser failure are reproduced. Earlier reports below retain their dated milestone results.
+
 Research checked **2026-10-26**. Architecture is approved and the first gameplay foundation is implemented. [Implementation status](planning/implementation-status.md) distinguishes tested local behavior from the wider target and external verification. Delivery follows dependencies and measured progress without assumed staffing or fixed development hours.
 
 ## Review sequence

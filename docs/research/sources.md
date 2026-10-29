@@ -1,5 +1,9 @@
 # Source register
 
+## October 29 audit recheck
+
+[The critical audit](../reviews/2026-10-29-comprehensive-audit.md) separates primary-document support from executed provider and isolated-test evidence. Rechecked Twitch [cloud chat authentication](https://dev.twitch.tv/docs/chat/authenticating/), [raw webhook delivery/revocation](https://dev.twitch.tv/docs/eventsub/handling-webhook-events/), [token validation](https://dev.twitch.tv/docs/authentication/validate-tokens/), [raid subscription semantics](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelraid) and [OBS Browser Source](https://obsproject.com/kb/browser-source). These still support the selected integration, not a claim of native acceptance. Devpost [rules](https://twitchcon-codex.devpost.com/rules) and [schedule](https://twitchcon-codex.devpost.com/details/dates) still publish November 2 at 14:00 PST and disagree on judging dates. Resources returned 403, so its earlier FAQ conversion was not freshly confirmed. Retain the conservative internal cutoff in the submission plan. Current real-provider/HTTPS results are dated in the audit; historical “reachable/current grant” paragraphs below do not override them.
+
 Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consulted for the plan. Documentation support is not proof that TORCHLINE has exercised an API. Recheck changing scopes, limits, schedules and hosting behavior during implementation.
 
 ## Twitch and OBS
