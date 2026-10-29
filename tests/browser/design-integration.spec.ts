@@ -24,6 +24,10 @@ test('all physical-state fixtures remain legible in read-only 720p and 1080p com
       { workers: false },
     );
     let projected: WorldPresentation;
+    app.get('/overlay/design-fixture/state', async () => ({
+      world: projected,
+      mode: 'simulation',
+    }));
     app.get('/overlay/design-fixture/events', async (_request, reply) => {
       reply.hijack();
       reply.raw.writeHead(200, {

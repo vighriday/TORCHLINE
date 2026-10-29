@@ -18,6 +18,7 @@ import {
   recoverEpisodes,
   configureEpisode,
   REQUIRED_MIGRATION,
+  settleInterruption,
 } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import type { InputPolicy } from '@torchline/storage';
@@ -357,6 +358,15 @@ export async function createApp(
     const creator = await currentCreator(request);
     const { id } = z.object({ id: NodeText }).parse(request.params);
     const body = CommandRequestSchema.parse(request.body);
+    if (
+      config.mode === 'live' &&
+      body.command.type === 'resume' &&
+      !(await subscriptions.chatAvailable(creator.id))
+    )
+      denied(
+        'SUBSCRIPTION_UNREADY',
+        'Repair the Twitch chat connection before resuming this live episode.',
+      );
     const participation = ['inspect', 'allocate', 'scan', 'route', 'patch', 'vote'].includes(
       body.command.type,
     );
@@ -840,9 +850,11 @@ export async function createApp(
           if (reply.raw.writableLength > 262144) reply.raw.end();
           else reply.raw.write(`event: snapshot\ndata: ${body}\n\n`);
         }
-      } catch {
+      } catch (error) {
         if (closed) return;
-        reply.raw.write('event: unavailable\ndata: {}\n\n');
+        const terminal =
+          error instanceof DomainError && ['FORBIDDEN', 'UNAUTHENTICATED'].includes(error.code);
+        reply.raw.write(`event: ${terminal ? 'unavailable' : 'retrying'}\ndata: {}\n\n`);
         reply.raw.end();
       } finally {
         sending = false;
@@ -870,24 +882,29 @@ export async function createApp(
     const creator = await currentCreator(request);
     return stream(request, reply, creator.id, async () => snapshot(await currentCreator(request)));
   });
+  const overlaySnapshot = async (request: FastifyRequest, channel: string) => {
+    const token = request.cookies.torchline_overlay ?? '';
+    if (
+      !(
+        await store.pool.query(
+          'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
+          [digest(token), channel],
+        )
+      ).rowCount
+    )
+      denied('FORBIDDEN', 'Overlay access revoked.');
+    const creator = await store.creator(channel);
+    if (!creator || creator.mode !== config.mode)
+      denied('FORBIDDEN', 'Overlay channel unavailable.');
+    return snapshot(creator!, true);
+  };
+  app.get('/overlay/:channel/state', async (request) => {
+    const { channel } = z.object({ channel: NodeText }).parse(request.params);
+    return overlaySnapshot(request, channel);
+  });
   app.get('/overlay/:channel/events', async (request, reply) => {
     const { channel } = z.object({ channel: NodeText }).parse(request.params);
-    const load = async () => {
-      const token = request.cookies.torchline_overlay ?? '';
-      if (
-        !(
-          await store.pool.query(
-            'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
-            [digest(token), channel],
-          )
-        ).rowCount
-      )
-        denied('FORBIDDEN', 'Overlay access revoked.');
-      const creator = await store.creator(channel);
-      if (!creator || creator.mode !== config.mode)
-        denied('FORBIDDEN', 'Overlay channel unavailable.');
-      return snapshot(creator!, true);
-    };
+    const load = () => overlaySnapshot(request, channel);
     await load();
     return stream(request, reply, channel, load);
   });
@@ -949,6 +966,7 @@ export async function createApp(
     busy = true;
     try {
       await store.expire(config.mode);
+      await subscriptions.interruptUnavailableEpisodes();
       const items =
         config.mode === 'live'
           ? (
@@ -959,7 +977,9 @@ export async function createApp(
           : [];
       for (const item of items) {
         try {
-          if (item.payload.kind === 'raid') {
+          if (item.payload.kind === 'interruption') {
+            await settleInterruption(store, item.message_id, config.mode);
+          } else if (item.payload.kind === 'raid') {
             await store.observeRaid({ messageId: item.message_id, mode: 'live', ...item.payload });
             await store.pool.query(
               'UPDATE eventsub_inbox SET processed_at=now() WHERE message_id=$1',
@@ -997,7 +1017,16 @@ export async function createApp(
             );
           }
         } catch (e) {
-          if (e instanceof DomainError && !['STALE_VERSION', 'INPUT_PENDING'].includes(e.code))
+          if (
+            item.payload.kind === 'interruption' &&
+            e instanceof DomainError &&
+            e.code === 'INPUT_PENDING'
+          )
+            await store.pool.query(
+              "UPDATE eventsub_inbox SET next_attempt_at=clock_timestamp()+interval '1 second' WHERE message_id=$1 AND processed_at IS NULL",
+              [item.message_id],
+            );
+          else if (e instanceof DomainError && !['STALE_VERSION', 'INPUT_PENDING'].includes(e.code))
             await store.pool.query(
               'UPDATE eventsub_inbox SET processed_at=now(),error=$2 WHERE message_id=$1',
               [item.message_id, e.code],

@@ -12,7 +12,7 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
   const last = publicEvents.at(-1);
   const votes: Record<string, number> = {};
   for (const option of Object.values(s.votes)) votes[option] = (votes[option] ?? 0) + 1;
-  const enabled = hostControls && !world.frozen_by;
+  const enabled = hostControls && !world.frozen_by && !world.input_suspended;
   return {
     schemaVersion: PRESENTATION_VERSION,
     worldId: s.id,

@@ -29,6 +29,7 @@ test('operator bot setup confirms the named account and converts an accidental c
       await context.addCookies([
         { name: 'torchline_session', value: token, url: baseUrl, httpOnly: true, sameSite: 'Lax' },
       ]);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(baseUrl);
       let authorization: URL | undefined;
       await page.route('https://id.twitch.tv/oauth2/authorize**', async (route) => {

@@ -11,6 +11,7 @@ export type { InputPolicy } from './admission.ts';
 export const REQUIRED_MIGRATION = '008_release_hardening.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
+export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';
 import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
 import { applyCommand, createWorld } from '@torchline/engine';
 export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
@@ -32,6 +33,7 @@ export interface StoredWorld {
   label: string;
   events: WorldEvent[];
   clock?: EpisodeClock;
+  input_suspended?: boolean;
 }
 export interface Handoff {
   id: string;
@@ -193,7 +195,7 @@ export class Store {
         return;
       const row = (
         await c.query(
-          'SELECT w.* FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w',
+          "SELECT w.*,EXISTS(SELECT 1 FROM eventsub_inbox i WHERE i.processed_at IS NULL AND i.payload->>'kind'='interruption' AND i.payload->>'worldId'=w.id AND (i.payload->>'window')::integer=(w.state->>'window')::integer) AS input_suspended FROM worlds w JOIN channel_slots s ON s.world_id=w.id WHERE s.channel_id=$1 FOR UPDATE OF w",
           [channel],
         )
       ).rows[0];
@@ -204,6 +206,7 @@ export class Store {
         connected &&
         row &&
         row.mode === 'live' &&
+        !row.input_suspended &&
         !row.frozen_by &&
         ['investigation', 'challenge', 'allocation', 'decision'].includes(row.state.phase) &&
         row.state.windowOpenedAt &&
@@ -296,7 +299,7 @@ export class Store {
   async get(id: string, recentOnly = false): Promise<StoredWorld> {
     const row = (
       await this.pool.query(
-        'SELECT w.*,c.label FROM worlds w JOIN creators c ON c.id=w.custodian_id WHERE w.id=$1',
+        "SELECT w.*,c.label,EXISTS(SELECT 1 FROM eventsub_inbox i WHERE i.processed_at IS NULL AND i.payload->>'kind'='interruption' AND i.payload->>'worldId'=w.id AND (i.payload->>'window')::integer=(w.state->>'window')::integer) AS input_suspended FROM worlds w JOIN creators c ON c.id=w.custodian_id WHERE w.id=$1",
         [id],
       )
     ).rows[0];
@@ -450,6 +453,20 @@ export class Store {
           error('IDEMPOTENCY_CONFLICT', 'Command ID was reused with different input.');
         return;
       }
+      if (
+        !ingress &&
+        command.type !== 'pause' &&
+        (
+          await c.query(
+            "SELECT 1 FROM eventsub_inbox WHERE processed_at IS NULL AND payload->>'kind'='interruption' AND payload->>'worldId'=$1 AND (payload->>'window')::integer=$2 LIMIT 1",
+            [id, row.state.window],
+          )
+        ).rowCount
+      )
+        error(
+          'INPUT_SUSPENDED',
+          'Chat connection interrupted. Wait for the saved pause, repair the connection, then resume.',
+        );
       if (row.frozen_by) error('HANDOFF_PENDING', 'This world is frozen for handoff.');
       if (
         !(

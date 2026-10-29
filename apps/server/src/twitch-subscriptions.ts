@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { DomainError } from '@torchline/contracts';
 import type { TwitchIntegrationStatus } from '@torchline/contracts';
 import type { Store, Creator } from '@torchline/storage';
+import { interruptEpisode } from '@torchline/storage';
 import { BOT_SCOPES, CREATOR_SCOPES, helix } from '@torchline/twitch';
 import type { Fetcher, WebhookNotification } from '@torchline/twitch';
 import type { AppConfig } from './app.ts';
@@ -208,6 +209,7 @@ export function twitchSubscriptions(
         await save(sub, channel, false);
       }
       await record(notification.id, channel, sub.id, 'revocation');
+      if (sub.type === 'channel.chat.message') await interruptEpisode(store, channel, config.mode);
       return { channel, challenge: false };
     }
     const creator = await current(channel);
@@ -492,5 +494,43 @@ export function twitchSubscriptions(
       },
     };
   }
-  return { observe, reconcile, reconcileAll, record, status };
+  async function interruptUnavailableEpisodes() {
+    if (config.mode !== 'live') return;
+    const rows = (
+      await store.pool.query(
+        `SELECT c.id FROM creators c JOIN channel_slots slot ON slot.channel_id=c.id JOIN worlds w ON w.id=slot.world_id
+      WHERE w.mode='live' AND w.frozen_by IS NULL AND w.state->>'phase' IN ('investigation','challenge','allocation','decision')
+      AND EXISTS(SELECT 1 FROM subscriptions previous WHERE previous.channel_id=c.id AND previous.type='channel.chat.message' AND previous.confirmed_at IS NOT NULL)
+      AND NOT EXISTS(SELECT 1 FROM eventsub_inbox i WHERE i.processed_at IS NULL AND i.payload->>'kind'='interruption' AND i.payload->>'worldId'=w.id AND (i.payload->>'window')::integer=(w.state->>'window')::integer)
+      AND NOT (c.connected AND EXISTS(SELECT 1 FROM oauth_grants g WHERE g.id=c.id AND g.role='creator' AND g.scopes @> $1::text[] AND g.validated_at>now()-interval '1 hour')
+        AND EXISTS(SELECT 1 FROM oauth_grants b JOIN subscriptions s ON s.type='channel.chat.message' AND s.channel_id=c.id WHERE b.role='bot' AND b.scopes @> $2::text[] AND b.validated_at>now()-interval '1 hour'
+          AND s.status='enabled' AND s.version='1' AND s.callback=$3 AND s.confirmed_at IS NOT NULL AND s.condition=jsonb_build_object('broadcaster_user_id',c.id,'user_id',b.id)))
+      ORDER BY w.updated_at LIMIT 20`,
+        [CREATOR_SCOPES, BOT_SCOPES, callbackUrl(config)],
+      )
+    ).rows;
+    for (const row of rows) await interruptEpisode(store, row.id, config.mode);
+  }
+  async function chatAvailable(channel: string) {
+    try {
+      await current(channel);
+    } catch (error) {
+      if (error instanceof DomainError) return false;
+      throw error;
+    }
+    const botId = await bot();
+    return Boolean(
+      botId &&
+      (await hasCurrentSubscription(store, config, channel, 'channel.chat.message', botId)),
+    );
+  }
+  return {
+    observe,
+    reconcile,
+    reconcileAll,
+    record,
+    status,
+    interruptUnavailableEpisodes,
+    chatAvailable,
+  };
 }

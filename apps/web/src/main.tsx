@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import type { Command, WorldPresentation } from '@torchline/contracts';
 import { HandoffInspector } from './WorldRecords.tsx';
 import { request } from './api.ts';
+import { connectOverlayFeed } from './overlay-feed.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { TitleScreen } from './TitleScreen.tsx';
 import { FlightDeck } from './FlightDeck.tsx';
@@ -65,6 +66,7 @@ function App() {
       setData(next);
       setBotSetup(pending);
       setConnectionError('');
+      return next;
     }
   }, [overlayChannel]);
   useEffect(() => {
@@ -86,8 +88,9 @@ function App() {
     source.addEventListener('unavailable', () => {
       source.close();
       void refresh()
-        .then(() => {
-          if (active) setConnectionError('Live updates interrupted. Reconnect to resume.');
+        .then((next) => {
+          if (active && next?.me)
+            setConnectionError('Live updates interrupted. Reconnect to resume.');
         })
         .catch(() => {
           if (active)
@@ -106,36 +109,10 @@ function App() {
   }, [data?.me?.id, overlayChannel, refresh, feedEpoch]);
   useEffect(() => {
     if (!overlayChannel) return;
-    let source: EventSource | undefined;
-    let stopped = false;
-    const connect = async () => {
-      if (location.hash.length > 1) {
-        await request(`/overlay/${overlayChannel}/session`, { token: location.hash.slice(1) });
-        history.replaceState(null, '', location.pathname);
-      }
-      if (stopped) return;
-      source = new EventSource(`/overlay/${overlayChannel}/events`);
-      source.addEventListener('snapshot', (event) => {
-        if (stopped) return;
-        try {
-          setData(JSON.parse((event as MessageEvent).data));
-          setError('');
-        } catch {
-          setError('Overlay reconnecting. Check the connection if this persists.');
-        }
-      });
-      source.addEventListener('unavailable', () => {
-        setData(null);
-        setError('Overlay access ended. Check its grant and connection.');
-        source?.close();
-      });
-      source.onerror = () => setError('Overlay reconnecting. Check the grant if this persists.');
-    };
-    void connect().catch((e) => setError(e.message));
-    return () => {
-      stopped = true;
-      source?.close();
-    };
+    return connectOverlayFeed(overlayChannel, setData, (message, terminal) => {
+      if (terminal) setData(null);
+      setError(message);
+    });
   }, [overlayChannel]);
   async function perform(action: () => Promise<unknown>) {
     setBusy(true);

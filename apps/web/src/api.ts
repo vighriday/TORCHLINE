@@ -27,6 +27,13 @@ export interface BotSetupPreview {
   expiresAt: string;
 }
 export class ConnectionError extends Error {}
+export class HttpError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
 
 export async function request<T = unknown>(
   path: string,
@@ -71,8 +78,9 @@ export async function request<T = unknown>(
   if (result === null || typeof result !== 'object')
     throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
   if (!response.ok)
-    throw new Error(
+    throw new HttpError(
       typeof result.message === 'string' ? result.message : 'The request did not complete.',
+      response.status,
     );
   return result as T;
 }

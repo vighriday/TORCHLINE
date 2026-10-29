@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Audit recovery fixes
+
+- Address A02 with durable chat-loss interruption: freeze the deadline, reject post-cutoff input, drain admitted work, record one replayable pause across restart and require repaired chat before deliberate resume. Waiting on admitted work does not consume the interruption's retry budget. Internal work cannot become Twitch evidence.
+- Address A03 with a capability-scoped read-only overlay state probe, bounded automatic reconnection for temporary failures and terminal shutdown on real revocation. Preserve the last world during transient failure; never repeat a gameplay or custody write.
+- Address A05's obsolete creator-feed error after successful bot conversion. Use reduced motion for account-flow testing while keeping dedicated WebGL animation checks.
+- Added four real-database/provider-fixture recovery cases and a fault-injected overlay browser journey; the complete twelve-journey browser suite passes locally. These tests do not prove genuine Twitch chat, visible bot output, actual OBS or native raid acceptance.
+
 ## 2026-10-29 — Independent implementation audit
 
 - Audited the original vision locally, all requirement/architecture/decision/documentation families, game and frontend contracts, public routes, tests, recovery tools and release evidence against source `7700316`. Added a detailed severity-ranked report, PR01–PR19 and authority matrix, sanitized evidence and dependency-based completion roadmap. Private concept material remains ignored and unchanged.

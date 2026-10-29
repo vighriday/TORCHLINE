@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0027](../decisions/0027-recover-participation-and-overlay.md) reviews audit recovery fixes across C1–C13: durable participation cutoff, admitted-input drain and explicit resume, plus capability-scoped read/feed recovery. Its executed SQL/provider-fixture/browser evidence does not establish actual OBS or native Twitch outage acceptance.
+
 [ADR 0026](../decisions/0026-versioned-preview-releases.md) reviews aligned app versions and explicit source prereleases across C1–C13. Application release labels remain independent of rules, schemas, migrations, world revisions and genuine live acceptance.
 
 [ADR 0025](../decisions/0025-readme-experience.md) reviews the owner-requested README, isolated capture tooling and replay-checked examples across C1–C13. No application architecture, authority or live verification gate changes.
