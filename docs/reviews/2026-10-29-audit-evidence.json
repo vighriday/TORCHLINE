@@ -1,0 +1,267 @@
+{
+  "schemaVersion": "audit-2026-10-29.1",
+  "sourceCommit": "77003160017a667318c0174ad9af4a4b6b26ca76",
+  "branch": "feat/gameplay-foundation",
+  "applicationVersion": "0.1.0-preview.1",
+  "scope": "Read-only code/document audit; isolated schemas for probes; real diagnostics do not refresh grants, reconcile subscriptions, send chat or change worlds. No application patches.",
+  "automated": {
+    "format": "passed",
+    "versions": "passed",
+    "buildTypecheck": "passed",
+    "vitest": {
+      "passed": 97,
+      "files": 21,
+      "durationSeconds": 131.83
+    },
+    "browser": {
+      "passed": 10,
+      "failed": 1,
+      "failure": "Bot conversion leaves Live updates interrupted alert; tests/browser/live-onboarding.spec.ts:73",
+      "isolatedRepeats": {
+        "passed": 3,
+        "failed": 0
+      },
+      "traceLimitation": "Initial failure log retained. Playwright repeats reset the ordinary output directory; the original trace was not preserved."
+    },
+    "repo": "passed",
+    "productionDependencyAudit": "No known vulnerabilities found",
+    "generatedArtifacts": "No drift",
+    "secretScan": {
+      "result": "passed",
+      "fingerprints": 15,
+      "gitObjects": 1085,
+      "indexEntries": 232,
+      "inspectedBuffers": 302,
+      "publicResponses": 0,
+      "scope": "artifacts only"
+    },
+    "remoteCI": {
+      "id": 40817957124,
+      "commit": "77003160017a667318c0174ad9af4a4b6b26ca76",
+      "conclusion": "success",
+      "containerEvidence": "Linux CI; no local Docker"
+    }
+  },
+  "historicalBalance": {
+    "rulesVersion": "ark-v2",
+    "terminalPaths": 2398,
+    "colony": 964,
+    "partial": 1304,
+    "wreck": 130,
+    "scope": "Choices and route success/skip plus repair subsets; not combined current v3 allocation/timing"
+  },
+  "realServices": {
+    "at": "2026-10-29T04:48:58.056Z",
+    "publicHttps": "failed",
+    "applicationToken": "minted and validated",
+    "storedCreatorAccessToken": "did not validate; refresh not attempted",
+    "storedBotAccessToken": "did not validate; refresh not attempted",
+    "exactEnabledChatOnlineOfflineSubscriptions": 3,
+    "requiredChatOnlineOfflineSubscriptions": 3,
+    "incomingRaidSubscription": "not included; receiver opt-in required",
+    "historicalSignedChallenges": 6,
+    "latestChallengeAt": "2026-10-27T17:02:41.073Z",
+    "lifetimeAppliedChat": 0,
+    "lifetimeAcceptedBotSends": 0,
+    "lifetimeLiveCustodyChanges": 0,
+    "baselineSince": "2026-10-28T11:08:53.396Z",
+    "sinceBaseline": {
+      "signedChat": 0,
+      "persistedChatActions": 0,
+      "nativeAcceptedReplies": 0,
+      "signedRaids": 0,
+      "linkedLiveTransfers": 0
+    },
+    "nativeOBS": "unverified",
+    "nativeRaidSession": "unverified"
+  },
+  "probes": {
+    "subscriptionLoss": {
+      "reconciliation": 200,
+      "revocation": 204,
+      "before": "challenge",
+      "after": "challenge",
+      "afterExpiredTick": "decision",
+      "subscriptionStatus": "authorization_revoked"
+    },
+    "staleGrantDisconnect": {
+      "http": 401,
+      "response": {
+        "error": "UNAUTHENTICATED",
+        "message": "Twitch authorization needs revalidation or reconnection."
+      },
+      "connected": true,
+      "grantStillPresent": true
+    },
+    "overlayTransient": {
+      "injectedReadFailures": 1,
+      "feedRequests": 1,
+      "afterRecovery": "TORCHLINE / THE ARK PROTOCOL\nCONNECTING TO THE ARK\n\nEstablishing the read-only channel connection…\n\nWAITING FOR CHANNEL STATE\n\nOverlay access ended. Check its grant and connection.",
+      "savedWorldUnchanged": true
+    },
+    "pureEngine": {
+      "source": "7700316; local isolated audit; CPU microbenchmark, not deployed capacity",
+      "ballots": 10000,
+      "blocks": [
+        {
+          "through": 1000,
+          "ms": 98,
+          "snapshotBytes": 32242
+        },
+        {
+          "through": 2000,
+          "ms": 452,
+          "snapshotBytes": 64242
+        },
+        {
+          "through": 3000,
+          "ms": 921,
+          "snapshotBytes": 96242
+        },
+        {
+          "through": 4000,
+          "ms": 1393,
+          "snapshotBytes": 128242
+        },
+        {
+          "through": 5000,
+          "ms": 1798,
+          "snapshotBytes": 160242
+        },
+        {
+          "through": 6000,
+          "ms": 2473,
+          "snapshotBytes": 192242
+        },
+        {
+          "through": 7000,
+          "ms": 3172,
+          "snapshotBytes": 224242
+        },
+        {
+          "through": 8000,
+          "ms": 3526,
+          "snapshotBytes": 256242
+        },
+        {
+          "through": 9000,
+          "ms": 4157,
+          "snapshotBytes": 288242
+        },
+        {
+          "through": 10000,
+          "ms": 5061,
+          "snapshotBytes": 320243
+        }
+      ],
+      "idleFourFeeds": {
+        "ticks": 8,
+        "ms": 2438,
+        "poolQueries": 321,
+        "phase": "ready",
+        "mutations": 0
+      }
+    },
+    "idleFeedNote": "pool queries include tick housekeeping; 4 creator feeds, 8 manually paced ticks, no mutations",
+    "ingress": {
+      "source": "7700316; synthetic signed provider via app.inject and real isolated PostgreSQL; one 500-message concurrent burst, no live capacity claim",
+      "totalMs": 2558,
+      "ackMs": {
+        "p50": 2000,
+        "p95": 2024,
+        "max": 2035
+      },
+      "codes": {
+        "204": 500
+      },
+      "beforeDrain": {
+        "pending": 106,
+        "rejected": 394
+      },
+      "drainMs": 521,
+      "uniqueVotes": 106,
+      "afterPending": 0
+    }
+  },
+  "limitations": [
+    "No fresh deployment/container build locally",
+    "No current positive public exposure scan",
+    "No token refresh or live database writes performed",
+    "Microbenchmarks and one fixture burst are not deployed capacity or sustained soak",
+    "No independent native OBS, human playtest, all-interleaving proof or completed submission"
+  ],
+  "localLogFingerprints": {
+    "format": {
+      "sha256": "b200983512dd5b1ef5a5e3f495d076688a98b078135f786685e5977899df9fe1",
+      "bytes": 210
+    },
+    "version": {
+      "sha256": "e0cde36dcb8573aaffe9f73883f8d31e33347f280021ce51315bfb473f4ef85c",
+      "bytes": 123
+    },
+    "build": {
+      "sha256": "7ec49d2d2f3090c6a2f459d8afe7529385a62bf9eafe609d00ec2410ea6ab339",
+      "bytes": 887
+    },
+    "tests": {
+      "sha256": "8b6390dca70511d3c91ddf08a5dd4c1db3888a63f87775c2470b9fd02aaf09b1",
+      "bytes": 402
+    },
+    "browser": {
+      "sha256": "f0586911b577168753a40198b796e08a75a0dcbe045f676acf2ad873fa6f1df2",
+      "bytes": 5061
+    },
+    "onboarding-repeat": {
+      "sha256": "9f05f1748edce58a9699848551564051952c7062cf6d16a57caa9add041958e9",
+      "bytes": 1060
+    },
+    "legacy": {
+      "sha256": "f17c3774ecd7653fb135a198780403900636a6d68144c5fbba87058ddff6b3e5",
+      "bytes": 396
+    },
+    "balance": {
+      "sha256": "6fe64e40a447b8c1cdec901b8f7bfd6ff0512f05665073d6506ebb5c4b9ad225",
+      "bytes": 2301
+    },
+    "design-fixtures": {
+      "sha256": "8f36532430ce89a4501db8514b944aeceb1c66cc718c2750452c4f2a2b53b2b4",
+      "bytes": 136
+    },
+    "readme-proof": {
+      "sha256": "219130bbca93a1899785011f190a5a352a3cea0de322de68c21846fb25180a9a",
+      "bytes": 1053
+    },
+    "repo": {
+      "sha256": "2bcc6c707f4e0b84c0ff300cda1836e704a19af4294a5f15f90633ae9e261ab1",
+      "bytes": 147
+    },
+    "dependencies": {
+      "sha256": "4e4757ff226a44b5c448b1c4624619419c22d5272463dc19510b4754871a72f9",
+      "bytes": 32
+    },
+    "secrets": {
+      "sha256": "00a52bd8921f5fcceb2a0d7ec594e7fd247f8d96c815fdeac5dad72a56ef9206",
+      "bytes": 540
+    },
+    "live": {
+      "sha256": "388ba72d600ac946c7e482640be5a897011864b3d926ff41b2670eaf5621603d",
+      "bytes": 4126
+    },
+    "acceptance": {
+      "sha256": "e3ecd2d584ec26ef926c2c4160e93c49923611c0d42721cddc96d2d9472bdbdb",
+      "bytes": 731
+    },
+    "probes": {
+      "sha256": "722bfe9f05f35e63642707b2f0b5304a570bb565be76a5305def996c51c7249f",
+      "bytes": 1123
+    },
+    "scale": {
+      "sha256": "9072c70d4e1bf0a6b5f6d76d47057a2a7ba6e6592840b90f4cd4b3bba670b094",
+      "bytes": 1149
+    },
+    "ingress": {
+      "sha256": "96104df9c056fc913be81c279c87edd2efccf65bab3d9b5a53b88491cd0e3818",
+      "bytes": 419
+    }
+  }
+}

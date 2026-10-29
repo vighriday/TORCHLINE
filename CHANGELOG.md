@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Independent implementation audit
+
+- Audited the original vision locally, all requirement/architecture/decision/documentation families, game and frontend contracts, public routes, tests, recovery tools and release evidence against source `7700316`. Added a detailed severity-ranked report, PR01–PR19 and authority matrix, sanitized evidence and dependency-based completion roadmap. Private concept material remains ignored and unchanged.
+- Fresh build/typecheck/format/version and 97 tests pass. The complete Chromium run has ten passes and one bot-onboarding connection-error failure; three isolated repetitions pass. Generated balance/design/README proof has no drift; repository, production-dependency and artifact-secret checks pass. Exact-source remote CI is green, which does not erase the fresh intermittent failure.
+- New isolated probes reproduce missing chat-loss pause, permanent overlay disconnection after one temporary read failure and stale-validation blocking local disconnect. Measured 10k pure-engine ballots, idle feed query amplification and a 500-message synthetic ingress burst; these are not deployed capacity or genuine Twitch evidence.
+- Current read-only provider checks validate the application and exact 3/3 enabled subscriptions, but public HTTPS fails and saved access tokens do not validate; refresh was not attempted. All genuine chat/reply/raid counters remain zero. Preserved application code, worlds, credentials, acceptance baseline and immutable preview tag; no fixes, deployment or native acceptance are claimed.
+
 ## 2026-10-29 — v0.1.0-preview.1
 
 - Introduced the first named development preview with seven aligned private package versions, version-specific release notes, README release navigation and a documented immutable-tag policy. This is a source prerelease, not a stable API or production deployment.
