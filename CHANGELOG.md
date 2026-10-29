@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-30 — Archive reading pass
+
+- Remove raw record IDs and repeated technical filler from the story log after direct screen inspection. Preserve saved history, event anchors, inherited-cause links, timestamps and resource consequences. No engine, permission or integration behavior changes.
+- Rebuild and repeat four existing browser journeys plus the 145-capture inventory. Reverify the final game in native OBS; its read-only probe now checks the stylesheet as well as the script and gives distinct stale-source/permission stages.
+
 ## 2026-10-29 — Native OBS evidence and acceptance probes
 
 - Add a read-only genuine-chat observer joining signed delivery, durable processing, canonical viewer events and the actual HTTPS overlay/reload. Add an authenticated native OBS probe with exact temporary source, unique CEF target, current-build/first-frame checks and zero page-control permissions. Neither tool sends chat, starts output or manufactures raid evidence; incomplete results replace stale success reports.

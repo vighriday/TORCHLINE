@@ -115,16 +115,17 @@ try {
     throw new Error('Start twitch:verify:play to obtain current temporary read access.');
   const url = new URL(access.url);
   if (url.protocol !== 'https:') throw new Error('Public HTTPS source required.');
-  stage = 'OBS source permissions';
+  stage = 'current temporary OBS source';
   const sourceSettings = await obs.call('GetInputSettings', { inputName: 'Ark public HTTPS' });
   if (sourceSettings.inputSettings?.url !== access.url)
     throw new Error('The isolated source must use the current temporary access.');
+  stage = 'OBS source permissions';
   if (sourceSettings.inputSettings?.webpage_control_level !== 0)
     throw new Error('The web page must have no OBS control permissions.');
-  const expectedAsset = (await readFile('apps/web/dist/index.html', 'utf8')).match(
-    /src="(\/assets\/[^" ]+\.js)"/,
-  )?.[1];
-  if (!expectedAsset) throw new Error('Current browser build required.');
+  const builtHtml = await readFile('apps/web/dist/index.html', 'utf8');
+  const expectedAsset = builtHtml.match(/src="(\/assets\/[^" ]+\.js)"/)?.[1];
+  const expectedStyle = builtHtml.match(/href="(\/assets\/[^" ]+\.css)"/)?.[1];
+  if (!expectedAsset || !expectedStyle) throw new Error('Current browser build required.');
   const targets = await (
     await fetch('http://127.0.0.1:6263/json/list', { signal: AbortSignal.timeout(5000) })
   ).json();
@@ -162,6 +163,14 @@ try {
   stage = 'current browser build';
   if (dom.asset !== expectedAsset)
     throw new Error('OBS is rendering an older browser build. Refresh the isolated source.');
+  const renderedStyle = (
+    await cef.call('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `[...document.querySelectorAll('link[rel="stylesheet"]')].map(s=>new URL(s.href).pathname).find(p=>p.startsWith('/assets/'))`,
+    })
+  ).result?.value;
+  if (renderedStyle !== expectedStyle)
+    throw new Error('OBS is rendering an older browser stylesheet. Refresh the isolated source.');
   stage = 'native screenshot';
   // DOM readiness precedes OBS's source compositor. Let the current frame reach it.
   await new Promise((r) => setTimeout(r, 1500));
@@ -188,6 +197,7 @@ try {
     hostControlsAbsent: true,
     obsPageControlLevel: 0,
     browserAsset: expectedAsset,
+    browserStylesheet: expectedStyle,
     chapter: dom.chapter,
     streaming: false,
     recording: false,

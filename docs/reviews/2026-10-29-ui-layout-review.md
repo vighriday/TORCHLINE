@@ -10,6 +10,7 @@ The owner's report exposed defects that the existing passing width checks did no
 | Narrow internal mission scrolling hid clues/tools on the captain screen | Allow document flow and scrolling; retain all puzzle content and actions |
 | Resource numbers shifted when only some resources had deltas | Reserve consistent label/meter/delta rows; use two columns on phones |
 | Short Hangar/Broadcast views appeared vertically centered like landing pages | Top-align the workspace content |
+| Raw event IDs and repeated technical filler cluttered Archive | Keep story, dates, consequences and cause links visible; preserve identifiers in the data and link anchors |
 | Mobile public Twitch status/setup overlapped launch copy | Flow branding, ship, launch, account/setup and footer separately on phones/tablets |
 | Large-screen captain footer styling leaked into the 1080p OBS composition | Scope captain breakpoint changes to captain mode; keep OBS padding/geometry independent |
 | Reduced-motion/narrow layouts offered a view toggle that could not enable 3D | Describe the simplified view accurately and disable that unavailable action |
@@ -30,3 +31,5 @@ An initial complete run exposed two cold-start/timing failures; their focused re
 ## Remaining gates
 
 The complete 14-journey browser suite passes. Native OBS renders the current build at 1280×720 with the 3D Ark, no host controls and zero page-control permissions; its screenshot was visually inspected. A controlled app outage/reconnect also succeeds without source reload or canonical-state change. Native gameplay updates, link rotation, deliberate source refresh and broadcast output remain separate. Genuine viewer-command effects and the authentic two-broadcaster raid remain external acceptance steps. A07 state/fan-out performance and A11 snapshot assignment/ordering remain release risks. This UI pass does not mark the product production-ready or claim a general accessibility certification.
+
+The final Archive reading pass was rebuilt, rechecked in four existing gameplay/layout browser journeys and recaptured in the same 145-capture inventory with no horizontal clipping/overflow findings. Native OBS then reverified both the final script and stylesheet. Record identifiers remain in canonical data and event anchors; the reading view keeps dates, summaries, resource consequences and inherited-cause links.

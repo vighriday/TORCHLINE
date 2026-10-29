@@ -247,7 +247,6 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
                 <span className="badge">{item.status}</span>
                 <h4>{item.kind.replaceAll('-', ' ')}</h4>
                 <p>Due chapter {item.dueChapter}</p>
-                <small>Origin: {item.originEventId}</small>
               </article>
             ))
           )}
@@ -309,11 +308,13 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
                     {event.community.label}
                   </small>
                 )}
-                <small>
-                  {Object.entries(event.resourceDelta)
-                    .map(([key, n]) => `${key} ${n! > 0 ? '+' : ''}${n}`)
-                    .join(' · ') || 'World state recorded'}
-                </small>
+                {Object.keys(event.resourceDelta).length > 0 && (
+                  <small>
+                    {Object.entries(event.resourceDelta)
+                      .map(([key, n]) => `${key} ${n! > 0 ? '+' : ''}${n}`)
+                      .join(' · ')}
+                  </small>
+                )}
                 {event.causes.length > 0 && (
                   <small>
                     Inherited cause:{' '}
@@ -329,7 +330,6 @@ export function WorldArchive({ world }: { world: WorldPresentation }) {
                     })}
                   </small>
                 )}
-                <small className="event-id">Event {event.id}</small>
               </div>
             </li>
           ))}
