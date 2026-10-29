@@ -29,6 +29,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0023](0023-cinematic-startup.md) | Deliberate loading, first-frame fade and intentional accessible fallback | D3–4, D11, D15–17, all C1–C13 |
 | [0024](0024-preview-connection-recovery.md) | JSON transport, honest initial connection and read-only reconnect after uncertain responses | D2–3, D5, D8, D11–13, D17, all C1–C13 |
 | [0025](0025-readme-experience.md) | Story-led README, real gameplay media, native GitHub inspection and replay-checked examples | Documentation tooling, all C1–C13 |
+| [0026](0026-versioned-preview-releases.md) | Aligned private app versions, explicit preview tags, release notes and source verification | Release metadata, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

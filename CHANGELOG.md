@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — v0.1.0-preview.1 release preparation
+
+- Introduced the first named development preview with seven aligned private package versions, version-specific release notes, README release navigation and a documented immutable-tag policy. This is a source prerelease, not a stable API or production deployment.
+- Added CI checks for package privacy/version alignment, release-note/README consistency and release tags. Game rules, presentation schemas, migrations and world revisions retain independent versions.
+- Reviewed the README's distinctive elements and promoted the actual 3D Ark to the top navigation. Kept setup/technical depth optional and native Twitch acceptance explicitly pending.
+- Added 15 accurate repository topics and a persistent-game-first description, then verified the remote metadata. Publication and exact-source verification are recorded separately from preparation.
+
 ## 2026-10-29 — Story-first README
 
 - Replaced the engineering-heavy entry page with a plain-language game introduction, two real opening choices, a viewer-contribution example, actual gameplay and optional 3D/flight-log exploration.

@@ -6,12 +6,15 @@
 
 <p align="center">
   <a href="#make-the-first-choice">Make a choice</a> ·
+  <a href="assets/readme/ark.stl">Rotate the Ark in 3D</a> ·
   <a href="#see-it-in-motion">See gameplay</a> ·
   <a href="#try-torchline">Try it</a> ·
   <a href="#behind-the-game">Behind the game</a>
 </p>
 
 <p align="center"><sub>Built with Codex for the Codex x TwitchCon Hackathon · Season 01: The Ark Protocol</sub></p>
+
+<p align="center"><a href="docs/releases/v0.1.0-preview.1.md">v0.1.0-preview.1</a> · Development preview · <a href="https://github.com/vighriday/TORCHLINE/releases">Releases</a></p>
 
 # Your chat leaves a world behind
 

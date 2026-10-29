@@ -1,7 +1,7 @@
 {
   "name": "torchline",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.0-preview.1",
   "type": "module",
   "packageManager": "pnpm@12.4.2",
   "engines": {
@@ -20,6 +20,7 @@
     "design:fixtures": "node scripts/export-design-fixtures.ts",
     "readme:proof": "node scripts/readme/export-proof.ts",
     "check:repo": "node scripts/check-repo.mjs",
+    "check:version": "node scripts/check-version.mjs",
     "check:public-secrets": "node scripts/check-public-secrets.ts",
     "format": "prettier --write apps packages scripts tests package.json tsconfig.json vitest.config.ts playwright.config.ts .github/workflows/verify.yml",
     "format:check": "prettier --check apps packages scripts tests package.json tsconfig.json vitest.config.ts playwright.config.ts .github/workflows/verify.yml",

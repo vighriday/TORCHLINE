@@ -52,6 +52,8 @@ Research date: **2026-10-26** (Asia/Calcutta). These are primary sources consult
 
 ## Competition and adjacent products
 
+Release metadata sources rechecked October 29, 2026: [Semantic Versioning](https://semver.org/), [GitHub releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases) and [repository topics](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics). Initial-development/prerelease meaning, tag-based source archives, immutable published versions and topic limits inform [ADR 0026](../decisions/0026-versioned-preview-releases.md). Installed `gh repo edit`/`gh release create` help verifies the exact used flags; source publication is separate from deployment and native Twitch acceptance.
+
 | ID | Source | Supports |
 | --- | --- | --- |
 | H1 | [Official rules](https://twitchcon-codex.devpost.com/rules) | Entry/build/submission/testing requirements and formal timing |

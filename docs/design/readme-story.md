@@ -35,3 +35,11 @@ Assets are self-contained and repository-owned. Existing OFL fonts are outlined 
 Optional Pillow/fontTools generation, Vite model capture and Playwright recording are documentation tools. They add no application dependencies and are not imported by the runtime. Regenerated JSON/CSV proof is checked for drift in CI; artwork is reviewed visually because GPU rendering is not byte-deterministic. Raw recordings/intermediate frames remain ignored. No secrets, real participant history, private concept excerpts or overlay URLs are published.
 
 The full component review is [ADR 0025](../decisions/0025-readme-experience.md). Revisit the media if a GitHub/mobile rendering check fails, the game changes, accessibility preferences are lost or the evidence becomes stale. Permanent hosting and genuine chat/bot/OBS/raid acceptance remain separate release gates.
+
+## Attention review — October 29
+
+The strongest distinctive elements are the actual rotatable vessel, the captain's opening choice and the replay-checked example where one repair changes an ending. The searchable recorder adds depth after that initial hook. Artwork, GIFs and Mermaid help presentation, but their presence alone is not evidence that a README is unusual. No usage survey was performed, so rarity is an editorial assessment rather than a statistic.
+
+The 3D artifact was hidden behind a lower disclosure. Add a direct hero-navigation link so readers can discover it immediately; retain the explanatory disclosure. Keep the other elements selective rather than adding more panels.
+
+GitHub also supports inline ASCII-STL and GeoJSON. Putting the full 12,952-triangle Ark into a Markdown fence would substantially bloat the README source; linking the compact binary model preserves the same native inspection without that cost. An Earth-map widget does not fit the Ark's fictional route. Unsupported SVG scripting, decorative activity widgets and generated popularity badges do not improve the product story. A future before/after ship comparison should use real states and the same camera, not fabricated visual evidence.
