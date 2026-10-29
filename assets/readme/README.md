@@ -20,6 +20,9 @@ The vessel and styling derive from the owner-supplied Claude Design references, 
 Use the repository's Node 24/pnpm environment and installed Playwright Chromium bundle. The capture pipeline is verified on this Windows workspace; optional documentation tooling is outside application/runtime dependencies. Python regeneration requires Pillow and fontTools as listed in [the documentation requirements](../../scripts/readme/requirements.txt).
 
 ```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = '.local/browsers'
+pnpm exec playwright install chromium --only-shell
+python -m pip install -r scripts/readme/requirements.txt
 node scripts/readme/export-proof.ts
 node scripts/readme/capture-model.ts
 python scripts/readme/design-assets.py

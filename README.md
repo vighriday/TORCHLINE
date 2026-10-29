@@ -148,9 +148,7 @@ Commands depend on the current phase and captain settings. Rewards apply once; s
 
 ## Try TORCHLINE
 
-**[Open the development preview →](https://education-slather-reps.ngrok-free.dev/)**
-
-The preview depends on our development machine and tunnel; it is not permanent hosting. For a reliable local rehearsal, use the saved simulation—no Twitch credentials needed.
+**Play a saved practice game locally—no Twitch account needed.**
 
 <details>
 <summary><strong>Run a saved local game</strong></summary>
@@ -182,6 +180,8 @@ Already connected? Use the [short live-testing checklist](docs/operations/live-r
 
 </details>
 
+[Development preview, when running →](https://education-slather-reps.ngrok-free.dev/) · This temporary preview depends on our development machine and may be offline.
+
 ## What works today
 
 | Checked | Still needs real-world confirmation |
@@ -191,7 +191,7 @@ Already connected? Use the [short live-testing checklist](docs/operations/live-r
 | Public game screen and an overlay that can watch without controlling | Permanent hosting, remote recovery and extended live testing |
 | **97 automated tests · 11 browser journeys**, plus release-image checks | Full-season playtesting and owner acceptance |
 
-Evidence snapshot: **October 28, 2026**, from [tested source f1a8d4c](https://github.com/vighriday/TORCHLINE/actions/runs/40738778152). Simulation footage and automated checks do not stand in for live Twitch proof. [Current status](docs/planning/implementation-status.md) · [Release report](docs/reports/2026-10-28-release-readiness.md).
+Automated checks passed [October 29, 2026](https://github.com/vighriday/TORCHLINE/actions/runs/40814601546). The live-service checks above are from October 28. Practice footage and automated checks do not stand in for live Twitch proof. [Current status](docs/planning/implementation-status.md) · [Release report](docs/reports/2026-10-28-release-readiness.md).
 
 ## Behind the game
 
@@ -248,7 +248,8 @@ The protocol has automated and simulated coverage. A real two-streamer transfer 
 
 Tests cover saved games, replay, permissions, repeated events, recovery, input flooding and history queries. A 50,000-ballot fixture checks history performance; it is not a live audience-capacity claim. Encrypted backup/restore and a restricted release container have automated checks.
 
-```sh
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH = '.local/browsers'
 pnpm build
 pnpm test
 pnpm exec playwright install chromium --only-shell
@@ -260,7 +261,7 @@ pnpm readme:proof
 pnpm check:repo
 ```
 
-Run sequentially with the local database configured. Tests use isolated saves. The older ark-v2 balance audit covers 2,398 final branches; current ark-v3 has separate tests and the README's replay-checked example. Those counts are not outcome probabilities. [Validation plan](docs/planning/validation.md) · [Backup and restore](docs/operations/backup-and-restore.md).
+This example uses Windows PowerShell. On macOS/Linux, use `export PLAYWRIGHT_BROWSERS_PATH=.local/browsers` for the first line. Run sequentially with the local database configured. Tests use isolated saves. The older ark-v2 balance audit covers 2,398 final branches; current ark-v3 has separate tests and the README's replay-checked example. Those counts are not outcome probabilities. [Validation plan](docs/planning/validation.md) · [Backup and restore](docs/operations/backup-and-restore.md).
 
 </details>
 

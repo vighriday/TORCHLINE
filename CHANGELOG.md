@@ -6,6 +6,8 @@
 - Kept setup, architecture, commands and verification in expandable sections. Added two Mermaid diagrams and clear links to current evidence; real Twitch/OBS/raid gates remain explicit.
 - Extended repository checks to cover HTML image/link references. Added deterministic README proof regeneration and drift checks to CI without new runtime dependencies.
 - Local production build/typecheck, format, repository links, negative missing-image check, media structure/duration, reduced-motion selection and staged credential scan pass. Full source CI is tracked separately; the previously reported run 40737973250 failed at npm bootstrap with ECONNRESET, and newer source f1a8d4c already passed the complete suite.
+- README source `fa6dc1b` passes CI 40814601546: all 97 tests, 11 browser journeys, generated proof/fixture consistency, release image and restricted-container smoke. Media source `84f3a58` also passes its full run. Native Twitch acceptance remains separate.
+- Clarified the local browser-install directory and optional media-generation prerequisites. Local play is the primary try-it path; the temporary preview is explicitly availability-dependent.
 
 ## 2026-10-29 — Inspectable README media
 
