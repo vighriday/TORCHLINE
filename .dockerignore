@@ -16,3 +16,5 @@
 **/[Ii][Dd][Ee][Aa].[Tt][Xx][Tt]
 **/.local
 **/.tools
+# Optional documentation studio imports fixtures; never part of the release build.
+apps/web/tools/

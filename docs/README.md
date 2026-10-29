@@ -25,6 +25,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
 | [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
 | [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
+| [README presentation](design/readme-story.md) | Simple reading path, researched GitHub interactions, actual gameplay media and proof limits |
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
 | [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
 | [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |

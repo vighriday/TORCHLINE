@@ -1,0 +1,64 @@
+{
+  "source": "Deterministic engine execution, not a live Twitch session",
+  "rulesVersion": "ark-v3",
+  "policy": "No allocation or route rewards; same planned captain route. Without the repair the Ark ends on chapter-5 arrival before its final burn. One viewer adds scan A and patch A in chapter 3.",
+  "captainChoices": [
+    "burn-navigation",
+    "manual-flight",
+    "seal-cabins",
+    "jettison",
+    "emergency-burn"
+  ],
+  "withoutViewerRepair": {
+    "outcome": "wreck",
+    "chapter": 5,
+    "resources": {
+      "passengers": 156,
+      "hull": 25,
+      "power": 50,
+      "oxygen": 0,
+      "navigation": 0,
+      "supplies": 35
+    },
+    "reason": "Life support exhausted its oxygen reserve.",
+    "replayVerified": true
+  },
+  "withViewerRepair": {
+    "outcome": "partial",
+    "chapter": 5,
+    "resources": {
+      "passengers": 156,
+      "hull": 15,
+      "power": 35,
+      "oxygen": 4,
+      "navigation": 0,
+      "supplies": 20
+    },
+    "reason": "Survivors landed, but population or supplies cannot support a viable colony.",
+    "replayVerified": true
+  },
+  "firstChoice": {
+    "burnNavigation": {
+      "resources": {
+        "passengers": 216,
+        "hull": 65,
+        "power": 50,
+        "oxygen": 65,
+        "navigation": 0,
+        "supplies": 50
+      },
+      "condition": "destroyed"
+    },
+    "sealHabitat": {
+      "resources": {
+        "passengers": 168,
+        "hull": 60,
+        "power": 60,
+        "oxygen": 60,
+        "navigation": 70,
+        "supplies": 50
+      },
+      "condition": "sealed"
+    }
+  }
+}

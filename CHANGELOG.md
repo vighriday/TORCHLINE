@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Inspectable README media
+
+- Created original hero artwork and icons, a handoff illustration, actual saved-simulation footage and a native GitHub 3D export of the game vessel. Preserved simulation/pending-live labels and reduced-motion stills; raw captures remain ignored.
+- Generated the opening choices and a one-viewer repair counterfactual through current ark-v3 rules, with deterministic replay checks and a synthetic searchable flight log.
+- Added optional, isolated capture/generation recipes and asset provenance. Documentation tooling is excluded from the release build; application rules, permissions and design are unchanged.
+- Reviewed supported GitHub formats and all thirteen component boundaries. GitHub's Markdown API preserves disclosures/picture sources; local light/dark/mobile rendering, two diagrams, keyboard disclosure and reduced-motion selection pass. Native GitHub STL/CSV viewer support is documented rather than claimed as a live browser acceptance test.
+
 ## 2026-10-28 — Preview connection recovery
 
 - Reproduced the live JSON error: ngrok returned an HTML warning page to browser-agent API requests. Added its documented header only on free-preview hosts, JSON response validation and short recoverable messages without raw parser/upstream output.

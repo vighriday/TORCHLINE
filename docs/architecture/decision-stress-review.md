@@ -8,6 +8,8 @@ The matrices below cover every proposed decision against every named component. 
 
 ## Component inventory
 
+[ADR 0025](../decisions/0025-readme-experience.md) reviews the owner-requested README, isolated capture tooling and replay-checked examples across C1–C13. No application architecture, authority or live verification gate changes.
+
 [ADR 0024](../decisions/0024-preview-connection-recovery.md) reviews JSON response handling, initial connection and read-only feed recovery across C1–C13. Real preview interstitial reproduction is separate from local synthetic response-loss and genuine native Twitch acceptance.
 
 [ADR 0023](../decisions/0023-cinematic-startup.md) checks explicit loading/cinematic/fallback states across C1–C13. First-frame and layout checks do not establish native OBS acceptance; graphics readiness never grants authority or advances a phase.

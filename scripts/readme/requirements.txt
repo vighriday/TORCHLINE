@@ -1,0 +1,3 @@
+# Optional documentation generation only; never required by the game.
+Pillow==12.1.1
+fonttools==4.60.1
