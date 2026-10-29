@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-29 — Independent replies and bounded database recovery
+
+- Add an operator pause for outgoing bot replies while signed incoming chat, canonical gameplay and read-only overlays continue. Preserve the dedicated bot, grants, scopes and native custody requirements; paused/uncertain sends are not presented as delivered chat.
+- Add server-side statement, row-lock and idle-transaction limits, preserve original errors during failed rollback and discard dead clients. Maintenance uses a separate bounded allowance. Real PostgreSQL tests exercise contention, cancellation, rollback, dead sessions and reuse; encrypted backup/restore passes.
+- Record ADR 0029 and configuration/recovery limits. This addresses the SQL part of audit A08, not overall transaction duration, deployed capacity or all remaining operational risks.
+
 ## 2026-10-29 — Bot-account checks completed
 
 - Owner confirmed the correct bot profile, verified email and no block in either direction between broadcaster and bot. Manual Twitch messages still fail cross-account delivery. The underlying provider/account/channel cause remains unproven; visible bot acceptance remains open.

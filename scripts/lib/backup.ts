@@ -10,6 +10,9 @@ import type { PoolClient } from 'pg';
 import { Store } from '@torchline/storage';
 import { replayEvents } from '@torchline/engine';
 
+// Operator-only native backup/restore and scratch DDL have a larger bounded budget
+// than interactive requests. Never disable timeouts on application connections.
+const maintenanceBudgets = { statementMs: 60000, lockMs: 10000, idleTransactionMs: 60000 };
 const magic = Buffer.from('TORCHLINE.BAK1\n');
 const quote = (s: string) => '"' + s.replaceAll('"', '""') + '"';
 type Fingerprint = { table: string; rows: number; sha256: string };
@@ -143,7 +146,7 @@ async function fingerprints(client: PoolClient, schema: string): Promise<Fingerp
 }
 export async function createBackup(url: string, key: string, path: string) {
   const bytes = keyBytes(key),
-    store = new Store(url);
+    store = new Store(url, maintenanceBudgets);
   let created = false;
   await mkdir(dirname(path), { recursive: true });
   try {
@@ -276,7 +279,7 @@ export async function restoreBackup(
   ).catch(() => {
     throw new Error('Backup authentication failed. No restore was attempted.');
   });
-  const target = new Store(targetUrl),
+  const target = new Store(targetUrl, maintenanceBudgets),
     client = await target.pool.connect();
   try {
     await client.query('SELECT pg_advisory_lock(833016)');
@@ -326,7 +329,7 @@ export async function restoreBackup(
       throw new Error('Restore fingerprint mismatch. Keep this destination isolated.');
     const replayUrl = new URL(targetUrl);
     replayUrl.searchParams.set('options', `-c search_path=${a.header.schema}`);
-    const replayStore = new Store(replayUrl.toString());
+    const replayStore = new Store(replayUrl.toString(), maintenanceBudgets);
     let replayed = 0;
     try {
       const ids = (await replayStore.pool.query('SELECT id FROM worlds ORDER BY id')).rows;
@@ -355,7 +358,7 @@ export async function restoreBackup(
   }
 }
 export async function restoreDrill(url: string, key: string, path: string) {
-  const source = new Store(url),
+  const source = new Store(url, maintenanceBudgets),
     name = 'torchline_restore_' + randomUUID().replaceAll('-', '');
   let created = false;
   try {
@@ -366,7 +369,10 @@ export async function restoreDrill(url: string, key: string, path: string) {
     target.searchParams.delete('options');
     return await restoreBackup(url, target.toString(), key, path);
   } finally {
-    if (created) await source.pool.query(`DROP DATABASE ${quote(name)}`);
-    await source.close();
+    try {
+      if (created) await source.pool.query(`DROP DATABASE ${quote(name)}`);
+    } finally {
+      await source.close();
+    }
   }
 }

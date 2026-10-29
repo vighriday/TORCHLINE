@@ -25,7 +25,7 @@ export async function database<T>(run: (store: Store, url: string) => Promise<T>
     throw new Error(
       'Integration tests require DATABASE_URL pointing to an isolated development database. Run pnpm db:up.',
     );
-  const admin = new Store(process.env.DATABASE_URL);
+  const admin = new Store(process.env.DATABASE_URL, { statementMs: 60000 });
   const schema = `test_${randomUUID().replaceAll('-', '')}`;
   const url = new URL(process.env.DATABASE_URL);
   url.searchParams.set('options', `-c search_path=${schema}`);

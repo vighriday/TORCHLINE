@@ -21,6 +21,7 @@ export function twitchBot(
   ) {
     if (config.mode !== 'live')
       throw new DomainError('MODE_MISMATCH', 'Bot replies are disabled in simulation.');
+    if (config.botRepliesEnabled === false) return;
     await store.transaction(async (c) => {
       await store.lockChannels(c, [channel]);
       const creator = (
@@ -83,7 +84,7 @@ export function twitchBot(
       );
   }
   async function perform() {
-    if (config.mode !== 'live') return;
+    if (config.mode !== 'live' || config.botRepliesEnabled === false) return;
     const reply = await store.transaction(async (c) => {
       const row = (
         await c.query(

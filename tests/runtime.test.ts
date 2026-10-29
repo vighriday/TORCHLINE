@@ -24,6 +24,10 @@ it('rejects insecure or ambiguous release configuration without echoing credenti
     { PUBLIC_BASE_URL: 'https://secret@game.example' },
     { PUBLIC_BASE_URL: 'https://game.example/subpath' },
     { FEED_MAX_TOTAL: '0' },
+    { BOT_REPLIES_ENABLED: 'yes' },
+    { DB_STATEMENT_TIMEOUT_MS: '0' },
+    { DB_LOCK_TIMEOUT_MS: 'NaN' },
+    { DB_IDLE_TRANSACTION_TIMEOUT_MS: '60001' },
     { DATABASE_URL: 'invalid-private-sentinel' },
     { DATABASE_URL: 'postgresql://user:private-sentinel@remote.example/db?sslmode=require' },
     { WORLD_MODE: 'live' },
@@ -51,6 +55,9 @@ it('rejects insecure or ambiguous release configuration without echoing credenti
     TWITCH_REDIRECT_URI: 'https://game.example/auth/twitch/callback',
   };
   expect(runtimeConfig(live).port).toBe(3001);
+  expect(runtimeConfig({ ...live, BOT_REPLIES_ENABLED: 'false' }).config.botRepliesEnabled).toBe(
+    false,
+  );
   expect(() =>
     runtimeConfig({ ...live, TWITCH_REDIRECT_URI: 'https://other.example/auth/twitch/callback' }),
   ).toThrow('exactly match');

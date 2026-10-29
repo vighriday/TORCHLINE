@@ -40,6 +40,10 @@ Authenticated live feeds default to eight per channel / 256 per process with `FE
 
 ## Health and observability
 
+Database work is now bounded at PostgreSQL: `DB_STATEMENT_TIMEOUT_MS=10000`, `DB_LOCK_TIMEOUT_MS=2000`, `DB_IDLE_TRANSACTION_TIMEOUT_MS=15000`. Statement/idle overrides allow 1–60000 ms, lock overrides 1–10000 ms; lock must remain shorter than statement. Connection acquisition remains five seconds, pool size ten. Migration and trusted backup/restore operations have separate bounded allowances; do not disable runtime timeouts to perform maintenance. See [ADR 0029](../decisions/0029-independent-replies-and-database-budgets.md). These are guardrails, not a completed load test.
+
+`BOT_REPLIES_ENABLED=false` pauses automatic outgoing replies independently of chat ingestion and gameplay. Restart normally to apply it. Keep the bot grant/subscriptions and channel protections intact. An already in-progress send cannot be recalled; old queued replies expire under the normal freshness check if replies are later re-enabled. The current native visibility issue is investigated separately from preflight health.
+
 `/health/live` indicates that the process is responding; `/health/ready` checks database access and migration compatibility. Expose Twitch health separately: an expired grant can affect one creator without marking every world unavailable.
 
 Structured logs include request/command ID, world ID, channel ID, mode, version, subscription/delivery ID, job attempt and error classification. Redact authorization headers, OAuth codes/tokens, cookies, overlay capabilities, encryption keys and raw chat text. Avoid logging full URLs with fragments/query secrets or raw signed request bodies.

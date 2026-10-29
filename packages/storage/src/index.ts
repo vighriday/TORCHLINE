@@ -62,27 +62,68 @@ const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(valu
 export const participantIdentity = (worldId: string, accountId: string, key: string) =>
   createHmac('sha256', key).update(`${worldId}:${accountId}`).digest('hex');
 
+export interface DatabaseBudgets {
+  statementMs?: number;
+  lockMs?: number;
+  idleTransactionMs?: number;
+}
+export const DEFAULT_DATABASE_BUDGETS = {
+  statementMs: 10000,
+  lockMs: 2000,
+  idleTransactionMs: 15000,
+};
+
 export class Store {
   readonly pool: Pool;
-  constructor(connectionString: string) {
-    this.pool = new Pool({ connectionString, max: 10, connectionTimeoutMillis: 5000 });
+  constructor(connectionString: string, budgets: DatabaseBudgets = {}) {
+    const limits = { ...DEFAULT_DATABASE_BUDGETS, ...budgets };
+    for (const value of Object.values(limits))
+      if (!Number.isInteger(value) || value < 1 || value > 60000)
+        throw new Error('Database execution budgets must be 1–60000 milliseconds.');
+    if (limits.lockMs >= limits.statementMs)
+      throw new Error('Database lock budget must be shorter than the statement budget.');
+    this.pool = new Pool({
+      connectionString,
+      max: 10,
+      connectionTimeoutMillis: 5000,
+      statement_timeout: limits.statementMs,
+      lock_timeout: limits.lockMs,
+      idle_in_transaction_session_timeout: limits.idleTransactionMs,
+    });
+    // Idle sockets may fail between queries. pg removes them; do not crash the process
+    // or log a connection string. Subsequent work obtains a fresh connection.
+    this.pool.on('error', (cause: Error & { code?: string }) => {
+      console.error('Database idle connection lost', { code: cause.code ?? 'CONNECTION_LOST' });
+    });
   }
   async transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
+    let broken: Error | undefined;
+    const lost = (cause: Error) => {
+      broken = cause;
+    };
+    client.on('error', lost);
     try {
       await client.query('BEGIN');
       const result = await fn(client);
       await client.query('COMMIT');
       return result;
     } catch (e) {
-      await client.query('ROLLBACK');
+      try {
+        await client.query('ROLLBACK');
+      } catch (cause) {
+        broken = cause instanceof Error ? cause : new Error('Rollback failed.');
+      }
       throw e;
     } finally {
-      client.release();
+      client.removeListener('error', lost);
+      client.release(broken);
     }
   }
   async migrate() {
     await this.transaction(async (c) => {
+      // Bounded release-only allowance, reverted at transaction end; runtime stays strict.
+      await c.query("SET LOCAL statement_timeout='60s'; SET LOCAL lock_timeout='10s'");
       await c.query('SELECT pg_advisory_xact_lock(833016)');
       await c.query(
         'CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())',

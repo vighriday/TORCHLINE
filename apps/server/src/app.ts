@@ -54,6 +54,7 @@ export interface AppConfig {
   twitchRedirectUri?: string;
   eventsubSecret?: string;
   botUserId?: string;
+  botRepliesEnabled?: boolean;
   inputPolicy?: InputPolicy;
   feedLimits?: { perChannel: number; total: number };
 }
@@ -263,6 +264,7 @@ export async function createApp(
       integration: {
         credentialsConfigured: Boolean(config.twitchClientId && config.twitchClientSecret),
         botAuthorized: details?.botAuthorized ?? Boolean(bot),
+        botRepliesEnabled: config.botRepliesEnabled !== false,
         publicHttps: secure,
         genuineRaidVerified: false,
         ...(details ? { details } : {}),

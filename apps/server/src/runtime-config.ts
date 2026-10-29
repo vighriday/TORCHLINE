@@ -93,6 +93,12 @@ export function runtimeConfig(env: NodeJS.ProcessEnv) {
     twitchRedirectUri: env.TWITCH_REDIRECT_URI,
     eventsubSecret: env.EVENTSUB_SECRET,
     botUserId: env.TWITCH_BOT_USER_ID,
+    botRepliesEnabled: (() => {
+      if (env.BOT_REPLIES_ENABLED === undefined) return true;
+      if (!['true', 'false'].includes(env.BOT_REPLIES_ENABLED))
+        throw new Error('BOT_REPLIES_ENABLED must be true or false.');
+      return env.BOT_REPLIES_ENABLED === 'true';
+    })(),
     inputPolicy: inputPolicy(env),
     feedLimits: {
       perChannel: bounded('FEED_MAX_PER_CHANNEL', 8, 100),
@@ -102,6 +108,11 @@ export function runtimeConfig(env: NodeJS.ProcessEnv) {
   return {
     config,
     databaseUrl: env.DATABASE_URL,
+    databaseBudgets: {
+      statementMs: bounded('DB_STATEMENT_TIMEOUT_MS', 10000, 60000),
+      lockMs: bounded('DB_LOCK_TIMEOUT_MS', 2000, 10000),
+      idleTransactionMs: bounded('DB_IDLE_TRANSACTION_TIMEOUT_MS', 15000, 60000),
+    },
     port: bounded('PORT', mode === 'live' ? 3001 : 3000, 65535),
     host: env.HOST || '127.0.0.1',
   };

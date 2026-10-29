@@ -18,7 +18,7 @@ const shutdown = (code = 0) => {
 };
 try {
   const runtime = runtimeConfig(process.env);
-  store = new Store(runtime.databaseUrl);
+  store = new Store(runtime.databaseUrl, runtime.databaseBudgets);
   if (
     !(await store.pool.query('SELECT 1 FROM schema_migrations WHERE name=$1', [REQUIRED_MIGRATION]))
       .rowCount

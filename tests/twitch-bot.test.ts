@@ -7,6 +7,100 @@ import { authorize, browserHeader, liveConfig, providerFixture, tick } from './t
 const send = (app: Awaited<ReturnType<typeof createApp>>) =>
   (app as unknown as { botTick: () => Promise<void> }).botTick();
 
+it('keeps signed gameplay, persisted clues and the read-only overlay working when outbound replies are paused', () =>
+  database(async (store) => {
+    const config = { ...liveConfig, botRepliesEnabled: false };
+    const provider = providerFixture(config);
+    const app = await createApp(store, config, { workers: false, fetcher: provider.fetcher });
+    provider.attach(app);
+    try {
+      const creator = await authorize(app, '42');
+      await authorize(app, '99', true);
+      await app.inject({
+        method: 'POST',
+        url: '/api/twitch/reconcile',
+        headers: creator.headers,
+        payload: {},
+      });
+      const id = (
+        await app.inject({
+          method: 'POST',
+          url: '/api/worlds',
+          headers: creator.headers,
+          payload: {},
+        })
+      ).json().id;
+      await app.inject({
+        method: 'POST',
+        url: `/api/worlds/${id}/commands`,
+        headers: creator.headers,
+        payload: { command: { type: 'start' }, expectedVersion: 0, commandId: randomUUID() },
+      });
+      const access = (
+        await app.inject({
+          method: 'POST',
+          url: '/api/overlay-grant',
+          headers: creator.headers,
+          payload: {},
+        })
+      ).json().url;
+      const session = await app.inject({
+        method: 'POST',
+        url: '/overlay/42/session',
+        headers: browserHeader,
+        payload: { token: new URL(access).hash.slice(1) },
+      });
+      const overlayHeaders = { cookie: session.headers['set-cookie']!.toString().split(';')[0] };
+      const sub = provider.subscriptions.find((s) => s.type === 'channel.chat.message')!;
+      await store.pool.query(
+        "INSERT INTO bot_replies(id,channel_id,body) VALUES('previously-pending','42','fixture')",
+      );
+      for (const text of ['!status', '!scan A']) {
+        expect(
+          (
+            await provider.deliver(sub, {
+              broadcaster_user_id: '42',
+              chatter_user_id: '77',
+              message_id: randomUUID(),
+              message: { text },
+            })
+          ).statusCode,
+        ).toBe(204);
+      }
+      await tick(app);
+      await send(app);
+      expect(provider.messages).toHaveLength(0);
+      expect((await store.pool.query('SELECT count(*) FROM bot_replies')).rows[0].count).toBe('1');
+      expect((await store.get(id)).state.challenge.scanned).toEqual(['A']);
+      const overlay = await app.inject({ url: '/overlay/42/state', headers: overlayHeaders });
+      expect(overlay.statusCode).toBe(200);
+      const node = overlay.json().world.challenge.nodes.find((n: { id: string }) => n.id === 'A');
+      expect(node.revealed).toBe(true);
+      expect(node.clue).toBeTruthy();
+      expect(overlay.json().world.capabilities.canCommit).toBe(false);
+      expect(
+        (await app.inject({ url: '/api/state', headers: creator.headers })).json().integration
+          .botRepliesEnabled,
+      ).toBe(false);
+      expect(
+        (
+          await app.inject({
+            method: 'POST',
+            url: `/api/worlds/${id}/commands`,
+            headers: { ...browserHeader, ...overlayHeaders },
+            payload: {
+              command: { type: 'close-challenge' },
+              expectedVersion: 2,
+              commandId: randomUUID(),
+            },
+          })
+        ).statusCode,
+      ).toBe(401);
+    } finally {
+      await app.close();
+    }
+  }));
+
 it('coalesces channel queries, deduplicates messages and sends only through the authorized bot in the source channel', () =>
   database(async (store) => {
     const provider = providerFixture();
