@@ -12,7 +12,7 @@ Updated 2026-10-29. For the configured accounts start with the [existing-account
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
 | Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev`. Callback mismatch is corrected; fresh real creator sign-in and first live Ark are observed. Native ngrok remains unused. Simulation stays on 3000. |
-| Real chat | First signed query delivered October 29. Bot send reached Twitch but was rejected with `msg_rejected`; visible reply and applied gameplay remain pending. |
+| Real chat | Four signed deliveries; first bot send rejected, two fresh sends accepted by Twitch with the correct accounts. Independent viewer receives the query but no bot reply; delivery and applied gameplay remain pending. |
 | Actual OBS / native raid | Not passed. Use existing two accounts for chat/OBS; a separate consenting broadcaster is needed only for raid acceptance later. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 

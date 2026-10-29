@@ -1,6 +1,6 @@
 # Live acceptance: essential owner steps
 
-Updated 2026-10-29. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. Start with the [existing-account walkthrough](controlled-account-live-test.md). First genuine chat reached the app; Twitch rejected the reply with `msg_rejected`. Gameplay, visible replies, actual OBS and native raid still need acceptance.
+Updated 2026-10-29. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. Start with the [existing-account walkthrough](controlled-account-live-test.md). Four genuine chats reached the app; Twitch accepted two bot sends after the earlier `msg_rejected`. Independent listener confirms missing bot output despite receiving the broadcaster query. Gameplay, actual OBS and native raid also still need acceptance.
 
 ## 1. Restore public HTTPS
 

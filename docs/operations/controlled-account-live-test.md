@@ -7,8 +7,8 @@ Updated October 29, 2026. Use **hriday29** as broadcaster and **hriday_29** as b
 | Check | Current evidence |
 | --- | --- |
 | Public HTTPS, callback and required subscriptions | Real public checks pass; both saved grants validate and 3/3 exact chat/online/offline subscriptions are enabled |
-| Real chat reaching the application | One genuine signed chat delivery at 09:21 UTC on October 29 |
-| Bot reply | The corresponding send was rejected by Twitch with `msg_rejected`; owner saw no reply. Not passed |
+| Real chat reaching the application | Four genuine signed chat deliveries by 10:10 UTC on October 29 |
+| Bot reply | First send rejected with `msg_rejected`; two fresh sends accepted with `is_sent=true` and message IDs. Independent viewer sees the broadcaster query but no bot reply; visible acceptance is still failing |
 | Chat changing the Ark | Not yet observed against Twitch. SQL/provider-fixture tests pass separately |
 | OBS | Public Chromium overlay connection tested previously; actual OBS browser rendering/updates/reconnect still unproven |
 | Native raid | No native proof or live custody change; second broadcaster is an external dependency |
@@ -34,6 +34,10 @@ Normal server startup validates/refreshes existing grants and reconciles subscri
 Current site: [TORCHLINE](https://education-slather-reps.ngrok-free.dev). Exact registered callback: `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Keep computer/database/app/SSH awake. This temporary preview is not permanent production hosting.
 
 ## 1. Resolve the bot account's rejection
+
+**Current next step:** two broadcaster queries have produced provider-accepted replies with the correct sender/destination IDs, but an independent listener received the fresh broadcaster query and no bot output. The owner checked [Mod View](https://www.twitch.tv/moderator/hriday29): nothing listed, empty AutoMod Queue and no bot-message removal in the screenshot. No moderation cause has been established. With the engineering listener ready, send `manual delivery check` manually as **hriday_29** from the private browser to distinguish account delivery from API-specific sending. No additional broadcaster queries are needed now. Do not disable protection or change roles as a guess. [Twitch's Mod View guide](https://help.twitch.tv/s/article/mod-view?language=en_US) explains the inspected panels.
+
+The steps below remain the initial diagnostic/retest procedure if setting up a different session. Manual messages appearing in the bot's own window alone do not establish cross-account visibility. The bot deliberately ignores its own queries.
 
 1. Keep the ordinary Twitch window signed in as **hriday29**.
 2. Open a private/incognito window and sign into Twitch as **hriday_29**. Check the underscore in the actual account menu.

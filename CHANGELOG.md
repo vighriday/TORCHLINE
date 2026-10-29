@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-29 — First native bot send accepted
+
+- A fresh real broadcaster query produced a Twitch-accepted bot reply (`is_sent=true`, nonempty message ID) at 09:57 UTC. Twitch's user lookup verifies destination hriday29 and sender hriday_29. Native counters now distinguish three signed deliveries and one accepted send from the earlier rejection; applied gameplay/raid counters remain zero.
+- Owner still reports no visible automatic reply. Keep visible chat acceptance unresolved; manual messages shown only in the bot window do not prove cross-account delivery. Document a read-only Mod View check, without changing protection, permissions, bot role or resending uncertain messages. No application behavior changed.
+- A controlled `!history` reached an independent anonymous read-only TLS viewer at 10:09 UTC; its automatic reply was accepted by Twitch but never reached that viewer during observation. Four signed chats/two accepted sends now establish a genuine delivery discrepancy outside the owner's browser, with no proven account/provider cause. Mod View check is empty; manual bot delivery remains the next control. Private diagnostic notes/identifiers stay ignored and no support request was submitted.
+
 ## 2026-10-29 — Existing-account live preparation
 
 - Added `live:up` / `live:check` for the existing local live database, app and registered strict SSH setup. Preserve credentials/acceptance baseline; never kill unknown processes, send chat or manufacture native proof. Read-only acceptance reports now include grouped bot outcomes.
