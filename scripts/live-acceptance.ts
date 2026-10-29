@@ -54,7 +54,7 @@ try {
       botOutcomes,
       manualEvidenceRequired: [
         'Actual chat reply visibility',
-        'Actual OBS CEF render/reconnect',
+        'Native OBS gameplay updates, source refresh/link rotation and broadcast output; first render and controlled app-restart recovery are separately documented',
         'Two consenting broadcasters: native raid and inherited condition/history plus revoked former custody',
       ],
     };

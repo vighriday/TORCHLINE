@@ -146,11 +146,12 @@ try {
             existingWorlds: worlds,
             ownerSteps: [
               'Sign into TORCHLINE as hriday29 if its browser session expired; use the existing Ark.',
-              'Send a legal current command, then !status, in hriday29 Twitch chat; observe hriday_29 reply.',
-              'Open the private source in actual OBS and confirm updates/reconnect.',
+              'Use twitch:verify:play and send one legal gameplay command during its open phase in actual hriday29 chat; queries do not prove a game change.',
+              'Native OBS rendering and controlled app-restart recovery are documented; verify gameplay updates and source refresh/link rotation separately.',
             ],
             nativeRaid:
               'External dependency: a second consenting broadcaster. hriday_29 remains the bot; this command never starts or verifies a raid.',
+            botRepliesEnabled: runtime.config.botRepliesEnabled !== false,
           },
           null,
           2,

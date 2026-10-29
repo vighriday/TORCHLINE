@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-29 — Native OBS evidence and acceptance probes
+
+- Add a read-only genuine-chat observer joining signed delivery, durable processing, canonical viewer events and the actual HTTPS overlay/reload. Add an authenticated native OBS probe with exact temporary source, unique CEF target, current-build/first-frame checks and zero page-control permissions. Neither tool sends chat, starts output or manufactures raid evidence; incomplete results replace stale success reports.
+- Verify the current 3D Ark in installed OBS 32.2.2 at 1280×720, then observe a controlled app outage/reconnect without source reload or canonical-state change. Original OBS configuration is untouched; the isolated instance was stopped afterward. Native gameplay updates, source refresh/link rotation and actual broadcast remain separate gates.
+- Document application/auth/channel/account evidence for invisible replies and remove support-first/repeated-message instructions. Refresh owner guidance, status and primary sources. Keep four native deliveries, zero applied native gameplay actions, two accepted-but-invisible sends and zero native transfers distinct. No scope, role or custody requirement was weakened; the preview tag stays unchanged.
+- Create a fresh encrypted live snapshot (25 tables/70 rows), authenticate and restore it into a disposable database, and replay the saved world without changing the source. Remote durability and clean-host deployment recovery remain unverified.
+
 ## 2026-10-29 — Gameplay layout and saved controls
 
 - Replace competing screen offsets with reserved heading, status, vessel, resource, mission and footer regions. Preserve Claude Design's artwork, encounter effects, real game state and handlers. Fix mobile title/setup overlap, utility-page alignment and the 1080p OBS footer; captain content can scroll instead of hiding controls.

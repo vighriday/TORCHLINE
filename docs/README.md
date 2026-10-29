@@ -1,6 +1,6 @@
 # Documentation
 
-**Latest: [October 29 recovery/live follow-up](reports/2026-10-29-recovery-and-live-acceptance.md).** Recovery fixes pass 102 tests and twelve browser journeys; public HTTPS/grants/subscriptions validate and genuine chat arrives. Twitch accepted a fresh bot send after the earlier rejection; visible output remains unresolved. Applied chat, actual OBS, native raid and production deployment also remain incomplete. The [critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [audit evidence](reviews/2026-10-29-audit-evidence.json) retain their historical findings; the follow-up maps fixes and outstanding gates.
+**Latest: [October 29 integration diagnosis](reports/2026-10-29-integration-diagnosis.md) and [visual review](reviews/2026-10-29-ui-layout-review.md).** Local build, 107 tests and all 14 browser journeys pass. Public HTTPS/grants/exact subscriptions validate; genuine chat arrives. The current game renders in native OBS and recovers after a controlled app outage. Bot visibility, genuine gameplay effects, native raid and production deployment remain incomplete. The [critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [audit evidence](reviews/2026-10-29-audit-evidence.json) retain their historical findings; follow-ups distinguish fixes from outstanding gates.
 
 Research checked **2026-10-26**. Architecture is approved and the first gameplay foundation is implemented. [Implementation status](planning/implementation-status.md) distinguishes tested local behavior from the wider target and external verification. Delivery follows dependencies and measured progress without assumed staffing or fixed development hours.
 
@@ -26,6 +26,7 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Backup and restore](operations/backup-and-restore.md) | Encrypted snapshots, isolated recovery, replay checks and external durability gates |
 | [Decision register](decisions/README.md) | Proposed architecture decisions and revisit triggers |
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
+| [October 29 integration diagnosis](reports/2026-10-29-integration-diagnosis.md) | Account/channel/application evidence, independent reply degradation, SQL recovery and actual native OBS rendering |
 | [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
 | [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
 | [README presentation](design/readme-story.md) | Simple reading path, researched GitHub interactions, actual gameplay media and proof limits |

@@ -29,9 +29,9 @@ You can play the whole journey on one channel. Or pass the same Ark to another s
   <img src="assets/readme/world-trace.gif" width="1400" alt="Handoff illustration: one community makes a choice, the same Ark keeps the consequences, the next community inherits the story. A genuine raid test is still pending.">
 </picture>
 
-> **Where we are:** the full journey works in a saved practice game. Twitch sign-in, event connections and the public game screen have been checked. Real chat gameplay, visible bot replies, OBS and the two-streamer raid test still need live confirmation. [Evidence and next steps](#what-works-today).
+> **Where we are:** the full journey works in a saved practice game. Twitch sign-in, incoming chat and the game inside OBS have been checked. Real chat changing the Ark, visible bot replies and the two-streamer raid still need live confirmation. [Evidence and next steps](#what-works-today).
 
-> **October 29 follow-up:** the preview is online, recovery fixes pass, and Twitch accepts a real bot reply. Its appearance in chat is still unresolved; live gameplay, OBS and the native raid also need proof. [Current results and next steps](docs/reports/2026-10-29-recovery-and-live-acceptance.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md).
+> **October 29 follow-up:** clearer game layouts, saved timing and OBS reconnection now pass their checks. Twitch accepts bot replies, but other viewers still cannot see them; gameplay stays usable while we investigate. [Current evidence](docs/reports/2026-10-29-integration-diagnosis.md) · [Visual review](docs/reviews/2026-10-29-ui-layout-review.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md).
 
 ## Make the first choice
 
@@ -191,12 +191,12 @@ Already connected? Use the [short live-testing checklist](docs/operations/live-r
 
 | Checked | Still needs real-world confirmation |
 | --- | --- |
-| Full saved-simulation season, repairs, choices, endings and history | Genuine chat participation and visible bot replies |
-| Broadcaster/bot sign-in and all three required Twitch event connections | OBS and a real two-streamer raid handoff |
-| Public game screen and an overlay that can watch without controlling | Permanent hosting, remote recovery and extended live testing |
-| **97 automated tests · 11 browser journeys**, plus release-image checks | Full-season playtesting and owner acceptance |
+| Full saved practice season, repairs, choices, endings and history | Genuine chat changing the Ark and visible bot replies |
+| Broadcaster/bot sign-in, incoming chat and all three required event connections | A real two-streamer raid handoff |
+| Actual OBS game rendering and recovery after a local app outage | Live chat updates in OBS, link rotation and broadcast output |
+| **107 automated tests · 14 browser journeys**, plus checks across five screen sizes | Permanent hosting, remote recovery and full-season audience testing |
 
-Automated checks passed [October 29, 2026](https://github.com/vighriday/TORCHLINE/actions/runs/40814601546). The live-service checks above are from October 28. Practice footage and automated checks do not stand in for live Twitch proof. [Current status](docs/planning/implementation-status.md) · [Release report](docs/reports/2026-10-28-release-readiness.md).
+These local and live-service results were checked October 29; exact-source CI is tracked separately. Practice footage and automated checks do not stand in for live Twitch proof. [Current evidence and remaining work](docs/reports/2026-10-29-integration-diagnosis.md) · [Implementation status](docs/planning/implementation-status.md).
 
 ## Behind the game
 

@@ -234,7 +234,7 @@ const report = {
     'Provider calls are read-only. Public route probes exercise unauthenticated denial; no authenticated game action, chat, raid, synthetic proof or subscription change is sent.',
   checks,
   externalAcceptance:
-    'Actual OBS and a recorded native two-broadcaster raid session remain separate from automated diagnostics.',
+    'Native OBS gameplay/refresh/link-rotation/broadcast acceptance and a recorded native two-broadcaster raid remain separate from these automated diagnostics.',
 };
 await mkdir('.local', { recursive: true });
 await writeFile('.local/live-verification.json', JSON.stringify(report, null, 2) + '\n', {

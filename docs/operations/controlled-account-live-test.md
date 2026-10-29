@@ -10,7 +10,7 @@ Updated October 29, 2026. Use **hriday29** as broadcaster and **hriday_29** as b
 | Real chat reaching the application | Four genuine signed chat deliveries by 10:10 UTC on October 29 |
 | Bot reply | First send rejected with `msg_rejected`; two fresh sends accepted with `is_sent=true` and message IDs. Independent viewer sees the broadcaster query but no bot reply; visible acceptance is still failing |
 | Chat changing the Ark | Not yet observed against Twitch. SQL/provider-fixture tests pass separately |
-| OBS | Public Chromium overlay connection tested previously; actual OBS browser rendering/updates/reconnect still unproven |
+| OBS | Actual OBS 32.2.2 renders the current live HTTPS Ark and recovers across a controlled app outage without source reload. Native gameplay updates, deliberate refresh, link rotation and broadcast output remain separate gates |
 | Native raid | No native proof or live custody change; second broadcaster is an external dependency |
 
 The signed query proves inbound delivery, not gameplay. `!status` does not change the Ark. Existing practice worlds and fixture providers do not count as Twitch evidence.
@@ -33,31 +33,27 @@ Normal server startup validates/refreshes existing grants and reconciles subscri
 
 Current site: [TORCHLINE](https://education-slather-reps.ngrok-free.dev). Exact registered callback: `https://education-slather-reps.ngrok-free.dev/auth/twitch/callback`. Keep computer/database/app/SSH awake. This temporary preview is not permanent production hosting.
 
-## 1. Resolve the bot account's rejection
+## 1. Bot diagnosis — completed checks, no repeated trial messages
 
 **Current result:** two broadcaster queries produced provider-accepted replies with the correct account IDs, but an independent listener received the fresh broadcaster query and no bot output. The owner also manually sent as **hriday_29** entirely in Twitch and confirmed that message is missing from the broadcaster's browser. The problem therefore also occurs without TORCHLINE's send code. Mod View was empty; the exact cause remains unknown. No additional chat queries are needed now.
 
 **Completed owner checks:** the owner confirmed the bot profile is **hriday_29**, its email is verified, and **hriday29** is not in its blocked list. The owner also confirmed **hriday_29** is not in the broadcaster's blocked list. Mod View showed no held reply or bot-message removal. No mandatory phone-verification prompt was supplied; the standalone **Add a number** option is not itself such an error. Do not repeat these checks or send more trial messages without a new diagnostic reason.
 
-**Current owner action:** open [Twitch Support](https://help.twitch.tv/s/contactsupport), identify the affected account as **hriday_29**, and report the reproducible native/manual delivery failure. A ready-to-copy private draft with exact provider timestamps/message IDs is at ignored `.local/twitch-chat-support.md` on the owner's machine. No request has been submitted automatically. [Twitch's troubleshooting](https://help.twitch.tv/s/article/why-cant-i-chat) recommends support after the usual checks; temporary account limitations are one documented possibility, not an established cause here. Keep the existing app, accounts and validated grants. Do not grant a broader role or disable protection to mask this failure.
+**Continue gameplay and OBS first.** No further account checks or blind reauthorizations are requested. [The systematic diagnosis](../reports/2026-10-29-integration-diagnosis.md) separates application, authorization, channel and account/provider evidence. `BOT_REPLIES_ENABLED=false` pauses outgoing replies while incoming participation continues. A private support draft remains available if provider-only account information is later required; it is not a prerequisite for the rest of TORCHLINE. No request has been submitted automatically. Keep the existing accounts, scopes and protections.
 
-The steps below remain the initial diagnostic/retest procedure if setting up a different session. Manual messages appearing in the bot's own window alone do not establish cross-account visibility. The bot deliberately ignores its own queries.
-
-1. Keep the ordinary Twitch window signed in as **hriday29**.
-2. Open a private/incognito window and sign into Twitch as **hriday_29**. Check the underscore in the actual account menu.
-3. In that private window open [hriday29's chat](https://www.twitch.tv/popout/hriday29/chat). Try `TORCHLINE bot check`. Complete any Twitch rules or account verification prompt yourself. A message labeled **hriday29** tests the broadcaster, not the bot.
-4. Report whether the bot message appears, or the exact non-secret rejection. Do not change channel protections, grant moderator permissions or repeat bot authorization as a blind fix.
-5. Once the bot can speak, return to the ordinary **hriday29** chat and send `!status`. Wait at least ten seconds between query attempts. Confirm a visible reply from **hriday_29**.
+Manual messages appearing in the bot's own window alone do not establish cross-account visibility. The bot deliberately ignores its own queries. A future reply retest should follow an identified account/provider change and use one command with an independent observation window.
 
 We checked the read-only Twitch chat settings: emote/follower/subscriber/slow/unique modes are off. That endpoint does not establish email/phone verification or account restrictions. The code `msg_rejected` alone does not identify the cause. Old failed or uncertain sends will not be replayed automatically. Broadcast now exposes the latest outcome privately; a native accepted send still needs visual confirmation.
 
 ## 2. Prove real gameplay without another account
 
-1. Open TORCHLINE as **Captain / hriday29**, using the existing Ark. At preparation time it is in chapter 1's **awaiting-commit** phase. Do not create a replacement to test an obsolete scan.
-2. Review the two consequences and commit your own preferred chapter 1 choice. At the next **ready** boundary choose Manual timing if available, then start chapter 2. Manual timing makes the acceptance session easy to coordinate; it does not bypass any puzzle or custody rule. Older manual-rule worlds keep their original timing.
+Engineering runs `pnpm twitch:verify:play` first. It watches genuinely signed gameplay, its canonical event and the visible HTTPS overlay clue after reload. The owner performs only the next phase-valid action; no additional bot query is needed. A timeout is not a pass.
+
+1. Open TORCHLINE as **Captain / hriday29**, using the existing Ark. At the latest check it is in chapter 2's **awaiting-commit** phase; use the current displayed state if that changes. Do not create a replacement to test an obsolete scan.
+2. Review the two consequences and commit your own preferred current choice. At the next **ready** boundary save Manual timing if available, then start that chapter. Manual timing makes the acceptance session easy to coordinate; it does not bypass any puzzle or custody rule. Older manual-rule worlds keep their original timing.
 3. While the displayed challenge is open, send the displayed legal command from **hriday29's actual Twitch chat**, for example `!scan A` if A is still unknown. Confirm its clue changes in TORCHLINE and survives reload.
 4. Submit the solved route shown by the puzzle's rules. Check the resulting resources/ship condition. In the decision phase send `!vote 1` before advice closes; only the captain can commit.
-5. Run `pnpm live:acceptance check`. `signedChat`, `persistedChatActions` and `nativeAcceptedReplies` should increase for their respective actions. Inspect the visible consequence and reply as well.
+5. Run `pnpm live:acceptance check`. `signedChat` and `persistedChatActions` should increase for this action. `nativeAcceptedReplies` is a separate outbound counter and need not change for gameplay. Inspect the visible consequence as well.
 
 The broadcaster is an eligible ordinary participant; using it exercises real Twitch transport without fabricating another viewer. This does not replace multi-person audience usability/cooperation testing. Bot-authored commands remain ignored.
 
@@ -66,8 +62,10 @@ The broadcaster is an eligible ordinary participant; using it exercises real Twi
 1. In TORCHLINE's Captain tools generate/copy the private OBS link. Do not share the full URL; its fragment grants read access.
 2. In OBS choose **Sources → + → Browser**, name it TORCHLINE and paste the complete URL. Use **1920 × 1080** or **1280 × 720**, with **30 FPS**. Start with source shutdown/refresh-on-activation disabled. [OBS properties](https://obsproject.com/kb/browser-source).
 3. Confirm the real Ark, phase, resources and damaged/repaired systems match the dashboard; no captain/operator controls appear. Trigger the legal chat action from step 2 and observe OBS update without a refresh.
-4. Hide/show and refresh the source. Briefly interrupt and restore its connection. The current saved state should return without repeating consequences. New recovery tests cover this in Chromium; only this step proves OBS's actual browser engine.
+4. Hide/show and refresh the source. Briefly interrupt and restore its connection. The current saved state should return without repeating consequences. A controlled local app outage already passed in native OBS; deliberate refresh, hide/show and the owner's actual source still need confirmation.
 5. Record a short local sample and inspect it on a phone for legibility. Streaming publicly is not required for this local OBS test. Rotate the link, check the old source loses access, then update OBS with the newly generated link.
+
+Engineering can run `pnpm twitch:verify:obs` against the prepared isolated OBS profile while its temporary source is current. It checks native CEF, the current built asset, first-frame readiness, no host controls, zero OBS page-control permission and inactive outputs, then saves a private native-source screenshot. It does not launch OBS or alter its sources. A fresh free-ngrok source can show the provider's HTML warning: the isolated development instance uses ngrok's documented custom client user agent; permanent HTTPS hosting is the release solution. [Current native evidence and limitations](../reports/2026-10-29-integration-diagnosis.md).
 
 Engineering can run `pnpm twitch:verify:overlay` against real HTTPS with an independent five-minute read-only grant and no world mutation. It revokes only its own temporary grant. That is a useful connection/permission check, not OBS acceptance.
 

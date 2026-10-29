@@ -39,6 +39,8 @@
     "live:up": "node --env-file=.env.live scripts/live-session.ts up",
     "live:check": "node --env-file=.env.live scripts/live-session.ts check",
     "twitch:verify:overlay": "node --env-file=.env.live scripts/verify-overlay.ts",
+    "twitch:verify:play": "node --env-file=.env.live scripts/verify-live-play.ts",
+    "twitch:verify:obs": "node scripts/verify-obs.ts",
     "backup:prepare": "node scripts/backup.ts prepare",
     "backup:create": "node --env-file=.env.live scripts/backup.ts create",
     "backup:drill": "node --env-file=.env.live scripts/backup.ts drill",

@@ -12,8 +12,9 @@ Updated 2026-10-29. For the configured accounts start with the [existing-account
 | Dedicated bot | `hriday_29` completed real bot consent and the named conversion. It is a separate account with no creator custody authority. |
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
 | Current public preview | Reachable through Windows OpenSSH at `https://education-slather-reps.ngrok-free.dev`. Callback mismatch is corrected; fresh real creator sign-in and first live Ark are observed. Native ngrok remains unused. Simulation stays on 3000. |
-| Real chat | Four signed deliveries; first bot send rejected, two fresh sends accepted by Twitch with the correct accounts. Independent viewer receives the query but no bot reply; delivery and applied gameplay remain pending. |
-| Actual OBS / native raid | Not passed. Use existing two accounts for chat/OBS; a separate consenting broadcaster is needed only for raid acceptance later. |
+| Real chat | Four signed deliveries, zero applied native actions; two bot sends accepted but invisible to other viewers. Replies are independently paused. Follow the current walkthrough rather than repeating query/account checks. |
+| Actual OBS | Current 3D Ark renders in native OBS 32.2.2 and recovers across a controlled app outage without source reload. Chat-driven updates, source refresh/link rotation and broadcast output remain to verify. |
+| Native raid | Not passed. A separate consenting broadcaster is needed only for this later acceptance; the dedicated bot keeps its role. |
 | Production hosting | Not provisioned. Hosting below is a proposed procedure, not a deployed service. |
 
 ## 1. Keep the two Twitch accounts separate

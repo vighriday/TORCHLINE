@@ -1,6 +1,6 @@
 # Live acceptance: essential owner steps
 
-Updated 2026-10-29. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. Start with the [existing-account walkthrough](controlled-account-live-test.md). Four genuine chats reached the app; Twitch accepted two bot sends after the earlier `msg_rejected`. Independent listener confirms missing bot output despite receiving the broadcaster query. Gameplay, actual OBS and native raid also still need acceptance.
+Updated 2026-10-29 UTC. App/credentials and broadcaster `hriday29` / bot `hriday_29` consent already exist. Keep the existing app and accounts. Start with the [existing-account walkthrough](controlled-account-live-test.md). Four genuine chats reached the app; two accepted bot sends remain invisible to other viewers, so replies are independently paused. Native OBS renders the current 3D Ark and recovers after a controlled app outage. Genuine gameplay effects, visible replies, further OBS checks and native raid remain distinct gates. [Current evidence](../reports/2026-10-29-integration-diagnosis.md).
 
 ## 1. Restore public HTTPS
 
@@ -30,8 +30,8 @@ Engineering runs `pnpm twitch:verify:live`: real grants, all provider subscripti
 A live baseline is already saved locally. Keep it, or deliberately start a new session with `pnpm live:acceptance begin --replace`.
 
 1. Resume the existing live Ark. The new flight deck's **Open Twitch chat** action opens the broadcaster's actual chat directly; the adjacent command updates with the legal phase. During an open challenge, scan a still-unknown relay. During a decision, vote before advice freezes. If chapter 1 has ended, do not create another Ark just to test an obsolete scan. Confirm the actual clue/advice and private applied-action counter change. Copying a command alone does not send it.
-2. Type `!status`; confirm a visible reply from `hriday_29` in that same Twitch channel. Queries within ten seconds can intentionally coalesce. Accepted API sends alone do not prove visibility.
-3. Run `pnpm live:acceptance check`. New signed chat, persisted engine action and native accepted-reply counters must increase. No raw chat, participant IDs, grants or capability URLs are exported. Observe the actual consequence/reply as well as counters.
+2. No additional bot query is requested now. Completed identity/email/block/moderation checks and the manual cross-account failure are recorded in the current evidence. Retest a reply only after an identified provider/account change, with outbound replies deliberately enabled and one observed command. Accepted API sends alone do not prove visibility.
+3. Run `pnpm live:acceptance check`. New signed chat and persisted engine-action counters should increase for a valid action. Bot sends are a separate counter and need not change while replies are paused. No raw chat, participant IDs, grants or capability URLs are exported. Observe the actual game consequence as well as counters.
 
 ## 4. Prove OBS connectivity
 

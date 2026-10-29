@@ -24,6 +24,7 @@ The archive contains sessions, encrypted grants, durable inbox/outbox and custod
 
 - Native PostgreSQL integration test: real public-schema gameplay, persistent navigation sacrifice, encrypted sentinel, all-table fingerprints, deterministic replay, wrong key/corruption rejected before SQL, same-source/nonempty protections and source preservation.
 - Actual local live snapshot: 25 tables / 25 rows, authenticated scratch restore succeeded on October 28. **Zero live worlds existed**, so gameplay replay evidence comes from the isolated test, not this archive.
+- October 29 18:36 UTC follow-up: the current live database's encrypted 25-table/70-row snapshot authenticates and restores into a disposable database; one saved world replays successfully and source state is preserved. This supersedes the earlier zero-world limitation for local recovery only. Remote durability and clean-host recovery remain unverified.
 - No remote backup scheduler, managed restore, measured production RPO/RTO, cross-major recovery or large-data throughput claim. A staging restore with deployment secrets is a release gate.
 
 See [ADR 0018](../decisions/0018-encrypted-recovery.md).
