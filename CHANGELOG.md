@@ -1,11 +1,13 @@
 # Changelog
 
-## 2026-10-29 — v0.1.0-preview.1 release preparation
+## 2026-10-29 — v0.1.0-preview.1
 
 - Introduced the first named development preview with seven aligned private package versions, version-specific release notes, README release navigation and a documented immutable-tag policy. This is a source prerelease, not a stable API or production deployment.
 - Added CI checks for package privacy/version alignment, release-note/README consistency and release tags. Game rules, presentation schemas, migrations and world revisions retain independent versions.
 - Reviewed the README's distinctive elements and promoted the actual 3D Ark to the top navigation. Kept setup/technical depth optional and native Twitch acceptance explicitly pending.
 - Added 15 accurate repository topics and a persistent-game-first description, then verified the remote metadata. Publication and exact-source verification are recorded separately from preparation.
+- Published the [development prerelease](https://github.com/vighriday/TORCHLINE/releases/tag/v0.1.0-preview.1) from annotated tag `v0.1.0-preview.1`, pinned to source `cb8348b`. [Tag CI](https://github.com/vighriday/TORCHLINE/actions/runs/40817351801) and [branch CI](https://github.com/vighriday/TORCHLINE/actions/runs/40817351723) pass: 97 tests, 11 browser journeys, version/proof checks and restricted release-container smoke.
+- Downloaded and inspected the actual source ZIP: 232 files, all seven private manifests aligned, and no concept inputs, environments other than `.env.example`, internal notes, raw design workspace or machine-local tooling. Verified the prerelease flag, exact remote tag target and retained private repository/default branch. This publication record does not move the released tag.
 
 ## 2026-10-29 — Story-first README
 
