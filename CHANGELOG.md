@@ -9,6 +9,7 @@
 - Report why audience input did not apply, per current window, so the streamer can explain a rate limit, a full queue or a command typed in the wrong phase. Viewer identities stay excluded. Regression: `tests/input-feedback.test.ts`.
 - Read chapter titles and choices from the rules version of the world being presented rather than the pinned historical default, and fail loudly if the two rules versions drift apart without a deliberate decision. Regression: `tests/rules-dispatch.test.ts`.
 - Re-verify the audit's reproduced defects on this source: signed chat revocation now pauses the episode (`challenge` → `paused`), and a stale provider validation no longer blocks the local disconnect that revokes authority. Both re-run through `scripts/audit/probes.ts`.
+- Add a current-rule balance exploration with witnesses. A seeded, reproducible sweep of complete ark-v3 seasons attempts every legal action at every boundary it reaches: all three endings are reached with witnesses that replay exactly, no reachable state lacks a legal action, no boundary refuses every legal action, and the only refusals are `UNAFFORDABLE` and `ALREADY_DISCOVERED`. It is a bounded sample, not a proof: a complete season enumeration is not feasible because the state space is the full resource, system and obligation product. Regression: `tests/balance-v3.test.ts`.
 
 ## v0.1.0-preview.2 — October 30, 2026
 
