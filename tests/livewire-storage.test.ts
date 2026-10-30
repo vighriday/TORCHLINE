@@ -10,7 +10,7 @@ import {
 } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import type { LivewireRequest } from '@torchline/contracts';
-import { replayEvents, applyCommand } from '@torchline/engine';
+import { replayEvents, applyCommand, createWorld } from '@torchline/engine';
 import { database } from './helpers.ts';
 
 async function setup(store: Store) {
@@ -56,6 +56,140 @@ async function vote(
   });
 }
 describe('LIVEWIRE real PostgreSQL transactions', () => {
+  it('carries mission damage and the spent allowance through consented simulated custody without empowering the former host', () =>
+    database(async (store) => {
+      const { creator, id } = await setup(store),
+        target = await store.ensureCreator('sim-receiver', 'Receiver', 'simulation');
+      await store.optIn(target.id, true);
+      for (const command of [
+        { type: 'start' },
+        { type: 'close-challenge' },
+        { type: 'close-voting' },
+        { type: 'commit', option: 'seal-habitat' },
+      ] as const)
+        await store.command(
+          id,
+          { id: creator.id, role: 'host', community: creator.id },
+          'simulation',
+          (await store.get(id)).revision,
+          randomUUID(),
+          command,
+        );
+      const stakeId = await open(store, creator, id);
+      await vote(store, creator, 'hull');
+      await action(store, creator, id, { type: 'lock', stakeId });
+      await action(store, creator, id, { type: 'resolve', stakeId, outcome: 'failure' });
+      const before = await store.get(id),
+        offer = await store.prepare(id, creator, target.id, before.revision);
+      await store.observeRaid({
+        mode: 'simulation',
+        messageId: `simulated-${randomUUID()}`,
+        sourceId: creator.id,
+        targetId: target.id,
+        subscriptionId: 'simulated-only',
+        notificationAt: (
+          await store.pool.query('SELECT clock_timestamp() AS at')
+        ).rows[0].at.toISOString(),
+      });
+      await store.accept(offer.id, target);
+      const inherited = await store.get(id);
+      expect(inherited.state).toEqual(before.state);
+      expect(inherited.custodian_id).toBe(target.id);
+      expect(replayEvents(id, inherited.events)).toEqual(inherited.state);
+      await expect(
+        action(store, target, id, {
+          type: 'open',
+          preset: 'match',
+          game: 'Game',
+          label: 'Attempt',
+        }),
+      ).rejects.toMatchObject({ code: 'CHARGE_SPENT' });
+      await expect(
+        action(store, creator, id, { type: 'resolve', stakeId, outcome: 'success' }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      await store.command(
+        id,
+        { id: target.id, role: 'host', community: target.id },
+        'simulation',
+        inherited.revision,
+        randomUUID(),
+        { type: 'start' },
+      );
+      expect((await store.get(id)).state.chapter).toBe(2);
+    }));
+  it(
+    'recovers all hosted selections beyond one startup batch, without duplicate pauses',
+    () =>
+      database(async (store) => {
+        const seeds = Array.from({ length: 101 }, (_, i) => {
+          const id = `batch-world-${String(i).padStart(3, '0')}`,
+            channel = `batch-host-${i}`;
+          const next = applyCommand(
+            createWorld(id, 'ark-v3'),
+            {
+              type: 'livewire-open',
+              stakeId: randomUUID(),
+              preset: 'boss',
+              game: 'Game',
+              label: 'Recovery attempt',
+            },
+            { id: channel, community: channel, role: 'host' },
+            { commandId: `seed-${i}`, at: new Date().toISOString() },
+          );
+          return {
+            id,
+            channel,
+            state: next.state,
+            event: next.event,
+            stake: next.state.livewire!.stake,
+          };
+        });
+        await store.transaction(async (c) => {
+          await c.query(
+            "INSERT INTO creators(id,label,mode,connected) SELECT x->>'channel','Recovery captain','simulation',true FROM jsonb_array_elements($1::jsonb) x",
+            [JSON.stringify(seeds)],
+          );
+          await c.query(
+            "INSERT INTO worlds(id,mode,custodian_id,state,revision) SELECT x->>'id','simulation',x->>'channel',x->'state',1 FROM jsonb_array_elements($1::jsonb) x",
+            [JSON.stringify(seeds)],
+          );
+          await c.query(
+            "INSERT INTO channel_slots(channel_id,world_id) SELECT x->>'channel',x->>'id' FROM jsonb_array_elements($1::jsonb) x",
+            [JSON.stringify(seeds)],
+          );
+          await c.query(
+            "INSERT INTO world_events(world_id,sequence,event) SELECT x->>'id',1,x->'event' FROM jsonb_array_elements($1::jsonb) x",
+            [JSON.stringify(seeds)],
+          );
+          await c.query(
+            "INSERT INTO livewire_stakes(id,world_id,channel_id,chapter,status,deadline_at) SELECT (x->'stake'->>'id')::uuid,x->>'id',x->>'channel',0,'open',(x->'stake'->>'deadlineAt')::timestamptz FROM jsonb_array_elements($1::jsonb) x",
+            [JSON.stringify(seeds)],
+          );
+        });
+        await recoverLivewire(store, 'simulation');
+        await recoverLivewire(store, 'simulation');
+        expect(
+          (
+            await store.pool.query(
+              "SELECT count(*)::integer AS n FROM livewire_stakes WHERE status='paused'",
+            )
+          ).rows[0].n,
+        ).toBe(101);
+        expect(
+          (
+            await store.pool.query(
+              "SELECT count(*)::integer AS n FROM world_events WHERE event->'command'->>'type'='livewire-pause'",
+            )
+          ).rows[0].n,
+        ).toBe(101);
+        for (const seed of [seeds[0], seeds[100]]) {
+          const world = await store.get(seed.id);
+          expect(world.state.livewire!.stake.remainingMs).toBeGreaterThan(0);
+          expect(replayEvents(seed.id, world.events)).toEqual(world.state);
+        }
+      }),
+    30000,
+  );
   it('orders nanosecond Twitch timestamps before using the delivery-ID tie break', () =>
     database(async (store) => {
       const { creator, id } = await setup(store);

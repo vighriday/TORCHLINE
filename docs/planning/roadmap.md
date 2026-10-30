@@ -1,5 +1,7 @@
 # Delivery roadmap
 
+October 30: the isolated [LIVEWIRE v0](../product/livewire-v0.md) lane implements one complete companion mission, with finite economics and unchanged native custody. Keep the existing release protected; require its [candidate acceptance](../operations/livewire-v0.md) before activation. Genuine gameplay chat, native raid, permanent hosting and submission packaging remain independent priorities. Other speculative expansion arms are deferred.
+
 Plan date: 2026-10-26. Architecture review is complete and implementation is underway. [Current evidence](implementation-status.md) records G1 gameplay progress, G2 adapter/UI work, and G3a independent custody checks. G2 live/OBS and G3b authentic raid remain unsatisfied external gates. No team size, daily capacity, or broadcaster availability is assumed.
 
 ## Outcome and ordering

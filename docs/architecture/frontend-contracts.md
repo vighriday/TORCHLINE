@@ -1,5 +1,7 @@
 # Frontend and Claude Design integration contract
 
+The optional `WorldPresentation.livewire` extension is defined in [the shared contract](../../packages/contracts/src/livewire.ts). It carries a sanitized stake, three aggregate counts, participant count, separate ballot revision, lifecycle/deadline, availability and private-control capability. Author/channel actor fields and participant ballots are not projected. Result damage/repair uses existing canonical system marks, resource deltas and causal visual cues. `?view=compact|auto` selects read-only presentation, never authority; replacement URL fragments trigger a fresh scoped exchange. See [LIVEWIRE design and rules](../product/livewire-v0.md).
+
 Status: contract implemented; Claude Design exports integrated on 2026-10-27. [ADR 0011](../decisions/0011-claude-design-integration.md) preserves transport and authority while adapting the six surfaces into typed React. [Seven generated fixtures](../design/README.md) exercise the contract at both broadcast sizes. Actual OBS and owner usability/accessibility acceptance remain pending.
 
 ## Boundaries

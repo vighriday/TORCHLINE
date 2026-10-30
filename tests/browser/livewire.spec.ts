@@ -113,6 +113,19 @@ test('mobile mission selection locks, changes the saved Ark once, and updates th
         .filter({ hasText: 'Archive' })
         .click();
       await expect(page.locator('.history').getByText(/Streamer-attested failure/)).toBeVisible();
+      await overlay.setViewportSize({ width: 1280, height: 720 });
+      let release!: () => void;
+      const waiting = new Promise<void>((resolve) => (release = resolve));
+      await overlay.route('**/overlay/sim-alpha/state', async (route) => {
+        await waiting;
+        await route.continue();
+      });
+      await overlay.goto(href!.replace('view=compact', 'view=auto'));
+      await expect(overlay.locator('.lw-dock')).toBeVisible();
+      expect(await overlay.locator('.broadcast-overlay').count()).toBe(0);
+      release();
+      await overlay.unrouteAll({ behavior: 'wait' });
+      await expect(overlay.locator('[data-livewire-resource=hull]')).toHaveText(`${before - 6}%`);
       await page
         .getByRole('navigation', { name: 'Command deck' })
         .getByRole('button')
@@ -120,6 +133,8 @@ test('mobile mission selection locks, changes the saved Ark once, and updates th
         .click();
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
       await expect.poll(async () => (await store.get(id)).state.phase).toBe('challenge');
+      await expect(overlay.locator('.flight-deck')).toBeVisible();
+      expect(await overlay.getByRole('button').count()).toBe(0);
       expect(errors).toEqual([]);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,

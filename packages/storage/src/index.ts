@@ -8,7 +8,7 @@ import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
 import type { InputPolicy } from './admission.ts';
 export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
 export type { InputPolicy } from './admission.ts';
-export const REQUIRED_MIGRATION = '009_livewire.sql';
+export const REQUIRED_MIGRATION = '010_livewire_recovery_index.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';

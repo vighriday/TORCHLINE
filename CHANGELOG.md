@@ -5,6 +5,8 @@
 - Add a pinned, opt-in mission engine extension with finite per-boundary allowances, pre-attempt locks, streamer-attested results, persisted physical consequences and mixed-history replay. Historical Ark reducers remain unchanged. This feature is isolated from the existing release; real Twitch acceptance is pending.
 - Add transactional mission APIs, normalized bounded ballots, signed-chat routing, recovery/expiry, feature gating and custody/hosting exclusion. Regression tests use real PostgreSQL and explicitly isolated provider fixtures; no genuine Twitch mission is claimed.
 - Add the functional captain mission workspace and transparent compact/automatic OBS layouts. Preserve layout across access exchange, handle same-page replacement capabilities, keep outcomes clearly streamer-attested and preserve keyboard access under reduced motion.
+- Keep automatic OBS layout compact while its first saved state loads, then expand only for an actual chapter; verify the transition without exposing host controls.
+- Add a read-only live-evidence probe that rejects simulation-only acceptance, and drain all open selections during restart recovery with an indexed batch cursor. Extend SQL verification across more than one recovery batch and consented simulated custody, without resetting mission allowances.
 
 ## 2026-10-30 — Archive reading pass
 

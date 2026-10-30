@@ -46,7 +46,8 @@
     "backup:drill": "node --env-file=.env.live scripts/backup.ts drill",
     "backup:restore": "node --env-file=.env.live scripts/backup.ts restore",
     "twitch:doctor:live": "node --env-file=.env.live scripts/twitch-doctor.ts",
-    "twitch:verify:live": "node --env-file=.env.live scripts/verify-live.ts"
+    "twitch:verify:live": "node --env-file=.env.live scripts/verify-live.ts",
+    "twitch:verify:livewire": "node --env-file=.env.live scripts/verify-livewire.ts"
   },
   "dependencies": {
     "@torchline/contracts": "workspace:*",

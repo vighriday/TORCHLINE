@@ -172,7 +172,8 @@ function App() {
   };
   if (overlayChannel)
     return new URLSearchParams(location.search).get('view') === 'compact' ||
-      (new URLSearchParams(location.search).get('view') === 'auto' && world?.phase === 'ready') ? (
+      (new URLSearchParams(location.search).get('view') === 'auto' &&
+        (!world || world.phase === 'ready')) ? (
       <LivewireDock world={world} error={visibleError} />
     ) : (
       <BroadcastOverlay world={world} error={visibleError} mode={data?.mode} />

@@ -1,5 +1,7 @@
 # Product requirements
 
+The isolated [LIVEWIRE v0 requirements](livewire-v0.md) add bounded, streamer-attested missions in the same Ark between chapters. This optional extension does not replace the survival game or relax genuine native custody. Its default-off release and live-evidence gates are separate.
+
 Status: approved product direction with implementation underway, 2026-10-26. [Current evidence](../planning/implementation-status.md) distinguishes working foundations from unfinished requirements. Claude Design owns final UI/UX, art and motion; the reference frontend consumes stable physical-state and challenge contracts. Owner roles below indicate responsibility, not staffing assignments.
 
 ## Product thesis

@@ -1,5 +1,7 @@
 # Source register
 
+October 30 LIVEWIRE review: rechecked Twitch's [chat-message subscription contract](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchatmessage) and [webhook handling](https://dev.twitch.tv/docs/eventsub/handling-webhook-events/). Existing signed ingress/scopes are reused; retries remain at least once. Full provider timestamp precision is retained for mission ballot ordering rather than relying on JavaScript/pg millisecond `Date` decoding. Documentation review, local signed fixtures and actual provider acceptance are separate evidence classes.
+
 October 29 follow-up: rechecked [PostgreSQL 17 client execution defaults](https://www.postgresql.org/docs/17/runtime-config-client.html), [OBS portable mode](https://obsproject.com/kb/portable-mode), [official browser-source diagnostics](https://github.com/obsproject/obs-studio/wiki/Browser-source-development-and-debugging), [authenticated obs-websocket protocol](https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md), and [ngrok's documented developer-client identification](https://ngrok.com/docs/pricing-limits/free-plan-limits#removing-the-interstitial-page). Actual installed OBS 32.2.2/CEF127 rendering is separate from Playwright evidence. [Current diagnosis](../reports/2026-10-29-integration-diagnosis.md) separates authorization, channel/account restrictions, accepted sends and observed delivery; no global Twitch restriction is claimed.
 
 ## October 29 audit recheck

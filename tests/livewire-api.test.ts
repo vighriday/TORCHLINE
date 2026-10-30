@@ -5,6 +5,7 @@ import { replayEvents } from '@torchline/engine';
 import { createApp } from '../apps/server/src/app.ts';
 import { database } from './helpers.ts';
 import { authorize, liveConfig, providerFixture, tick } from './twitch-provider.ts';
+import { livewireAcceptance } from '../scripts/lib/livewire-acceptance.ts';
 
 it('keeps the feature off by default and rejects markup or client-supplied effects without spending an allowance', () =>
   database(async (store) => {
@@ -123,6 +124,7 @@ it('applies signed provider fixtures to real SQL ballots, one attested effect, h
       expect((await action({ type: 'resolve', stakeId, outcome: 'failure' })).statusCode).toBe(200);
       const after = await store.get(id);
       expect(after.state.resources.hull).toBe(before - 6);
+      expect((await livewireAcceptance(store)).backendPathObserved).toBe(true);
       expect(replayEvents(id, after.events)).toEqual(after.state);
       expect(
         (await app.inject({ url: `/api/worlds/${id}/history`, headers: owner.headers }))

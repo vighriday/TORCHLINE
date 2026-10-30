@@ -24,7 +24,7 @@ All views share the same scoped read grant. Generating a new grant rotates them 
 
 Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed.
 
-After this branch passes review, apply migration 009 to the intended candidate database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart that candidate. Do not claim that the current public baseline has this feature enabled.
+After this branch passes review, apply migrations 009–010 to the intended candidate database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart that candidate. Do not claim that the current public baseline has this feature enabled.
 
 1. At a ready chapter boundary, the broadcaster opens a clearly described mission before the gaming attempt.
 2. As the broadcaster or another genuine participant, send one displayed legal `!stake` command in that exact channel. Observe count/choice in the dashboard and actual OBS source. Do not send as the bot.
@@ -34,9 +34,11 @@ After this branch passes review, apply migration 009 to the intended candidate d
 
 No repeated bot-status trials are needed. Replies are independently paused on the current preview. Do not weaken bot roles, channel protections, native proof or receiving consent to accelerate acceptance.
 
+Run `pnpm twitch:verify:livewire` with that candidate's ignored `.env.live`. It reads a consistent database snapshot and joins accepted signed-input receipts, the locked crew choice and one cause-linked attested result. It writes a private `.local/livewire-live-result.json` and exits 2 while incomplete. It sends no chat, chooses no result and never turns simulation, a solo choice, OBS rendering or provider metadata into genuine gameplay proof. Native OBS and the actual game attempt still require separate observation.
+
 ## Rollout and rollback
 
-Keep the known-good release/source available. Migration 009 is additive. Test encrypted backup/restore before activation and verify the candidate's public health, authentication denials, assets and SSE through the intended HTTPS proxy. A permanent host/account/region/budget and remote backup destination are still external deployment decisions; no service is purchased automatically.
+Keep the known-good release/source available. Migrations 009–010 are additive. Startup recovery visits every open selection in indexed batches; a batch size is not a cap on worlds recovered. Test encrypted backup/restore before activation and verify the candidate's public health, authentication denials, assets and SSE through the intended HTTPS proxy. A permanent host/account/region/budget and remote backup destination are still external deployment decisions; no service is purchased automatically.
 
 Set `LIVEWIRE_ENABLED=false` to stop new openings, ballots, locks and resumes. An existing locked mission can still be attested or cancelled; paused/open missions can be cancelled, and expiry continues. Finish that cleanup before normal chapter play. **Keep the extension-capable binary:** a pre-extension binary cannot replay histories that contain LIVEWIRE events. Do not roll back by deleting the ledger, ballots or history.
 

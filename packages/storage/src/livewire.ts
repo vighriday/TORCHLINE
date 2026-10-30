@@ -309,29 +309,34 @@ export async function recoverLivewire(
   reason: 'restart' | 'chat_unavailable' | 'offline' | 'disconnected' = 'restart',
   channel?: string,
 ) {
-  const rows = (
-    await store.pool.query(
-      "SELECT l.world_id,l.channel_id FROM livewire_stakes l JOIN worlds w ON w.id=l.world_id WHERE w.mode=$1 AND l.status='open' AND ($2::text IS NULL OR l.channel_id=$2) ORDER BY l.world_id LIMIT 100",
-      [mode, channel ?? null],
-    )
-  ).rows;
-  for (const entry of rows)
-    await store.transaction(async (c) => {
-      await store.lockChannels(c, [entry.channel_id]);
-      const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [entry.world_id]))
-        .rows[0];
-      const stake = row?.state.livewire?.stake;
-      if (!stake || stake.status !== 'open' || row.custodian_id !== entry.channel_id) return;
-      const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
-      await commit(
-        c,
-        row,
-        { type: 'livewire-pause', stakeId: stake.id, reason },
-        'mission-recovery',
-        `livewire:pause:${row.revision}`,
-        at,
-      );
-    });
+  let after = '';
+  for (;;) {
+    const rows = (
+      await store.pool.query(
+        "SELECT l.world_id,l.channel_id FROM livewire_stakes l JOIN worlds w ON w.id=l.world_id WHERE w.mode=$1 AND l.status='open' AND ($2::text IS NULL OR l.channel_id=$2) AND l.world_id>$3 ORDER BY l.world_id LIMIT 100",
+        [mode, channel ?? null, after],
+      )
+    ).rows;
+    for (const entry of rows)
+      await store.transaction(async (c) => {
+        await store.lockChannels(c, [entry.channel_id]);
+        const row = (await c.query('SELECT * FROM worlds WHERE id=$1 FOR UPDATE', [entry.world_id]))
+          .rows[0];
+        const stake = row?.state.livewire?.stake;
+        if (!stake || stake.status !== 'open' || row.custodian_id !== entry.channel_id) return;
+        const at = (await c.query('SELECT clock_timestamp() AS at')).rows[0].at as Date;
+        await commit(
+          c,
+          row,
+          { type: 'livewire-pause', stakeId: stake.id, reason },
+          'mission-recovery',
+          `livewire:pause:${row.revision}`,
+          at,
+        );
+      });
+    if (rows.length < 100) break;
+    after = rows.at(-1)!.world_id;
+  }
 }
 
 export async function expireLivewire(store: Store, mode: Creator['mode']) {
