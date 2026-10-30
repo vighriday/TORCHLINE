@@ -1,7 +1,42 @@
 import { test, expect } from '@playwright/test';
 import { configureEpisode } from '@torchline/storage';
+import { tick } from '../twitch-provider.ts';
 import { serve, launch, snapshot, overlayLink } from './runtime.ts';
 test.use({ reducedMotion: 'reduce' });
+test('a live clock refresh preserves the captain’s unsaved timing selection', async ({ page }) =>
+  serve(async (store, app) => {
+    test.setTimeout(120000);
+    try {
+      await launch(page);
+      await page.locator('.episode-preparation summary').click();
+      const initial = await snapshot(page);
+      expect(initial.clock).toBeUndefined();
+      await page.getByLabel('Next chapter timing').selectOption('manual');
+
+      // An independent, real SQL update first materializes the default clock.
+      // Its actual SSE snapshot must not replace the local, unsaved selection.
+      await configureEpisode(store, (await store.creator('sim-alpha'))!, initial.worldId, {
+        investigation: 30,
+        challenge: 90,
+        allocation: 45,
+        decision: 60,
+      });
+      const revision = (await store.get(initial.worldId)).revision;
+      await tick(app);
+      await expect(page.locator('main.mission')).toHaveAttribute('data-version', String(revision));
+      await expect(page.getByLabel('Next chapter timing')).toHaveValue('manual');
+      await page.getByRole('button', { name: 'Save timing', exact: true }).click();
+      await expect
+        .poll(async () => (await store.get(initial.worldId)).clock?.durations)
+        .toEqual({ investigation: null, challenge: null, allocation: null, decision: null });
+      await page.reload();
+      await page.locator('.episode-preparation summary').click();
+      await expect(page.getByLabel('Next chapter timing')).toHaveValue('manual');
+    } finally {
+      await page.goto('about:blank');
+    }
+  }));
+
 test('mobile investigation, saved custom clocks and real allocation change the shared OBS state', async ({
   page,
   browser,

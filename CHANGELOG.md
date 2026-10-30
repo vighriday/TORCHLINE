@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Recover the independent QA branch's two real PostgreSQL concurrency regressions and dated assessment during main consolidation. Preserve the superseded UI-LAB work without importing its prototype server or visuals.
+- Preserve an unsaved captain timing selection when a delayed HTTP/SSE snapshot initializes the saved clock. Disable preparation inputs during a save and cover a real SQL update → SSE refresh → manual save → reload regression.
+
 ## Unreleased — Final Figma v2 integration
 
 - Fix entry controls overlapping the manifest: copy/actions and status now occupy separate flow rows. Make the desktop relay starfield fill its screen instead of exposing the edges of a smaller opaque canvas; stack handoff information on narrow screens. Add geometric overlap checks at phone, tablet and desktop sizes.

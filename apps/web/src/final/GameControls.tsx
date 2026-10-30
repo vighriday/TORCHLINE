@@ -119,12 +119,18 @@ function EpisodeSettings({ world }: { world: WorldPresentation }) {
           saved.decision === 60
         ? 'timed'
         : 'custom';
-  const [timing, setTiming] = useState(savedKind);
+  const [timingDraft, setTimingDraft] = useState<string | null>(null);
+  const timing = timingDraft ?? savedKind;
   useEffect(() => {
     setBudget(world.cooperation?.budget ?? 0);
     setInvestigation(world.cooperation?.investigation ?? false);
   }, [world.worldId, world.phase, world.cooperation?.budget, world.cooperation?.investigation]);
-  useEffect(() => setTiming(savedKind), [world.worldId, world.phase, savedKey, savedKind]);
+  useEffect(() => setTimingDraft(null), [world.worldId, world.phase]);
+  useEffect(() => {
+    // Late HTTP/SSE snapshots may initialize or change the saved clock while
+    // the captain edits. Only adopt them when no local selection is pending.
+    if (timingDraft === savedKind) setTimingDraft(null);
+  }, [savedKey, savedKind, timingDraft]);
   if (readOnly || !world.capabilities.canStart) return null;
   return (
     <details className="episode-preparation">
@@ -142,6 +148,7 @@ function EpisodeSettings({ world }: { world: WorldPresentation }) {
             min="0"
             max={Math.min(10, world.resources.power)}
             value={budget}
+            disabled={busy}
             onChange={(e) => setBudget(Number(e.target.value))}
           />
         </label>
@@ -149,6 +156,7 @@ function EpisodeSettings({ world }: { world: WorldPresentation }) {
           <input
             type="checkbox"
             checked={investigation}
+            disabled={busy}
             onChange={(e) => setInvestigation(e.target.checked)}
           />
           Investigate a shared clue first
@@ -157,7 +165,7 @@ function EpisodeSettings({ world }: { world: WorldPresentation }) {
       </form>
       <label>
         Next chapter timing
-        <select value={timing} onChange={(e) => setTiming(e.target.value)}>
+        <select value={timing} disabled={busy} onChange={(e) => setTimingDraft(e.target.value)}>
           <option value="manual">Manual · captain closes each window</option>
           <option value="timed">Timed · automatic countdowns</option>
           {savedKind === 'custom' && <option value="custom">Custom · keep saved timing</option>}
