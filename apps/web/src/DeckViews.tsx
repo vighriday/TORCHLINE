@@ -8,9 +8,10 @@ import type {
 import { ArkView } from './ArkView.tsx';
 import { FlightDeck } from './FlightDeck.tsx';
 import { useWorldHistory } from './useWorldHistory.ts';
-export type Workspace = 'bridge' | 'relay' | 'hangar' | 'broadcast' | 'archive';
+export type Workspace = 'bridge' | 'livewire' | 'relay' | 'hangar' | 'broadcast' | 'archive';
 const destinations: { id: Workspace; label: string; detail: string }[] = [
   { id: 'bridge', label: 'Bridge', detail: 'Play & cooperate' },
+  { id: 'livewire', label: 'LIVEWIRE', detail: 'Your game changes the Ark' },
   { id: 'relay', label: 'Relay', detail: 'Pass the torch' },
   { id: 'hangar', label: 'Hangar', detail: 'Your worlds' },
   { id: 'broadcast', label: 'Broadcast', detail: 'Twitch & OBS' },

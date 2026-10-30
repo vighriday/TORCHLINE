@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { Resources, ShipSystem, SystemId, WorldPresentation } from '@torchline/contracts';
 import { conditionColor, markSeed, shipDescription, systemLabels } from './visual-state.ts';
 export interface ArkRendererProps {
+  detailsExpanded?: boolean;
   systems: ShipSystem[];
   resources: Resources;
   reducedMotion?: boolean;
@@ -179,6 +180,7 @@ export function ArkView({
   resources,
   reducedMotion = false,
   readOnly = false,
+  detailsExpanded,
   variant = 'panel',
   chapter = 0,
   events = [],
@@ -399,7 +401,7 @@ export function ArkView({
           <small>This condition travels with the Ark.</small>
         </aside>
       )}
-      <details className="system-inspector" open={variant === 'panel'}>
+      <details className="system-inspector" open={detailsExpanded ?? variant === 'panel'}>
         <summary>
           Ship condition · {systems.reduce((sum, s) => sum + s.marks.length, 0)} permanent marks
         </summary>

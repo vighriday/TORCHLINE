@@ -316,9 +316,18 @@ header p {
   z-index: 10;
   background: #132a32;
   padding: 10px;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .skip-link:focus {
   transform: none;
+  clip-path: none;
+  width: auto;
+  height: auto;
+  overflow: visible;
 }
 .panel {
   position: relative;

@@ -320,7 +320,10 @@ export function FlightDeck({
               ) : world.phase === 'ready' ? (
                 <>
                   <p>
-                    Continue this voyage here, or pass its story to another community through Relay.
+                    {world.livewire?.stake &&
+                    ['open', 'paused', 'locked'].includes(world.livewire.stake.status)
+                      ? 'Your LIVEWIRE mission is still active. Resolve or cancel it in LIVEWIRE before starting the next chapter.'
+                      : 'Continue this voyage here, or pass its story to another community through Relay.'}
                   </p>
                   {!readonly && (
                     <button

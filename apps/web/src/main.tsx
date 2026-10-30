@@ -7,12 +7,14 @@ import { connectOverlayFeed } from './overlay-feed.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { TitleScreen } from './TitleScreen.tsx';
 import { FlightDeck } from './FlightDeck.tsx';
+import { LivewireView, LivewireDock } from './LivewireView.tsx';
 import { BroadcastOverlay, DeckNav, RelayProgress, WorldArchive } from './DeckViews.tsx';
 import type { Workspace } from './DeckViews.tsx';
 import './styles.css';
 import './game.css';
 import './encounter.css';
 import './hud-layout.css';
+import './livewire.css';
 
 function App() {
   const overlayChannel = location.pathname.match(/^\/overlay\/([^/]+)\//)?.[1];
@@ -110,11 +112,22 @@ function App() {
   }, [data?.me?.id, overlayChannel, refresh, feedEpoch]);
   useEffect(() => {
     if (!overlayChannel) return;
+    const replacement = () => {
+      if (!location.hash.slice(1)) return;
+      setData(null);
+      setError('');
+      setFeedEpoch((epoch) => epoch + 1);
+    };
+    addEventListener('hashchange', replacement);
+    return () => removeEventListener('hashchange', replacement);
+  }, [overlayChannel]);
+  useEffect(() => {
+    if (!overlayChannel) return;
     return connectOverlayFeed(overlayChannel, setData, (message, terminal) => {
       if (terminal) setData(null);
       setError(message);
     });
-  }, [overlayChannel]);
+  }, [overlayChannel, feedEpoch]);
   async function perform(action: () => Promise<unknown>) {
     setBusy(true);
     setError('');
@@ -158,7 +171,12 @@ function App() {
       );
   };
   if (overlayChannel)
-    return <BroadcastOverlay world={world} error={visibleError} mode={data?.mode} />;
+    return new URLSearchParams(location.search).get('view') === 'compact' ||
+      (new URLSearchParams(location.search).get('view') === 'auto' && world?.phase === 'ready') ? (
+      <LivewireDock world={world} error={visibleError} />
+    ) : (
+      <BroadcastOverlay world={world} error={visibleError} mode={data?.mode} />
+    );
   if (!data)
     return (
       <main className="connection-screen" aria-busy={!visibleError}>
@@ -453,6 +471,20 @@ function App() {
                     <a href={overlayUrl} target="_blank" rel="noreferrer">
                       Open read-only overlay
                     </a>
+                    <a
+                      href={overlayUrl.replace('/#', '/?view=compact#')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open compact OBS dock
+                    </a>
+                    <a
+                      href={overlayUrl.replace('/#', '/?view=auto#')}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open automatic OBS layout
+                    </a>
                   </>
                 )}
                 <button onClick={() => void perform(() => request('/auth/logout', {}))}>
@@ -474,6 +506,36 @@ function App() {
               <button onClick={() => setWorkspace('hangar')}>Open Hangar</button>
               <button onClick={() => setWorkspace('relay')}>Open Relay</button>
             </div>
+          </section>
+        )}
+        {world && workspace === 'livewire' && (
+          <LivewireView
+            world={world}
+            busy={busy}
+            onAction={(action) =>
+              void perform(() =>
+                request(`/api/worlds/${world.worldId}/livewire`, {
+                  expectedVersion: world.worldVersion,
+                  commandId: crypto.randomUUID(),
+                  action,
+                }),
+              )
+            }
+            onSimulate={
+              data.mode === 'simulation'
+                ? (text, actor) =>
+                    void perform(() => request('/api/simulator/commands', { text, actor }))
+                : undefined
+            }
+          />
+        )}
+        {!world && workspace === 'livewire' && (
+          <section className="panel">
+            <h2>Host an Ark first</h2>
+            <p>
+              Create or resume your persistent ship in Hangar, then open a mission between chapters.
+            </p>
+            <button onClick={() => setWorkspace('hangar')}>Open Hangar</button>
           </section>
         )}
         {world && workspace === 'bridge' && (

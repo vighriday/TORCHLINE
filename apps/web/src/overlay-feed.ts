@@ -42,7 +42,8 @@ export function connectOverlayFeed(
         await request(`${root}/session`, { token });
         if (stopped) return;
         exchanged = true;
-        history.replaceState(null, '', location.pathname);
+        // Drop the private capability fragment, retain the chosen read-only layout.
+        history.replaceState(null, '', location.pathname + location.search);
       }
       const current = await request<DashboardSnapshot>(`${root}/state`);
       if (stopped) return;
