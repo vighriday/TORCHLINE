@@ -2,6 +2,8 @@
 
 ## Unreleased — Final frontend replacement preparation
 
+- Remove the owner-identified floating cyan rectangle from the new Ark's bridge mesh. Retain the nose geometry, running light, damage/debris state and cockpit; the shared model correction applies to every new-design view before media capture.
+
 - Preserve verified source `663888a` under `archive/frontend-before-final-2026-10-30` and create an isolated replacement branch; locally archive UI-LAB's committed and dirty work without importing its fixture backend.
 - Separate existing session, SSE, overlay reconnect and versioned command handling from the visual entry. Keep the reference runnable until the final owner-supplied design replaces it, with one presentation root and explicit stylesheet ownership.
 - Inventory every existing screen, gameplay/mission action, history, custody, setup and OBS recovery state for final-design integration. No final visuals or new genuine Twitch/raid acceptance are claimed by this preparation.

@@ -1,15 +1,11 @@
-# Design and font provenance
+# Final design and asset provenance
 
-The owner supplied six Claude Design HTML surfaces and four JavaScript reference exports on 2026-10-27. Unmodified originals remain in the ignored local `frontend-design/` workspace. [SHA-256 inventory](../docs/design/source-checksums.txt) identifies the reviewed exports without distributing the export runtime, synthetic gameplay data, duplicate uploads or screenshots.
+The owner-provided **Figma v2** export is TORCHLINE's visual source. Its raw local folder is ignored and untouched. [Source checksums](../docs/design/source-checksums.txt) identify `App.tsx`, `Ark3D.tsx`, `VoxelScene.tsx` and `index.css`. Typed adaptations preserve its screens and 3D artwork while replacing prototype state with the actual application.
 
-The [integration review](../docs/design/integration-review.md) records the mapping to curated TypeScript/React components. Ship geometry, title/flight composition, animation direction and schematic styling are adapted from the supplied Ark references. Metal panels and glow sprites are generated locally in `ark-model.ts`; no external model, texture, stock image or remote script is required. The prototype engine, synthetic participants and export runtime are excluded.
+- The shared Ark, cockpit, procedural backgrounds and Minecraft-style scene originate in the export. The floating blue bridge plane is removed at the owner's request.
+- The favicon is supplied with the export.
+- Barlow Condensed and IBM Plex Mono are self-hosted from the official [Google Fonts source](https://github.com/google/fonts), with their SIL Open Font License files beside the fonts. No font CDN or external texture is used at runtime.
+- React Three Fiber, Drei and Three.js retain their upstream package licenses. Figma editor/deployment plugins are not shipped.
+- Public media must be captured from the integrated build after the bridge correction, with saved practice labeled honestly. Private links/session material and simulated native-provider claims are excluded.
 
-The browser serves three unmodified static font files locally. Each includes the upstream SIL Open Font License in `apps/web/public/fonts/`:
-
-| Asset | Upstream | Style |
-| --- | --- | --- |
-| `tektur.ttf` | [Tektur](https://github.com/google/fonts/tree/main/ofl/tektur) | 800 normal |
-| `saira.ttf` | [Saira](https://github.com/google/fonts/tree/main/ofl/saira) | 400 normal |
-| `kode-mono.ttf` | [Kode Mono](https://github.com/google/fonts/tree/main/ofl/kodemono) | 400 normal |
-
-Font binaries were obtained from official `fonts.gstatic.com` URLs resolved by Google Fonts CSS on 2026-10-27. These licenses cover the fonts only; no project-wide open-source license is implied.
+[ADR 0033](../docs/decisions/0033-figma-v2-presentation.md) records compatibility, rendering and authority decisions. Previous artwork is recoverable from the separate archive tag; it is not the final visual source.
