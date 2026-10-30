@@ -36,7 +36,7 @@ The [October 28 release authority review](../reviews/2026-10-28-release-authorit
 
 [ADR 0012](../decisions/0012-scoped-world-records.md) records the C1–C13 review for complete history and temporary offer previews. Six executed PostgreSQL/API regressions and the extended preview-to-accept browser journey cover the stated read boundaries; no genuine native raid evidence is implied.
 
-The [2026-10-27 design integration review](../design/integration-review.md) checks the Claude Design adaptation and optional cinematic renderer against all C1–C13. [ADR 0011](../decisions/0011-claude-design-integration.md) revises D4 while retaining SVG/DOM information and interaction. Its design constraints are separate from executed browser and OBS evidence.
+The [final-design review](../decisions/0033-figma-v2-presentation.md) evaluates the supplied scenes and typed integration against all C1–C13. Rendering decisions preserve canonical DOM controls, server authority, recovery and read-only sources; executed browser/native evidence remains separate.
 
 | ID | Component | Critical workload or invariant |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ The [2026-10-27 design integration review](../design/integration-review.md) chec
 | D1 | TypeScript on Node 24 | Go backend | Shared command/content types avoid cross-language drift. Node's event loop can stall on heavy replay: measure it and move large reconstruction to a worker before it affects ingress. |
 | D2 | Fastify modular monolith | Next.js full stack or independent services | A single transaction boundary and durable host directly fit custody. Raw-body parsing, streaming and worker isolation need explicit integration tests; framework defaults are not enough. |
 | D3 | React/Vite browser | Next.js or plain DOM | Shared dashboard/overlay/puzzle components with no SSR dependency. Avoid rendering every message or importing server secrets into shared bundles. |
-| D4 | SVG/DOM first, Canvas effects later | PixiJS or Phaser first | Small graphs and damageable ship systems benefit from inspectable, accessible elements. Hundreds of animated objects could require Canvas; profile on OBS before changing the renderer. |
+| D4 | Supplied R3F/Three scenes plus semantic DOM controls | Rebuild geometry imperatively or use a sprite engine | The final source already defines Ark/cockpit and Minecraft scenes. Preserve those components with matching React versions, lazy loading, bounded rendering and explicit failure states. The renderer never owns gameplay. |
 | D5 | SSE reads, HTTP writes | WebSocket | Browser traffic is one-way; chat is the gameplay input. A proxy buffering streams, HTTP connection caps or unreliable OBS cookie behavior can invalidate this choice. Test deployed before committing UI transport assumptions. |
 | D6 | EventSub webhooks/cloud bot with a bounded native fetch/crypto adapter | Per-creator WebSocket; Twurple SDK within the adapter | Durable hosted ingress and one canonical recipient subscription fit continuity. Direct calls keep DB grant locking/ingress ownership explicit; Twurple reduces SDK maintenance but needs durable refresh/subscription hooks. Requires TLS and two consents; neither account flow nor SDK integration is proven yet. |
 | D7 | PostgreSQL 17 | SQLite or managed document store | Atomic two-channel custody and unique active slots are relational problems. Busy ballot writes and long event logs can overload the same database if not bounded and indexed. |
@@ -144,7 +144,7 @@ The [2026-10-27 design integration review](../design/integration-review.md) chec
 
 ## Composition failures that individual library reviews miss
 
-The cinematic title/flight restoration is reviewed against C1–C13 in [ADR 0015](../decisions/0015-cinematic-game-presentation.md). It keeps the approved stack, controller, rules, persistence and authority. Decorative event effects are baselined/deduplicated and bounded; SVG/DOM remain usable without graphics. Executed browser checks and measured software-renderer limitations belong to the rollout evidence, separately from this design review.
+The [final-design ADR](../decisions/0033-figma-v2-presentation.md) supersedes presentation-specific directions. View state, camera and sound remain cosmetic; saved physical condition and history come from the engine projection. Hardware/native OBS performance is an acceptance gate.
 
 | Combination | Failure scenario | Required mitigation/evidence |
 | --- | --- | --- |

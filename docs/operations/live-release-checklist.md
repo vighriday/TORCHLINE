@@ -15,7 +15,7 @@ Intended origin: `https://education-slather-reps.ngrok-free.dev`. The computer/d
 
 ## 2. Confirm OAuth and subscriptions
 
-The preview now checks its connection before showing account/launch actions and fades into 3D without a temporary schematic. If a connection fails, **Retry connection** only reloads the saved state and live feed. It does not repeat a gameplay action or require new Twitch consent. Intentional reduced-motion/mobile and graphics-failure schematic views remain available.
+The preview checks its connection before launch and shows a deliberate graphics-loading state. **Retry connection** only reloads saved state and the feed; it never repeats a gameplay action. Reduced motion uses a static ship. Graphics failure leaves functional text and controls available.
 
 **Completed on the current machine:** the owner corrected the console callback; a fresh real creator session and the first live Ark were observed afterward. The earlier `redirect_mismatch` is resolved. Keep the exact callback below if registering/recovering the app later; begin sign-in from the current home page rather than an old callback URL.
 
@@ -37,7 +37,7 @@ A live baseline is already saved locally. Keep it, or deliberately start a new s
 
 `pnpm twitch:verify:overlay` checks actual public HTTPS. It makes a separate five-minute read-only capability, privately exchanges it in Chromium, checks actual public SSE/mutation denial, and removes only that grant. It never rotates ordinary links or changes a world; it records no URL, screenshot or trace. The existing live Ark is available to render. **This is not actual OBS CEF.**
 
-In Captain tools choose Generate / rotate OBS link. Copy the private URL. In OBS: Sources → + → Browser → TORCHLINE → paste URL; set 1280×720 or 1920×1080. Keep the URL out of chat/screenshots/Git. Confirm the actual Ark/phase/resources/challenge/damage and absence of creator controls. Apply a legal game action and observe it. Hide/show the scene, refresh the source and briefly interrupt/reconnect networking: current state must return without repeating rewards/damage. Rotate the link once, verify the old source loses access, and update OBS with the new URL.
+In **Command OS → Creator Studio**, choose an overlay preset, then **Generate / rotate private OBS source**. Copy the private URL. In OBS: Sources → + → Browser → TORCHLINE → paste URL; set 1280×720 or 1920×1080. Keep the URL out of chat/screenshots/Git. Confirm the actual Ark/phase/resources/challenge/damage and absence of creator controls. Apply a legal game action and observe it. Hide/show the scene, refresh the source and briefly interrupt/reconnect networking: current state must return without repeating rewards/damage. Rotate the link once, verify the old source loses access, and update OBS with the new URL.
 
 ## 5. Prove a native raid handoff
 

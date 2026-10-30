@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
 import { database } from '../helpers.ts';
 import type { Store } from '@torchline/storage';
 import { createApp } from '../../apps/server/src/app.ts';
@@ -52,20 +51,18 @@ test('an upstream HTML page becomes a recoverable connection screen without pars
     });
     try {
       await page.goto('/');
-      await expect(
-        page.getByText('Connecting to your flight deck…', { exact: true }),
-      ).toBeVisible();
-      await expect(page.locator('.title-screen, .ark-schematic, canvas')).toHaveCount(0);
+      await expect(page.getByText('Connecting to your Ark…', { exact: true })).toBeVisible();
+      await expect(page.locator('.awakening, canvas')).toHaveCount(0);
       releaseState();
       await expect(page.getByRole('alert')).toContainText('Please retry the connection.');
       await expect(page.locator('body')).not.toContainText(
         /Unexpected token|DOCTYPE|private upstream detail|not valid JSON/,
       );
-      await expect(page.locator('.title-screen, .ark-schematic')).toHaveCount(0);
+      await expect(page.locator('.awakening')).toHaveCount(0);
       healthy = true;
       await page.getByRole('button', { name: 'Retry connection', exact: true }).click();
-      await expect(page.locator('.title-screen')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Launch the Ark', exact: true })).toBeEnabled();
+      await expect(page.locator('.awakening')).toBeVisible();
+      await expect(page.getByRole('button', { name: 'LAUNCH THE ARK', exact: true })).toBeEnabled();
       await expect(page.getByRole('alert')).toHaveCount(0);
       expect(mutations).toEqual([]);
       expect(Number((await store.pool.query('SELECT count(*) FROM worlds')).rows[0].count)).toBe(0);
@@ -104,10 +101,10 @@ test('a committed action with a lost response stays saved; reconnect performs no
       });
     });
     try {
-      await page.goto('/');
+      await page.goto('/?screen=mission');
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
       await expect(page.getByRole('alert')).toContainText('Please retry the connection.');
-      await expect(page.locator('.phase-challenge')).toBeVisible();
+      await expect(page.locator('.challenge-panel')).toBeVisible();
       const committed = (await store.get(id)).state;
       expect(committed.chapter).toBe(1);
       expect(committed.version).toBe(before.version + 1);

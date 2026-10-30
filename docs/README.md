@@ -1,10 +1,8 @@
 # Documentation
 
-**October 30 feature lane: [LIVEWIRE v0 implementation report](reports/2026-10-30-livewire-v0.md).** The complete saved mission flow, finite economy, normalized chat selection, physical consequence and compact native OBS view are implemented on an isolated branch. The original release remains protected. [Mission rules](product/livewire-v0.md) · [Setup and acceptance](operations/livewire-v0.md) · [ADR 0031](decisions/0031-livewire-v0.md). Feature activation, genuine command-driven effects, authentic raid and permanent deployment retain separate gates; the October 29 core observations below remain their historical baseline.
+**Current lane: final Figma v2 frontend on feat/frontend-replacement.** All ten screens are connected to the existing persistent game and LIVEWIRE foundations. Fresh regression and visual/native acceptance determine promotion; previous presentation evidence does not accept this build. [Current implementation status](planning/implementation-status.md) · [Final design](design/README.md) · [Cutover](design/final-frontend-replacement.md) · [ADR 0033](decisions/0033-figma-v2-presentation.md).
 
-**Latest: [October 29 integration diagnosis](reports/2026-10-29-integration-diagnosis.md) and [visual review](reviews/2026-10-29-ui-layout-review.md).** Local build, 107 tests and all 14 browser journeys pass. Public HTTPS/grants/exact subscriptions validate; genuine chat arrives. The current game renders in native OBS and recovers after a controlled app outage. Bot visibility, genuine gameplay effects, native raid and production deployment remain incomplete. The [critical audit](reviews/2026-10-29-comprehensive-audit.md), [requirement/authority matrix](reviews/2026-10-29-requirement-matrix.md) and [audit evidence](reviews/2026-10-29-audit-evidence.json) retain their historical findings; follow-ups distinguish fixes from outstanding gates.
-
-Research checked **2026-10-26**. Architecture is approved and the first gameplay foundation is implemented. [Implementation status](planning/implementation-status.md) distinguishes tested local behavior from the wider target and external verification. Delivery follows dependencies and measured progress without assumed staffing or fixed development hours.
+Genuine chat-driven game changes, native raid transfer and permanent deployment remain separate open gates. [October 29 diagnosis](reports/2026-10-29-integration-diagnosis.md) and [critical audit](reviews/2026-10-29-comprehensive-audit.md) retain historical provider/security evidence. [LIVEWIRE rules](product/livewire-v0.md) and [acceptance](operations/livewire-v0.md) describe the default-off extension.
 
 ## Review sequence
 
@@ -30,17 +28,13 @@ Research checked **2026-10-26**. Architecture is approved and the first gameplay
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
 | [October 29 integration diagnosis](reports/2026-10-29-integration-diagnosis.md) | Account/channel/application evidence, independent reply degradation, SQL recovery and actual native OBS rendering |
 | [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
-| [Claude Design handoff](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
-| [README presentation](design/readme-story.md) | Simple reading path, researched GitHub interactions, actual gameplay media and proof limits |
+| [Final Figma v2 design](design/README.md) | Renderer interfaces and seven engine-derived physical-state fixtures |
 | [Twitch account setup](operations/twitch-setup.md) | Owner registration, local configuration and live verification steps |
 | [Owner launch walkthrough](operations/owner-launch-guide.md) | Ordered beginner steps with current setup, exact confirmations, hosting and OBS |
 | [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |
 | [Existing-account live test](operations/controlled-account-live-test.md) | Verify chat/gameplay/OBS now with hriday29 + hriday_29; add a second broadcaster only for the authentic raid |
 | [October 28 release readiness](reports/2026-10-28-release-readiness.md) | Executed reliability/security/container evidence and remaining external release gates |
-| [Design integration review](design/integration-review.md) | Six-surface mapping, excluded prototype logic and thirteen-component stress review |
-| [Encounter presentation review](design/encounter-review.md) | Actual encounter motion, persistent ship inspection, relay interaction, recording and honest visual/native limits |
 | [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
 | [Public capability and authority review](reviews/2026-10-26-public-authority.md) | All route/component boundaries, four reproduced defects, evidence and pruning recommendations |
-| [Design and launch authority review](reviews/2026-10-27-design-integration.md) | Integrated consumers, resolved visual defects, exact verification scope and deferred public HTTPS |
 
 The local source concept remains outside version control. No document in this index requires it to run, test, or judge the future application.

@@ -1,18 +1,18 @@
 # Run and verify LIVEWIRE v0
 
-Use `feat/livewire-v0`, based on release source `89fa019`. The original `feat/gameplay-foundation` worktree and preview remain separate. Do not replace the live database with test fixtures.
+Use the current `feat/frontend-replacement` candidate; LIVEWIRE is inherited from the separately verified `feat/livewire-v0` source. The original `feat/gameplay-foundation` worktree and preview remain separate. Do not replace the live database with test fixtures.
 
 ## Local practice
 
 Use the normal [development setup](development.md) with Node 24, pnpm 12.4.2 and an isolated development PostgreSQL database. In its ignored `.env`, set `LIVEWIRE_ENABLED=true` and `WORLD_MODE=simulation`. Run `pnpm db:migrate`, `pnpm build`, then `pnpm dev`. Use the configured local origin.
 
-Create/resume an Ark, open **LIVEWIRE** in the command navigation, then open a mission. Use **Practice chat** to send `!stake 2`; lock and confirm a result. Check the same ship's resources and Archive. Return to Bridge and continue the chapter. Practice inputs are explicitly simulated and never go to Twitch.
+Create/resume an Ark, open **Livewire** through **Command OS**, then open a mission. Use **Practice chat** to send `!stake 2`; lock and confirm a result. Check the same ship's resources and Archive. Return to Mission Control and continue the chapter. Practice inputs are explicitly simulated and never go to Twitch.
 
-At a zero-vote opening, select **Solo system** before locking. If the 45-second window expires, the allowance stays spent; continue the chapter or use another chapter boundary rather than trying to reopen it. A completed mission can be revisited in the ship log.
+At a zero-vote opening, select **No crew votes · explicit solo target** before locking. If the 45-second window expires, the allowance stays spent; continue the chapter or use another chapter boundary rather than trying to reopen it. A completed mission can be revisited in the ship log.
 
 ## Overlay
 
-Generate an OBS link in Captain tools/Broadcast and choose **Open compact OBS dock**. Copy that destination, including its private fragment, into a Browser Source. Use 1280×720 or 1920×1080 at 30 FPS. The transparent page places a small dock at the lower right; crop/position it as required. It cannot control the Ark or OBS.
+Open **Command OS → Creator Studio**, choose **TACTICAL DOCK**, then **Generate / rotate private OBS source** and **COPY SOURCE**. Copy that destination, including its private fragment, into a Browser Source. Use 1280×720 or 1920×1080 at 30 FPS. The transparent page places a small dock at the lower right; crop/position it as required. It cannot control the Ark or OBS.
 
 - Full view: existing OBS URL, unchanged.
 - Compact view: add `?view=compact` before the private fragment.

@@ -63,7 +63,7 @@ try {
   await page.goto(`${origin.origin}/overlay/${encodeURIComponent(creator.id)}/#${token}`, {
     waitUntil: 'domcontentloaded',
   });
-  await page.waitForSelector('.flight-deck', { timeout: 20000 });
+  await page.waitForSelector('.mission', { timeout: 20000 });
   await page.screenshot({ path: '.local/live-play-before.png' });
   console.log(
     `Live observation ready: chapter ${before.state.chapter}, ${before.state.phase}. Watches native viewer actions and real public overlay for 40 minutes. No game action or chat sent.`,
@@ -92,7 +92,7 @@ try {
         timeout: 15000,
       });
       const noControls = (await page.locator('button,input,select,textarea').count()) === 0;
-      const observedWorld = await page.locator('.flight-deck').getAttribute('data-world');
+      const observedWorld = await page.locator('.mission').getAttribute('data-world');
       if (!noControls || observedWorld !== before.id)
         throw new Error('Overlay authority/world assertion failed.');
       await page.screenshot({ path: '.local/live-play-after.png' });

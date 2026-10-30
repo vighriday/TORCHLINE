@@ -152,7 +152,7 @@ try {
     dom = (
       await cef.call('Runtime.evaluate', {
         returnByValue: true,
-        expression: `({ world: document.querySelector('.flight-deck')?.getAttribute('data-world'), shipReady: !!document.querySelector('.ark-stage[aria-busy="false"]'), renderedCanvas: !!document.querySelector('.ark-stage.scene-ready canvas'), controls: document.querySelectorAll('button,input,select,textarea').length, chapter: document.querySelector('.flight-deck')?.className, previewWarning: document.body.innerText.includes('You are about to visit:'), asset: [...document.scripts].map(s=>s.src && new URL(s.src).pathname).find(p=>p && p.startsWith('/assets/')) })`,
+        expression: `({ world: document.querySelector('.mission')?.getAttribute('data-world'), shipReady: !!document.querySelector('.ark-canvas[data-scene-ready="true"]'), renderedCanvas: !!document.querySelector('.ark-canvas[data-scene-ready="true"] canvas'), controls: document.querySelectorAll('button,input,select,textarea').length, chapter: document.querySelector('.mission')?.className, previewWarning: document.body.innerText.includes('You are about to visit:'), asset: [...document.scripts].map(s=>s.src && new URL(s.src).pathname).find(p=>p && p.startsWith('/assets/')) })`,
       })
     ).result?.value;
     if (dom?.world && dom.shipReady && dom.controls === 0 && !dom.previewWarning) break;

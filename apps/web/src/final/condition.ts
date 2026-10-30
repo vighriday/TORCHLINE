@@ -10,14 +10,14 @@ export const systemLabels: Record<SystemId, string> = {
 };
 export const conditionColor = (system: ShipSystem) =>
   system.condition === 'destroyed' || system.integrity <= 25
-    ? '#f57865'
+    ? '#d5533e'
     : system.condition === 'sealed'
-      ? '#d5bc72'
+      ? '#df9d47'
       : system.integrity < 60
-        ? '#ffc873'
+        ? '#df9d47'
         : ['repaired', 'jury-rigged'].includes(system.condition)
-          ? '#8fdce4'
-          : '#abb8c2';
+          ? '#76c6c5'
+          : '#73796f';
 // Stable placement from canonical event IDs; reload and custody changes preserve scars.
 export function markSeed(eventId: string): number {
   let hash = 2166136261;

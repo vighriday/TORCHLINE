@@ -71,7 +71,7 @@ Engineering can run `pnpm twitch:verify:overlay` against real HTTPS with an inde
 
 ## 4. Authentic raid — only when a second broadcaster is available
 
-Use a friend's existing consenting broadcaster or a separate controlled account later. They authorize as a creator, enable incoming offers in Relay, have no active Ark and repair subscriptions so incoming `channel.raid` is current and provider-confirmed. Keep **hriday_29** exclusively as the bot.
+Use a friend's existing consenting broadcaster or a separate controlled account later. They authorize as a creator, enable incoming offers in Inheritance, have no active Ark and repair subscriptions so incoming `channel.raid` is current and provider-confirmed. Keep **hriday_29** exclusively as the bot.
 
 Simplest complete recording: each broadcaster uses their usual OBS/computer. A computer plus phone can establish two real live channels: the receiver uses Twitch's camera/IRL broadcast and accepts in a separate browser. However, the native Twitch mobile broadcaster does **not** support browser overlays, so this verifies receiver presence/custody only, not the inherited Ark in their outgoing video. [Twitch mobile limitations](https://help.twitch.tv/s/article/mobile-game-broadcasting).
 
@@ -80,7 +80,7 @@ One computer can alternatively run two OBS instances with different profiles and
 1. Both creators go live. On the receiving account review Twitch's incoming raid settings so the source is allowed. Twitch exposes viewer-range, account-age and optional group restrictions; TORCHLINE cannot override them. [Twitch raid controls](https://help.twitch.tv/s/article/how-to-use-raids?language=en_US&langue=en_US).
 2. At a **ready chapter boundary**, hriday29 prepares an offer to that exact receiver. Save a private before-state comparison of chapter/resources/condition/history. This freezes changes until completion/cancellation/expiry.
 3. As hriday29 use Twitch's native **Raid Channel** control or `/raid RECEIVER_LOGIN`, then complete Twitch's countdown/confirmation. No TORCHLINE chat command initiates a raid.
-4. Relay must become verified only after signed native evidence matches source, target and the persisted time window. A small raid is not guaranteed to produce a qualifying provider event; do not fabricate viewers or substitute a screenshot if it does not.
+4. Inheritance must become verified only after signed native evidence matches source, target and the persisted time window. A small raid is not guaranteed to produce a qualifying provider event; do not fabricate viewers or substitute a screenshot if it does not.
 5. Receiver stays live, inspects and explicitly accepts before expiry. Check the same Ark and all consequences moved; hriday29 loses controls and its overlay no longer shows that Ark. Start the next chapter at the receiver.
 6. Run `pnpm live:acceptance check`; require a linked native live transfer, plus observation of inherited state and source authority removal. Do not conduct another real raid merely to test duplicate delivery; automated replay/race tests cover duplicates separately.
 

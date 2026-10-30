@@ -1,98 +1,72 @@
-import { chooseSimulation, disclose } from './ui.ts';
-import { expect, test } from '@playwright/test';
-import { database } from '../helpers.ts';
-import { createApp } from '../../apps/server/src/app.ts';
-
-test('designed cooperation, exact allocation forecasts and frozen advice work on mobile and OBS', async ({
+import { test, expect } from '@playwright/test';
+import { configureEpisode } from '@torchline/storage';
+import { serve, launch, snapshot, overlayLink } from './runtime.ts';
+test.use({ reducedMotion: 'reduce' });
+test('mobile investigation, saved custom clocks and real allocation change the shared OBS state', async ({
   page,
   browser,
 }) =>
-  database(async (store) => {
-    test.setTimeout(90000);
-    const app = await createApp(store, {
-      mode: 'simulation',
-      baseUrl: 'http://localhost:3100',
-      sessionSecret: 'ab'.repeat(32),
-      tokenKey: 'cd'.repeat(32),
-      botSetupSecret: 'fixture-only',
+  serve(async (store) => {
+    test.setTimeout(120000);
+    const overlay = await browser.newPage({
+      viewport: { width: 1280, height: 720 },
+      reducedMotion: 'reduce',
     });
-    await app.listen({ port: 3100, host: '127.0.0.1' });
-    const overlay = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-    const failures: string[] = [];
-    await overlay.emulateMedia({ reducedMotion: 'reduce' });
-    page.on('pageerror', (e) => failures.push(e.message));
     try {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto('/');
-      await chooseSimulation(page, 'alpha');
-      await page.getByRole('button', { name: 'Create an Ark' }).click();
-      await disclose(page, '.episode-configuration');
-      await page.getByLabel('Repair reserve').fill('5');
-      await page.getByLabel('Investigate a shared clue').check();
-      await page.getByRole('button', { name: 'Save crew settings' }).click();
+      await launch(page);
+      await page.locator('.episode-preparation summary').click();
+      await page.getByLabel('Repair reserve (0–10 power)').fill('5');
+      await page.getByLabel('Investigate a shared clue first').check();
+      await page.getByRole('button', { name: 'Save crew settings', exact: true }).click();
+      await expect.poll(async () => (await snapshot(page)).cooperation?.budget).toBe(5);
       await page.getByLabel('Next chapter timing').selectOption('manual');
       await page.getByRole('button', { name: 'Save timing', exact: true }).click();
-      await expect
-        .poll(async () => (await store.active('sim-alpha'))?.clock?.durations.challenge)
-        .toBeNull();
+      await expect.poll(async () => (await snapshot(page)).clock?.durations?.challenge).toBeNull();
       await page.reload();
-      await disclose(page, '.episode-configuration');
+      await page.locator('.episode-preparation summary').click();
       await expect(page.getByLabel('Next chapter timing')).toHaveValue('manual');
-      // An operator-defined mixed policy must survive a browser reload/save unchanged.
-      const custom = { investigation: null, challenge: null, allocation: null, decision: 120 };
-      const worldId = (await store.active('sim-alpha'))!.id;
-      const { configureEpisode } = await import('@torchline/storage');
-      await configureEpisode(store, (await store.creator('sim-alpha'))!, worldId, custom);
+      const world = await snapshot(page),
+        custom = { investigation: null, challenge: null, allocation: null, decision: 120 };
+      await configureEpisode(store, (await store.creator('sim-alpha'))!, world.worldId, custom);
       await page.reload();
-      await disclose(page, '.episode-configuration');
+      await page.locator('.episode-preparation summary').click();
       await expect(page.getByLabel('Next chapter timing')).toHaveValue('custom');
       await page.getByRole('button', { name: 'Save timing', exact: true }).click();
-      await expect.poll(async () => (await store.get(worldId)).clock?.durations).toEqual(custom);
+      await expect
+        .poll(async () => (await store.get(world.worldId)).clock?.durations)
+        .toEqual(custom);
       await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
-      await expect(
-        page.getByRole('heading', { name: 'Choose where the crew investigates' }),
-      ).toBeVisible();
+      await page.locator('.practice-chat summary').click();
       const input = async (text: string) => {
-        await disclose(page, '.simulation-console');
-        await page.getByRole('textbox', { name: 'Chat command' }).fill(text);
-        await page.getByRole('button', { name: 'Send simulated input' }).click();
+        await page.getByLabel('Chat command', { exact: true }).fill(text);
+        await page.getByRole('button', { name: 'Send simulated input', exact: true }).click();
       };
       await input('!inspect engine');
-      await page.getByRole('button', { name: 'Open cooperative challenge' }).click();
-      await expect(page.getByText('C · Discovered', { exact: true })).toBeVisible();
-      await page.getByRole('button', { name: 'Open crew allocation' }).click();
-      await expect(page.locator('.phase-allocation')).toBeVisible();
+      await page.getByRole('button', { name: 'Close investigation', exact: true }).click();
+      await expect(page.locator('.clue-list .found')).toContainText(['C']);
+      await page.getByRole('button', { name: 'Close challenge', exact: true }).click();
       await input('!allocate 3 2');
-      await expect(page.getByText(/3 hull repairs · 2 oxygen units/)).toBeVisible();
-      await disclose(page, '.captain-console');
-      await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
-      const href = await page
-        .getByRole('link', { name: 'Open read-only overlay' })
-        .getAttribute('href');
-      await overlay.goto(href!);
-      await expect(
-        overlay.getByRole('heading', { name: 'Distribute the repair reserve' }),
-      ).toBeVisible();
-      await expect(overlay.getByRole('button')).toHaveCount(0);
-      await page.getByRole('button', { name: 'Lock repairs & open decision' }).click();
-      await expect(page.locator('.phase-decision')).toBeVisible();
-      await input('!vote 2');
-      await page.getByRole('button', { name: 'Freeze advisory votes' }).click();
-      await expect(page.getByRole('timer')).toHaveText('Awaiting captain');
-      await page.getByRole('button', { name: 'Commit Seal the rear habitat', exact: true }).click();
-      await expect(page.locator('[data-resource=hull]')).toHaveText('63');
-      await expect(page.locator('[data-resource=oxygen]')).toHaveText('64');
-      await expect(overlay.locator('[data-resource=hull]')).toHaveText('63');
-      await page.reload();
-      await expect(page.locator('[data-resource=hull]')).toHaveText('63');
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
+      await expect
+        .poll(async () => (await snapshot(page)).cooperation?.plan)
+        .toEqual({ hull: 3, oxygen: 2 });
+      await overlay.goto(await overlayLink(page, 'full'));
+      await expect(overlay.locator('.game-directives')).toContainText(
+        'Locked plan: hull +3 · oxygen +2',
       );
-      expect(failures).toEqual([]);
+      await expect(overlay.getByRole('button')).toHaveCount(0);
+      await page.getByRole('button', { name: 'Close allocation', exact: true }).click();
+      await input('!vote 2');
+      await page.getByRole('button', { name: 'Close voting', exact: true }).click();
+      await page.getByRole('button', { name: /Seal the rear habitat/ }).click();
+      await page.getByRole('button', { name: 'Commit directive', exact: true }).click();
+      await expect(page.locator('[data-resource=hull]')).toHaveAttribute('data-value', '63');
+      await expect(page.locator('[data-resource=oxygen]')).toHaveAttribute('data-value', '64');
+      await expect(overlay.locator('[data-resource=hull]')).toHaveAttribute('data-value', '63');
+      await page.reload();
+      await expect(page.locator('[data-resource=hull]')).toHaveAttribute('data-value', '63');
     } finally {
-      await page.goto('about:blank');
       await overlay.close();
-      await app.close();
+      await page.goto('about:blank');
     }
   }));

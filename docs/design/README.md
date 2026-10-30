@@ -1,25 +1,28 @@
-# Claude Design handoff
+# Final design
 
-**October 30: the owner is supplying a final replacement design.** The current interface and UI-LAB direction are archived references. Use the [final replacement checklist](final-frontend-replacement.md) and [ADR 0032](../decisions/0032-final-frontend-replacement.md); do not extend the old visual direction or combine its global styles with the incoming design. Functional contracts and generated physical-state fixtures below remain authoritative. Final design integration and visual acceptance are pending.
+The owner-supplied **Figma v2** export is the sole visual source. All ten destinations, the rolling Ark, interactive cockpit and Minecraft LIVEWIRE scene are adapted into strict TypeScript/React. The raw export stays untouched and ignored. [Source checksums](source-checksums.txt) identify the input; [ADR 0033](../decisions/0033-figma-v2-presentation.md) records the renderer decisions.
 
-[LIVEWIRE v0](../product/livewire-v0.md) adds a functional mission workspace and compact/automatic read-only overlay. `WorldPresentation.livewire` exposes bounded tallies, a ballot revision, saved lifecycle/deadline, exact effects and solo/evidence labels; canonical outcome cues remain the existing damage/repair events. No voter roster or raw actor identity is projected. The optional renderer `detailsExpanded` setting changes initial disclosure only. Claude Design can replace the visual treatment without moving authority or game rules into components.
+The application mounts one design system from [final/App.tsx](../../apps/web/src/final/App.tsx). It uses the existing PostgreSQL backend, signed Twitch ingress, deterministic engine, session controller and scoped overlays. Prototype votes, outcomes, fictional creators and browser-owned resources are excluded.
 
-See the [October 28 encounter review](encounter-review.md) for the owner-requested game presentation revision, actual-motion checks and remaining visual/native acceptance. It retains this presentation contract and the original design vocabulary.
+| Destination | Real connection |
+| --- | --- |
+| Awakening | Actual practice creation/resume or creator OAuth |
+| Mission Control | Saved chapters, challenges, allocation, exact costs, timers and physical ship record |
+| LIVEWIRE | Paid mission, counted ballots, locked commitment and one streamer-attested consequence |
+| Inheritance | Current offers, opt-in, frozen preview, native evidence requirements and receiver consent |
+| Hangar | Actual world library, parking, resume and saved memorials |
+| Creator Studio | Separate creator/bot setup, subscription health and private OBS sources |
+| World Chronicle | Paginated events, causes and custody records |
+| Field Manual | Current game and mission rules |
+| Judge Arena | Guided access to the real saved practice loop |
+| Settings | Local motion, contrast, captions, optional sound and control guidance |
 
-The owner-supplied Claude Design exports are now adapted into the typed React application. This directory contains the canonical fixtures and [integration review](integration-review.md); [ADR 0011](../decisions/0011-claude-design-integration.md) records the renderer boundaries. The ignored local `frontend-design/` workspace preserves the original exports; production does not load its runtime, simulator or fictional data. Actual OBS and owner visual/usability acceptance remain open.
+The shared Ark receives all seven saved systems, resources and marks. Navigation sacrifice changes the model; marks persist after repairs and custody changes. The floating blue nose panel has been removed at the owner's request. The running light and bridge shell remain. Every screen uses this same corrected component.
 
-Start with [the presentation contract](../architecture/frontend-contracts.md), then inspect the generated fixtures:
+Motion is decorative. A loading state precedes the lazy scene; graphics failure leaves text/controls available. Reduced motion retains a static 3D view. Rendering is manually scheduled with bounded pixel ratio and hidden/offscreen suspension. These limits do not establish acceptable performance on every device or native OBS.
 
-- [Pristine Ark](fixtures/pristine.json)
-- [Sacrificed navigation](fixtures/navigation-sacrificed.json)
-- [Leaking life support](fixtures/leaking.json)
-- [Repaired machinery with persistent scars](fixtures/repaired-with-scars.json)
-- [Jettisoned cargo](fixtures/cargo-jettisoned.json)
-- [Same Ark inherited by another host](fixtures/inherited.json)
-- [Wreck](fixtures/wreck.json)
+## Physical-state fixtures
 
-Regenerate with `pnpm design:fixtures`. Every fixture is labeled simulation and produced by actual engine commands. Preserve the schema version, stable system IDs, integrity, condition, severity, scar/event IDs, challenge constraints, exact choice previews and phase capability flags. `worldVersion` is the application/custody revision; `gameVersion` sequences immutable gameplay events.
+[Pristine](fixtures/pristine.json) · [navigation sacrificed](fixtures/navigation-sacrificed.json) · [leaking](fixtures/leaking.json) · [repaired with scars](fixtures/repaired-with-scars.json) · [cargo jettisoned](fixtures/cargo-jettisoned.json) · [inherited](fixtures/inherited.json) · [wreck](fixtures/wreck.json).
 
-The replaceable components are `ArkView`, `ChallengeView` and the surfaces in `DeckViews` in `apps/web/src`. The controller owns HTTP commands and SSE updates. The Ark has shared SVG and lazy Three.js renderers; optional local visual preferences cannot modify canonical state. Components accept presentation props/callbacks, respect reduced motion and never call Twitch or use animation completion to resolve outcomes. Locally licensed fonts avoid runtime CDN requests.
-
-Design for both participants and spectators. The current crisis, objective, effects of the last action, permitted commands and imminent risks should be understandable on a 720p stream. Mobile Twitch viewers participate in ordinary chat. They must not need to solve a drag puzzle or open a second authenticated application.
+Regenerate with `pnpm design:fixtures`. These are actual deterministic engine results labeled simulation. They verify presentation coverage, not genuine Twitch acceptance. See the [frontend contract](../architecture/frontend-contracts.md), [cutover record](final-frontend-replacement.md) and [current implementation status](../planning/implementation-status.md).

@@ -9,7 +9,7 @@ The [component decision review](../architecture/decision-stress-review.md) is pa
 | Runtime/language | Node.js 24 LTS, strict TypeScript | One domain model across engine, Twitch adapter and browser; long-running I/O service; supported LTS line | Go offers efficient concurrency but adds a second language/schema boundary; Python is fast to prototype but gives less shared browser typing |
 | API service | Fastify 5, modular monolith | Route-scoped raw-byte webhook parser, explicit HTTP commands, test injection and plugin boundaries | Next.js is attractive for content/SSR; this product needs a durable worker and streaming host regardless, so it would not remove that server |
 | Browser | React 19 + Vite, semantic HTML/CSS | Dashboard, puzzle board, overlay and history share a presentation model; no server rendering requirement | Next.js adds server rendering/routing conventions we do not currently need; a plain DOM app saves dependencies but makes shared complex UI harder to maintain |
-| Rendering | SVG/DOM gameplay and fallback; lazy Three.js 0.186.1 cinematic Ark | Supplied ship geometry justifies an isolated decorative renderer; canonical systems drive both views. Bounded DPR/frame rate, visibility suspension and disposal avoid prototype overhead | React Three Fiber adds another renderer lifecycle; PixiJS/Phaser fit sprite games but do not improve this modular 3D ship plus small SVG graph. Neither owns game state. See ADR 0011 |
+| Rendering | Three.js 0.186.1, Fiber 9.8.2, Drei 10.7.9; DOM challenge/control panels and Tailwind 4.2.2 | Preserve the final supplied Ark/cockpit and Minecraft geometry using its matching React 19 renderer. Same canonical state/authority, lazy scenes, manual scheduling and static reduced motion | Rewriting to imperative geometry risks changing the supplied experience; a sprite framework does not improve this 3D source. [ADR 0033](../decisions/0033-figma-v2-presentation.md) reviews every component boundary |
 | Browser updates | SSE snapshots + authenticated HTTP mutations | Twitch chat supplies gameplay input; browser feeds are one-way. Native reconnect and existing HTTP auth reduce protocol work | WebSocket remains a ready alternative if OBS/proxy tests expose streaming issues or future inputs need continuous bidirectional traffic |
 | Twitch transport | EventSub HTTPS webhooks with cloud bot grants | Hosted service and durable ingress can survive application restarts; one shared bot serves opted-in creators | EventSub WebSocket is useful for installed clients and a local spike, but has reconnect gaps and requires user-token subscription handling |
 | Database | PostgreSQL 17, managed in production | Custody needs relational uniqueness and multi-record transactions; JSONB suits versioned state and events | SQLite is excellent locally but mismatches hosted multi-channel concurrency; document stores shift relational custody constraints into application code |
@@ -27,7 +27,7 @@ For the bounded initial Helix surface, use Node's native `fetch` and `crypto` be
 
 Node 24 and PostgreSQL 17 are deliberate supported baselines, not claims that they are the newest releases. React 19, Fastify 5 and Zod 4 are the selected major lines. Vite, pnpm, TypeScript, Vitest, Playwright and `pg` must be pinned to mutually compatible supported stable versions when building. Confirm each tool's Node engine requirement and all Fastify plugin majors before installation.
 
-OBS uses an embedded browser, so target the tested OBS browser version rather than assuming every modern desktop feature is available. Validate SVG effects, font loading, EventSource, same-origin overlay cookies and reduced-motion behavior on the actual OBS installation.
+OBS uses an embedded browser, so target the tested OBS browser version rather than assuming every modern desktop feature is available. Validate graphics, font loading, EventSource, same-origin overlay cookies and reduced-motion behavior on the actual OBS installation.
 
 ## What changed during the architecture review
 
@@ -35,7 +35,7 @@ The initial concept suggested Canvas and WebSockets. Component analysis favors S
 
 ## Operating cost and build complexity
 
-The 2026-10-27 design adaptation revisits D4 only: optional Three.js with matching `@types/three` 0.186.0, no new backend, state library, animation framework or runtime CDN. The measured initial browser bundle is about 81 kB gzip; the separate cinematic chunk about 135 kB gzip, plus 181 kB of locally served font files. These are build sizes, not device frame-time measurements. Actual OBS/GPU performance remains a live gate.
+The final-design adaptation adds only the exact renderer/style dependencies required by the supplied source. Initial JS is about 94 kB gzip, lazy shared rendering about 243 kB, Ark about 23 kB and voxel scene about 3 kB, with self-hosted licensed fonts. These are measured build sizes, not native OBS/GPU performance acceptance.
 
 Runtime AI has no mandatory cost. Initial infrastructure is one application instance, one database, backups and optional domain/storage services. No monthly price is asserted here: instance, region, retention and usage must be priced at provisioning. Choose a budget with the user then; no service is being purchased during planning. Keep hosting available for the entire judging window described in [the submission plan](hackathon.md).
 

@@ -1,6 +1,6 @@
 # ADR 0032: Replace the visual application from one owner-supplied design
 
-Date: October 30, 2026. Status: session boundary extracted and regression checked; final `figma-v2` supplied, visual adaptation in progress.
+Date: October 30, 2026. Status: controller separation retained; final Figma v2 adapted, regression and acceptance in progress.
 
 The owner rejected the current presentation and the separate UI-LAB direction. The next interface must follow the incoming complete design. Supplement missing screens using that same design vocabulary. Existing screenshots, fonts, animated treatments and components are historical references, not competing art direction.
 
@@ -12,9 +12,9 @@ Local, ignored archives preserve the tracked frontend, UI-LAB's committed histor
 
 Extract the existing session/feed/reconnect/mutation lifecycle into [useTorchlineSession](../../apps/web/src/useTorchlineSession.ts). Keep HTTP validation in [api.ts](../../apps/web/src/api.ts), scoped read-only feed recovery in [overlay-feed.ts](../../apps/web/src/overlay-feed.ts), public records/history types and server-side presentation contracts. No dependencies, API fields, authority, rules or migrations change.
 
-The current layout is contained in [ReferenceFrontend](../../apps/web/src/ReferenceFrontend.tsx). [main.tsx](../../apps/web/src/main.tsx) is only the application bootstrap, retaining the one-time overlay-exchange behavior. When the final design arrives, replace that single presentation entry and remove superseded components/style imports. Do not mount both interfaces, add an old/new appearance toggle, append CSS overrides to the old theme or silently introduce a fixture-backed server. A source tag is the archive; retired source need not remain in the shipping bundle.
+[main.tsx](../../apps/web/src/main.tsx) mounts only the final presentation. The prior tracked presentation source, fonts, media and generators are retired; the archive tag preserves them. [ADR 0033](0033-figma-v2-presentation.md) records exact dependencies and rendering decisions.
 
-The extracted reference remains runnable during adaptation, explicitly not the accepted final appearance. Final replacement, visual acceptance and new native OBS checks remain pending. The owner-supplied `frontend-design/figma-v2` is the sole visual source; preserve its ten screens and both 3D experiences while replacing prototype state with canonical data.
+The owner-supplied figma-v2 is the sole visual source. All ten destinations and both 3D experiences are retained while prototype state is replaced with canonical data. Final visual/native acceptance is assessed on this build.
 
 ## Alternatives and consequences
 

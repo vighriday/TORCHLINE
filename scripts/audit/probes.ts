@@ -119,7 +119,7 @@ await database(async (store) => {
       if (req.url().endsWith('/events')) feeds++;
     });
     await page.goto(url);
-    await page.locator('.flight-deck').waitFor();
+    await page.locator('.mission').waitFor();
     const original = store.active.bind(store);
     let injected = 0;
     store.active = async (...args: Parameters<typeof store.active>) => {

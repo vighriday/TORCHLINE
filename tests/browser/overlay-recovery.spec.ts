@@ -62,7 +62,7 @@ test('overlay survives initial and mid-feed dependency failures, reads the saved
         await route.continue();
       });
       await page.goto(grant.json().url);
-      await expect(page.locator('.spectator-deck')).toBeVisible();
+      await expect(page.locator('.mission')).toBeVisible();
       await expect.poll(() => reads).toBeGreaterThanOrEqual(3);
       await expect.poll(() => feeds).toBeGreaterThan(0);
       const before = (await store.get(id)).state;
@@ -71,7 +71,7 @@ test('overlay survives initial and mid-feed dependency failures, reads the saved
       };
       await tick(app);
       await expect(page.locator('body')).toContainText('Overlay reconnecting');
-      await expect(page.locator('.spectator-deck')).toBeVisible();
+      await expect(page.locator('.mission')).toBeVisible();
       store.active = original;
       await store.command(
         id,
@@ -81,7 +81,7 @@ test('overlay survives initial and mid-feed dependency failures, reads the saved
         randomUUID(),
         { type: 'start' },
       );
-      await expect(page.locator('.spectator-deck.phase-challenge')).toBeVisible();
+      await expect(page.locator('.mission')).toBeVisible();
       await expect(page.locator('body')).not.toContainText('Overlay reconnecting');
       expect((await store.get(id)).state.version).toBe(before.version + 1);
       expect(paths.every((path) => path === '/overlay/sim-alpha/session')).toBe(true);
@@ -104,7 +104,7 @@ test('overlay survives initial and mid-feed dependency failures, reads the saved
       await store.pool.query("DELETE FROM overlay_grants WHERE channel_id='sim-alpha'");
       await tick(app);
       await expect(page.locator('body')).toContainText('Overlay access ended');
-      await expect(page.locator('.spectator-deck')).toHaveCount(0);
+      await expect(page.locator('.mission')).toHaveCount(0);
       const stoppedFeeds = feeds,
         stoppedReads = reads;
       await page.waitForTimeout(1600);

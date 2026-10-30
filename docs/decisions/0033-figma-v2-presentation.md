@@ -10,7 +10,7 @@ Retain React 19.3.1, Vite 8.3.5 and Three.js 0.186.1. Pin the export's React Thr
 
 Pin Tailwind and its Vite adapter to the supplied 4.2.2. Retain the full custom stylesheet and its layers, with one presentation entry at cutover. Do not ship Figma hosting/editor/analytics plugins. Self-host exact Barlow Condensed and IBM Plex Mono weights and their SIL OFL licenses; no runtime font CDN or external texture is needed.
 
-Keep both scenes lazy. Drive manual frames at roughly 30 FPS, 20 for miniatures, bounded DPR, and pause automatic frames while hidden/offscreen or reduced motion is selected. `frameloop="never"` prevents OrbitControls from independently scheduling a continuous RAF loop. User inspection and canonical updates can redraw a reduced-motion scene. These are implementation limits, not measured guarantees for every GPU/OBS host.
+Keep both scenes lazy. Drive manual frames at roughly 30 FPS, 20 for miniatures, bounded/adaptive DPR (0.75 floor on sustained expensive frames), and pause automatic frames while hidden/offscreen or reduced motion is selected. `frameloop="never"` prevents OrbitControls from independently scheduling a continuous RAF loop. User inspection and canonical updates can redraw a reduced-motion scene. These are implementation limits, not measured guarantees for every GPU/OBS host.
 
 Give Drei HTML labels a stable, separately owned portal. An initial browser run exposed a DOM cleanup error when the default target changed; explicit ownership fixes the reproduced failure while preserving the label. Graphics failure has a styled text fallback and retry, not another ship model. Animation and audio never apply commands or verify real attempts.
 
@@ -36,4 +36,4 @@ Pass saved resources, passenger count and physical marks into the ship/cockpit. 
 
 ## Evidence boundary
 
-The corrected awakening, mission and cockpit were visually inspected after build/restart; navigation reports no page errors. A new mission journey verifies a SQL ballot/lock, one attested consequence, replay, history and read-only overlay. A separate solo/recovery/rotation journey passes. Full replacement regression, all-size review, new media and final native OBS checks are still being completed. Prior presentation evidence does not accept this design. Genuine Twitch gameplay and native raid verification remain open.
+The corrected awakening, mission and cockpit were visually inspected after build/restart. A fresh build, 134 automated tests and all 15 replacement browser journeys pass, including actual moving pixels, cold loading/context retry, seven physical-state fixtures at both broadcast sizes, all ten screens, saved cooperation/allocation, paid mission/recovery/history/replay, custody and zero-control overlays. The Minecraft journey also passes with voxel first-frame readiness asserted. Media review, fresh native OBS and owner acceptance are separate. Genuine Twitch gameplay and native raid verification remain open.

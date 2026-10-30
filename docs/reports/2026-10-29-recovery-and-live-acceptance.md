@@ -1,6 +1,6 @@
 # October 29 — recovery fixes and genuine Twitch acceptance
 
-Latest follow-up: [systematic diagnosis, SQL recovery and native OBS evidence](2026-10-29-integration-diagnosis.md), plus the [visual layout review](../reviews/2026-10-29-ui-layout-review.md). These supersede the next-action sequence below: bot delivery is isolated, completed checks are not repeated, and support is not a blocker for gameplay/OBS work. Earlier observations remain dated evidence.
+Latest follow-up: [systematic diagnosis, SQL recovery and native OBS evidence](2026-10-29-integration-diagnosis.md), plus the [visual layout review](../design/README.md). These supersede the next-action sequence below: bot delivery is isolated, completed checks are not repeated, and support is not a blocker for gameplay/OBS work. Earlier observations remain dated evidence.
 
 **Stage: playable, locally hardened development preview; live acceptance and production release remain incomplete.** This follows the [critical audit](../reviews/2026-10-29-comprehensive-audit.md), without rewriting its historical findings. Implementation commits: `61ef4e0` (participation/overlay recovery) and `50dc884` (self-revocation/private bot outcomes), on `feat/gameplay-foundation`. The published preview tag stays unchanged.
 

@@ -1,0 +1,678 @@
+/* Functional states extend the supplied Figma v2 tokens and components. */
+.scene-boundary {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+.ark-canvas canvas {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.ark-canvas[data-scene-ready='true'] canvas {
+  opacity: 1;
+}
+.ark-canvas-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 24px;
+  color: var(--bone);
+  font: 12px var(--mono);
+  text-align: center;
+}
+.connection-panel {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px;
+  text-align: center;
+}
+.connection-panel h1 {
+  font-size: clamp(38px, 9vw, 100px);
+  letter-spacing: 0.12em;
+}
+.connection-panel button,
+.connection-banner button {
+  border: 1px solid var(--amber);
+  padding: 12px 20px;
+  color: var(--amber);
+}
+.connection-banner {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(740px, calc(100vw - 24px));
+  z-index: 120;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: #351e19;
+  color: var(--bone);
+  border-block: 1px solid var(--crimson);
+  padding: 12px 24px;
+  font: 12px var(--mono);
+}
+.skip-link {
+  position: fixed;
+  z-index: 200;
+  top: 8px;
+  left: 8px;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  clip-path: none;
+  width: auto;
+  height: auto;
+  padding: 12px 20px;
+  background: var(--amber);
+  color: var(--void);
+}
+.game-directives {
+  display: grid;
+  gap: 22px;
+}
+.game-directives .panel-cut {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.game-directives :where(p, li, label, small),
+.account-panel :where(p, label, small),
+.private-source p,
+.studio-health p {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.game-directives p,
+.account-panel p {
+  font-size: 13px;
+}
+.game-directives code,
+.practice-chat code {
+  color: var(--cyan);
+  font: 11px var(--mono);
+}
+.game-directives button:disabled,
+.dock button:disabled,
+.platform-page button:disabled,
+.legacy-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.game-directives :where(button, a),
+.practice-chat button,
+.episode-preparation button,
+.account-panel button,
+.private-source button,
+.relay-preparation button {
+  min-height: 40px;
+}
+.game-directives .choice {
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+}
+.game-directives .choice-deltas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--amber-bright);
+}
+.warning-copy {
+  color: var(--crimson-bright);
+  margin: 8px 0;
+  font: 11px/1.6 var(--mono);
+}
+.phase-actions {
+  display: grid;
+  gap: 8px;
+}
+.phase-actions button:not(.commit-button),
+.practice-chat button,
+.episode-preparation button,
+.account-panel button,
+.private-source button,
+.relay-preparation button,
+.cause-links button {
+  border: 1px solid var(--line);
+  background: #202727;
+  color: var(--bone);
+  padding: 10px 14px;
+  font: 11px/1.5 var(--mono);
+}
+.episode-preparation,
+.practice-chat,
+.physical-record {
+  border-block: 1px solid var(--line);
+  padding: 14px 0;
+}
+.episode-preparation summary,
+.practice-chat summary,
+.physical-record summary,
+.account-panel summary {
+  cursor: pointer;
+  font: 11px/1.6 var(--mono);
+  color: var(--amber);
+}
+.game-directives :where(form, label),
+.practice-chat :where(form, label),
+.episode-preparation :where(form, label),
+.account-panel label,
+.solo-choice,
+.relay-preparation label,
+.private-source label {
+  display: grid;
+  gap: 8px;
+}
+.game-directives form,
+.practice-chat form,
+.episode-preparation form {
+  margin-top: 12px;
+}
+.game-directives :where(input, select),
+.practice-chat input,
+.episode-preparation select,
+.account-panel input,
+.solo-choice select,
+.relay-preparation select,
+.legacy-panel select,
+.private-source input,
+.controls-list input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #0b1011;
+  color: var(--bone);
+  min-height: 40px;
+  padding: 9px 10px;
+  font: 12px var(--mono);
+}
+input[type='checkbox'] {
+  accent-color: var(--amber);
+  width: 18px !important;
+  min-height: 18px !important;
+}
+.constraint-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  font: 10px var(--mono);
+  color: var(--cyan);
+}
+.relay-map {
+  width: 100%;
+  min-height: 160px;
+}
+.relay-map line {
+  stroke: #4b6564;
+  stroke-width: 2;
+}
+.relay-map circle {
+  fill: #172322;
+  stroke: var(--amber);
+  stroke-width: 1;
+}
+.relay-map text {
+  fill: var(--bone);
+  font: 12px var(--mono);
+  text-anchor: middle;
+}
+.clue-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.clue-list article {
+  padding: 12px;
+  border: 1px solid var(--line);
+}
+.clue-list article.found {
+  border-color: var(--cyan);
+}
+.clue-list article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.clue-list span {
+  font: 9px var(--mono);
+  color: var(--cyan);
+}
+.clue-list button {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  font: 11px var(--mono);
+}
+.physical-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.physical-grid article {
+  padding: 12px;
+  border-left: 2px solid var(--cyan);
+  background: #121a1a;
+  font: 11px/1.6 var(--mono);
+}
+.physical-grid article[data-severity='lost'],
+.physical-grid article[data-severity='critical'] {
+  border-color: var(--crimson-bright);
+}
+.physical-grid article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  text-transform: uppercase;
+}
+.physical-grid article span {
+  color: var(--amber);
+}
+.physical-grid li {
+  font-size: 10px;
+}
+.mechanical-reward {
+  color: var(--amber-bright);
+}
+.latest-consequence {
+  padding: 12px;
+  border-left: 2px solid var(--amber);
+  font: 11px/1.7 var(--mono);
+}
+.chat-link {
+  color: var(--cyan);
+  font: 11px var(--mono);
+  text-decoration: underline;
+}
+.account-panel {
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: rgba(9, 14, 15, 0.9);
+  display: grid;
+  gap: 14px;
+}
+.account-panel h2 {
+  font-size: 24px;
+  text-transform: uppercase;
+}
+.account-panel .controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.account-panel details {
+  margin-top: 12px;
+}
+.account-panel details > p {
+  margin: 12px 0;
+}
+.private-source {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--amber);
+  font: 11px var(--mono);
+}
+.private-source a {
+  color: var(--cyan);
+  text-decoration: underline;
+}
+.empty-platform {
+  min-height: 250px;
+  display: grid;
+  place-content: center;
+  gap: 24px;
+  text-align: center;
+}
+.world-inspector button {
+  margin-block: 8px;
+}
+.world-list .new-world {
+  min-height: 90px;
+}
+.record-delta {
+  flex-wrap: wrap;
+}
+.timeline button {
+  width: 100%;
+  text-align: left;
+}
+.timeline button strong {
+  white-space: normal;
+}
+.cause-links {
+  display: grid;
+  gap: 8px;
+  margin-block: 20px;
+}
+.custody-chain small {
+  display: block;
+  line-height: 1.7;
+}
+.archive-ship .physical-record {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+.archive-ship {
+  min-width: 0;
+}
+.legacy-panel {
+  max-height: 45vh;
+  overflow: auto;
+}
+.legacy-panel :where(label, .relay-preparation) {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.relay-account {
+  position: absolute;
+  left: 0;
+  bottom: 12px;
+  z-index: 5;
+  max-width: 480px;
+  padding: 24px;
+  margin-left: 4vw;
+}
+.inheritance {
+  padding-bottom: 24px;
+}
+.inheritance-action button + button {
+  margin-top: 8px;
+}
+.inheritance-action > p {
+  color: var(--bone);
+  font: 11px/1.7 var(--mono);
+  margin: 16px 0;
+}
+.solo-choice {
+  margin: 0 24px 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  font: 11px var(--mono);
+}
+.dock .practice-chat {
+  margin: 0 24px;
+  padding: 10px 0;
+}
+.dock .practice-chat form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+.dock .practice-chat label {
+  font: 10px var(--mono);
+}
+.controls-list label {
+  display: grid;
+  gap: 8px;
+  font: 10px var(--mono);
+  color: var(--amber);
+}
+.controls-list p,
+.farm-meter p {
+  font: 10px/1.65 var(--mono);
+  color: var(--bone);
+}
+.livewire-empty {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.livewire-empty h1 {
+  font-size: clamp(34px, 6vw, 72px);
+  max-width: 800px;
+}
+.livewire-empty p {
+  max-width: 600px;
+}
+.compact-resources {
+  display: grid;
+  gap: 7px;
+  white-space: nowrap;
+  font: 10px var(--mono);
+  color: var(--amber);
+}
+.mini-status small {
+  display: block;
+  font: 9px/1.6 var(--mono);
+  color: var(--cyan);
+}
+.app-shell .livewire-world {
+  height: 100dvh;
+}
+.voxel-canvas {
+  position: absolute;
+  inset: 0;
+}
+.settings-panel > p {
+  font: 14px/1.8 var(--mono);
+  margin-block: 18px;
+}
+.game-directives,
+.account-panel,
+.controls-body {
+  font-size: calc(13px * var(--hud-scale, 1));
+}
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+html[data-contrast='high'] {
+  --line: rgba(230, 225, 207, 0.6);
+  --bone: #fff9e9;
+  --cyan: #a6efeb;
+}
+.grain,
+.screen-vignette {
+  pointer-events: none;
+}
+html.obs-document,
+html.obs-document body,
+html.obs-document #root {
+  background: transparent !important;
+}
+.obs-source {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: transparent;
+}
+.obs-source .livewire-world--overlay {
+  height: 100%;
+  min-height: 0;
+  background: transparent;
+  overflow: hidden;
+}
+.obs-source .dock--collapsed {
+  left: auto !important;
+  right: 20px;
+  bottom: 20px !important;
+  transform: none !important;
+  width: min(720px, calc(100vw - 40px));
+  min-height: 100px;
+  height: auto;
+  padding: 12px 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 100px auto;
+  gap: 12px;
+}
+.obs-source .mini-status {
+  padding-left: 12px;
+}
+.obs-source .mini-ark {
+  margin: 0;
+  width: 100px;
+  height: 76px;
+}
+.obs-source .dock--collapsed .mini-ark {
+  width: 100px;
+  height: 76px;
+}
+.obs-source .dock--collapsed .mini-ark .ark-viewport {
+  height: 76px;
+  min-height: 0;
+}
+.obs-full .view-switch {
+  display: none;
+}
+.passive-control {
+  cursor: default;
+  pointer-events: none;
+}
+.obs-source .mini-ark .ark-viewport {
+  min-height: 0;
+  height: 76px;
+}
+.obs-source .mini-status strong {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.obs-source .brand strong {
+  font-size: 18px;
+}
+.obs-full {
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--void);
+}
+.obs-full > .mission {
+  height: 100dvh;
+  min-height: 0;
+}
+@media (min-width: 1101px) {
+  .mission {
+    height: 100dvh;
+    min-height: 600px;
+  }
+  .left-rail,
+  .decision-panel {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .ship-stage {
+    min-width: 0;
+    height: 100%;
+  }
+  .livewire-world:has(.controls-body) .dock {
+    left: calc(50% + 150px);
+    max-width: calc(100vw - 350px);
+  }
+}
+@media (max-width: 1100px) {
+  .decision-panel {
+    overflow: visible;
+  }
+  .legacy-panel {
+    max-height: none;
+  }
+  .relay-account {
+    position: relative;
+    margin: 0 auto;
+  }
+  .inheritance-action,
+  .legacy-panel {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 700px) {
+  .connection-banner {
+    font-size: 10px;
+  }
+  .clue-list {
+    grid-template-columns: 1fr;
+  }
+  .dock .practice-chat form {
+    grid-template-columns: 1fr;
+  }
+  .solo-choice {
+    margin-inline: 12px;
+  }
+  .obs-source .dock--collapsed {
+    right: 8px;
+    bottom: 8px !important;
+    width: calc(100vw - 16px);
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 12px;
+  }
+  .obs-source .mini-ark {
+    display: none;
+  }
+  .obs-source .compact-resources {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: space-around;
+  }
+  .obs-source .mini-status {
+    padding-left: 8px;
+  }
+  .obs-source .brand-mark {
+    display: none;
+  }
+  .relay-account {
+    padding: 16px;
+  }
+  .inheritance-action {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: auto;
+    margin: 24px;
+  }
+  .legacy-panel {
+    max-height: none;
+  }
+  .game-directives input,
+  .account-panel input {
+    font-size: 16px;
+  }
+}
+
+.ark-label-portal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.obs-full > .mission {
+  padding-top: 0;
+}
+.obs-warning {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  background: var(--panel);
+  color: var(--amber);
+  padding: 8px 14px;
+  font: 11px/1.5 var(--mono);
+}
+.obs-full .left-rail,
+.obs-full .decision-panel,
+.obs-full .ship-stage {
+  height: 100dvh;
+}

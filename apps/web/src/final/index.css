@@ -726,7 +726,7 @@ button:disabled {
   gap: 2px;
   z-index: 2;
 }
-.sector-tabs button {
+.sector-tabs :is(button, .passive-control) {
   display: grid;
   grid-template-columns: 28px 1fr;
   text-align: left;
@@ -735,27 +735,27 @@ button:disabled {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
-.sector-tabs button:hover,
-.sector-tabs button.active {
+.sector-tabs :is(button, .passive-control):hover,
+.sector-tabs :is(button, .passive-control).active {
   background: rgba(201, 152, 81, 0.09);
   border-top-color: var(--amber);
 }
-.sector-tabs button > span {
+.sector-tabs :is(button, .passive-control) > span {
   grid-row: 1 / 3;
   color: #5e635f;
   font: 500 11px var(--mono);
 }
-.sector-tabs button strong {
+.sector-tabs :is(button, .passive-control) strong {
   font-size: 12px;
   letter-spacing: 0.04em;
 }
-.sector-tabs button small {
+.sector-tabs :is(button, .passive-control) small {
   color: #6c716d;
   font: 500 7px var(--mono);
   letter-spacing: 0.1em;
   margin-top: 3px;
 }
-.sector-tabs button.active small {
+.sector-tabs :is(button, .passive-control).active small {
   color: var(--amber);
 }
 .signal-strip {
@@ -1886,14 +1886,14 @@ button:disabled {
     padding: 0 346px 16px 268px;
     gap: 12px;
   }
-  .sector-tabs button {
+  .sector-tabs :is(button, .passive-control) {
     padding: 7px 8px 7px 10px;
     background: linear-gradient(90deg, rgba(6, 11, 12, 0.76), rgba(16, 24, 25, 0.3));
     border: 0;
     border-left: 1px solid rgba(111, 170, 169, 0.3);
   }
-  .sector-tabs button:hover,
-  .sector-tabs button.active {
+  .sector-tabs :is(button, .passive-control):hover,
+  .sector-tabs :is(button, .passive-control).active {
     background: linear-gradient(90deg, rgba(111, 170, 169, 0.16), transparent);
     border-top: 0;
     border-left-color: var(--cyan);
@@ -2450,14 +2450,14 @@ button:disabled {
     padding-right: 318px;
     gap: 5px;
   }
-  .sector-tabs button {
+  .sector-tabs :is(button, .passive-control) {
     grid-template-columns: 21px 1fr;
     padding-inline: 6px;
   }
-  .sector-tabs button > span {
+  .sector-tabs :is(button, .passive-control) > span {
     font-size: 8px;
   }
-  .sector-tabs button strong {
+  .sector-tabs :is(button, .passive-control) strong {
     font-size: 9px;
   }
   .signal-strip {
@@ -2692,7 +2692,7 @@ button:disabled {
     overflow-x: auto;
     grid-template-columns: repeat(4, 120px);
   }
-  .sector-tabs button {
+  .sector-tabs :is(button, .passive-control) {
     padding: 7px;
   }
   .floating-mode-nav {
@@ -3004,11 +3004,11 @@ button:disabled {
     border-top: 1px solid rgba(111, 170, 169, 0.15);
     background: rgba(5, 9, 10, 0.94);
   }
-  .sector-tabs button {
+  .sector-tabs :is(button, .passive-control) {
     min-width: 0;
     padding: 7px 8px;
   }
-  .sector-tabs button strong {
+  .sector-tabs :is(button, .passive-control) strong {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3156,16 +3156,16 @@ button:disabled {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     overflow: hidden;
   }
-  .sector-tabs button {
+  .sector-tabs :is(button, .passive-control) {
     grid-template-columns: 18px minmax(0, 1fr);
     padding-inline: 5px;
   }
-  .sector-tabs button strong {
+  .sector-tabs :is(button, .passive-control) strong {
     font-size: 10px;
     line-height: 1;
     white-space: normal;
   }
-  .sector-tabs button small {
+  .sector-tabs :is(button, .passive-control) small {
     font-size: 6px;
   }
 }

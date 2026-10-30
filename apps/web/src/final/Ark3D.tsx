@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type { Resources, SystemPresentation } from '@torchline/contracts';
 import { FrameBudget } from './SceneRuntime.tsx';
+import { conditionColor } from './condition.ts';
 import { Canvas, createPortal, type ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { Billboard, Html, Line, OrbitControls, RoundedBox, Stars } from '@react-three/drei';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -414,7 +415,7 @@ function Radiators() {
   );
 }
 
-function ArkModel({ selected, navigation, onSelect, mini }: SceneProps) {
+function ArkModel({ selected, navigation, onSelect, mini, systems }: SceneProps) {
   const ship = useRef<THREE.Group>(null);
   useFrame(({ clock }) => {
     if (ship.current) {
@@ -425,6 +426,7 @@ function ArkModel({ selected, navigation, onSelect, mini }: SceneProps) {
   });
   return (
     <group ref={ship} scale={mini ? 0.78 : 1}>
+      <PersistentMarks systems={systems} />
       <Truss start={-5.2} length={10.1} />
       <mesh rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.48, 0.48, 11.2, 16]} />
@@ -1208,8 +1210,8 @@ function PersistentMarks({ systems }: { systems?: SystemPresentation[] }) {
               <mesh key={mark.eventId + index} position={[index * 0.17, 0, 0.02 * index]}>
                 <boxGeometry args={[0.07, 0.28, 0.06]} />
                 <meshStandardMaterial
-                  color={mark.kind === 'repair' ? '#76c6c5' : '#d5533e'}
-                  emissive={mark.kind === 'repair' ? '#76c6c5' : '#d5533e'}
+                  color={mark.kind === 'repair' ? conditionColor(system) : '#d5533e'}
+                  emissive={mark.kind === 'repair' ? conditionColor(system) : '#d5533e'}
                   emissiveIntensity={0.9}
                   roughness={0.8}
                 />
@@ -1238,7 +1240,6 @@ function Scene({
   return (
     <>
       <FrameBudget reducedMotion={reducedMotion} mini={mini} />
-      <PersistentMarks systems={systems} />
       <ResponsiveCamera mini={mini} view={view} />
       <color attach="background" args={['#020506']} />
       <fog attach="fog" args={['#020506', 45, 240]} />
@@ -1249,7 +1250,13 @@ function Scene({
       <DeepSpace mini={mini} />
       <SpaceDust count={mini ? 220 : 900} speed={burn ? 9 : 2.6} />
       {!mini && <SpeedStreaks speed={burn ? 3.2 : 1} />}
-      <ArkModel selected={selected} navigation={navigation} onSelect={onSelect} mini={mini} />
+      <ArkModel
+        selected={selected}
+        navigation={navigation}
+        onSelect={onSelect}
+        mini={mini}
+        systems={systems}
+      />
       {cockpit && (
         <CockpitInterior
           resources={resources}

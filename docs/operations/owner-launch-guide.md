@@ -47,7 +47,7 @@ pnpm live:check
 
 The project's SSH public key is already registered. `live:up` checks the build/database/migration, starts missing local live and SSH processes and reuses healthy services. It never kills an unknown process, replaces credentials or changes the acceptance baseline. Private logs/PIDs stay under `.local/`. It uses the already installed Windows SSH client, not the quarantined ngrok executable. For a new machine, follow [SSH key setup](live-release-checklist.md#1-restore-public-https). Exit 2 from `live:check` means some live acceptance evidence is still pending; inspect the individual results.
 
-**Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE with **TWITCH MODE · LIVE VERIFICATION PENDING**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
+**Confirm:** open `https://YOUR_ORIGIN/health/ready`. It must return JSON with `ok: true`, and the home page must show TORCHLINE with **TWITCH SESSION**. An ngrok error/interstitial or an HTML 404 is not a successful callback test. The simulation at `http://localhost:3000` is independent and cannot verify Twitch.
 
 For permanent hosting, use the cloud instructions below instead of running a tunnel. Choose the final HTTPS origin before editing Twitch's redirect address.
 
@@ -89,13 +89,13 @@ Restart the live service after configuration changes. Run `pnpm twitch:doctor:li
 
 ## 5. Connect the broadcaster
 
-At the public origin, in the broadcaster browser choose **Connect creator with Twitch** on the cinematic title. Check the Twitch account name and approve the requested `channel:bot` access. After the callback, open **Captain / hriday29** and confirm **Twitch creator session**. If you have no active Ark, the title offers **Create an Ark**.
+At the public origin, in the broadcaster browser choose **CONNECT CREATOR WITH TWITCH** in the Awakening. Check the Twitch account name and approve the requested `channel:bot` access. After the callback, check the captain name in the top bar and **Command OS → Creator Studio**. If you have no active Ark, choose **LAUNCH THE ARK**.
 
-Before creating an Ark, open the **Captain** menu and choose **Broadcast setup** for integration checks, **Open Hangar** for saved worlds or **Open Relay** for incoming offers. Once an Ark is active, the left navigation provides those workspaces and **Captain tools** contains session and OBS-link controls. The cinematic presentation does not replace account setup or grant any viewer authority.
+Use **Command OS** for **Creator Studio** (accounts, integration checks and OBS), **World Hangar** (saved worlds), **Relay Handoff** (incoming offers) and **Settings**. **Mission Control** contains chapter actions and ship inspection. These destinations use the same server session; viewing a ship never grants creator authority.
 
 If already signed in with the correct account, keep that session. Do not disconnect a working account as a routine setup step. A redirect mismatch means stage 3 and `TWITCH_REDIRECT_URI` disagree. “Invalid state” usually means the one-use flow expired or was reused; start fresh from the site in the same browser.
 
-**Confirm:** creating or resuming your Ark opens Bridge with creator controls. Signing out removes the browser session; **Disconnect Twitch authorization** in Broadcast removes that account's TORCHLINE authorization and subscriptions while preserving its worlds. They are different operations.
+**Confirm:** creating or resuming your Ark opens Mission Control with creator controls. Signing out removes the browser session; **Disconnect Twitch authorization** in Creator Studio removes that account's TORCHLINE authorization and subscriptions while preserving its worlds. They are different operations.
 
 ## 6. Confirm or authorize the dedicated bot
 
@@ -104,7 +104,7 @@ The current bot **hriday_29** has already completed this stage. Broadcast should
 For a fresh bot authorization:
 
 1. In the private window, sign into the separate bot account on Twitch and open TORCHLINE's public origin.
-2. Open **Dedicated bot setup · operator access**. If signed into TORCHLINE as a creator, this section is under **Broadcast**.
+2. Open **Dedicated bot setup · operator access**. If signed into TORCHLINE as a creator, this section is under **Creator Studio**.
 3. Enter `BOT_SETUP_SECRET` from your local configuration in **Bot setup secret** and choose **Authorize the dedicated bot**.
 4. Check the actual account name on Twitch. Approve `user:read:chat`, `user:write:chat`, and `user:bot`. This matches [Twitch's cloud chatbot grant requirements](https://dev.twitch.tv/docs/chat/authenticating/).
 5. If that empty account was accidentally connected as a creator, TORCHLINE shows **Use ACCOUNT as the dedicated bot?** Choose **Convert ACCOUNT to the dedicated bot** only when the name is correct. The confirmation expires in five minutes. An account with Ark or handoff history cannot be converted; use a separate bot account instead.
@@ -113,7 +113,7 @@ For a fresh bot authorization:
 
 ## 7. Check EventSub subscriptions and permissions
 
-Return to the broadcaster's **Broadcast** workspace. Choose **Check / repair Twitch subscriptions**. The server creates/reconciles subscriptions using the proper tokens and answers Twitch's signed challenge automatically. There is no webhook to create manually in the Twitch console.
+Return to the broadcaster's **Creator Studio** workspace. Choose **Check / repair Twitch subscriptions**. The server creates/reconciles subscriptions using the proper tokens and answers Twitch's signed challenge automatically. There is no webhook to create manually in the Twitch console.
 
 For a playing broadcaster, expect current, provider-confirmed enabled subscriptions for `channel.chat.message`, `stream.online`, and `stream.offline`. For incoming raids, open **Relay**, enable **Accept incoming world offers**, then reconcile again. Expect `channel.raid` for that receiver. A provider-confirmed chat subscription alone does not prove a viewer action was applied.
 
@@ -123,7 +123,7 @@ Webhook URL: `https://YOUR_ORIGIN/integrations/twitch/eventsub`. It accepts auth
 
 ## 8. Verify real cooperative play and bot output
 
-1. In **Bridge**, use the existing live Ark. At chapter 1 **awaiting-commit**, choose your preferred consequence, then start the next chapter at the ready boundary. Create/start chapter 1 only on a fresh account with no Ark. Follow the [phase-specific live steps](controlled-account-live-test.md#2-prove-real-gameplay-without-another-account).
+1. In **Mission Control**, use the existing live Ark. At chapter 1 **awaiting-commit**, choose your preferred consequence, then start the next chapter at the ready boundary. Create/start chapter 1 only on a fresh account with no Ark. Follow the [phase-specific live steps](controlled-account-live-test.md#2-prove-real-gameplay-without-another-account).
 2. Open that broadcaster's **actual Twitch chat**, using the ordinary Twitch site or mobile app. Send `!scan A` from a participant account. Look for the discovered clue in TORCHLINE and an increase in **chat actions applied** under Broadcast.
 3. Share scans, discover the constraints, and submit a route using `!route` followed by space-separated nodes, such as the path the crew has solved. A successful solution must change canonical resources and repair shields; reloading must preserve it.
 4. Choose **Open final decision**, then send `!vote 1`. Its advisory tally should change. The captain reviews the forecast and commits; chat votes cannot directly commit a sacrifice.
@@ -136,14 +136,14 @@ Check the public exposure scan with `pnpm check:public-secrets`. It checks confi
 
 ## 9. Add the read-only game view to OBS
 
-1. In the creator dashboard choose **Generate / rotate OBS link**, then **Copy OBS link**. Keep that complete link private. Opening the overlay exchanges its capability for a read-only session and removes the fragment from that tab's address bar; the post-exchange address alone does not grant a fresh OBS browser access.
+1. In the creator dashboard choose **Generate / rotate private OBS source**, then **COPY SOURCE**. Keep that complete link private. Opening the overlay exchanges its capability for a read-only session and removes the fragment from that tab's address bar; the post-exchange address alone does not grant a fresh OBS browser access.
 2. In OBS, under **Sources**, select **+ → Browser**, name it **TORCHLINE**, leave **Local file** off and paste the complete generated link in **URL**.
 3. Set **Width 1920, Height 1080**, or **1280 × 720** for a 720p scene. Enable custom frame rate and set **30 FPS**. Match the source dimensions to your intended scene rather than stretching a default 800 × 600 viewport. [OBS Browser Source properties](https://obsproject.com/kb/browser-source)
 4. Keep browser page permissions at their minimum; TORCHLINE does not need permission to modify OBS. Start with **Shutdown source when not visible** and **Refresh browser when scene becomes active** off, then explicitly test scene switching/reloading with the generated link on your OBS version.
 5. Check crisis title, resource values, system conditions, puzzle constraints and chat command guidance in the OBS preview and in a short recording viewed on a phone. The source must contain no captain, operator or simulator buttons.
 6. Solve or commit something from the dashboard/chat. Confirm OBS updates without refresh. Hide/show the source, refresh once, and test reconnection. Compare ship damage after a new chapter or handoff.
 
-The cinematic ship is optional; unavailable graphics fall back to the schematic. Browser tests cover both canvas sizes and fallback behavior. Actual OBS frame rate, CEF compatibility, scene switching and phone broadcast legibility remain owner acceptance tests. The current composition is a full game scene with a dark background, suitable for a dedicated game segment; a transparent gameplay-over-video preset is separate future work.
+The final design uses the shared 3D Ark, a static view for reduced motion and a text graphics fallback. Creator Studio offers a transparent tactical dock, full expedition and automatic mode. Reverify actual native OBS on this exact build; historical rendering evidence does not establish new frame time, readability or output compatibility.
 
 Rotating the OBS link revokes prior overlay access. Update the OBS URL after rotation and do not share it publicly. The overlay can read its channel's current Ark, not change it. Use creator sign-in in a normal browser for controls.
 
@@ -151,8 +151,8 @@ Rotating the OBS link revokes prior overlay access. Update the OBS URL after rot
 
 Arrange **two consenting live broadcasters**. This external dependency is not yet confirmed. Run a simulator rehearsal separately first if needed; its evidence cannot authorize a live transfer.
 
-1. Receiver: connect their creator account, opt into offers under Relay, have **no active Ark**, reconcile current subscriptions, go live and permit the source's raid in Twitch settings. Park an existing active Ark from Bridge; it remains in the Hangar for later.
-2. Source: play through a chapter and commit a decision. At the ready chapter boundary, choose the receiving creator in Relay and **Prepare handoff**. Readiness checks must pass. Mutations freeze while the prepared intent is pending.
+1. Receiver: connect their creator account, opt into offers under Inheritance, have **no active Ark**, reconcile current subscriptions, go live and permit the source's raid in Twitch settings. Park an existing active Ark from Mission Control; it remains in the Hangar for later.
+2. Source: play through a chapter and commit a decision. At the ready chapter boundary, choose the receiving creator in Inheritance and **Prepare handoff**. Readiness checks must pass. Mutations freeze while the prepared intent is pending.
 3. Source: perform Twitch's genuine native raid using Twitch's normal broadcaster controls. TORCHLINE does not currently request permission to initiate raids on your behalf.
 4. Watch Relay change from prepared to verified only after a signed native `channel.raid` event matches the persisted source/target/time window. Do not replace this evidence with a screenshot, chat command or simulator.
 5. Receiver: remain live and choose **Accept inherited Ark** before the intent expires. Acceptance is an explicit second consent step. If the intent expires, cancel/reprepare and perform a fresh qualifying raid; do not reuse old evidence.

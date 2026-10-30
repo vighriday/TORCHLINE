@@ -471,6 +471,7 @@ export function VoxelScene({
   const palette = palettes[context];
   return (
     <Canvas
+      className="voxel-canvas"
       frameloop="never"
       dpr={[1, 1.5]}
       camera={{ fov: 72, near: 0.1, far: 220, position: START.toArray() }}

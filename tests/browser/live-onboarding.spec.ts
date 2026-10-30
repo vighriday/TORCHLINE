@@ -2,38 +2,37 @@ import { expect, test } from '@playwright/test';
 import { database } from '../helpers.ts';
 import { authorize, liveConfig, providerFixture } from '../twitch-provider.ts';
 import { createApp } from '../../apps/server/src/app.ts';
-import { disclose } from './ui.ts';
 
-test('anonymous Twitch launch and bot setup stay separate on phone and tablet', async ({ page }) =>
+test('phone and tablet keep creator launch separate from operator-only bot consent', async ({
+  page,
+}) =>
   database(async (store) => {
-    const baseUrl = 'http://localhost:3101',
-      config = { ...liveConfig, baseUrl };
-    const provider = providerFixture(config);
-    const app = await createApp(store, config, { workers: false, fetcher: provider.fetcher });
+    const config = { ...liveConfig, baseUrl: 'http://localhost:3101' },
+      provider = providerFixture(config),
+      app = await createApp(store, config, { workers: false, fetcher: provider.fetcher });
     provider.attach(app);
     await app.listen({ port: 3101, host: '127.0.0.1' });
     try {
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(baseUrl);
-      await expect(page.locator('.title-screen')).toBeVisible();
+      await page.goto(config.baseUrl);
+      await expect(
+        page.getByRole('button', { name: 'CONNECT CREATOR WITH TWITCH', exact: true }),
+      ).toBeVisible();
+      await page.goto(config.baseUrl + '/?screen=broadcast');
       for (const size of [
         { width: 390, height: 844 },
         { width: 820, height: 1180 },
       ]) {
         await page.setViewportSize(size);
-        for (const open of [false, true]) {
-          if (open) await disclose(page, '.title-access .title-accounts');
-          const bounds = await page.evaluate(() => {
-            const launch = document.querySelector('.title-launch')!.getBoundingClientRect();
-            const access = document.querySelector('.title-access')!.getBoundingClientRect();
-            return {
-              separate: launch.bottom <= access.top,
-              overflow: document.documentElement.scrollWidth > innerWidth,
-            };
-          });
-          expect(bounds).toEqual({ separate: true, overflow: false });
-        }
-        await page.locator('.title-access .title-accounts > summary').click();
+        await page.getByText('Dedicated bot setup · operator access', { exact: true }).click();
+        await expect(page.getByLabel('Bot setup secret', { exact: true })).toBeVisible();
+        await expect(
+          page.getByRole('link', { name: 'Connect creator with Twitch', exact: true }),
+        ).toHaveAttribute('href', '/auth/twitch');
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await page.getByText('Dedicated bot setup · operator access', { exact: true }).click();
       }
     } finally {
       await page.goto('about:blank');
@@ -67,7 +66,7 @@ test('operator bot setup confirms the named account and converts an accidental c
         { name: 'torchline_session', value: token, url: baseUrl, httpOnly: true, sameSite: 'Lax' },
       ]);
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(baseUrl);
+      await page.goto(baseUrl + '/?screen=broadcast');
       let authorization: URL | undefined;
       await page.route('https://id.twitch.tv/oauth2/authorize**', async (route) => {
         authorization = new URL(route.request().url());
@@ -76,16 +75,14 @@ test('operator bot setup confirms the named account and converts an accidental c
           body: 'Fixture Twitch consent; no real provider request.',
         });
       });
-      await disclose(page, '.title-captain-menu');
-      await expect(page.getByText('Twitch creator session', { exact: true })).toBeVisible();
-      await page.getByRole('button', { name: 'Broadcast setup', exact: true }).click();
+      await page.getByText('Dedicated bot setup · operator access', { exact: true }).click();
       const setup = page.getByLabel('Bot setup secret', { exact: true });
       await expect(setup).toBeVisible();
       await setup.fill('wrong-fixture-key');
-      await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
+      await page.getByRole('button', { name: 'Authorize dedicated bot', exact: true }).click();
       await expect(page.getByRole('alert')).toContainText('Operator authorization required');
       await setup.fill(config.botSetupSecret);
-      await page.getByRole('button', { name: 'Authorize the dedicated bot', exact: true }).click();
+      await page.getByRole('button', { name: 'Authorize dedicated bot', exact: true }).click();
       await expect(page).toHaveURL(/id\.twitch\.tv\/oauth2\/authorize/);
       await page.goto(
         `${baseUrl}/auth/twitch/callback?code=99&state=${authorization!.searchParams.get('state')}`,
@@ -102,12 +99,7 @@ test('operator bot setup confirms the named account and converts an accidental c
       await page
         .getByRole('button', { name: 'Convert fixture_99 to the dedicated bot', exact: true })
         .click();
-      await expect(
-        page.getByText(
-          'Dedicated bot authorization is current. Connect the broadcaster to finish channel setup.',
-          { exact: true },
-        ),
-      ).toBeVisible();
+      await expect(page.locator('.studio-health')).toContainText('AUTHORIZED');
       await expect(page.getByRole('alert')).not.toBeVisible();
       expect(
         (await store.pool.query("SELECT 1 FROM oauth_grants WHERE id='99' AND role='bot'"))

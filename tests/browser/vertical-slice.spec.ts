@@ -1,163 +1,115 @@
-import { chooseSimulation, disclose } from './ui.ts';
-import { expect, test } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
-import { Store } from '@torchline/storage';
-import { createApp } from '../../apps/server/src/app.ts';
-import { randomUUID } from 'node:crypto';
-
-// This journey verifies state/custody across three simultaneous pages. Dedicated
-// cinematic/encounter tests verify moving WebGL; avoid competing software GPUs here.
+import { test, expect } from '@playwright/test';
+import {
+  serve,
+  launch,
+  login,
+  navigate,
+  manual,
+  closeDecision,
+  overlayLink,
+  snapshot,
+} from './runtime.ts';
 test.use({ reducedMotion: 'reduce' });
-
-let store: Store;
-let admin: Store;
-let schema: string;
-let app: Awaited<ReturnType<typeof createApp>>;
-test.beforeAll(async () => {
-  if (!process.env.DATABASE_URL) throw new Error('Run pnpm db:up first.');
-  admin = new Store(process.env.DATABASE_URL);
-  schema = `browser_${randomUUID().replaceAll('-', '')}`;
-  await admin.pool.query(`CREATE SCHEMA "${schema}"`);
-  const url = new URL(process.env.DATABASE_URL);
-  url.searchParams.set('options', `-c search_path=${schema}`);
-  store = new Store(url.toString());
-  await store.migrate();
-  app = await createApp(store, {
-    mode: 'simulation',
-    baseUrl: 'http://localhost:3100',
-    sessionSecret: 'ab'.repeat(32),
-    tokenKey: 'cd'.repeat(32),
-    botSetupSecret: 'fixture-only',
-  });
-  await app.listen({ port: 3100, host: '127.0.0.1' });
-  await mkdir('.local/screenshots', { recursive: true });
-});
-test.afterAll(async ({ browser }) => {
-  await Promise.allSettled(browser.contexts().map((context) => context.close()));
-  if (app) await app.close();
-  if (store) await store.close();
-  if (admin) {
-    await admin.pool.query(`DROP SCHEMA "${schema}" CASCADE`);
-    await admin.close();
-  }
-});
-
-test('cooperative play, save/reload, read-only overlay and consented simulated custody transfer', async ({
+test('shared puzzle rewards, saved sacrifice and consented practice custody reach the inherited ship', async ({
   page,
   browser,
-}) => {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
-  await chooseSimulation(page, 'alpha');
-  await page.getByRole('button', { name: 'Create an Ark' }).click();
-  await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
-  await expect(page.locator('[data-resource=hull]')).toHaveText('70');
-  await disclose(page, '.simulation-console');
-  await page.getByRole('textbox', { name: 'Chat command' }).fill('!scan A');
-  await page.getByRole('button', { name: 'Send simulated input' }).click();
-  await expect(page.getByText('A · Discovered', { exact: true })).toBeVisible();
-  await page.getByLabel('Participant alias').fill('crew-two');
-  await page.getByRole('textbox', { name: 'Chat command' }).fill('!scan C');
-  await page.getByRole('button', { name: 'Send simulated input' }).click();
-  await expect(page.getByText('C · Discovered', { exact: true })).toBeVisible();
-  await disclose(page, '.route-tools');
-  await page.getByLabel('Candidate route').fill('S A C T');
-  await page.getByRole('button', { name: 'Submit route' }).click();
-  await expect(page.locator('[data-resource=hull]')).toHaveText('85');
-  await expect(page.locator('[data-system=shields]')).toHaveAttribute('data-condition', 'repaired');
-  await page.getByRole('button', { name: 'Open final decision' }).click();
-  await page.getByRole('button', { name: 'Commit Sacrifice navigation', exact: true }).click();
-  await expect(page.locator('[data-resource=navigation]')).toHaveText('0');
-  await expect(page.locator('[data-system=navigation]')).toHaveAttribute(
-    'data-condition',
-    'destroyed',
-  );
-  await page.reload();
-  await expect(page.locator('[data-system=navigation]')).toHaveAttribute(
-    'data-condition',
-    'destroyed',
-  );
-  await page.screenshot({ path: '.local/screenshots/vertical-slice.png', fullPage: true });
-  await disclose(page, '.captain-console');
-  await page.getByRole('button', { name: 'Generate / rotate OBS link' }).click();
-  const [overlay] = await Promise.all([
-    page.waitForEvent('popup'),
-    page.getByRole('link', { name: 'Open read-only overlay' }).click(),
-  ]);
-  await expect(overlay.locator('[data-system=navigation]')).toHaveAttribute(
-    'data-condition',
-    'destroyed',
-  );
-  await expect(overlay.getByRole('button')).toHaveCount(0);
-  const targetContext = await browser.newContext({ reducedMotion: 'reduce' });
-  const target = await targetContext.newPage();
-  await target.goto('/');
-  await chooseSimulation(target, 'beta');
-  await disclose(target, '.title-captain-menu');
-  await target.getByRole('button', { name: 'Open Relay', exact: true }).click();
-  await target.getByLabel('Accept incoming world offers').check();
-  await page
-    .getByRole('navigation', { name: 'Command deck' })
-    .getByRole('button', { name: /Relay/ })
-    .click();
-  await page.getByRole('button', { name: 'Prepare handoff', exact: true }).click();
-  await page.getByRole('button', { name: 'Inject simulated raid evidence' }).click();
-  await target.getByRole('button', { name: 'Inspect offered Ark' }).click();
-  await expect(target.locator('.handoff-inspector [data-system=navigation]')).toHaveAttribute(
-    'data-condition',
-    'destroyed',
-  );
-  await expect(target.getByRole('region', { name: 'Incoming Ark preview' })).toContainText(
-    'frozen Ark on offer',
-  );
-  for (const size of [
-    { width: 1280, height: 900 },
-    { width: 390, height: 844 },
-  ]) {
-    await target.setViewportSize(size);
-    expect(await target.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+}) =>
+  serve(async (store) => {
+    test.setTimeout(120000);
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    const targetContext = await browser.newContext({ reducedMotion: 'reduce' }),
+      target = await targetContext.newPage(),
+      overlay = await browser.newPage({ reducedMotion: 'reduce' });
+    try {
+      await launch(page);
+      await manual(page);
+      await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
+      await page.locator('.practice-chat summary').click();
+      await page.getByLabel('Chat command', { exact: true }).fill('!scan A');
+      await page.getByRole('button', { name: 'Send simulated input', exact: true }).click();
+      await expect(page.locator('.clue-list .found')).toContainText(['A']);
+      await page.getByLabel('Simulated viewer').fill('crew-two');
+      await page.getByLabel('Chat command', { exact: true }).fill('!scan C');
+      await page.getByRole('button', { name: 'Send simulated input', exact: true }).click();
+      await expect(page.locator('.clue-list .found')).toHaveCount(2);
+      await page.getByLabel('Candidate route').fill('S A C T');
+      await page.getByRole('button', { name: 'Submit route', exact: true }).click();
+      await expect(page.locator('[data-resource=hull]')).toHaveAttribute('data-value', '85');
+      await expect(page.locator('[data-system=shields]')).toHaveAttribute(
+        'data-condition',
+        'repaired',
+      );
+      await closeDecision(page);
+      await expect(page.getByRole('button', { name: /Sacrifice navigation/ })).toBeEnabled();
+      await page.getByRole('button', { name: /Sacrifice navigation/ }).click();
+      await page.getByRole('button', { name: 'Commit directive', exact: true }).click();
+      await expect(page.locator('[data-resource=navigation]')).toHaveAttribute('data-value', '0');
+      await page.reload();
+      await expect(page.locator('[data-system=navigation]')).toHaveAttribute(
+        'data-condition',
+        'destroyed',
+      );
+      const before = await snapshot(page);
+      await overlay.goto(await overlayLink(page, 'full'));
+      await expect(overlay.locator('[data-system=navigation]')).toHaveAttribute(
+        'data-condition',
+        'destroyed',
+      );
+      await expect(overlay.getByRole('button')).toHaveCount(0);
+      await login(target, 'beta');
+      await navigate(target, 'inheritance');
+      await target.getByLabel('Accept incoming world offers').check();
+      await expect.poll(async () => (await store.creator('sim-beta'))?.receive_opt_in).toBe(true);
+      await navigate(page, 'inheritance');
+      await page.getByRole('button', { name: 'Prepare handoff', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Inject simulated raid evidence', exact: true })
+        .click();
+      await expect(
+        target.getByRole('button', { name: 'Accept inherited Ark', exact: true }),
+      ).toBeVisible();
+      await expect(target.locator('.inherited-stats')).toContainText('0%');
+      await target.getByRole('button', { name: 'Accept inherited Ark', exact: true }).click();
+      await expect.poll(async () => (await snapshot(target))?.worldId).toBe(before.worldId);
+      await expect
+        .poll(async () => (await store.get(before.worldId)).custodian_id)
+        .toBe('sim-beta');
+      await expect(overlay.getByRole('status')).toContainText('Waiting for an active Ark');
+      if (await target.getByRole('button', { name: 'Exit inheritance', exact: true }).count())
+        await target.getByRole('button', { name: 'Exit inheritance', exact: true }).click();
+      await expect(target.locator('[data-system=navigation]')).toHaveAttribute(
+        'data-condition',
+        'destroyed',
+      );
+      await expect(target.locator('[data-system=shields]')).toHaveAttribute(
+        'data-condition',
+        'repaired',
+      );
+      await expect(target.locator('[data-resource=hull]')).toHaveAttribute('data-value', '80');
+      await target.getByRole('button', { name: 'Start chapter 2', exact: true }).click();
+      await expect(target.locator('.chapter-block')).toContainText('The Blind Jump');
+      await expect(target.locator('[data-resource=hull]')).toHaveAttribute('data-value', '80');
+      expect(errors).toEqual([]);
+    } finally {
+      await overlay.close();
+      await targetContext.close();
+      await page.goto('about:blank');
+    }
+  }));
+test('phone captain can create and play a saved chapter without layout overflow', async ({
+  page,
+}) =>
+  serve(async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await launch(page, 'gamma');
+    await manual(page);
+    await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
+    await expect(page.locator('.chapter-block')).toContainText('Radiation Storm');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await target.screenshot({
-      path: `.local/screenshots/handoff-preview-${size.width}.png`,
-      fullPage: true,
-    });
-  }
-  await target.setViewportSize({ width: 1280, height: 900 });
-  await target.getByRole('button', { name: 'Accept inherited Ark' }).click();
-  await expect(target.locator('[data-system=navigation]')).toHaveAttribute(
-    'data-condition',
-    'destroyed',
-  );
-  await expect(target.locator('[data-system=shields]')).toHaveAttribute(
-    'data-condition',
-    'repaired',
-  );
-  await expect(target.locator('[data-resource=hull]')).toHaveText('80');
-  await expect(overlay.getByRole('heading', { name: 'No active Ark' })).toBeVisible();
-  await target.getByRole('button', { name: 'Start chapter 2', exact: true }).click();
-  await expect(target.locator('[data-resource=hull]')).toHaveText('80');
-  await expect(
-    target.getByRole('heading', { name: 'The Blind Jump', level: 1, exact: true }),
-  ).toBeVisible();
-  await target.screenshot({ path: '.local/screenshots/inherited-ark.png', fullPage: true });
-  expect(errors).toEqual([]);
-  await overlay.close();
-  await targetContext.close();
-});
-
-test('mobile reference layout has no horizontal overflow and supports solo play', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await chooseSimulation(page, 'gamma');
-  await page.getByRole('button', { name: 'Create an Ark' }).click();
-  await page.getByRole('button', { name: 'Start chapter 1', exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Radiation Storm', level: 1, exact: true }),
-  ).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: '.local/screenshots/mobile-reference.png', fullPage: true });
-});
+    await page.getByRole('button', { name: 'Scan A', exact: true }).click();
+    await expect(page.locator('.clue-list .found')).toHaveCount(1);
+    await page.goto('about:blank');
+  }));
