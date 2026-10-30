@@ -23,6 +23,6 @@ python scripts/readme/encode-final.py
 pnpm readme:proof
 ```
 
-The capture binds only a disposable local simulation at port 3102, then drops its schema and closes the app/browser. Raw frames and manifests remain ignored under .local/final-media. GIFs contain 24 actual sampled browser frames, resized without invented intermediate frames; timing is condensed for documentation. Each GIF must remain under 5 MB. Review the selected images and privacy scan before staging.
+The capture binds only a disposable local simulation at port 3102, then drops its schema and closes the app/browser. It waits for actual rendered frames and the canvas/ancestor entrance fades to be visible; a ready GPU frame alone is insufficient. Raw frames and manifests remain ignored under .local/final-media. GIFs contain 24 actual sampled browser frames, resized without invented intermediate frames; timing is condensed for documentation. Each GIF must remain under 5 MB. Review the selected images and privacy scan before staging.
 
 See [design provenance](../design-provenance.md) for the supplied artwork, fonts and licenses. These captures demonstrate presentation and saved practice, not genuine Twitch, native OBS or raid acceptance.

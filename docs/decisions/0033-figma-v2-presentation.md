@@ -18,6 +18,8 @@ Pass saved resources, passenger count and physical marks into the ship/cockpit. 
 
 ## Component review
 
+Follow-up owner review found launch controls colliding with the manifest and a relay canvas with visible rectangular bounds. Use flow rows for entry content and a full-parent desktop relay canvas, with stacked mobile panels. Coalesce graphics into one scheduled frame and leave a timeout after completion so slow GPUs cannot accumulate interval work ahead of controls. These are presentation corrections; canonical clocks and provider/custody rules remain unchanged. Local passing journeys and failed first-cutover CI are recorded separately in the evidence report.
+
 | Component | Required boundary |
 | --- | --- |
 | C1 identity | Existing sessions and separate bot consent; no secrets in UI/media |
@@ -36,4 +38,4 @@ Pass saved resources, passenger count and physical marks into the ship/cockpit. 
 
 ## Evidence boundary
 
-The corrected awakening, mission and cockpit were visually inspected after build/restart. A fresh build, 134 automated tests and all 15 replacement browser journeys pass, including actual moving pixels, cold loading/context retry, seven physical-state fixtures at both broadcast sizes, all ten screens, saved cooperation/allocation, paid mission/recovery/history/replay, custody and zero-control overlays. The Minecraft journey also passes with voxel first-frame readiness asserted. Media review, fresh native OBS and owner acceptance are separate. Genuine Twitch gameplay and native raid verification remain open.
+The corrected awakening, mission and cockpit were visually inspected after build/restart. A fresh build, 134 automated tests and all 15 replacement browser journeys pass, including actual moving pixels, cold loading/context retry, seven physical-state fixtures at both broadcast sizes, all ten screens, saved cooperation/allocation, paid mission/recovery/history/replay, custody and zero-control overlays. The Minecraft journey also passes with voxel first-frame readiness asserted. Corrected final media is reviewed; fresh native OBS 32.2.2 verifies full rendering, refresh, rotation and a transparent compact replacement against saved simulation over loopback. Owner acceptance, sustained performance and outgoing broadcast remain separate. [Evidence](../reports/2026-10-30-final-frontend.md). Genuine Twitch gameplay and native raid verification remain open.

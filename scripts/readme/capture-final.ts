@@ -61,6 +61,24 @@ async function ready() {
     .locator('.ark-canvas[data-scene-ready=true],.voxel-canvas[data-scene-ready=true]')
     .first()
     .waitFor({ timeout: 60000 });
+  // A rendered frame can exist behind an entry fade. Capture only after the
+  // actual canvas and its cinematic parent have become visible.
+  await page.waitForFunction(
+    () => {
+      const root = document.querySelector<HTMLElement>(
+        '.ark-canvas[data-scene-ready=true],.voxel-canvas[data-scene-ready=true]',
+      );
+      if (!root || Number(root.dataset.frameCount) < 2) return false;
+      let node: HTMLElement | null = root.querySelector('canvas');
+      while (node) {
+        if (Number(getComputedStyle(node).opacity) < 0.99) return false;
+        node = node.parentElement;
+      }
+      return true;
+    },
+    undefined,
+    { timeout: 60000 },
+  );
 }
 try {
   await page.goto(origin);

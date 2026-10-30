@@ -1,6 +1,7 @@
 """Encode actual final-design browser frames. No generated or interpolated gameplay."""
 from pathlib import Path
 from base64 import b64encode
+from io import BytesIO
 from PIL import Image
 
 root = Path(__file__).resolve().parents[2]
@@ -13,13 +14,18 @@ for name, duration in [('ark', 180), ('livewire', 120)]:
             frames.append(frame)
     if len(frames) != 24:
         raise ValueError(f'Expected 24 real {name} frames')
-    palette = frames[0].quantize(colors=64)
-    frames = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
     output = root / 'assets' / 'readme' / ('ark-roll.gif' if name == 'ark' else 'minecraft-livewire.gif')
-    frames[0].save(output, save_all=True, append_images=frames[1:], duration=duration, loop=0, optimize=True, disposal=2)
-    if output.stat().st_size > 5_000_000:
+    for colors in [128, 96, 64]:
+        palette = frames[0].quantize(colors=colors)
+        encoded = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
+        buffer = BytesIO()
+        encoded[0].save(buffer, format='GIF', save_all=True, append_images=encoded[1:], duration=duration, loop=0, optimize=True, disposal=2)
+        if buffer.tell() <= 5_000_000:
+            output.write_bytes(buffer.getvalue())
+            break
+    else:
         raise ValueError(f'{output.name} exceeds the documentation budget')
-    print(f'{output.name}: {len(frames)} actual frames, {output.stat().st_size} bytes')
+    print(f'{output.name}: {len(frames)} actual frames, {colors} colors, {output.stat().st_size} bytes')
 
 # Portable SVG container for the actual recorded animation; GitHub's inline SVG animation is unsupported.
 gif = b64encode((root / 'assets/readme/ark-roll.gif').read_bytes()).decode('ascii')

@@ -1,6 +1,8 @@
 # Documentation
 
-**Current lane: final Figma v2 frontend on feat/frontend-replacement.** All ten screens are connected to the existing persistent game and LIVEWIRE foundations. Fresh regression and visual/native acceptance determine promotion; previous presentation evidence does not accept this build. [Current implementation status](planning/implementation-status.md) · [Final design](design/README.md) · [Cutover](design/final-frontend-replacement.md) · [ADR 0033](decisions/0033-figma-v2-presentation.md).
+**Current: [final frontend implementation and evidence](reports/2026-10-30-final-frontend.md).**
+
+Final Figma v2 frontend on feat/frontend-replacement. All ten screens are connected to the existing persistent game and LIVEWIRE foundations. Fresh regression and visual/native acceptance determine promotion; previous presentation evidence does not accept this build. [Current implementation status](planning/implementation-status.md) · [Final design](design/README.md) · [Cutover](design/final-frontend-replacement.md) · [ADR 0033](decisions/0033-figma-v2-presentation.md).
 
 Genuine chat-driven game changes, native raid transfer and permanent deployment remain separate open gates. [October 29 diagnosis](reports/2026-10-29-integration-diagnosis.md) and [critical audit](reviews/2026-10-29-comprehensive-audit.md) retain historical provider/security evidence. [LIVEWIRE rules](product/livewire-v0.md) and [acceptance](operations/livewire-v0.md) describe the default-off extension.
 

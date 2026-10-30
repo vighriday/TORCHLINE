@@ -102,7 +102,7 @@ For the real stream, follow the [owner setup guide](docs/operations/owner-launch
 | Layer | Honest status |
 | --- | --- |
 | Saved survival + LIVEWIRE | Implemented with actual PostgreSQL, deterministic consequences, replay and automated tests |
-| Final design | Ten screens integrated; browser, graphics and native acceptance are recorded separately in [current status](docs/planning/implementation-status.md) |
+| Final design + OBS | Ten screens integrated; browser checks and native full/dock rendering, refresh and rotation pass in saved practice. [Evidence and limits](docs/reports/2026-10-30-final-frontend.md) |
 | Twitch | Real consent, signed callbacks and incoming query chat observed; genuine chat changing the Ark still needs acceptance |
 | Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |
 | Native raid + permanent hosting | Still open. Simulation does not satisfy either gate |
