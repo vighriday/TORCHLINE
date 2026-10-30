@@ -241,8 +241,10 @@ export async function createApp(
         'Configure the Twitch client and encryption key in the ignored environment file.',
       );
   };
-  const snapshot = async (creator: Creator, readonly = false) => {
+  const buildSnapshot = async (creator: Creator, readonly = false) => {
     const world = await store.active(creator.id, true);
+    if (world && (world.custodian_id !== creator.id || world.mode !== config.mode))
+      denied('STATE_CHANGED', 'The channel assignment changed. Refresh the saved state.');
     const bot = (await store.pool.query("SELECT id FROM oauth_grants WHERE role='bot' LIMIT 1"))
       .rows[0];
     const details =
@@ -324,6 +326,24 @@ export async function createApp(
       },
     };
   };
+  const snapshot = async (creator: Creator, readonly = false) => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const before = await store.creator(creator.id);
+      if (!before?.connected || before.mode !== config.mode)
+        return denied('FORBIDDEN', 'Creator authorization ended.');
+      try {
+        const result = await buildSnapshot(before, readonly);
+        const after = await store.creator(creator.id);
+        if (!after?.connected || after.mode !== config.mode)
+          return denied('FORBIDDEN', 'Creator authorization ended.');
+        if (before.assignment_revision !== after.assignment_revision) continue;
+        return { ...result, channelEpoch: before.assignment_revision };
+      } catch (error) {
+        if (!(error instanceof DomainError && error.code === 'STATE_CHANGED')) throw error;
+      }
+    }
+    return denied('STATE_CHANGED', 'The channel is changing. Reconnect to its saved state.');
+  };
   app.get('/health/live', async () => ({ ok: true, mode: config.mode }));
   app.get('/health/ready', async () => {
     if (
@@ -361,7 +381,9 @@ export async function createApp(
           genuineRaidVerified: false,
         },
       };
-    return snapshot(await currentCreator(request));
+    const result = await snapshot(await currentCreator(request));
+    await currentCreator(request);
+    return result;
   });
   app.post('/api/simulator/login', async (request, reply) => {
     if (config.mode !== 'simulation')
@@ -1005,23 +1027,30 @@ export async function createApp(
   };
   app.get('/api/live/events', async (request, reply) => {
     const creator = await currentCreator(request);
-    return stream(request, reply, creator.id, async () => snapshot(await currentCreator(request)));
+    return stream(request, reply, creator.id, async () => {
+      const result = await snapshot(await currentCreator(request));
+      await currentCreator(request);
+      return result;
+    });
   });
   const overlaySnapshot = async (request: FastifyRequest, channel: string) => {
     const token = request.cookies.torchline_overlay ?? '';
-    if (
-      !(
-        await store.pool.query(
-          'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
-          [digest(token), channel],
-        )
-      ).rowCount
-    )
-      denied('FORBIDDEN', 'Overlay access revoked.');
+    const grantValid = async () =>
+      Boolean(
+        (
+          await store.pool.query(
+            'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
+            [digest(token), channel],
+          )
+        ).rowCount,
+      );
+    if (!(await grantValid())) denied('FORBIDDEN', 'Overlay access revoked.');
     const creator = await store.creator(channel);
     if (!creator || creator.mode !== config.mode)
       denied('FORBIDDEN', 'Overlay channel unavailable.');
-    return snapshot(creator!, true);
+    const result = await snapshot(creator!, true);
+    if (!(await grantValid())) denied('FORBIDDEN', 'Overlay access revoked.');
+    return result;
   };
   app.get('/overlay/:channel/state', async (request) => {
     const { channel } = z.object({ channel: NodeText }).parse(request.params);

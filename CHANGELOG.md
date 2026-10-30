@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Release hardening
+
+- Version channel assignments and creator authority atomically in migration 011. Retry snapshots that cross a park, rehost or custody change; recheck session/capability authority after slow projection reads.
+- Reject stale dashboard/OBS world and mission-ballot snapshots, ignore superseded HTTP refreshes, and clear expired sessions. Regressions reorder actual HTTP/SSE responses around saved clues, mission ballots, world reassignment and logout; historical replay remains unchanged.
+
 ## v0.1.0-preview.2 — October 30, 2026
 
 - Recover the independent QA branch's two real PostgreSQL concurrency regressions and dated assessment during main consolidation. Preserve the superseded UI-LAB work without importing its prototype server or visuals.

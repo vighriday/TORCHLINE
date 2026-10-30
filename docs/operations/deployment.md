@@ -1,5 +1,7 @@
 # Deployment and operational runbook
 
+Current hardening source requires migration **011_channel_assignment_revision.sql** before startup. It adds durable channel-assignment/authority epochs for stale-response protection; historical Ark state/events are unchanged. Run the existing migration command before switching the application. A pre-011 application can still read the additive schema; keep an extension-capable binary for LIVEWIRE histories.
+
 Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster are running/verified as described in the README; no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
 
 ## Recommended topology
@@ -52,18 +54,18 @@ Monitor ingress acknowledgement latency, inbox age/failures, outbox age, accepte
 
 ## Recovery procedures to implement and rehearse
 
-| Incident | Response |
-| --- | --- |
-| Database unavailable | Fail mutations/ingress durably with retryable response; show disconnected state; do not announce successful custody change |
-| App restart or deploy | Reclaim expired leases, reconcile subscriptions, pause interrupted timed interactions, drain accepted work, publish current snapshots |
-| Missing/expired raid proof | Preserve source custody, expire/cancel intent, explain retry after cooldown; no operator fabrication of native proof |
-| Token revoked | End associated sessions and chat actions, remove/reconcile subscriptions, ask creator to reconnect through product flow |
-| Recipient busy/opted out | Reject commit, preserve both worlds, cancel/expire safely |
-| Feed stalled | Reconnect and refetch current snapshot; missed visuals do not repeat outcomes |
-| Poison inbox item | Mark failed after bounded retries, expose diagnostic metadata, preserve unrelated work |
-| Exposed overlay capability | Revoke grant and sessions, regenerate channel link, retain independent Twitch connection |
-| Exposed OAuth credential | Revoke/rotate, update server secret/grant, validate reconnect and affected subscriptions |
-| Bad release | Roll back application to a schema-compatible image; do not blindly roll back destructive data changes |
+| Incident                   | Response                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Database unavailable       | Fail mutations/ingress durably with retryable response; show disconnected state; do not announce successful custody change            |
+| App restart or deploy      | Reclaim expired leases, reconcile subscriptions, pause interrupted timed interactions, drain accepted work, publish current snapshots |
+| Missing/expired raid proof | Preserve source custody, expire/cancel intent, explain retry after cooldown; no operator fabrication of native proof                  |
+| Token revoked              | End associated sessions and chat actions, remove/reconcile subscriptions, ask creator to reconnect through product flow               |
+| Recipient busy/opted out   | Reject commit, preserve both worlds, cancel/expire safely                                                                             |
+| Feed stalled               | Reconnect and refetch current snapshot; missed visuals do not repeat outcomes                                                         |
+| Poison inbox item          | Mark failed after bounded retries, expose diagnostic metadata, preserve unrelated work                                                |
+| Exposed overlay capability | Revoke grant and sessions, regenerate channel link, retain independent Twitch connection                                              |
+| Exposed OAuth credential   | Revoke/rotate, update server secret/grant, validate reconnect and affected subscriptions                                              |
+| Bad release                | Roll back application to a schema-compatible image; do not blindly roll back destructive data changes                                 |
 
 ## Backups and judge availability
 

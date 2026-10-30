@@ -10,6 +10,7 @@ export interface HandoffView {
 export interface DashboardSnapshot {
   me: { id: string; label: string; receiveOptIn: boolean } | null;
   mode: 'simulation' | 'live';
+  channelEpoch?: string;
   world: WorldPresentation | null;
   worlds?: { id: string; chapter: number; outcome: string | null; parked: boolean }[];
   handoffs?: HandoffView[];
