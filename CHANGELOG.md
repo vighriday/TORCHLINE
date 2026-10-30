@@ -4,6 +4,7 @@
 
 - Version channel assignments and creator authority atomically in migration 011. Retry snapshots that cross a park, rehost or custody change; recheck session/capability authority after slow projection reads.
 - Reject stale dashboard/OBS world and mission-ballot snapshots, ignore superseded HTTP refreshes, and clear expired sessions. Regressions reorder actual HTTP/SSE responses around saved clues, mission ballots, world reassignment and logout; historical replay remains unchanged.
+- Recover authenticated dashboard SSE feeds after transient projection or transport failures with bounded read-only retry. Session expiry remains terminal, and snapshots from a different creator are rejected.
 
 ## v0.1.0-preview.2 — October 30, 2026
 

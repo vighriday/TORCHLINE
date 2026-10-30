@@ -38,6 +38,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0032](0032-final-frontend-replacement.md) | Archive rejected visuals and replace one presentation entry while retaining real session/game/overlay behavior | Presentation/controller boundary, all C1–C13 |
 
 | [0033](0033-figma-v2-presentation.md) | Preserve the final ten-screen Figma design, corrected shared Ark and Minecraft scene with real state | Presentation/rendering, all C1–C13 |
+| [0034](0034-dashboard-feed-recovery.md) | Recover authenticated dashboard SSE feeds after transient failures without accepting stale authority | Recovery/presentation, C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

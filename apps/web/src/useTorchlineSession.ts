@@ -56,39 +56,68 @@ export function useTorchlineSession(overlayChannel?: string) {
     if (overlayChannel || !data?.me) return;
     let active = true;
     const channel = data.me.id;
-    const source = new EventSource('/api/live/events');
-    source.addEventListener('snapshot', (event) => {
+    let source: EventSource | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let attempt = 0;
+    const close = () => {
+      source?.close();
+      source = undefined;
+    };
+    const retry = () => {
+      if (!active || timer) return;
+      close();
+      setConnectionError('Connection interrupted. Reconnecting…');
+      timer = setTimeout(
+        () => {
+          timer = undefined;
+          void recover();
+        },
+        Math.min(15000, 500 * 2 ** Math.min(attempt++, 5)),
+      );
+    };
+    const open = () => {
+      if (!active) return;
+      const feed = new EventSource('/api/live/events');
+      source = feed;
+      feed.addEventListener('snapshot', (event) => {
+        if (!active || source !== feed || current.current?.me?.id !== channel) return;
+        try {
+          const next: DashboardSnapshot = JSON.parse((event as MessageEvent).data);
+          if (next.me?.id !== channel) throw Error('Feed identity changed.');
+          adopt(next);
+          attempt = 0;
+          setConnectionError('');
+        } catch {
+          retry();
+        }
+      });
+      feed.addEventListener('unavailable', () => {
+        if (!active || source !== feed || current.current?.me?.id !== channel) return;
+        retry();
+      });
+      feed.onerror = () => {
+        if (active && source === feed) retry();
+      };
+    };
+    const recover = async () => {
       if (!active || current.current?.me?.id !== channel) return;
       try {
-        const next: DashboardSnapshot = JSON.parse((event as MessageEvent).data);
-        if (next.me?.id !== channel) throw Error('Feed identity changed.');
-        adopt(next);
-        setConnectionError('');
-      } catch {
-        setConnectionError('Connection interrupted. Reconnect to check your latest saved state.');
+        const next = await refresh();
+        if (!active || next?.me?.id !== channel) return;
+        open();
+      } catch (error) {
+        if (error instanceof HttpError && [401, 403].includes(error.status)) {
+          if (active) setConnectionError('Your creator session ended. Reconnect to resume.');
+          return;
+        }
+        retry();
       }
-    });
-    source.addEventListener('unavailable', () => {
-      if (!active || current.current?.me?.id !== channel) return;
-      source.close();
-      void refresh()
-        .then((next) => {
-          if (active && next?.me)
-            setConnectionError('Live updates interrupted. Reconnect to resume.');
-        })
-        .catch(() => {
-          if (active)
-            setConnectionError(
-              'Connection interrupted. Reconnect to check your latest saved state.',
-            );
-        });
-    });
-    source.onerror = () => {
-      if (active) setConnectionError('Connection interrupted. Reconnecting…');
     };
+    open();
     return () => {
       active = false;
-      source.close();
+      close();
+      if (timer) clearTimeout(timer);
     };
   }, [data?.me?.id, overlayChannel, refresh, feedEpoch, adopt]);
   useEffect(() => {
