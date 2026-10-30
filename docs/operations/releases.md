@@ -1,6 +1,6 @@
 # Versions and releases
 
-TORCHLINE uses one application version across the root, two apps and four internal packages. The first release is **0.1.0-preview.1**, with the annotated Git tag **v0.1.0-preview.1**. It is a development preview, not a claim that native Twitch acceptance or production operations are complete.
+TORCHLINE uses one application version across the root, two apps and four internal packages. The current source preview is **0.1.0-preview.2**, with the annotated Git tag **v0.1.0-preview.2**. The first **v0.1.0-preview.1** tag remains immutable. These are development previews, not claims that native Twitch acceptance or production operations are complete.
 
 ## What the numbers mean
 
@@ -20,7 +20,9 @@ Increase the preview counter for a new preview of the same planned release, for 
 6. Require successful Verify evidence for the exact tagged revision before publishing. Create the GitHub release with `--verify-tag`, the version's notes file and an explicit target SHA. A preview uses `--prerelease --latest=false`. Do not let the CLI create a tag from the default branch implicitly.
 7. Check the remote tag/commit, release flags and notes. Record evidence in the subsequent changelog or operations record without rewriting the tagged snapshot.
 
-The first release is sourced from `feat/gameplay-foundation`; the default branch is not changed or merged as part of release metadata work. Tags are annotated, not cryptographically signed unless signing is explicitly configured. Internal packages stay unpublished. This is a source release, not a deployment or a container-registry publication.
+The first release is sourced from `feat/gameplay-foundation`. On October 30 the owner explicitly authorized main consolidation: preserve the full gameplay → LIVEWIRE → final-design history, merge the independently reviewed QA branch, then fast-forward `main` only to the verified integration source. Keep the superseded UI-LAB prototype separate. Start subsequent engineering on a new branch from that main revision. Do not squash/rewrite published history or delete branches/tags as inferred cleanup. [Consolidation record](../reports/2026-10-30-main-consolidation.md).
+
+Tags are annotated, not cryptographically signed unless signing is explicitly configured. Internal packages stay unpublished. This is a source release, not a deployment or a container-registry publication.
 
 GitHub automatically offers source ZIP/tar archives for a release. Do not attach local recordings, environment files, backups, session exports or OBS links. [GitHub release behavior](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 

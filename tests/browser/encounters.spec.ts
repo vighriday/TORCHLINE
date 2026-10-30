@@ -5,7 +5,8 @@ test('all ten final screens, keyboard launcher, local settings and legal chat gu
   page,
 }) =>
   serve(async (store) => {
-    test.setTimeout(120000);
+    // Ten real scenes and forty viewport changes exceed two minutes on shared CI GPUs.
+    test.setTimeout(process.env.CI ? 300000 : 120000);
     const errors: string[] = [],
       external: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));

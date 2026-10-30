@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased
+## v0.1.0-preview.2 — October 30, 2026
 
 - Recover the independent QA branch's two real PostgreSQL concurrency regressions and dated assessment during main consolidation. Preserve the superseded UI-LAB work without importing its prototype server or visuals.
 - Preserve an unsaved captain timing selection when a delayed HTTP/SSE snapshot initializes the saved clock. Disable preparation inputs during a save and cover a real SQL update → SSE refresh → manual save → reload regression.
+- Align all seven private packages, README and release notes at preview.2. Consolidate reviewed feature and QA history into main, retain immutable preview.1/archive tags, and start later engineering on a fresh branch. Source consolidation does not deploy or establish genuine Twitch/raid acceptance. [Branch and verification record](docs/reports/2026-10-30-main-consolidation.md).
+- Give three measured software-rendering CI journeys bounded, explicit observation budgets without changing their frame/pixel, gameplay or custody assertions. These checks do not certify broadcast FPS.
 
-## Unreleased — Final Figma v2 integration
+### Final Figma v2 integration
 
 - Fix entry controls overlapping the manifest: copy/actions and status now occupy separate flow rows. Make the desktop relay starfield fill its screen instead of exposing the edges of a smaller opaque canvas; stack handoff information on narrow screens. Add geometric overlap checks at phone, tablet and desktop sizes.
 - Coalesce graphics scheduling after each completed frame so slow rendering leaves time for controls and network updates. Fix browser setup racing the create-world button and avoid loading an unnecessary second graphics context. The first cutover CI run exposed browser timing failures; follow-up verification is recorded separately.
@@ -19,7 +21,7 @@
 - Replace README artwork with final-design app captures and reproducible recording/encoding tools. Update current contracts, decisions and owner instructions. Native Twitch/gameplay, native raid, final native OBS and owner visual acceptance remain distinct gates.
 - Fresh automated regression: 134 tests in 31 files pass. All 15 replacement browser journeys pass, with the Minecraft journey repeated after adding voxel first-frame instrumentation. Media/native checks are recorded separately; baseline presentation results are not reused as new evidence.
 
-## Unreleased — LIVEWIRE v0
+### LIVEWIRE v0
 
 - Add the default-off deterministic mission extension without changing historical Ark reducers. Paid openings, finite per-boundary allowance, explicit pre-attempt lock, solo target and streamer-attested outcome apply one bounded persistent consequence.
 - Add transactional mission APIs, migrations 009–010, normalized ballots, signed chat routing, deadline/restart recovery and custody/hosting exclusion. Results retain replay and permanent physical marks; no outbound reply is required.

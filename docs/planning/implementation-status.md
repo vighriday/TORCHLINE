@@ -1,6 +1,6 @@
 # Implementation and verification status
 
-Updated October 30, 2026. The final Figma v2 presentation is being completed on isolated **feat/frontend-replacement**, based on LIVEWIRE source 663888a. The protected gameplay-foundation release remains at 89fa019. [Design and cutover](../design/README.md) · [LIVEWIRE report](../reports/2026-10-30-livewire-v0.md) · [critical audit](../reviews/2026-10-29-comprehensive-audit.md).
+Updated October 30, 2026. **Preview.2** consolidates the final Figma v2 presentation, LIVEWIRE, recovery work and independent QA coverage into the reviewed main baseline. Source promotion is separate from deployment; the existing running live service is not upgraded by this operation. [Consolidation and checks](../reports/2026-10-30-main-consolidation.md) · [Design and cutover](../design/README.md) · [LIVEWIRE report](../reports/2026-10-30-livewire-v0.md) · [critical audit](../reviews/2026-10-29-comprehensive-audit.md).
 
 ## Implemented
 
@@ -15,6 +15,8 @@ Updated October 30, 2026. The final Figma v2 presentation is being completed on 
 ## Evidence boundaries
 
 The LIVEWIRE baseline passed 134 automated tests in 31 files and 16 browser journeys, plus native compact OBS practice recovery. Those observations establish the baseline, not the final presentation. The replacement passes a fresh local build, all 134 automated tests and all 15 original adapted browser journeys. Its first cutover CI run nevertheless failed 7 browser journeys (8 passed); remote verification remains a gate. Follow-up fixes address launch synchronization and slow graphics scheduling; five affected layout/recovery/gameplay checks pass locally. The Minecraft journey additionally passes with actual voxel first-frame readiness asserted. Final-design media is captured and reviewed. Native OBS 32.2.2 renders full/compact views, refreshes and rotates access against an isolated saved simulation, with transparent outer pixels and no game change. Owner visual/mobile readability, outgoing broadcast and provider acceptance remain separate. [Final frontend evidence](../reports/2026-10-30-final-frontend.md).
+
+The consolidation also recovers two real PostgreSQL adversarial tests and fixes a timing draft overwritten by a late snapshot. The focused regression reproduces that defect before the fix; both cooperation journeys pass twice afterward. The [consolidation record](../reports/2026-10-30-main-consolidation.md) records current full-suite/CI evidence separately from these dated observations.
 
 Seven physical fixtures are engine-generated. The balance enumeration covers 2,398 terminal branches: 964 colonies, 1,304 partial survivors, 130 wrecks. It does not exhaust v3 cooperation/allocation combinations. [Balance evidence](../reports/balance-ark-v2.json).
 

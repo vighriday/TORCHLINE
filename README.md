@@ -5,7 +5,7 @@
 
 <p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#livewire--your-next-attempt-matters">Minecraft LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
 
-<p align="center"><a href="docs/releases/v0.1.0-preview.1.md">v0.1.0-preview.1</a> · Development preview · Built with Codex for the Codex x TwitchCon Hackathon</p>
+<p align="center"><a href="docs/releases/v0.1.0-preview.2.md">v0.1.0-preview.2</a> · Development preview · Built with Codex for the Codex x TwitchCon Hackathon</p>
 
 ## A stream that leaves something behind
 
@@ -107,7 +107,7 @@ For the real stream, follow the [owner setup guide](docs/operations/owner-launch
 | Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |
 | Native raid + permanent hosting | Still open. Simulation does not satisfy either gate |
 
-This is a development preview, not a production-ready claim. The original release is protected while the final-design feature branch is verified. [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md) · [LIVEWIRE acceptance](docs/operations/livewire-v0.md).
+This is a development preview, not a production-ready claim. The final design, LIVEWIRE and recovery work share one reviewed source baseline; deployment and real Twitch acceptance remain separate. [Consolidation record](docs/reports/2026-10-30-main-consolidation.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md) · [LIVEWIRE acceptance](docs/operations/livewire-v0.md).
 
 <details>
 <summary><strong>For builders and judges</strong></summary>

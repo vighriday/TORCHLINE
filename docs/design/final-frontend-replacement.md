@@ -1,5 +1,7 @@
 # Final frontend cutover
 
+Subsequent source consolidation: [preview.2 and main](../reports/2026-10-30-main-consolidation.md). The isolation statements below describe the original cutover; all preserved feature history is included in the consolidated baseline.
+
 Worktree: feat/frontend-replacement, based on the verified LIVEWIRE source 663888a. The original release and UI-LAB worktree remain untouched. The owner-supplied figma-v2 export is the only design source. Its raw files are ignored and unchanged.
 
 ## Preservation

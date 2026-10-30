@@ -1,5 +1,7 @@
 # Final frontend implementation and evidence
 
+Source promotion follow-up: [main consolidation and preview.2](2026-10-30-main-consolidation.md). The branch-isolation and pending-CI statements below describe this cutover's original evidence, not the subsequent source promotion.
+
 October 30, 2026. Candidate branch: **feat/frontend-replacement**. Cutover source: **5b7f328**; layout/scheduling follow-up: **2bae3c0**. The protected release remains unchanged. This report describes a working feature candidate, not production or genuine Twitch acceptance.
 
 ## Delivered

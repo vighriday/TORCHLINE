@@ -2,6 +2,8 @@
 
 Accepted October 29, 2026 after the owner requested GitHub tags, versioning and repository metadata.
 
+October 30 scope update: the owner explicitly authorized consolidating reviewed branches into `main` before further engineering. Preview.2 combines the final design, LIVEWIRE and recovered QA history without deploying or claiming stable/live acceptance. The original restriction on inferred default-branch changes is superseded for this authorized consolidation; immutable tags, exact-source CI and private package rules remain. [Record](../reports/2026-10-30-main-consolidation.md).
+
 Use a single version across all seven private manifests, annotated `vVERSION` tags, version-specific tracked notes, a README version link and CI alignment checks. The initial `0.1.0-preview.1` is explicitly a prerelease. The previous `0.1.0` manifest value had no published tag or release; this corrects an unreleased label rather than renaming a published release. Publish only after exact-source CI passes. Keep default-branch changes, deployment, package publishing and signing outside this operation.
 
 Independent package versions and a release-management dependency are the strongest alternatives. All packages ship together in the current application; separate versions and new automation would add coordination without a real independently consumed package. A source release needs no new privileged Actions workflow. Existing CI remains read-only; the authenticated operator publishes the reviewed tag/notes.

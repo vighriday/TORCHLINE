@@ -4,7 +4,8 @@ test('rolling Ark renders real changing pixels, stable cockpit navigation and pe
   page,
 }) =>
   serve(async (store) => {
-    test.setTimeout(180000);
+    // Shared CI software rendering is a correctness check, not an FPS benchmark.
+    test.setTimeout(process.env.CI ? 300000 : 180000);
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewportSize({ width: 1280, height: 720 });
@@ -16,7 +17,9 @@ test('rolling Ark renders real changing pixels, stable cockpit navigation and pe
       const pixels = await scene.locator('canvas').screenshot(),
         frames = Number(await scene.getAttribute('data-frame-count'));
       await expect
-        .poll(async () => Number(await scene.getAttribute('data-frame-count')), { timeout: 15000 })
+        .poll(async () => Number(await scene.getAttribute('data-frame-count')), {
+          timeout: process.env.CI ? 60000 : 15000,
+        })
         .toBeGreaterThan(frames + 8);
       expect(Buffer.compare(pixels, await scene.locator('canvas').screenshot())).not.toBe(0);
       const ratio = Number(await scene.getAttribute('data-pixel-ratio'));
