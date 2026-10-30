@@ -6,7 +6,12 @@ import { existsSync } from 'node:fs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import { CommandRequestSchema, DomainError, LivewireRequestSchema } from '@torchline/contracts';
+import {
+  CommandRequestSchema,
+  DomainError,
+  LivewireRequestSchema,
+  SYSTEM_IDS,
+} from '@torchline/contracts';
 import type { Command } from '@torchline/contracts';
 import {
   Store,
@@ -24,8 +29,9 @@ import {
   castLivewire,
   recoverLivewire,
   expireLivewire,
+  sweepRetention,
 } from '@torchline/storage';
-import type { Creator } from '@torchline/storage';
+import type { Creator, StoredWorld } from '@torchline/storage';
 import type { InputPolicy } from '@torchline/storage';
 import {
   authorizationUrl,
@@ -241,6 +247,42 @@ export async function createApp(
         'Configure the Twitch client and encryption key in the ignored environment file.',
       );
   };
+  // What a receiving custodian inherited, attributed to the community that sent it. The briefing is
+  // current only while the receiver has not changed the world, so it clears itself on their first
+  // command instead of becoming permanent decoration. World revision is part of the key because a
+  // second transfer can arrive at the same state version.
+  interface ArrivalBriefing {
+    at: string;
+    from: { id: string; label: string };
+    briefing: string;
+    lostSystems: (typeof SYSTEM_IDS)[number][];
+  }
+  const arrivals = new Map<string, ArrivalBriefing | undefined>();
+  const arrivalBriefing = async (world: StoredWorld): Promise<ArrivalBriefing | undefined> => {
+    const key = `${world.id}:${world.state.version}:${world.revision}`;
+    if (arrivals.has(key)) return arrivals.get(key);
+    const row = (
+      await store.pool.query(
+        `SELECT h.created_at,h.state_version,s.id AS source_id,s.label AS source_label
+         FROM custody_events h JOIN creators s ON s.id=h.source_id
+         WHERE h.world_id=$1 ORDER BY h.created_at DESC,h.id DESC LIMIT 1`,
+        [world.id],
+      )
+    ).rows[0];
+    const marks = SYSTEM_IDS.reduce((total, id) => total + world.state.systems[id].marks.length, 0);
+    const briefing =
+      !row || row.state_version === null || row.state_version !== world.state.version
+        ? undefined
+        : {
+            at: (row.created_at as Date).toISOString(),
+            from: { id: row.source_id as string, label: row.source_label as string },
+            briefing: `Received from ${row.source_label} · ${world.state.resources.passengers} passengers aboard · ${marks} lasting marks · chapter ${world.state.chapter}`,
+            lostSystems: SYSTEM_IDS.filter((id) => world.state.systems[id].integrity === 0),
+          };
+    if (arrivals.size > 512) arrivals.clear();
+    arrivals.set(key, briefing);
+    return briefing;
+  };
   const buildSnapshot = async (creator: Creator, readonly = false) => {
     const world = await store.active(creator.id, true);
     if (world && (world.custodian_id !== creator.id || world.mode !== config.mode))
@@ -250,6 +292,18 @@ export async function createApp(
     const details =
       config.mode === 'live' && !readonly ? await subscriptions.status(creator.id) : undefined;
     const visibleWorld = world ? presentWorld(world, !readonly) : null;
+    if (world && visibleWorld && world.state.phase === 'ready') {
+      const arrival = await arrivalBriefing(world);
+      if (arrival) visibleWorld.arrival = arrival;
+    }
+    if (
+      world &&
+      visibleWorld &&
+      ['investigation', 'challenge', 'allocation', 'decision'].includes(world.state.phase)
+    ) {
+      const rejections = await store.rejections(world.id, world.state.window);
+      if (rejections.length) visibleWorld.rejections = rejections;
+    }
     if (world && visibleWorld && (config.livewireEnabled || world.state.livewire)) {
       const { author: _author, channel: _channel, ...stake } = world.state.livewire?.stake ?? {};
       const chargeAvailable = !world.state.livewire?.spentChapters.includes(world.state.chapter);
@@ -304,8 +358,8 @@ export async function createApp(
         : {
             worlds: (await store.library(creator.id)).map((row) => ({
               id: row.id,
-              chapter: row.state.chapter,
-              outcome: row.state.outcome,
+              chapter: row.chapter,
+              outcome: row.outcome,
               parked: row.parked,
             })),
             handoffs: await store.handoffs(creator.id),
@@ -962,6 +1016,30 @@ export async function createApp(
   const feedCounts = new Map<string, number>();
   const endFeeds = new Set<() => void>();
   const feedLimits = config.feedLimits ?? { perChannel: 8, total: 256 };
+  // Several views of one channel (dashboard tabs, OBS sources, spectator windows) ask for the same
+  // world. Building that projection clones the whole state and re-reads the library, so concurrent
+  // views share one authoritative read per publication round instead of one each.
+  const projections = new Map<string, { value: unknown; at: number }>();
+  const rounds = new Map<string, Promise<unknown>>();
+  const PROJECTION_REUSE_MS = 200;
+  const CLOCK_RESYNC_MS = 4000;
+  const shareProjection = <T>(key: string, load: () => Promise<T>): Promise<T> => {
+    const held = projections.get(key);
+    if (held && Date.now() - held.at < PROJECTION_REUSE_MS) return Promise.resolve(held.value as T);
+    const pending = rounds.get(key);
+    if (pending) return pending as Promise<T>;
+    const round = load()
+      .then((value) => {
+        if (projections.size > 256)
+          for (const [id, entry] of projections)
+            if (entry.at < Date.now() - PROJECTION_REUSE_MS) projections.delete(id);
+        projections.set(key, { value, at: Date.now() });
+        return value;
+      })
+      .finally(() => rounds.delete(key));
+    rounds.set(key, round);
+    return round;
+  };
   const stream = (
     request: FastifyRequest,
     reply: FastifyReply,
@@ -986,16 +1064,31 @@ export async function createApp(
     let closed = false;
     let sending = false;
     let last = '';
+    let publishedAt = 0;
     const send = async () => {
       if (closed || sending) return;
       sending = true;
       try {
-        const body = JSON.stringify(await load());
+        const value = await load();
         if (closed) return;
-        if (body !== last) {
-          last = body;
+        const body = JSON.stringify(value);
+        // The server clock moves on every read. Publishing it on its own keeps an idle world from
+        // rewriting its whole snapshot several times a second, while a running phase clock stays
+        // exact: the client derives its offset from the last server time it was given.
+        const content = JSON.stringify(value, (key, item) =>
+          key === 'serverAt' ? undefined : item,
+        );
+        const clocked = Boolean((value as { world?: { clock?: unknown } } | null)?.world?.clock);
+        if (content !== last) {
+          last = content;
+          publishedAt = Date.now();
           if (reply.raw.writableLength > 262144) reply.raw.end();
           else reply.raw.write(`event: snapshot\ndata: ${body}\n\n`);
+        } else if (clocked && Date.now() - publishedAt >= CLOCK_RESYNC_MS) {
+          publishedAt = Date.now();
+          reply.raw.write(
+            `event: clock\ndata: ${JSON.stringify({ serverAt: new Date().toISOString() })}\n\n`,
+          );
         }
       } catch (error) {
         if (closed) return;
@@ -1028,7 +1121,9 @@ export async function createApp(
   app.get('/api/live/events', async (request, reply) => {
     const creator = await currentCreator(request);
     return stream(request, reply, creator.id, async () => {
-      const result = await snapshot(await currentCreator(request));
+      // This view rechecks its own authority before and after the read; only the projection is shared.
+      const current = await currentCreator(request);
+      const result = await shareProjection(`creator:${current.id}`, () => snapshot(current));
       await currentCreator(request);
       return result;
     });
@@ -1048,7 +1143,7 @@ export async function createApp(
     const creator = await store.creator(channel);
     if (!creator || creator.mode !== config.mode)
       denied('FORBIDDEN', 'Overlay channel unavailable.');
-    const result = await snapshot(creator!, true);
+    const result = await shareProjection(`overlay:${channel}`, () => snapshot(creator!, true));
     if (!(await grantValid())) denied('FORBIDDEN', 'Overlay access revoked.');
     return result;
   };
@@ -1231,6 +1326,7 @@ export async function createApp(
   let interval: ReturnType<typeof setInterval> | undefined;
   let validationInterval: ReturnType<typeof setInterval> | undefined;
   let botInterval: ReturnType<typeof setInterval> | undefined;
+  let retentionInterval: ReturnType<typeof setInterval> | undefined;
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
       workerLease = await store.pool.connect();
@@ -1282,6 +1378,24 @@ export async function createApp(
         .catch(() => app.log.error('Twitch validation dependency failed.'));
     }, 60000);
     validationInterval.unref();
+    // Operational rows (delivered outbox, terminal inbox, expired sessions and states) otherwise
+    // grow with every broadcast. Counts that diagnostics report are folded, not lost.
+    retentionInterval = setInterval(() => {
+      void sweepRetention(store)
+        .then((result) => {
+          const removed =
+            result.inbox +
+            result.dedup +
+            result.outbox +
+            result.sessions +
+            result.oauthStates +
+            result.inputLimits +
+            result.inputRejections;
+          if (removed) app.log.info(result, 'Retention sweep removed terminal rows.');
+        })
+        .catch(() => app.log.error('Retention sweep dependency failed.'));
+    }, 300000);
+    retentionInterval.unref();
   }
   app.decorate('tick', tick);
   app.decorate('botTick', botReplies.tick);
@@ -1291,6 +1405,7 @@ export async function createApp(
     if (interval) clearInterval(interval);
     if (validationInterval) clearInterval(validationInterval);
     if (botInterval) clearInterval(botInterval);
+    if (retentionInterval) clearInterval(retentionInterval);
     await activeTick;
     await botReplies.close();
     if (workerLease) {

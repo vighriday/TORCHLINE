@@ -6,6 +6,7 @@ export function connectOverlayFeed(
   channel: string,
   snapshot: (value: DashboardSnapshot) => void,
   status: (message: string, terminal: boolean) => void,
+  serverTime: (value: string) => void = () => {},
 ) {
   let stopped = false,
     attempt = 0,
@@ -58,6 +59,15 @@ export function connectOverlayFeed(
           status('', false);
         } catch {
           retry();
+        }
+      });
+      feed.addEventListener('clock', (event) => {
+        if (stopped || source !== feed) return;
+        try {
+          const { serverAt } = JSON.parse((event as MessageEvent).data) as { serverAt?: unknown };
+          if (typeof serverAt === 'string') serverTime(serverAt);
+        } catch {
+          /* A malformed clock frame is ignored; the next snapshot carries a fresh server time. */
         }
       });
       feed.addEventListener('unavailable', () => {

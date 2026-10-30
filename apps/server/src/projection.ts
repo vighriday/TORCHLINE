@@ -1,6 +1,6 @@
 import { PRESENTATION_VERSION, SYSTEM_IDS } from '@torchline/contracts';
 import type { WorldPresentation } from '@torchline/contracts';
-import { getPuzzle, previewChoices, TITLES } from '@torchline/engine';
+import { getPuzzle, previewChoices, titles } from '@torchline/engine';
 import { normalizeAllocation } from '@torchline/engine';
 import { livewireUnresolved } from '@torchline/engine';
 import type { StoredWorld } from '@torchline/storage';
@@ -26,7 +26,7 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
     handoffPending: Boolean(world.frozen_by),
     chapter: s.chapter,
     phase: s.phase,
-    title: s.crisis === 'safe-corridor' ? 'The Safe Corridor' : TITLES[s.chapter],
+    title: s.crisis === 'safe-corridor' ? 'The Safe Corridor' : titles(s.rulesVersion)[s.chapter],
     recap:
       last?.summary ?? '216 passengers. Five chapters. One world that persists between broadcasts.',
     resources: s.resources,

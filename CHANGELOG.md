@@ -2,9 +2,13 @@
 
 ## Unreleased — Release hardening
 
-- Version channel assignments and creator authority atomically in migration 011. Retry snapshots that cross a park, rehost or custody change; recheck session/capability authority after slow projection reads.
-- Reject stale dashboard/OBS world and mission-ballot snapshots, ignore superseded HTTP refreshes, and clear expired sessions. Regressions reorder actual HTTP/SSE responses around saved clues, mission ballots, world reassignment and logout; historical replay remains unchanged.
-- Recover authenticated dashboard SSE feeds after transient projection or transport failures with bounded read-only retry. Session expiry remains terminal, and snapshots from a different creator are rejected.
+- Serve every view of one channel from a single projection per publication round and publish the server clock separately, so an unchanged world stops rewriting its whole snapshot four times a second. Four idle creator feeds cost **175 pool queries over eight paced ticks instead of the audited 321**, while each view still rechecks its own authority before and after the read. Regression: `tests/feed-projection.test.ts`.
+- Project only the library fields the dashboard renders instead of loading up to 50 complete world states per projection.
+- Add bounded retention for terminal operational rows: delivered outbox, terminal inbox, chat dedup, expired sessions and OAuth states, and closed input windows. Lifetime applied/quarantined diagnostics are folded into `retention_totals` before pruning, so reported totals never shrink, and the sweep never touches world events, custody events, raid proofs, handoffs or command idempotency records. Regression: `tests/retention.test.ts`.
+- Attribute an inherited Ark to the community that sent it. A receiving custodian sees a bounded arrival briefing (source, passengers, lasting marks, chapter, systems lost on arrival) from the committed handoff until their first command, and the archive keeps the custody step. Regression: `tests/custody-arrival.test.ts`.
+- Report why audience input did not apply, per current window, so the streamer can explain a rate limit, a full queue or a command typed in the wrong phase. Viewer identities stay excluded. Regression: `tests/input-feedback.test.ts`.
+- Read chapter titles and choices from the rules version of the world being presented rather than the pinned historical default, and fail loudly if the two rules versions drift apart without a deliberate decision. Regression: `tests/rules-dispatch.test.ts`.
+- Re-verify the audit's reproduced defects on this source: signed chat revocation now pauses the episode (`challenge` → `paused`), and a stale provider validation no longer blocks the local disconnect that revokes authority. Both re-run through `scripts/audit/probes.ts`.
 
 ## v0.1.0-preview.2 — October 30, 2026
 

@@ -3,7 +3,7 @@ import type { Command } from '@torchline/contracts';
 import { HttpError, request } from './api.ts';
 import type { BotSetupPreview, DashboardSnapshot } from './api.ts';
 import { connectOverlayFeed } from './overlay-feed.ts';
-import { orderedSnapshot } from './snapshot-order.ts';
+import { orderedSnapshot, withServerTime } from './snapshot-order.ts';
 
 // Presentation-independent session/transport. Components decide layout; the server decides authority.
 export function useTorchlineSession(overlayChannel?: string) {
@@ -17,6 +17,12 @@ export function useTorchlineSession(overlayChannel?: string) {
   const clear = useCallback(() => {
     current.current = null;
     setData(null);
+  }, []);
+  const patchClock = useCallback((serverAt: string) => {
+    const next = withServerTime(current.current, serverAt);
+    if (!next || next === current.current) return;
+    current.current = next;
+    setData(next);
   }, []);
   const [error, setError] = useState('');
   const [connectionError, setConnectionError] = useState('');
@@ -91,6 +97,15 @@ export function useTorchlineSession(overlayChannel?: string) {
           retry();
         }
       });
+      feed.addEventListener('clock', (event) => {
+        if (!active || source !== feed || current.current?.me?.id !== channel) return;
+        try {
+          const { serverAt } = JSON.parse((event as MessageEvent).data) as { serverAt?: unknown };
+          if (typeof serverAt === 'string') patchClock(serverAt);
+        } catch {
+          /* A malformed clock frame is ignored; the next snapshot carries a fresh server time. */
+        }
+      });
       feed.addEventListener('unavailable', () => {
         if (!active || source !== feed || current.current?.me?.id !== channel) return;
         retry();
@@ -119,7 +134,7 @@ export function useTorchlineSession(overlayChannel?: string) {
       close();
       if (timer) clearTimeout(timer);
     };
-  }, [data?.me?.id, overlayChannel, refresh, feedEpoch, adopt]);
+  }, [data?.me?.id, overlayChannel, refresh, feedEpoch, adopt, patchClock]);
   useEffect(() => {
     if (!overlayChannel) return;
     const replacement = () => {
@@ -133,11 +148,16 @@ export function useTorchlineSession(overlayChannel?: string) {
   }, [overlayChannel, clear]);
   useEffect(() => {
     if (!overlayChannel) return;
-    return connectOverlayFeed(overlayChannel, adopt, (message, terminal) => {
-      if (terminal) clear();
-      setError(message);
-    });
-  }, [overlayChannel, feedEpoch, adopt, clear]);
+    return connectOverlayFeed(
+      overlayChannel,
+      adopt,
+      (message, terminal) => {
+        if (terminal) clear();
+        setError(message);
+      },
+      patchClock,
+    );
+  }, [overlayChannel, feedEpoch, adopt, clear, patchClock]);
   async function perform(action: () => Promise<unknown>) {
     refreshVersion.current++;
     setBusy(true);

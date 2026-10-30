@@ -226,6 +226,15 @@ export interface WorldPresentation {
   };
   outcome: Ending | null;
   endingReason: string | null;
+  /** Present for a receiving custodian from a committed handoff until their first command. */
+  arrival?: {
+    at: string;
+    from: { id: string; label: string };
+    briefing: string;
+    lostSystems: SystemId[];
+  };
+  /** Current-window audience input that did not apply, so the streamer can explain it. */
+  rejections?: { reason: string; dropped: number }[];
   events: Pick<WorldEvent, 'id' | 'chapter' | 'summary' | 'resourceDelta' | 'cues' | 'causes'>[];
   capabilities: {
     canStart: boolean;

@@ -30,3 +30,16 @@ export function orderedSnapshot(
   }
   return next;
 }
+
+// The server publishes its clock separately so an unchanged world never rewrites its whole
+// snapshot. Only the timestamp moves, so no ordering rule applies to this patch.
+export function withServerTime(
+  previous: DashboardSnapshot | null,
+  serverAt: string,
+): DashboardSnapshot | null {
+  if (!previous?.world?.clock) return previous;
+  return {
+    ...previous,
+    world: { ...previous.world, clock: { ...previous.world.clock, serverAt } },
+  };
+}

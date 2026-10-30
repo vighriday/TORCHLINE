@@ -308,6 +308,33 @@ button:disabled {
   font: 400 11px/1.55 var(--mono);
   margin: 10px 0 14px;
 }
+.rejected-inputs {
+  color: #b9827a;
+  font: 400 10px/1.5 var(--mono);
+  margin: 8px 0 0;
+  letter-spacing: 0.03em;
+}
+.arrival-brief {
+  border: 1px solid rgba(92, 141, 148, 0.45);
+  background: rgba(92, 141, 148, 0.09);
+  padding: 9px 10px;
+  margin: 0 0 12px;
+}
+.arrival-brief .eyebrow {
+  color: #8fb6ba;
+}
+.arrival-brief p {
+  color: #cfd6d2;
+  font: 400 11px/1.5 var(--mono);
+  margin: 6px 0 0;
+}
+.arrival-brief small {
+  display: block;
+  color: #b9827a;
+  font: 400 10px/1.5 var(--mono);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
 .countdown {
   display: flex;
   align-items: center;

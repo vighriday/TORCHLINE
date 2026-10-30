@@ -4,6 +4,13 @@ import { Button, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
 import { request } from '../api.ts';
 
+// Reasons an audience member can act on, in the words a streamer would say them out loud.
+const rejectionLabels: Record<string, string> = {
+  INPUT_RATE_LIMITED: 'rate limited',
+  INPUT_BACKLOG: 'queue full',
+  INPUT_WRONG_PHASE: 'wrong phase for the command',
+};
+
 export function PhaseClock({ world }: { world: WorldPresentation }) {
   const [now, setNow] = useState(Date.now());
   const offset = useMemo(
@@ -261,6 +268,20 @@ export function GameControls() {
             <span>CREW COOPERATION</span>
             <small>{world.participantCount} PARTICIPANTS</small>
           </div>
+          {world.rejections && world.rejections.length > 0 && (
+            <p className="rejected-inputs">
+              Not applied this window ·{' '}
+              {world.rejections
+                .map(
+                  (entry) =>
+                    `${entry.dropped} ${
+                      rejectionLabels[entry.reason] ??
+                      entry.reason.toLowerCase().replaceAll('_', ' ')
+                    }`,
+                )
+                .join(' · ')}
+            </p>
+          )}
           {world.phase === 'investigation' ? (
             <>
               <p>

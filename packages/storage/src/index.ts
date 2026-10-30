@@ -8,7 +8,7 @@ import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
 import type { InputPolicy } from './admission.ts';
 export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
 export type { InputPolicy } from './admission.ts';
-export const REQUIRED_MIGRATION = '011_channel_assignment_revision.sql';
+export const REQUIRED_MIGRATION = '013_custody_arrival.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';
@@ -23,6 +23,8 @@ export {
   expireLivewire,
 } from './livewire.ts';
 export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
+export { sweepRetention, RETENTION_POLICY } from './retention.ts';
+export type { RetentionResult } from './retention.ts';
 
 export interface Creator {
   id: string;
@@ -294,6 +296,12 @@ export class Store {
         eligible && !duplicate && withinDeadline && supported
           ? await admitInput(c, row.id, row.state.window, participantId, at, policy)
           : null;
+      // A viewer who typed something the current phase cannot accept is told nothing today. Record
+      // the reason so the streamer can say it out loud, which is the only reliable feedback channel
+      // while outbound bot replies stay decoupled. Provider retries and messages that arrived after
+      // the window closed are not the audience's mistake to correct.
+      const ignored =
+        eligible && !duplicate && withinDeadline && !supported ? 'INPUT_WRONG_PHASE' : rejection;
       const accepted = eligible && !duplicate && withinDeadline && supported && !rejection;
       const appliedParticipantId =
         accepted && participantKey ? participantIdentity(row.id, actorId, participantKey) : actorId;
@@ -311,12 +319,21 @@ export class Store {
         'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at,error) VALUES($1,$2,$3,$4,$5) ON CONFLICT(message_id) DO NOTHING',
         [deliveryId, 'channel.chat.message', payload, accepted ? null : at, rejection],
       );
-      if (rejection)
+      if (ignored)
         await c.query(
           'INSERT INTO input_rejections(world_id,input_window,reason) VALUES($1,$2,$3) ON CONFLICT(world_id,input_window,reason) DO UPDATE SET dropped=input_rejections.dropped+1',
-          [row.id, row.state.window, rejection],
+          [row.id, row.state.window, ignored],
         );
     });
+  }
+  /** Bounded, current-window feedback: what the audience tried that did not apply, and why. */
+  async rejections(world: string, window: number) {
+    return (
+      await this.pool.query(
+        'SELECT reason,dropped::integer AS dropped FROM input_rejections WHERE world_id=$1 AND input_window=$2 AND dropped>0 ORDER BY dropped DESC,reason LIMIT 6',
+        [world, window],
+      )
+    ).rows as { reason: string; dropped: number }[];
   }
   async lockChannels(c: PoolClient, ids: string[]) {
     await c.query('SELECT id FROM creators WHERE id=ANY($1::text[]) ORDER BY id FOR UPDATE', [
@@ -378,9 +395,11 @@ export class Store {
     return row ? this.get(row.world_id, recentOnly) : null;
   }
   async library(channel: string) {
+    // Only the library summary is ever rendered; fetching whole world states here made every
+    // dashboard projection carry up to 50 full state documents.
     return (
       await this.pool.query(
-        'SELECT id,revision,state,mode,NOT EXISTS(SELECT 1 FROM channel_slots s WHERE s.world_id=w.id) AS parked FROM worlds w WHERE custodian_id=$1 ORDER BY created_at DESC LIMIT 50',
+        "SELECT id,(state->>'chapter')::integer AS chapter,state->>'outcome' AS outcome,NOT EXISTS(SELECT 1 FROM channel_slots s WHERE s.world_id=w.id) AS parked FROM worlds w WHERE custodian_id=$1 ORDER BY created_at DESC LIMIT 50",
         [channel],
       )
     ).rows;
@@ -782,7 +801,7 @@ export class Store {
       ]);
       await c.query("UPDATE handoffs SET status='committed' WHERE id=$1", [intent.id]);
       await c.query(
-        'INSERT INTO custody_events(id,world_id,source_id,target_id,proof_id,mode) VALUES($1,$2,$3,$4,$5,$6)',
+        'INSERT INTO custody_events(id,world_id,source_id,target_id,proof_id,mode,state_version) VALUES($1,$2,$3,$4,$5,$6,$7)',
         [
           intent.id,
           intent.world_id,
@@ -790,6 +809,7 @@ export class Store {
           intent.target_id,
           intent.proof_id,
           intent.mode,
+          w.state.version,
         ],
       );
       await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [

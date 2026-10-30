@@ -14,6 +14,7 @@ import {
 } from './platform.tsx';
 import type { Mode, Sector, World } from './types.ts';
 import type { WorldPresentation } from '@torchline/contracts';
+import { systemLabels } from './condition.ts';
 import { SceneBoundary } from './SceneBoundary.tsx';
 import { SoundEffects } from './SoundEffects.tsx';
 import './index.css';
@@ -278,6 +279,20 @@ export function MissionControl({
           </span>
           <strong>{ship.title}</strong>
           <p>{ship.recap}</p>
+          {ship.arrival && (
+            <aside className="arrival-brief" data-arrival-from={ship.arrival.from.id}>
+              <span className="eyebrow">
+                INHERITED ARK · {ship.arrival.from.label.toUpperCase()}
+              </span>
+              <p>{ship.arrival.briefing}</p>
+              {ship.arrival.lostSystems.length > 0 && (
+                <small>
+                  LOST ON ARRIVAL ·{' '}
+                  {ship.arrival.lostSystems.map((id) => systemLabels[id]).join(' · ')}
+                </small>
+              )}
+            </aside>
+          )}
           <PhaseClock world={ship} />
         </div>
         <div className="vital-stack">
