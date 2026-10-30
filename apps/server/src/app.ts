@@ -1308,11 +1308,19 @@ export async function createApp(
   if (existsSync(publicDir)) {
     await app.register(staticFiles, { root: publicDir, wildcard: true });
     app.setNotFoundHandler((request, reply) => {
+      const path = request.url.split('?')[0];
+      const privatePath =
+        /(^|\/)\./.test(path) ||
+        /^\/(?:apps|docs|frontend-design|infrastructure|packages|scripts|tests)(?:\/|$)/i.test(
+          path,
+        ) ||
+        /^\/(?:AGENTS|CHANGELOG|CONTRIBUTING|README|SECURITY)(?:\.|$)/i.test(path);
       if (
         request.method !== 'GET' ||
-        request.url.startsWith('/assets/') ||
-        request.url.startsWith('/api/') ||
-        request.url.startsWith('/integrations/')
+        privatePath ||
+        path.startsWith('/assets/') ||
+        path.startsWith('/api/') ||
+        path.startsWith('/integrations/')
       )
         return reply.code(404).send({ error: 'NOT_FOUND' });
       return reply.sendFile('index.html');
