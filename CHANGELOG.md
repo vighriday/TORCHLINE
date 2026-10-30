@@ -7,6 +7,7 @@
 - Add the functional captain mission workspace and transparent compact/automatic OBS layouts. Preserve layout across access exchange, handle same-page replacement capabilities, keep outcomes clearly streamer-attested and preserve keyboard access under reduced motion.
 - Keep automatic OBS layout compact while its first saved state loads, then expand only for an actual chapter; verify the transition without exposing host controls.
 - Add a read-only live-evidence probe that rejects simulation-only acceptance, and drain all open selections during restart recovery with an indexed batch cursor. Extend SQL verification across more than one recovery batch and consented simulated custody, without resetting mission allowances.
+- Document 134 automated checks, 16 browser journeys, native compact OBS evidence, controlled rollout and the still-open genuine Twitch/deployment/submission gates.
 
 ## 2026-10-30 — Archive reading pass
 

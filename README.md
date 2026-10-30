@@ -33,6 +33,8 @@ You can play the whole journey on one channel. Or pass the same Ark to another s
 
 > **October 29 follow-up:** clearer game layouts, saved timing and OBS reconnection now pass their checks. Twitch accepts bot replies, but other viewers still cannot see them; gameplay stays usable while we investigate. [Current evidence](docs/reports/2026-10-29-integration-diagnosis.md) · [Visual review](docs/reviews/2026-10-29-ui-layout-review.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md).
 
+> **LIVEWIRE v0 · isolated feature preview:** keep playing your usual game while chat chooses an Ark system for your mission. Lock the choice before your attempt, confirm what happened, and the same Ark keeps a small repair or scar. The saved practice flow and native OBS dock work; real Twitch mission acceptance is still pending. This feature is off by default and separate from the current live release. [What was built and tested](docs/reports/2026-10-30-livewire-v0.md) · [Try a mission](docs/operations/livewire-v0.md).
+
 ## Make the first choice
 
 A radiation storm is closing in. All **216 passengers** are aboard. Your crew has not solved the shield challenge. What do you save?
