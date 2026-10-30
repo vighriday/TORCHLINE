@@ -1,5 +1,7 @@
 # Claude Design handoff
 
+**October 30: the owner is supplying a final replacement design.** The current interface and UI-LAB direction are archived references. Use the [final replacement checklist](final-frontend-replacement.md) and [ADR 0032](../decisions/0032-final-frontend-replacement.md); do not extend the old visual direction or combine its global styles with the incoming design. Functional contracts and generated physical-state fixtures below remain authoritative. Final design integration and visual acceptance are pending.
+
 [LIVEWIRE v0](../product/livewire-v0.md) adds a functional mission workspace and compact/automatic read-only overlay. `WorldPresentation.livewire` exposes bounded tallies, a ballot revision, saved lifecycle/deadline, exact effects and solo/evidence labels; canonical outcome cues remain the existing damage/repair events. No voter roster or raw actor identity is projected. The optional renderer `detailsExpanded` setting changes initial disclosure only. Claude Design can replace the visual treatment without moving authority or game rules into components.
 
 See the [October 28 encounter review](encounter-review.md) for the owner-requested game presentation revision, actual-motion checks and remaining visual/native acceptance. It retains this presentation contract and the original design vocabulary.

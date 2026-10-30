@@ -1,5 +1,7 @@
 # Architecture decision stress review
 
+[ADR 0032](../decisions/0032-final-frontend-replacement.md) reviews final-design replacement and the isolated session controller across C1–C13. Existing visuals and UI-LAB are archived; the replacement starts from the verified LIVEWIRE source. Preparation does not establish final visual fidelity or new native-provider evidence.
+
 [ADR 0031](../decisions/0031-livewire-v0.md) reviews the isolated LIVEWIRE extension across C1–C13: finite economics, historical replay, normalized participation, persisted locks, recovery, scoped overlays and unchanged native custody. Its component review is separate from executed tests and genuine Twitch acceptance.
 
 Status: design analysis completed and initial components implemented on 2026-10-26. Domain, real PostgreSQL, HTTP/Twitch-contract and browser checks now exist; **load/soak benchmarks and genuine Twitch/OBS verification have not run**. [Implementation status](../planning/implementation-status.md) names the evidence and limits.

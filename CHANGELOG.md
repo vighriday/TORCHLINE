@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Final frontend replacement preparation
+
+- Preserve verified source `663888a` under `archive/frontend-before-final-2026-10-30` and create an isolated replacement branch; locally archive UI-LAB's committed and dirty work without importing its fixture backend.
+- Separate existing session, SSE, overlay reconnect and versioned command handling from the visual entry. Keep the reference runnable until the final owner-supplied design replaces it, with one presentation root and explicit stylesheet ownership.
+- Inventory every existing screen, gameplay/mission action, history, custody, setup and OBS recovery state for final-design integration. No final visuals or new genuine Twitch/raid acceptance are claimed by this preparation.
+
 ## Unreleased — LIVEWIRE v0 feature branch
 
 - Add a pinned, opt-in mission engine extension with finite per-boundary allowances, pre-attempt locks, streamer-attested results, persisted physical consequences and mixed-history replay. Historical Ark reducers remain unchanged. This feature is isolated from the existing release; real Twitch acceptance is pending.
