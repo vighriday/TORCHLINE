@@ -56,11 +56,8 @@ export async function login(page: Page, channel = 'alpha') {
   await page.goto('/?screen=mission');
 }
 export async function launch(page: Page, channel = 'alpha') {
-  await page.goto('/');
   await login(page, channel);
-  await expect(page.locator('.awakening, .mission')).toBeVisible();
-  if (await page.getByRole('button', { name: 'LAUNCH THE ARK', exact: true }).count())
-    await page.getByRole('button', { name: 'LAUNCH THE ARK', exact: true }).click();
+  await page.getByRole('button', { name: 'LAUNCH THE ARK', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Start chapter 1', exact: true })).toBeEnabled({
     timeout: 30000,
   });

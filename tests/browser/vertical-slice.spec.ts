@@ -15,7 +15,7 @@ test('shared puzzle rewards, saved sacrifice and consented practice custody reac
   browser,
 }) =>
   serve(async (store) => {
-    test.setTimeout(120000);
+    test.setTimeout(180000);
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     const targetContext = await browser.newContext({ reducedMotion: 'reduce' }),

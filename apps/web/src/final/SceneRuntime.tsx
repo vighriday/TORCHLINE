@@ -24,7 +24,10 @@ export function FrameBudget({
   const trigger = useRef(() => {});
   useEffect(() => {
     let visible = true,
-      timer: ReturnType<typeof setInterval> | undefined,
+      timer: ReturnType<typeof setTimeout> | undefined,
+      raf = 0,
+      pending = false,
+      warmup = 2,
       previous = performance.now();
     let slowFrames = 0;
     const frame = () => {
@@ -41,15 +44,30 @@ export function FrameBudget({
         slowFrames = 0;
       }
     };
-    trigger.current = frame;
-    const update = () => {
-      if (timer) clearInterval(timer);
-      previous = performance.now();
-      if (!document.hidden && visible) {
+    const draw = () => {
+      if (pending || document.hidden || !visible) return;
+      pending = true;
+      raf = requestAnimationFrame(() => {
+        pending = false;
+        if (document.hidden || !visible) return;
         frame();
-        requestAnimationFrame(frame);
-        if (!reducedMotion) timer = setInterval(frame, mini ? 50 : 34);
-      }
+        warmup = Math.max(0, warmup - 1);
+        // Leave a real event-loop gap after each completed render. Slow GPUs must
+        // not build interval debt ahead of input, fetch completion or phase UI.
+        if (warmup > 0 || !reducedMotion) timer = setTimeout(draw, warmup > 0 ? 0 : mini ? 50 : 34);
+      });
+    };
+    trigger.current = () => {
+      if (timer) clearTimeout(timer);
+      draw();
+    };
+    const update = () => {
+      if (timer) clearTimeout(timer);
+      cancelAnimationFrame(raf);
+      pending = false;
+      warmup = 2;
+      previous = performance.now();
+      draw();
     };
     const observer = new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
@@ -57,14 +75,15 @@ export function FrameBudget({
     });
     observer.observe(gl.domElement);
     const input = () => {
-      if (reducedMotion) requestAnimationFrame(frame);
+      if (reducedMotion) trigger.current();
     };
     for (const name of ['pointermove', 'pointerup', 'wheel'])
       gl.domElement.addEventListener(name, input);
     document.addEventListener('visibilitychange', update);
     update();
     return () => {
-      if (timer) clearInterval(timer);
+      if (timer) clearTimeout(timer);
+      cancelAnimationFrame(raf);
       observer.disconnect();
       document.removeEventListener('visibilitychange', update);
       for (const name of ['pointermove', 'pointerup', 'wheel'])
@@ -73,7 +92,7 @@ export function FrameBudget({
     };
   }, [gl, advance, setDpr, reducedMotion, mini]);
   useEffect(() => {
-    requestAnimationFrame(() => trigger.current());
+    trigger.current();
   });
   useFrame(() => {
     const root = gl.domElement.closest<HTMLElement>('.ark-canvas,.voxel-canvas');

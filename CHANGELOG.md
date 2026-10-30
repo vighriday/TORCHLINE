@@ -2,6 +2,10 @@
 
 ## Unreleased — Final Figma v2 integration
 
+- Fix entry controls overlapping the manifest: copy/actions and status now occupy separate flow rows. Make the desktop relay starfield fill its screen instead of exposing the edges of a smaller opaque canvas; stack handoff information on narrow screens. Add geometric overlap checks at phone, tablet and desktop sizes.
+- Coalesce graphics scheduling after each completed frame so slow rendering leaves time for controls and network updates. Fix browser setup racing the create-world button and avoid loading an unnecessary second graphics context. The first cutover CI run exposed browser timing failures; follow-up verification is recorded separately.
+- Fix the blank README hero capture by waiting for both actual GPU frames and ancestor entrance fades, then regenerate the final-design stills and animations. A rendered frame behind a zero-opacity parent is not a visible capture.
+- Verify actual OBS 32.2.2 full rendering, refresh, grant rotation, transparent compact resources and zero host controls on the new design over isolated loopback simulation. This does not prove public-edge or Twitch broadcast acceptance.
 - Preserve the owner's complete ten-screen design, shared Ark/cockpit and Minecraft LIVEWIRE scene as strict TypeScript/React components. Connect actual state/actions, challenges, allocation, clocks, history, custody and Twitch setup. Prototype state and automatic result/vote generation are excluded.
 - Remove the floating cyan panel at the ship's nose before media capture; preserve the bridge shell and running light. All new surfaces use the same corrected model.
 - Mount one presentation entry. Archive and retire superseded source, fonts, media, capture tools and visual instructions; retain the existing session, SQL, engine, Twitch and read-only recovery boundaries. The original release and unrelated UI-LAB worktree remain untouched.

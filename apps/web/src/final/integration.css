@@ -380,12 +380,12 @@ input[type='checkbox'] {
 }
 .relay-account {
   position: absolute;
-  left: 0;
-  bottom: 12px;
+  right: 80px;
+  top: 20px;
   z-index: 5;
   max-width: 480px;
-  padding: 24px;
-  margin-left: 4vw;
+  padding: 0;
+  margin: 0;
 }
 .inheritance {
   padding-bottom: 24px;
@@ -675,4 +675,163 @@ html.obs-document #root {
 .obs-full .decision-panel,
 .obs-full .ship-stage {
   height: 100dvh;
+}
+
+/* One continuous starfield, rather than an opaque, scaled rectangle over the
+   page. Reserve camera space for the copy without cropping the canvas. */
+.inheritance-ship {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  --ark-frame-left: 0.32;
+}
+.inheritance-ship .ark-viewport {
+  height: 100%;
+}
+.inheritance-noise {
+  z-index: 1;
+  pointer-events: none;
+}
+.inheritance:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(2, 4, 5, 0.9), rgba(2, 4, 5, 0.5) 28%, transparent 65%),
+    linear-gradient(0deg, rgba(2, 4, 5, 0.96), rgba(2, 4, 5, 0.85) 19%, transparent 52%);
+}
+.legacy-panel {
+  padding: 16px;
+  background: rgba(4, 10, 11, 0.9);
+  border: 1px solid var(--line);
+  scrollbar-width: thin;
+  scrollbar-color: var(--amber) transparent;
+}
+
+/* Keep copy, actions and the manifest in separate flow rows, even when a
+   narrower viewport wraps the headline or the current captain's name. */
+.awakening {
+  display: grid;
+  grid-template-rows: minmax(auto, 1fr) auto;
+  row-gap: 40px;
+  height: auto;
+  min-height: 100dvh;
+  padding: clamp(100px, 13vh, 140px) 5vw 32px;
+}
+.awakening-copy {
+  position: relative;
+  inset: auto;
+  align-self: center;
+}
+.awakening-actions {
+  flex-wrap: wrap;
+}
+.awakening-actions button {
+  min-width: 0;
+  padding: 14px 17px;
+  overflow-wrap: anywhere;
+}
+.awakening-metrics {
+  position: relative;
+  inset: auto;
+}
+.awakening-metrics > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 901px) and (max-height: 700px) {
+  .awakening-metrics {
+    display: grid;
+  }
+}
+@media (max-width: 900px) {
+  .awakening-copy {
+    width: 100%;
+  }
+  .awakening-actions {
+    width: 100%;
+  }
+  .awakening-space {
+    inset: 0;
+  }
+}
+
+/* Handoff information stays in document flow on narrow screens. */
+@media (max-width: 1100px) {
+  .inheritance {
+    display: flex;
+    flex-direction: column;
+    padding: 76px 24px 28px;
+    min-height: 100dvh;
+  }
+  .incoming-copy {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    order: 0;
+  }
+  .incoming-title {
+    font-size: clamp(44px, 10vw, 72px);
+  }
+  .incoming-copy p {
+    width: 100%;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .inheritance-ship {
+    position: relative;
+    inset: auto;
+    width: calc(100% + 48px);
+    height: 320px;
+    margin: 16px -24px;
+    order: 1;
+    overflow: hidden;
+    --ark-frame-left: 0;
+  }
+  .inheritance-ship .ark-viewport {
+    height: 320px;
+  }
+  .captain-transfer {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding: 24px 0;
+    order: 2;
+  }
+  .captain-names {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .captain-names strong {
+    font-size: clamp(19px, 4vw, 30px);
+    overflow-wrap: anywhere;
+  }
+  .inherited-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .legacy-panel {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin: 0;
+    max-height: none;
+    order: 3;
+  }
+  .inheritance-action {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin: 28px 0 0;
+    order: 4;
+  }
+  .relay-account {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding: 24px 0 0;
+    margin: 0;
+    order: 5;
+  }
 }
