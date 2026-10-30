@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import { CommandRequestSchema, DomainError } from '@torchline/contracts';
+import { CommandRequestSchema, DomainError, LivewireRequestSchema } from '@torchline/contracts';
 import type { Command } from '@torchline/contracts';
 import {
   Store,
@@ -19,6 +19,11 @@ import {
   configureEpisode,
   REQUIRED_MIGRATION,
   settleInterruption,
+  mutateLivewire,
+  readLivewire,
+  castLivewire,
+  recoverLivewire,
+  expireLivewire,
 } from '@torchline/storage';
 import type { Creator } from '@torchline/storage';
 import type { InputPolicy } from '@torchline/storage';
@@ -30,6 +35,7 @@ import {
   decryptSecret,
   normalizeChat,
   parseChatCommand,
+  parseLivewireVote,
   RaidSchema,
   requestToken,
   validateToken,
@@ -55,6 +61,7 @@ export interface AppConfig {
   eventsubSecret?: string;
   botUserId?: string;
   botRepliesEnabled?: boolean;
+  livewireEnabled?: boolean;
   inputPolicy?: InputPolicy;
   feedLimits?: { perChannel: number; total: number };
 }
@@ -240,10 +247,56 @@ export async function createApp(
       .rows[0];
     const details =
       config.mode === 'live' && !readonly ? await subscriptions.status(creator.id) : undefined;
+    const visibleWorld = world ? presentWorld(world, !readonly) : null;
+    if (world && visibleWorld && (config.livewireEnabled || world.state.livewire)) {
+      const { author: _author, channel: _channel, ...stake } = world.state.livewire?.stake ?? {};
+      const chargeAvailable = !world.state.livewire?.spentChapters.includes(world.state.chapter);
+      const compatible =
+        world.state.rulesVersion === 'ark-v3' &&
+        world.state.phase === 'ready' &&
+        world.state.chapter < 5 &&
+        !world.frozen_by;
+      const chatReady =
+        config.mode === 'simulation' ||
+        (details?.chatReady ?? (await subscriptions.chatAvailable(creator.id)));
+      const unresolved =
+        world.state.livewire &&
+        ['open', 'locked', 'paused'].includes(world.state.livewire.stake.status);
+      const available =
+        !!config.livewireEnabled &&
+        compatible &&
+        chargeAvailable &&
+        !unresolved &&
+        chatReady &&
+        world.state.resources.supplies >= 1;
+      visibleWorld.livewire = {
+        enabled: !!config.livewireEnabled,
+        available,
+        chargeAvailable,
+        reason: !config.livewireEnabled
+          ? 'New missions disabled'
+          : !compatible
+            ? 'Finish the chapter or handoff first'
+            : unresolved
+              ? 'Resolve or cancel the current mission'
+              : !chargeAvailable
+                ? 'This boundary’s mission allowance is spent'
+                : !chatReady
+                  ? 'Repair the Twitch chat connection'
+                  : world.state.resources.supplies < 1
+                    ? 'One supply is required'
+                    : 'One mission at this boundary · costs 1 supply',
+        stake: world.state.livewire
+          ? (stake as NonNullable<typeof visibleWorld.livewire>['stake'])
+          : null,
+        ...(await readLivewire(store, world.state)),
+        canControl: !readonly && !world.frozen_by,
+      };
+    }
     return {
       me: { id: creator.id, label: creator.label, receiveOptIn: creator.receive_opt_in },
       mode: config.mode,
-      world: world ? presentWorld(world, !readonly) : null,
+      world: visibleWorld,
       ...(readonly
         ? {}
         : {
@@ -390,6 +443,24 @@ export async function createApp(
     );
     return snapshot(creator);
   });
+  app.post('/api/worlds/:id/livewire', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const body = LivewireRequestSchema.parse(request.body);
+    if (!config.livewireEnabled && !['cancel', 'resolve'].includes(body.action.type))
+      denied(
+        'FEATURE_DISABLED',
+        'LIVEWIRE is disabled; existing missions may be resolved or cancelled.',
+      );
+    await mutateLivewire(
+      store,
+      creator,
+      id,
+      body,
+      config.mode === 'simulation' || (await subscriptions.chatAvailable(creator.id)),
+    );
+    return snapshot(creator);
+  });
   app.post('/api/simulator/commands', async (request) => {
     if (config.mode !== 'simulation')
       denied('MODE_MISMATCH', 'Simulation input cannot reach live worlds.');
@@ -398,10 +469,30 @@ export async function createApp(
       .object({ actor: z.string().min(1).max(40), text: z.string().max(160) })
       .parse(request.body);
     const command = parseChatCommand(text);
-    if (!command)
+    const stake = parseLivewireVote(text);
+    if (!command && !stake)
       denied('INVALID_INPUT', 'Use !scan, !route, !patch or !vote with valid arguments.');
     const world = await store.active(creator.id);
     if (!world) denied('NOT_FOUND', 'Create a world first.');
+    if (
+      config.livewireEnabled &&
+      stake &&
+      (await castLivewire(
+        store,
+        {
+          channel: creator.id,
+          actor,
+          target: stake,
+          providerAt: new Date().toISOString(),
+          deliveryId: randomUUID(),
+          messageId: randomUUID(),
+          mode: 'simulation',
+          participantKey: config.sessionSecret,
+        },
+        config.inputPolicy,
+      ))
+    )
+      return snapshot(creator);
     const actorId = participantIdentity(world!.id, actor, config.sessionSecret);
     await store.command(
       world!.id,
@@ -704,7 +795,26 @@ export async function createApp(
           if (chat.channelId !== channel || subscription.condition.user_id !== bot?.id)
             denied('FORBIDDEN', 'Chat identity does not match its subscription.');
           if (chat.actorId !== bot?.id) {
-            if (chat.query)
+            if (
+              config.livewireEnabled &&
+              chat.stake &&
+              (await castLivewire(
+                store,
+                {
+                  channel,
+                  actor: chat.actorId,
+                  target: chat.stake,
+                  providerAt: notification.timestamp,
+                  deliveryId: notification.id,
+                  messageId: chat.messageId,
+                  mode: 'live',
+                  participantKey: config.sessionSecret,
+                },
+                config.inputPolicy,
+              ))
+            ) {
+              // Already committed under the channel/world locks; no outbound reply dependency.
+            } else if (chat.query)
               await botReplies.enqueue(notification.id, channel, chat.messageId, chat.query);
             else if (chat.command)
               await store.enqueueChat(
@@ -739,6 +849,14 @@ export async function createApp(
         );
       } else if (subscription.type === 'stream.offline') {
         const world = await store.active(channel, true);
+        if (
+          world?.state.livewire?.stake.status === 'open' &&
+          Date.parse(notification.timestamp) >=
+            Date.parse(
+              world.state.livewire.stake.windowOpenedAt ?? world.state.livewire.stake.openedAt,
+            )
+        )
+          await recoverLivewire(store, config.mode, 'offline', channel);
         const eligible =
           world &&
           !world.frozen_by &&
@@ -973,6 +1091,7 @@ export async function createApp(
     busy = true;
     try {
       await store.expire(config.mode);
+      await expireLivewire(store, config.mode);
       await subscriptions.interruptUnavailableEpisodes();
       const items =
         config.mode === 'live'
@@ -1104,6 +1223,7 @@ export async function createApp(
       await lifecycle.validateGrants(true);
       await botSetup.expire();
       await botReplies.recover();
+      await recoverLivewire(store, config.mode);
       recoveryWorldIds = (
         await store.pool.query(
           'SELECT e.world_id FROM episode_clocks e JOIN worlds w ON w.id=e.world_id WHERE w.mode=$1 AND e.deadline_at IS NOT NULL',

@@ -508,7 +508,7 @@ export function twitchSubscriptions(
     const rows = (
       await store.pool.query(
         `SELECT c.id FROM creators c JOIN channel_slots slot ON slot.channel_id=c.id JOIN worlds w ON w.id=slot.world_id
-      WHERE w.mode='live' AND w.frozen_by IS NULL AND w.state->>'phase' IN ('investigation','challenge','allocation','decision')
+      WHERE w.mode='live' AND w.frozen_by IS NULL AND (w.state->>'phase' IN ('investigation','challenge','allocation','decision') OR w.state->'livewire'->'stake'->>'status'='open')
       AND EXISTS(SELECT 1 FROM subscriptions previous WHERE previous.channel_id=c.id AND previous.type='channel.chat.message' AND previous.confirmed_at IS NOT NULL)
       AND NOT EXISTS(SELECT 1 FROM eventsub_inbox i WHERE i.processed_at IS NULL AND i.payload->>'kind'='interruption' AND i.payload->>'worldId'=w.id AND (i.payload->>'window')::integer=(w.state->>'window')::integer)
       AND NOT (c.connected AND EXISTS(SELECT 1 FROM oauth_grants g WHERE g.id=c.id AND g.role='creator' AND g.scopes @> $1::text[] AND g.validated_at>now()-interval '1 hour')

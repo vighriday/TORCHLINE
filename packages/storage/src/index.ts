@@ -8,12 +8,20 @@ import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
 import type { InputPolicy } from './admission.ts';
 export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
 export type { InputPolicy } from './admission.ts';
-export const REQUIRED_MIGRATION = '008_release_hardening.sql';
+export const REQUIRED_MIGRATION = '009_livewire.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';
 import type { Actor, Command, WorldEvent, WorldState } from '@torchline/contracts';
-import { applyCommand, createWorld } from '@torchline/engine';
+import { applyCommand, createWorld, livewireUnresolved } from '@torchline/engine';
+import { recoverLivewire } from './livewire.ts';
+export {
+  mutateLivewire,
+  readLivewire,
+  castLivewire,
+  recoverLivewire,
+  expireLivewire,
+} from './livewire.ts';
 export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
 
 export interface Creator {
@@ -159,6 +167,7 @@ export class Store {
     });
   }
   async disconnectCreator(channel: string) {
+    await recoverLivewire(this, 'live', 'disconnected', channel);
     await this.transaction(async (c) => {
       await this.lockChannels(c, [channel]);
       await c.query('UPDATE creators SET connected=false,receive_opt_in=false WHERE id=$1', [
@@ -383,6 +392,8 @@ export class Store {
       if (!row || row.custodian_id !== channel)
         error('FORBIDDEN', 'Only the custodian can host this world.');
       if (row.frozen_by) error('HANDOFF_PENDING', 'Cancel the pending handoff first.');
+      if (livewireUnresolved(row.state))
+        error('LIVEWIRE_PENDING', 'Resolve or cancel the mission before changing hosting.');
       if (resume) {
         if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [channel])).rowCount)
           error('CHANNEL_BUSY', 'This channel already hosts a world.');
@@ -438,6 +449,11 @@ export class Store {
     ingress?: { id: string; window: number },
     due?: { window: number; recovery?: { remainingMs: number; reason: string } },
   ) {
+    if (command.type.startsWith('livewire-'))
+      error(
+        'FORBIDDEN',
+        'Use the dedicated mission API; internal effect inputs are not public commands.',
+      );
     await this.transaction(async (c) => {
       await this.lockChannels(c, [actor.community]);
       await this.requireConnected(c, actor.community, mode);
@@ -605,6 +621,8 @@ export class Store {
         error('TARGET_UNAVAILABLE', 'Target must connect and opt in in the same mode.');
       if (w.revision !== expectedRevision)
         error('STALE_VERSION', 'The world changed. Refresh before preparing.');
+      if (livewireUnresolved(w.state))
+        error('LIVEWIRE_PENDING', 'Resolve or cancel the mission before preparing custody.');
       if (w.state.phase !== 'ready' || w.state.chapter === 0 || w.frozen_by)
         error('INVALID_PHASE', 'Finish a chapter before preparing a handoff.');
       if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [targetId])).rowCount)

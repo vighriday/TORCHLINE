@@ -93,6 +93,12 @@ export function runtimeConfig(env: NodeJS.ProcessEnv) {
     twitchRedirectUri: env.TWITCH_REDIRECT_URI,
     eventsubSecret: env.EVENTSUB_SECRET,
     botUserId: env.TWITCH_BOT_USER_ID,
+    livewireEnabled: (() => {
+      if (env.LIVEWIRE_ENABLED === undefined) return false;
+      if (!['true', 'false'].includes(env.LIVEWIRE_ENABLED))
+        throw new Error('LIVEWIRE_ENABLED must be true or false.');
+      return env.LIVEWIRE_ENABLED === 'true';
+    })(),
     botRepliesEnabled: (() => {
       if (env.BOT_REPLIES_ENABLED === undefined) return true;
       if (!['true', 'false'].includes(env.BOT_REPLIES_ENABLED))

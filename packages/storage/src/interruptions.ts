@@ -2,12 +2,14 @@ import { applyCommand } from '@torchline/engine';
 import { DomainError } from '@torchline/contracts';
 import type { Store, Creator } from './index.ts';
 import { syncEpisode } from './episodes.ts';
+import { recoverLivewire } from './livewire.ts';
 
 export const CHAT_INTERRUPTED = 'Twitch chat is unavailable. Repair the connection, then resume.';
 
 /** Internal work, never native Twitch evidence. Freeze first; drain accepted input before pause. */
 export async function interruptEpisode(store: Store, channel: string, mode: Creator['mode']) {
   if (mode !== 'live') return false;
+  await recoverLivewire(store, mode, 'chat_unavailable', channel);
   return store.transaction(async (c) => {
     await store.lockChannels(c, [channel]);
     const world = (

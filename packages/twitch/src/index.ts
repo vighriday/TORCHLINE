@@ -209,6 +209,17 @@ export function verifyWebhook(
   return { id, timestamp, type, ...body };
 }
 export type WebhookNotification = ReturnType<typeof verifyWebhook>;
+export function parseLivewireVote(text: string): 'navigation' | 'hull' | 'oxygen' | null {
+  if (text.length > 160) return null;
+  const match = /^!(?:stake|vote)\s+(1|2|3|nav|navigation|hull|oxy|oxygen)\s*$/i.exec(text.trim());
+  if (!match) return null;
+  const key = match[1].toLowerCase();
+  return ['1', 'nav', 'navigation'].includes(key)
+    ? 'navigation'
+    : ['2', 'hull'].includes(key)
+      ? 'hull'
+      : 'oxygen';
+}
 export function parseChatCommand(text: string): Command | null {
   if (text.length > 160) return null;
   const [name, ...args] = text.trim().split(/\s+/);
@@ -247,14 +258,16 @@ export function normalizeChat(event: unknown) {
   )
     return null;
   const command = parseChatCommand(value.message.text);
+  const stake = parseLivewireVote(value.message.text);
   const query = /^!(status|history)\s*$/i.exec(value.message.text.trim())?.[1].toLowerCase() as
     'status' | 'history' | undefined;
-  return command || query
+  return command || query || stake
     ? {
         channelId: value.broadcaster_user_id,
         actorId: value.chatter_user_id,
         messageId: value.message_id,
         command,
+        stake,
         query: query ?? null,
       }
     : null;

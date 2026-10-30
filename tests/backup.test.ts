@@ -1,7 +1,7 @@
 import { it, expect } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, unlink } from 'node:fs/promises';
-import { Store } from '@torchline/storage';
+import { Store, mutateLivewire, castLivewire } from '@torchline/storage';
 import { database } from './helpers.ts';
 import { createBackup, restoreBackup, restoreDrill } from '../scripts/lib/backup.ts';
 
@@ -40,6 +40,28 @@ it(
             randomUUID(),
             command,
           );
+        const mission = async (action: Parameters<typeof mutateLivewire>[3]['action']) =>
+          mutateLivewire(
+            store,
+            owner,
+            id,
+            { expectedVersion: (await store.get(id)).revision, commandId: randomUUID(), action },
+            true,
+          );
+        await mission({ type: 'open', preset: 'match', game: 'A game', label: 'Backup mission' });
+        const stakeId = (await store.get(id)).state.livewire!.stake.id;
+        await castLivewire(store, {
+          channel: owner.id,
+          actor: 'fixture-viewer',
+          target: 'hull',
+          providerAt: new Date().toISOString(),
+          deliveryId: randomUUID(),
+          messageId: randomUUID(),
+          mode: 'simulation',
+          participantKey: 'backup-fixture-key',
+        });
+        await mission({ type: 'lock', stakeId });
+        await mission({ type: 'resolve', stakeId, outcome: 'failure' });
         const before = (await store.get(id)).state,
           key = randomBytes(32).toString('hex'),
           path = `.local/backups/test-${randomUUID()}.tlb`,

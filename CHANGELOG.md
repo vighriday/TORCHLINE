@@ -3,6 +3,7 @@
 ## Unreleased — LIVEWIRE v0 feature branch
 
 - Add a pinned, opt-in mission engine extension with finite per-boundary allowances, pre-attempt locks, streamer-attested results, persisted physical consequences and mixed-history replay. Historical Ark reducers remain unchanged. This feature is isolated from the existing release; real Twitch acceptance is pending.
+- Add transactional mission APIs, normalized bounded ballots, signed-chat routing, recovery/expiry, feature gating and custody/hosting exclusion. Regression tests use real PostgreSQL and explicitly isolated provider fixtures; no genuine Twitch mission is claimed.
 
 ## 2026-10-30 — Archive reading pass
 

@@ -1,5 +1,7 @@
 # Architecture decision stress review
 
+[ADR 0031](../decisions/0031-livewire-v0.md) reviews the isolated LIVEWIRE extension across C1–C13: finite economics, historical replay, normalized participation, persisted locks, recovery, scoped overlays and unchanged native custody. Its component review is separate from executed tests and genuine Twitch acceptance.
+
 Status: design analysis completed and initial components implemented on 2026-10-26. Domain, real PostgreSQL, HTTP/Twitch-contract and browser checks now exist; **load/soak benchmarks and genuine Twitch/OBS verification have not run**. [Implementation status](../planning/implementation-status.md) names the evidence and limits.
 
 Implementation findings: JSONB property ordering required order-insensitive replay verification; PostgreSQL intent timestamps required millisecond precision to match application timestamps; UI consensus controls required asynchronous feedback; open SSE connections required explicit shutdown. The first slice uses application revisions separate from game-event sequences, canonical physical state and engine-derived Claude Design fixtures. It serializes recognized input under world locks rather than claiming the planned finer phase/ballot throughput.
