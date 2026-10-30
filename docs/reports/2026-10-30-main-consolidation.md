@@ -31,6 +31,7 @@ Local integration checks on October 30:
 | --- | --- |
 | Engine/API/real PostgreSQL | 136 tests in 32 files pass, including recovered QA tests |
 | Timing/cooperation browser repeat | Both journeys pass twice; four executions, with persistence, SSE and reload assertions |
+| Corrected renderer repeat | Cinematic journey passes twice: actual moving pixels, canonical damage redraw and unchanged reduced-motion frame limit |
 | Production build / strict TypeScript | Pass |
 | Formatting / aligned versions | Pass; seven private manifests at preview.2 |
 | Balance, seven design fixtures and README replay proof | Regenerate without changes to their committed artifacts |
@@ -39,6 +40,10 @@ Local integration checks on October 30:
 Exact-source remote Verify and promotion evidence are recorded in the [preview.2 release](https://github.com/vighriday/TORCHLINE/releases/tag/v0.1.0-preview.2). Publication requires passing CI for its exact source; a pending run is not counted as passing. Local browser repeats are not a full remote-suite acceptance.
 
 The last frontend-only CI run at 57e1d1e passed 14/17 journeys: actual frame progression exceeded its 15-second observation budget, while the forty-viewport and three-browser journeys reached their overall time limits. Integration retains every graphics, business and custody assertion, uses longer bounded CI-only budgets for those three measured cases, and retains local budgets. Real changed pixels and more than eight new frames are still required. This verifies correctness on shared software rendering, not supported live FPS or sustained OBS performance.
+
+The first integrated local browser run then found an actual reduced-motion redraw defect: unchanged server snapshots could schedule three frames in a 500 ms static observation. The renderer now takes an explicit visual-state key and viewport dimensions; saved resource/system/mark, camera/view and illustrative phase changes still render, while identical snapshots do not. Pointer, visibility and startup handling remain. The existing at-most-two warmup-frame assertion is preserved.
+
+Direct-API browser setup now waits for the resulting saved revision to reach the actual page before clicking a captain control. A traced cinematic retry had submitted revision 4 immediately after the setup advanced the database to revision 5; the server correctly rejected that stale command. Synchronizing this test setup retains the real SSE path and optimistic-concurrency protection, rather than retrying or weakening application mutations. It does not close the broader A11 ordering audit.
 
 ## Gates that remain open
 

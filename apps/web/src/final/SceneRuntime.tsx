@@ -5,11 +5,13 @@ import { useFrame, useThree } from '@react-three/fiber';
 export function FrameBudget({
   reducedMotion = false,
   mini = false,
+  renderKey = '',
 }: {
   reducedMotion?: boolean;
   mini?: boolean;
+  renderKey?: string;
 }) {
-  const { gl, advance, setDpr } = useThree();
+  const { gl, advance, setDpr, size } = useThree();
   const [lost, setLost] = useState(false);
   useEffect(() => {
     const contextLost = (event: Event) => {
@@ -93,7 +95,7 @@ export function FrameBudget({
   }, [gl, advance, setDpr, reducedMotion, mini]);
   useEffect(() => {
     trigger.current();
-  });
+  }, [renderKey, size.width, size.height]);
   useFrame(() => {
     const root = gl.domElement.closest<HTMLElement>('.ark-canvas,.voxel-canvas');
     if (!root) return;

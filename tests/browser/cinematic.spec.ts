@@ -36,8 +36,12 @@ test('rolling Ark renders real changing pixels, stable cockpit navigation and pe
       await expect(page.locator('.clue-list .found')).toHaveCount(1);
       await closeDecision(page);
       await page.getByRole('button', { name: /Sacrifice navigation/ }).click();
+      const beforeDamage = Number(await scene.getAttribute('data-frame-count'));
       await page.getByRole('button', { name: 'Commit directive', exact: true }).click();
       await expect(page.locator('.nav-dead-stamp')).toContainText('NAVIGATION OFFLINE');
+      await expect
+        .poll(async () => Number(await scene.getAttribute('data-frame-count')))
+        .toBeGreaterThan(beforeDamage);
       await page.reload();
       await expect(page.locator('.nav-dead-stamp')).toBeVisible();
       await expect(page.locator('[data-system=navigation]')).toHaveAttribute(

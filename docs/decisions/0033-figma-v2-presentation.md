@@ -1,6 +1,6 @@
 # ADR 0033: Preserve the final Figma v2 design
 
-October 30, 2026. Status: adaptation in progress on `feat/frontend-replacement`.
+October 30, 2026. Status: implemented; [preview.2 source consolidation](../reports/2026-10-30-main-consolidation.md). Owner and live acceptance remain separate.
 
 The owner supplied `frontend-design/figma-v2` as the sole visual source. Preserve its ten screens, Ark/cockpit, voxel scene, typography, controls and animations while replacing prototype data with canonical state. Remove superseded UI, media and guidance from current source. The raw export remains untouched and ignored; [input checksums](../design/source-checksums.txt) identify its four source files.
 
@@ -11,6 +11,8 @@ Retain React 19.3.1, Vite 8.3.5 and Three.js 0.186.1. Pin the export's React Thr
 Pin Tailwind and its Vite adapter to the supplied 4.2.2. Retain the full custom stylesheet and its layers, with one presentation entry at cutover. Do not ship Figma hosting/editor/analytics plugins. Self-host exact Barlow Condensed and IBM Plex Mono weights and their SIL OFL licenses; no runtime font CDN or external texture is needed.
 
 Keep both scenes lazy. Drive manual frames at roughly 30 FPS, 20 for miniatures, bounded/adaptive DPR (0.75 floor on sustained expensive frames), and pause automatic frames while hidden/offscreen or reduced motion is selected. `frameloop="never"` prevents OrbitControls from independently scheduling a continuous RAF loop. User inspection and canonical updates can redraw a reduced-motion scene. These are implementation limits, not measured guarantees for every GPU/OBS host.
+
+Consolidation regression found unchanged SSE snapshots still triggered reduced-motion frames. Use an explicit visual-state key (resources, physical marks, selection/view and illustrative phase) plus viewport dimensions, instead of redrawing on every React render. Direct inspection, startup and visibility still redraw. This reduces C8/C9/C10 work without changing projection shape, engine state, clocks, input authority or native-proof requirements. C12 retains the static-frame limit and adds a saved-damage redraw assertion; C13 keeps actual host/FPS acceptance separate from software-rendered CI.
 
 Give Drei HTML labels a stable, separately owned portal. An initial browser run exposed a DOM cleanup error when the default target changed; explicit ownership fixes the reproduced failure while preserving the label. Graphics failure has a styled text fallback and retry, not another ship model. Animation and audio never apply commands or verify real attempts.
 

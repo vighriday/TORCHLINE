@@ -1239,7 +1239,11 @@ function Scene({
   const cockpit = !mini && view === 'cockpit';
   return (
     <>
-      <FrameBudget reducedMotion={reducedMotion} mini={mini} />
+      <FrameBudget
+        reducedMotion={reducedMotion}
+        mini={mini}
+        renderKey={JSON.stringify([selected, navigation, mini, view, burn, resources, systems])}
+      />
       <ResponsiveCamera mini={mini} view={view} />
       <color attach="background" args={['#020506']} />
       <fog attach="fog" args={['#020506', 45, 240]} />

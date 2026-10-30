@@ -477,7 +477,7 @@ export function VoxelScene({
       camera={{ fov: 72, near: 0.1, far: 220, position: START.toArray() }}
       gl={{ antialias: true }}
     >
-      <FrameBudget reducedMotion={reducedMotion} />
+      <FrameBudget reducedMotion={reducedMotion} renderKey={`${context}:${phase}`} />
       <color attach="background" args={[palette.sky]} />
       <fog attach="fog" args={[palette.fog, 20, 74]} />
       <hemisphereLight args={['#d6ebff', '#5a4632', palette.hemi]} />

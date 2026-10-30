@@ -65,6 +65,13 @@ export async function launch(page: Page, channel = 'alpha') {
 export async function snapshot(page: Page) {
   return (await page.request.get('/api/state').then((r) => r.json())).world as WorldPresentation;
 }
+async function renderedRevision(page: Page) {
+  const saved = await snapshot(page);
+  await expect(page.locator('main.mission')).toHaveAttribute(
+    'data-version',
+    String(saved.worldVersion),
+  );
+}
 export async function command(page: Page, value: Command) {
   const world = await snapshot(page);
   const result = await page.request.post('/api/worlds/' + world.worldId + '/commands', {
@@ -72,6 +79,7 @@ export async function command(page: Page, value: Command) {
     data: { command: value, expectedVersion: world.worldVersion, commandId: crypto.randomUUID() },
   });
   expect(result.ok()).toBe(true);
+  await renderedRevision(page);
 }
 export async function manual(page: Page) {
   const world = await snapshot(page);
@@ -80,6 +88,7 @@ export async function manual(page: Page) {
     data: { investigation: null, challenge: null, allocation: null, decision: null },
   });
   expect(result.ok()).toBe(true);
+  await renderedRevision(page);
 }
 export async function overlayLink(page: Page, view = 'compact') {
   const result = await page.request.post('/api/overlay-grant', { headers, data: {} });

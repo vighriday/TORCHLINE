@@ -6,6 +6,8 @@
 - Preserve an unsaved captain timing selection when a delayed HTTP/SSE snapshot initializes the saved clock. Disable preparation inputs during a save and cover a real SQL update → SSE refresh → manual save → reload regression.
 - Align all seven private packages, README and release notes at preview.2. Consolidate reviewed feature and QA history into main, retain immutable preview.1/archive tags, and start later engineering on a fresh branch. Source consolidation does not deploy or establish genuine Twitch/raid acceptance. [Branch and verification record](docs/reports/2026-10-30-main-consolidation.md).
 - Give three measured software-rendering CI journeys bounded, explicit observation budgets without changing their frame/pixel, gameplay or custody assertions. These checks do not certify broadcast FPS.
+- Stop unchanged server snapshots from redrawing reduced-motion Ark/Minecraft scenes. Render again for visual state, viewport, visibility or direct interaction changes; preserve the existing static-frame regression instead of relaxing it.
+- Wait for real SSE revision delivery after direct-API browser setup, avoiding test-generated stale commitments while preserving server concurrency checks.
 
 ### Final Figma v2 integration
 
