@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { LivewireState, LivewirePresentation, LivewireCommand } from './livewire.ts';
+export * from './livewire.ts';
 
 export const RULES_VERSION = 'ark-v2' as const;
 export const CURRENT_RULES_VERSION = 'ark-v3' as const;
@@ -72,6 +74,7 @@ export interface SystemPresentation extends ShipSystem {
   severity: 'stable' | 'compromised' | 'critical' | 'lost';
 }
 export interface WorldState {
+  livewire?: LivewireState;
   id: string;
   rulesVersion: RulesVersion;
   version: number;
@@ -124,7 +127,9 @@ export const CommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pause') }).strict(),
   z.object({ type: z.literal('resume') }).strict(),
 ]);
-export type Command = z.infer<typeof CommandSchema>;
+// Internal mission commands carry server-derived lock inputs. They are deliberately
+// excluded from the public Ark CommandRequestSchema and chat parser.
+export type Command = z.infer<typeof CommandSchema> | LivewireCommand;
 export const CommandRequestSchema = z
   .object({
     command: CommandSchema,
@@ -145,6 +150,8 @@ export interface VisualCue {
   eventId: string;
 }
 export interface WorldEvent {
+  extensionVersion?: 'livewire-v0';
+  evidence?: 'host_control' | 'streamer_attested';
   id: string;
   worldId: string;
   sequence: number;
@@ -182,6 +189,7 @@ export interface ChoicePresentation {
   preview: { resources: Resources; outcome: Ending | null; warnings: string[] } | null;
 }
 export interface WorldPresentation {
+  livewire?: LivewirePresentation;
   schemaVersion: typeof PRESENTATION_VERSION;
   worldId: string;
   worldVersion: number;

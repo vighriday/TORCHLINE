@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — LIVEWIRE v0 feature branch
+
+- Add a pinned, opt-in mission engine extension with finite per-boundary allowances, pre-attempt locks, streamer-attested results, persisted physical consequences and mixed-history replay. Historical Ark reducers remain unchanged. This feature is isolated from the existing release; real Twitch acceptance is pending.
+
 ## 2026-10-30 — Archive reading pass
 
 - Remove raw record IDs and repeated technical filler from the story log after direct screen inspection. Preserve saved history, event anchors, inherited-cause links, timestamps and resource consequences. No engine, permission or integration behavior changes.

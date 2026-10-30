@@ -2,6 +2,9 @@ import { DomainError, RULES_VERSION, CURRENT_RULES_VERSION } from '@torchline/co
 import type { Actor, Command, RulesVersion, WorldEvent, WorldState } from '@torchline/contracts';
 import * as v2 from './ark-v2.ts';
 import * as v3 from './ark-v3.ts';
+import { applyLivewire, livewireUnresolved } from './livewire.ts';
+import { LivewireCommandSchema } from '@torchline/contracts';
+export { livewireOptions, livewireUnresolved } from './livewire.ts';
 export {
   INITIAL_RESOURCES,
   TITLES,
@@ -37,6 +40,13 @@ export function applyCommand(
   actor: Actor,
   context: { commandId: string; at: string },
 ) {
+  if (command.type.startsWith('livewire-'))
+    return applyLivewire(state, LivewireCommandSchema.parse(command), actor, context);
+  if (livewireUnresolved(state))
+    throw new DomainError(
+      'LIVEWIRE_PENDING',
+      'Resolve or cancel the mission before continuing the chapter.',
+    );
   if (state.rulesVersion === RULES_VERSION && !legacyCommands.has(command.type))
     throw new DomainError(
       'RULES_VERSION',
@@ -55,5 +65,44 @@ export function replayEvents(
   events: WorldEvent[],
   version: RulesVersion = events[0]?.rulesVersion ?? RULES_VERSION,
 ) {
+  if (
+    events.some(
+      (event) =>
+        event.extensionVersion === 'livewire-v0' || event.command.type.startsWith('livewire-'),
+    )
+  ) {
+    let state = createWorld(id, version);
+    const canonical = (value: unknown): string =>
+      Array.isArray(value)
+        ? `[${value.map(canonical).join(',')}]`
+        : value !== null && typeof value === 'object'
+          ? `{${Object.keys(value)
+              .sort()
+              .map(
+                (key) =>
+                  `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`,
+              )
+              .join(',')}}`
+          : JSON.stringify(value);
+    for (const event of events) {
+      if (
+        event.worldId !== id ||
+        event.rulesVersion !== version ||
+        event.sequence !== state.version + 1
+      )
+        throw new DomainError(
+          'REPLAY_SEQUENCE',
+          'Event history has a gap or incompatible version.',
+        );
+      const next = applyCommand(state, event.command, event.actor, {
+        commandId: event.commandId,
+        at: event.at,
+      });
+      if (canonical(next.event) !== canonical(event))
+        throw new DomainError('REPLAY_MISMATCH', 'Stored effects do not match pinned rules.');
+      state = next.state;
+    }
+    return state;
+  }
   return rules(version).replayEvents(id, events);
 }
