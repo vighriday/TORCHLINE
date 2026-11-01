@@ -3,7 +3,7 @@
 
 <a href="assets/readme/awakening.png"><img src="assets/readme/awakening.png" width="1440" alt="TORCHLINE's Awakening: the persistent Ark rolls above a planet. Final Figma v2 design, with the corrected ship nose."></a>
 
-<p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#livewire--your-next-attempt-matters">Minecraft LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
+<p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#one-crews-choice-becomes-the-next-crews-crisis">The relay</a> · <a href="#livewire--your-next-attempt-matters">Minecraft LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
 
 <p align="center"><a href="docs/releases/v0.1.0-preview.2.md">v0.1.0-preview.2</a> · Development preview · Built with Codex for the Codex x TwitchCon Hackathon</p>
 
@@ -19,6 +19,25 @@ Play all five chapters on one channel. Or prepare a handoff and perform a genuin
 </picture>
 
 <sub>Recorded from the integrated app. [Full-size still](assets/readme/awakening.png) · [SVG animation container](assets/readme/ark-roll.svg) · [Capture and provenance](assets/readme/README.md).</sub>
+
+## One crew's choice becomes the next crew's crisis
+
+<a href="assets/readme/relay-broadcast.png"><img src="assets/readme/relay-broadcast.png" width="1440" alt="The read-only OBS view of a received Ark: an inheritance dossier names Simulation alpha, their decision to sacrifice navigation, the lost navigation system and the blind-jump debt now due in chapter two."></a>
+
+When a captain hands the Ark on, the receiving stream sees an **inheritance dossier** over the ship: who handed it over, every decision aboard and the community that made it, the systems already lost, and each debt still waiting, linked to the decision that created it. Starting the next chapter makes the debt real. The new audience inherits a problem it can trace to people it has never met.
+
+<details>
+<summary><strong>⇄ Follow one Ark through three communities</strong></summary>
+
+<a href="assets/readme/lineage.png"><img src="assets/readme/lineage.png" width="1440" alt="The Chronicle lineage: three practice communities as rows and five chapters as columns. Arrows link alpha's navigation sacrifice to beta's Blind Jump, and beta's and gamma's repairs to later chapters; dotted markers show each custody change."></a>
+
+Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided.
+
+<a href="assets/readme/season-record.png"><img src="assets/readme/season-record.png" width="1440" alt="Season record: A New Home. 216 passengers landed. Simulation alpha sacrificed navigation, Simulation beta rebuilt it, Simulation gamma restored life support, salvaged and landed."></a>
+
+Captured from the integrated app in saved practice. The relays used labeled simulated raid evidence, not native Twitch raids.
+
+</details>
 
 ## LIVEWIRE — your next attempt matters
 
@@ -84,16 +103,19 @@ flowchart LR
 
 ## Try it
 
-For saved practice, use the [development guide](docs/operations/development.md). With Node 24, pinned pnpm and an isolated PostgreSQL database configured:
+With Node 24, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
 
 ```powershell
 pnpm install --frozen-lockfile
+pnpm db:up        # private local cluster and ignored .env (saved practice, LIVEWIRE on)
 pnpm db:migrate
 pnpm build
-pnpm start
+pnpm start        # http://localhost:3000
 ```
 
-Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true` in your ignored local environment. Open its configured origin, choose **Launch the Ark**, then use **Command OS** for all ten destinations. The Judge Arena guides you through actual saved practice. No Twitch messages are sent in that mode.
+**The two-minute path:** open the app, choose **Command OS → Judge Arena**, then **Autoplay to the handoff**. Two practice communities play chapter one, prepare a relay, accept the Ark and stop on the inheritance dossier. Every step calls the same API as the dashboard. The raid proof is labeled simulation and can never move a live world. Then run step 8 to meet the debt and open the Chronicle lineage.
+
+For free play choose **Launch the Ark** and use **Command OS** for all ten destinations. No Twitch messages are sent in saved practice.
 
 For the real stream, follow the [owner setup guide](docs/operations/owner-launch-guide.md) in order: HTTPS → exact Twitch callback → broadcaster/bot consent → subscriptions → OBS → genuine chat → native raid. Keep the bot's role and every private OBS link private.
 
@@ -102,6 +124,7 @@ For the real stream, follow the [owner setup guide](docs/operations/owner-launch
 | Layer | Honest status |
 | --- | --- |
 | Saved survival + LIVEWIRE | Implemented with actual PostgreSQL, deterministic consequences, replay and automated tests |
+| Relay rehearsal, inheritance dossier, lineage | Implemented. A browser journey runs the full two-community practice relay and checks the saved custody, scars, debt and lineage. The raid evidence there is simulated and labeled |
 | Final design + OBS | Ten screens integrated; browser checks and native full/dock rendering, refresh and rotation pass in saved practice. [Evidence and limits](docs/reports/2026-10-30-final-frontend.md) |
 | Twitch | Real consent, signed callbacks and incoming query chat observed; genuine chat changing the Ark still needs acceptance |
 | Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |
