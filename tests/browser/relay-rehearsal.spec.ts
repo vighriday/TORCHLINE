@@ -62,6 +62,24 @@ test('the judge relay rehearsal moves one Ark between two practice communities a
     await expect(page.locator('.lineage-edge').first()).toBeAttached();
     await page.locator('.lineage-node[data-kind=decision]').first().click();
     await expect(page.locator('.event-record')).toContainText('Sacrifice navigation');
+
+    // The receiver publishes a read-only link; a browser with no session can follow the Ark.
+    await page.getByRole('button', { name: /Share public Chronicle/ }).click();
+    const link = await page.getByLabel('Public Chronicle link').inputValue();
+    expect(link).toMatch(/\/chronicle\/#[a-f\d]{64}$/);
+    const visitor = await page.context().browser()!.newContext();
+    try {
+      const reader = await visitor.newPage();
+      await reader.goto(link);
+      await expect(reader.locator('.season-record')).toContainText('Simulation alpha');
+      await expect(reader.locator('.lineage-custody')).toHaveCount(1);
+      await expect(reader.locator('.public-chronicle-custody')).toContainText(
+        'Simulation alpha → Simulation beta',
+      );
+      await expect(reader.getByRole('button', { name: /Commit|Start chapter/ })).toHaveCount(0);
+    } finally {
+      await visitor.close();
+    }
     expect(errors).toEqual([]);
     await page.goto('about:blank');
   }));

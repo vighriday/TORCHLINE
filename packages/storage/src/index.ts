@@ -8,7 +8,7 @@ import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
 import type { InputPolicy } from './admission.ts';
 export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
 export type { InputPolicy } from './admission.ts';
-export const REQUIRED_MIGRATION = '013_custody_arrival.sql';
+export const REQUIRED_MIGRATION = '014_world_shares.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';
@@ -22,7 +22,13 @@ export {
   recoverLivewire,
   expireLivewire,
 } from './livewire.ts';
-export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
+export {
+  readWorldRecord,
+  readWorldHistory,
+  readHandoffPreview,
+  readSharedChronicle,
+  shareWorld,
+} from './records.ts';
 export { sweepRetention, RETENTION_POLICY } from './retention.ts';
 export type { RetentionResult } from './retention.ts';
 
@@ -184,6 +190,8 @@ export class Store {
       await c.query('DELETE FROM oauth_grants WHERE id=$1', [channel]);
       await c.query('DELETE FROM sessions WHERE channel_id=$1', [channel]);
       await c.query('DELETE FROM overlay_grants WHERE channel_id=$1', [channel]);
+      // Disconnecting withdraws the public Chronicle links this creator published.
+      await c.query('DELETE FROM world_shares WHERE created_by=$1', [channel]);
       await c.query(
         "UPDATE subscriptions SET status='app_disconnected' WHERE channel_id=$1 AND status IN ('enabled','webhook_callback_verification_pending')",
         [channel],

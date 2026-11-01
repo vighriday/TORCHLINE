@@ -19,6 +19,8 @@ import {
   readWorldRecord,
   readWorldHistory,
   readHandoffPreview,
+  readSharedChronicle,
+  shareWorld,
   advanceEpisodes,
   recoverEpisodes,
   configureEpisode,
@@ -155,7 +157,9 @@ export async function createApp(
                 ? 503
                 : error.code === 'RATE_LIMITED'
                   ? 429
-                  : 409,
+                  : error.code === 'NOT_FOUND'
+                    ? 404
+                    : 409,
         )
         .send({ error: error.code, message: error.message });
     if (error instanceof z.ZodError)
@@ -542,6 +546,33 @@ export async function createApp(
       .strict()
       .parse(request.query);
     return readWorldHistory(store, creator, id, query);
+  });
+  // A public, read-only Chronicle link so communities and returning viewers can follow an Ark after
+  // it leaves their channel. The token lives in the URL fragment and is posted in the body, so it
+  // never appears in a path, query string or request log.
+  app.post('/api/worlds/:id/share', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const token = randomBytes(32).toString('hex');
+    await shareWorld(store, creator, id, token);
+    return { url: `${config.baseUrl}/chronicle/#${token}` };
+  });
+  app.post('/api/chronicle', async (request) => {
+    const body = z
+      .object({
+        token: z.string().regex(/^[a-f\d]{64}$/),
+        before: z.number().int().min(1).max(2147483647).optional(),
+        through: z.number().int().min(0).max(2147483646).optional(),
+        limit: z.number().int().min(1).max(100).default(100),
+        custodyBefore: NodeText.optional(),
+      })
+      .strict()
+      .parse(request.body);
+    const { token, ...query } = body;
+    const shared = await readSharedChronicle(store, token, query);
+    if (shared.world.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, world: presentWorld(shared.world), history: shared.history };
   });
   app.get('/api/handoffs/:id/preview', async (request) => {
     const creator = await currentCreator(request);

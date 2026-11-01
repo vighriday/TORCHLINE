@@ -943,6 +943,64 @@ function ChronicleRecords({ world }: { world: WorldPresentation }) {
     </>
   );
 }
+/** Publishes a revocable, read-only public link to this world's Chronicle. */
+function ShareChronicle({ world }: { world: WorldPresentation }) {
+  const { busy, perform } = useGame();
+  const [url, setUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    setUrl('');
+    setCopied(false);
+  }, [world.worldId]);
+  return (
+    <div className="share-chronicle">
+      <Button
+        disabled={busy}
+        onClick={() =>
+          void perform(async () => {
+            const next = await request<{ url: string }>(
+              `/api/worlds/${encodeURIComponent(world.worldId)}/share`,
+              {},
+            );
+            setUrl(next.url);
+            setCopied(false);
+          })
+        }
+      >
+        {url ? 'Rotate public Chronicle link' : 'Share public Chronicle'}
+        <Icon name="chevron" />
+      </Button>
+      {url && (
+        <>
+          <label>
+            Public Chronicle link
+            <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
+          </label>
+          <div className="controls-row">
+            <Button
+              onClick={() =>
+                void navigator.clipboard
+                  .writeText(url)
+                  .then(() => setCopied(true))
+                  .catch(() => setCopied(false))
+              }
+            >
+              {copied ? 'COPIED' : 'COPY LINK'}
+            </Button>
+            <a href={url} target="_blank" rel="noreferrer">
+              Open public view
+            </a>
+          </div>
+          <p>
+            Anyone with this link can read this Ark&rsquo;s saved record, including after it moves
+            to another channel. It grants no controls. Rotating replaces your previous link;
+            disconnecting withdraws it.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 export function Archive() {
   const { canonical, archiveWorld, setMode } = useGame();
   const world =
@@ -954,6 +1012,7 @@ export function Archive() {
         <strong>WORLD CHRONICLE</strong>
         <p>The ship remembers every custodian, sacrifice, repair and unresolved obligation.</p>
       </div>
+      {world && <ShareChronicle world={world} />}
       {world ? (
         <ChronicleRecords key={world.worldId} world={world} />
       ) : (

@@ -7,9 +7,16 @@ import type {
 } from '@torchline/contracts';
 import { request } from '../api.ts';
 
+export type HistoryLoader = (params: URLSearchParams) => Promise<WorldHistoryPage>;
+// The signed-in custodian reads history through their session; a public Chronicle link supplies
+// its own loader that posts the share token instead.
+const sessionLoader =
+  (worldId: string): HistoryLoader =>
+  (params) =>
+    request<WorldHistoryPage>(`/api/worlds/${encodeURIComponent(worldId)}/history?${params}`);
 // The whole saved record for one world, pinned to a single sequence so later pages can never
 // mix two different versions of the history.
-export function useFullHistory(worldId: string, gameVersion: number) {
+export function useFullHistory(worldId: string, gameVersion: number, loader?: HistoryLoader) {
   const [record, setRecord] = useState<{
     events: RecordedWorldEvent[];
     custody: CustodyStep[];
@@ -19,8 +26,8 @@ export function useFullHistory(worldId: string, gameVersion: number) {
     let active = true;
     setError('');
     void (async () => {
-      const base = `/api/worlds/${encodeURIComponent(worldId)}/history`;
-      const first = await request<WorldHistoryPage>(`${base}?limit=100`);
+      const load = loader ?? sessionLoader(worldId);
+      const first = await load(new URLSearchParams({ limit: '100' }));
       const events = [...first.events];
       const custody = [...first.custody];
       let cursor = first.nextCursor;
@@ -32,7 +39,7 @@ export function useFullHistory(worldId: string, gameVersion: number) {
         });
         if (cursor !== null) params.set('before', String(cursor));
         if (custodyCursor) params.set('custodyBefore', custodyCursor);
-        const next = await request<WorldHistoryPage>(`${base}?${params}`);
+        const next = await load(params);
         if (cursor !== null) {
           events.push(...next.events);
           cursor = next.nextCursor;
@@ -137,11 +144,13 @@ const clip = (text: string, length = 27) =>
 export function Lineage({
   world,
   onSelect,
+  loader,
 }: {
   world: WorldPresentation;
   onSelect?: (event: RecordedWorldEvent) => void;
+  loader?: HistoryLoader;
 }) {
-  const { record, error } = useFullHistory(world.worldId, world.gameVersion);
+  const { record, error } = useFullHistory(world.worldId, world.gameVersion, loader);
   const [focus, setFocus] = useState<string | null>(null);
   const layout = useMemo(() => {
     if (!record) return null;
@@ -373,8 +382,14 @@ const endingTitle = {
  * The season's closing record: how the voyage ended and what each community contributed. It
  * reads only saved events; nothing here is scored or invented.
  */
-export function SeasonRecord({ world }: { world: WorldPresentation }) {
-  const { record } = useFullHistory(world.worldId, world.gameVersion);
+export function SeasonRecord({
+  world,
+  loader,
+}: {
+  world: WorldPresentation;
+  loader?: HistoryLoader;
+}) {
+  const { record } = useFullHistory(world.worldId, world.gameVersion, loader);
   const nodes = record ? lineageNodes(record.events) : [];
   const crews: {
     community: { id: string; label: string };

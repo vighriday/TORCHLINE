@@ -761,3 +761,113 @@
     top: 296px;
   }
 }
+
+/* Public Chronicle link and its read-only page */
+.share-chronicle {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  max-width: 620px;
+  margin: -6px 0 18px;
+}
+.share-chronicle > button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(201, 152, 81, 0.5);
+  background: rgba(201, 152, 81, 0.08);
+  color: var(--amber-bright);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.08em;
+}
+.share-chronicle label {
+  display: grid;
+  gap: 4px;
+  color: #8d948e;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.share-chronicle input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--bone);
+  font: 400 11px var(--mono);
+}
+.share-chronicle .controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.share-chronicle .controls-row button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone);
+  font: 600 10px var(--mono);
+}
+.share-chronicle a {
+  color: var(--cyan);
+  font: 500 11px var(--mono);
+}
+.share-chronicle p {
+  margin: 0;
+  color: #8d948e;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.public-chronicle {
+  min-height: 100dvh;
+  padding: 24px clamp(16px, 4vw, 68px) 48px;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(111, 170, 169, 0.08), transparent 40%), var(--void);
+  color: var(--bone);
+}
+.public-chronicle-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+.public-chronicle-bar > span {
+  color: var(--amber);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.12em;
+}
+.public-chronicle-error {
+  padding: 12px 14px;
+  border-left: 3px solid var(--crimson-bright);
+  background: rgba(185, 71, 53, 0.12);
+  color: #f1b3a5;
+  font: 400 12px/1.5 var(--mono);
+}
+.public-chronicle-record,
+.public-chronicle-custody {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  background: rgba(8, 13, 14, 0.88);
+}
+.public-chronicle-record strong {
+  display: block;
+  margin: 8px 0 6px;
+  font: 600 clamp(18px, 1.6vw, 26px) / 1.15 var(--display);
+}
+.public-chronicle-record small,
+.public-chronicle-custody small {
+  display: block;
+  color: #8d948e;
+  font: 400 10.5px var(--mono);
+}
+.public-chronicle-custody p {
+  margin: 10px 0 0;
+  font: 600 16px var(--display);
+}
