@@ -1,6 +1,10 @@
 import { HttpError, request } from './api.ts';
 import type { DashboardSnapshot } from './api.ts';
 
+// A broadcast should return within seconds once its server recovers. Reads are cheap and GET-only,
+// so retries stop growing at four seconds instead of leaving viewers on a stale frame.
+const RETRY_CAP_MS = 4000;
+
 /** A capability exchange and GET-only recovery; never retries a gameplay mutation. */
 export function connectOverlayFeed(
   channel: string,
@@ -34,7 +38,7 @@ export function connectOverlayFeed(
         timer = undefined;
         void open();
       },
-      Math.min(15000, 500 * 2 ** Math.min(attempt++, 5)),
+      Math.min(RETRY_CAP_MS, 500 * 2 ** Math.min(attempt++, 3)),
     );
   };
   const open = async () => {

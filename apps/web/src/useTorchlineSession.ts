@@ -6,6 +6,8 @@ import { connectOverlayFeed } from './overlay-feed.ts';
 import { orderedSnapshot, withServerTime } from './snapshot-order.ts';
 
 // Presentation-independent session/transport. Components decide layout; the server decides authority.
+// Feed recovery is a GET-only read, so retries stop growing at four seconds.
+const RETRY_CAP_MS = 4000;
 export function useTorchlineSession(overlayChannel?: string) {
   const [data, setData] = useState<DashboardSnapshot | null>(null);
   const current = useRef<DashboardSnapshot | null>(null);
@@ -78,7 +80,7 @@ export function useTorchlineSession(overlayChannel?: string) {
           timer = undefined;
           void recover();
         },
-        Math.min(15000, 500 * 2 ** Math.min(attempt++, 5)),
+        Math.min(RETRY_CAP_MS, 500 * 2 ** Math.min(attempt++, 3)),
       );
     };
     const open = () => {
