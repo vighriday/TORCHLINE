@@ -102,6 +102,71 @@ describe('real PostgreSQL consistency', () => {
         ),
       ).rejects.toHaveProperty('code', '23514');
     }));
+  it('releases a finished voyage so the captain can launch the next Ark', () =>
+    database(async (store) => {
+      const owner = await store.ensureCreator('captain', 'Captain', 'simulation');
+      const first = await store.create(owner);
+      const actor = { id: owner.id, role: 'host' as const, community: owner.id };
+      for (const option of ['burn-navigation', 'chart-route', 'repair-life', 'salvage', 'land']) {
+        for (const command of [
+          { type: 'start' },
+          { type: 'close-challenge' },
+          { type: 'commit', option },
+        ] as Command[])
+          await store.command(
+            first,
+            actor,
+            'simulation',
+            (await store.get(first)).revision,
+            randomUUID(),
+            command,
+          );
+      }
+      const finished = await store.get(first);
+      expect(finished.state).toMatchObject({ phase: 'ended', outcome: 'colony' });
+      const second = await store.create(owner);
+      expect(second).not.toBe(first);
+      expect((await store.active(owner.id))?.id).toBe(second);
+      // The memorial keeps its exact final state and remains in the captain's library.
+      expect((await store.get(first)).state).toEqual(finished.state);
+      expect((await store.get(first)).revision).toBe(finished.revision + 1);
+      expect((await store.library(owner.id)).map((row) => row.id)).toEqual(
+        expect.arrayContaining([first, second]),
+      );
+      // An unfinished world still blocks a second launch.
+      await expect(store.create(owner)).rejects.toMatchObject({ code: 'CHANNEL_BUSY' });
+    }));
+  it('lets a receiver whose voyage ended inherit another Ark without losing the memorial', () =>
+    database(async (store) => {
+      const receiver = await store.ensureCreator('receiver', 'Receiver', 'simulation');
+      const finished = await store.create(receiver);
+      await store.pool.query(
+        "UPDATE worlds SET state=jsonb_set(jsonb_set(state,'{phase}','\"ended\"'),'{outcome}','\"wreck\"') WHERE id=$1",
+        [finished],
+      );
+      await store.optIn(receiver.id, true);
+      const source = await boundaryWorld(store, 'source');
+      const intent = await store.prepare(
+        source.id,
+        source.creator,
+        receiver.id,
+        (await store.get(source.id)).revision,
+      );
+      // Preparing never edits the receiver's channel; only their explicit acceptance does.
+      expect((await store.active(receiver.id))?.id).toBe(finished);
+      await store.observeRaid({
+        messageId: 'finished-receiver-proof',
+        mode: 'simulation',
+        sourceId: source.creator.id,
+        targetId: receiver.id,
+        subscriptionId: 'simulation-only',
+        notificationAt: new Date().toISOString(),
+      });
+      await store.accept(intent.id, receiver);
+      expect((await store.active(receiver.id))?.id).toBe(source.id);
+      expect((await store.get(finished)).state).toMatchObject({ phase: 'ended', outcome: 'wreck' });
+      expect((await store.library(receiver.id)).map((row) => row.id)).toContain(finished);
+    }));
   it('deduplicates commands and refuses a reused ID with different content', () =>
     database(async (store) => {
       const owner = await store.ensureCreator('source', 'A', 'simulation');

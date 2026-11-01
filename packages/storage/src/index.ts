@@ -345,11 +345,35 @@ export class Store {
     if (!row?.connected || (mode && row.mode !== mode))
       error('FORBIDDEN', 'The creator authorization ended.');
   }
+  /**
+   * A finished voyage stays in its custodian's library as a memorial, but it no longer occupies
+   * the channel. Returns false when the channel still hosts a playable world.
+   */
+  private async releaseFinished(c: PoolClient, channel: string) {
+    const hosted = (
+      await c.query(
+        "SELECT w.id,w.revision,w.state->>'phase' AS phase FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=$1 FOR UPDATE OF w",
+        [channel],
+      )
+    ).rows[0];
+    if (!hosted) return true;
+    if (hosted.phase !== 'ended') return false;
+    await c.query('DELETE FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+      channel,
+      hosted.id,
+    ]);
+    await c.query('UPDATE worlds SET revision=revision+1 WHERE id=$1', [hosted.id]);
+    await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [
+      hosted.id,
+      hosted.revision + 1,
+    ]);
+    return true;
+  }
   async create(owner: Creator): Promise<string> {
     return this.transaction(async (c) => {
       await this.lockChannels(c, [owner.id]);
       await this.requireConnected(c, owner.id, owner.mode);
-      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [owner.id])).rowCount)
+      if (!(await this.releaseFinished(c, owner.id)))
         error('CHANNEL_BUSY', 'Park or finish the current world first.');
       const id = randomUUID();
       const state = createWorld(id, CURRENT_RULES_VERSION);
@@ -645,7 +669,14 @@ export class Store {
         error('LIVEWIRE_PENDING', 'Resolve or cancel the mission before preparing custody.');
       if (w.state.phase !== 'ready' || w.state.chapter === 0 || w.frozen_by)
         error('INVALID_PHASE', 'Finish a chapter before preparing a handoff.');
-      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [targetId])).rowCount)
+      if (
+        (
+          await c.query(
+            "SELECT 1 FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=$1 AND w.state->>'phase'<>'ended'",
+            [targetId],
+          )
+        ).rowCount
+      )
         error('TARGET_BUSY', 'The receiving channel already hosts a world.');
       if (
         !(
@@ -766,9 +797,7 @@ export class Store {
         w.custodian_id !== intent.source_id
       )
         error('STALE_VERSION', 'Custody or frozen state changed.');
-      if (
-        (await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [receiver.id])).rowCount
-      )
+      if (!(await this.releaseFinished(c, receiver.id)))
         error('TARGET_BUSY', 'The receiving channel now hosts another world.');
       const proof = (
         await c.query('SELECT * FROM raid_proofs WHERE message_id=$1 FOR UPDATE', [intent.proof_id])
