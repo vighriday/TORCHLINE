@@ -17,7 +17,7 @@ export interface DashboardSnapshot {
   world: WorldPresentation | null;
   worlds?: { id: string; chapter: number; outcome: string | null; parked: boolean }[];
   handoffs?: HandoffView[];
-  recipients?: { id: string; label: string }[];
+  recipients?: { id: string; label: string; busy?: boolean }[];
   integration: {
     credentialsConfigured: boolean;
     botAuthorized: boolean;

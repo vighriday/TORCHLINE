@@ -156,7 +156,11 @@ export function Inheritance({
     data?.mode === 'simulation'
       ? ['alpha', 'beta', 'gamma']
           .filter((name) => `sim-${name}` !== data.me?.id)
-          .map((name) => ({ id: `sim-${name}`, label: `Simulation ${name}` }))
+          .map((name) => ({
+            id: `sim-${name}`,
+            label: `Simulation ${name}`,
+            busy: data.recipients?.find((item) => item.id === `sim-${name}`)?.busy,
+          }))
       : (data?.recipients ?? []);
   const unresolvedMission =
     !!world?.livewire?.stake && ['open', 'paused', 'locked'].includes(world.livewire.stake.status);
@@ -301,6 +305,7 @@ export function Inheritance({
                     {recipients.map((person) => (
                       <option key={person.id} value={person.id}>
                         {person.label}
+                        {person.busy ? ' · hosting an Ark (must park first)' : ''}
                       </option>
                     ))}
                   </select>

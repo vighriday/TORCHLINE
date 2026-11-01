@@ -153,7 +153,9 @@ export async function createApp(
               ? 401
               : error.code === 'NOT_CONFIGURED'
                 ? 503
-                : 409,
+                : error.code === 'RATE_LIMITED'
+                  ? 429
+                  : 409,
         )
         .send({ error: error.code, message: error.message });
     if (error instanceof z.ZodError)
@@ -179,6 +181,36 @@ export async function createApp(
       error: 'DEPENDENCY_FAILURE',
       message: 'The operation did not complete. Refresh and retry.',
     });
+  });
+  // Bounded per-client request budgets keep one client from turning unsigned routes into
+  // unbounded database writes (OAuth states, sessions, commands). Signed Twitch webhooks have
+  // their own persisted admission policy and are exempt. Authenticated traffic is keyed by session,
+  // so creators behind one proxy address do not share a budget.
+  const budgets = new Map<string, { count: number; resetAt: number }>();
+  const spend = (key: string, limit: number) => {
+    const now = Date.now();
+    let entry = budgets.get(key);
+    if (!entry || entry.resetAt <= now) {
+      entry = { count: 0, resetAt: now + 60000 };
+      budgets.set(key, entry);
+    }
+    if (budgets.size > 10000)
+      for (const [name, value] of budgets) if (value.resetAt <= now) budgets.delete(name);
+    return ++entry.count <= limit;
+  };
+  app.addHook('onRequest', async (request, reply) => {
+    const path = request.url.split('?')[0];
+    if (path.startsWith('/integrations/twitch/')) return;
+    const session = request.cookies[SessionCookie];
+    const entry = ['/auth/twitch', '/api/simulator/login', '/api/operator/bot-authorization'];
+    const allowed = entry.includes(path)
+      ? spend(`entry:${request.ip}`, 30)
+      : request.method !== 'POST' ||
+        spend(session ? `s:${digest(session)}` : `ip:${request.ip}`, 300);
+    if (!allowed) {
+      reply.header('Retry-After', '60');
+      denied('RATE_LIMITED', 'Too many requests from this client. Wait a minute and retry.');
+    }
   });
   app.addHook('onRequest', async (request) => {
     if (request.method !== 'POST' || request.url.startsWith('/integrations/twitch/')) return;
@@ -392,7 +424,8 @@ export async function createApp(
             handoffs: await store.handoffs(creator.id),
             recipients: (
               await store.pool.query(
-                'SELECT id,label FROM creators WHERE mode=$1 AND id<>$2 AND receive_opt_in=true AND connected=true ORDER BY label',
+                // A receiver hosting a playable Ark cannot accept; say so before preparation fails.
+                "SELECT c.id,c.label,EXISTS(SELECT 1 FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=c.id AND w.state->>'phase'<>'ended') AS busy FROM creators c WHERE c.mode=$1 AND c.id<>$2 AND c.receive_opt_in=true AND c.connected=true ORDER BY c.label",
                 [config.mode, creator.id],
               )
             ).rows,

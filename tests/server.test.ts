@@ -16,6 +16,39 @@ const baseConfig: AppConfig = {
   eventsubSecret: 'eventsub-test-secret-adequate-length',
 };
 describe('HTTP authorization, projections and Twitch integration contracts', () => {
+  it('bounds unsigned entry routes per client and answers 429 without touching the database', () =>
+    database(async (store) => {
+      const app = await createApp(store, baseConfig, { workers: false });
+      try {
+        const attempt = () =>
+          app.inject({
+            method: 'POST',
+            url: '/api/simulator/login',
+            payload: { channel: 'alpha' },
+            headers: header,
+          });
+        for (let index = 0; index < 30; index++) expect((await attempt()).statusCode).toBe(200);
+        const sessions = (await store.pool.query('SELECT count(*)::int AS n FROM sessions')).rows[0]
+          .n;
+        const limited = await attempt();
+        expect(limited.statusCode).toBe(429);
+        expect(limited.headers['retry-after']).toBe('60');
+        expect(limited.json()).toMatchObject({ error: 'RATE_LIMITED' });
+        // The refused request created no session; signed webhook ingress is never budgeted here.
+        expect((await store.pool.query('SELECT count(*)::int AS n FROM sessions')).rows[0].n).toBe(
+          sessions,
+        );
+        const webhook = await app.inject({
+          method: 'POST',
+          url: '/integrations/twitch/eventsub',
+          payload: {},
+          headers: header,
+        });
+        expect(webhook.statusCode).not.toBe(429);
+      } finally {
+        await app.close();
+      }
+    }));
   it('rotates overlay capabilities atomically when several requests race', () =>
     database(async (store) => {
       const app = await createApp(store, baseConfig, { workers: false });
