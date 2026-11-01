@@ -44,13 +44,14 @@ export async function request<T = unknown>(
   path: string,
   body?: unknown,
   headers?: Record<string, string>,
+  timeoutMs = 15000,
 ): Promise<T> {
   let response: Response;
   try {
     response = await fetch(path, {
       method: body === undefined ? 'GET' : 'POST',
       redirect: 'error',
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Accept: 'application/json',
         ...(typeof location !== 'undefined' && /\.ngrok-free\.(app|dev)$/.test(location.hostname)
