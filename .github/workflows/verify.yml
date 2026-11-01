@@ -39,6 +39,13 @@ jobs:
       - run: pnpm test
       - run: pnpm exec playwright install --with-deps chromium --only-shell
       - run: pnpm test:browser
+      - name: Keep browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-results
+          path: .local/browser-results
+          retention-days: 7
       - run: pnpm audit:balance && pnpm design:fixtures && pnpm readme:proof
       - run: pnpm check:repo
       - run: git diff --exit-code -- docs/reports docs/design/fixtures assets/readme/proof.json assets/readme/flight-log.csv
