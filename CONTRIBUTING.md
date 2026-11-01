@@ -10,7 +10,7 @@ TORCHLINE has an approved architecture and a working functional slice. Begin wit
 4. Record architectural changes in [an ADR](docs/decisions/README.md). Update requirements when behavior changes.
 5. Explain the resulting behavior, validation performed, and remaining limitations in the pull request.
 
-Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `chore:`. No particular branch protection or GitHub automation is configured yet.
+Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `chore:`. Every push and pull request runs `.github/workflows/verify.yml`: type checks, unit and PostgreSQL tests, browser journeys, fixture drift, repository checks and the container smoke test. No branch protection is configured.
 
 ## Before committing
 

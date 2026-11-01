@@ -1,6 +1,6 @@
 # Implementation and verification status
 
-Updated October 30, 2026. **Preview.2** consolidates the final Figma v2 presentation, LIVEWIRE, recovery work and independent QA coverage into the reviewed main baseline. Source promotion is separate from deployment; the existing running live service is not upgraded by this operation. [Consolidation and checks](../reports/2026-10-30-main-consolidation.md) · [Design and cutover](../design/README.md) · [LIVEWIRE report](../reports/2026-10-30-livewire-v0.md) · [critical audit](../reviews/2026-10-29-comprehensive-audit.md).
+Updated November 1, 2026. The `feat/ark-complete-20261101` branch (pending review into main) adds the guided relay rehearsal, attributed inheritance, lineage and the fixes listed below. **Preview.2** consolidates the final Figma v2 presentation, LIVEWIRE, recovery work and independent QA coverage into the reviewed main baseline. Source promotion is separate from deployment; the existing running live service is not upgraded by this operation. [Consolidation and checks](../reports/2026-10-30-main-consolidation.md) · [Design and cutover](../design/README.md) · [LIVEWIRE report](../reports/2026-10-30-livewire-v0.md) · [critical audit](../reviews/2026-10-29-comprehensive-audit.md).
 
 ## Implemented
 
@@ -11,6 +11,10 @@ Updated October 30, 2026. **Preview.2** consolidates the final Figma v2 presenta
 - Prepared/verified/consented custody transfer with live/simulation separation and native-proof requirements.
 - Default-off LIVEWIRE v0: paid mission, finite allowance, normalized ballots, explicit lock/solo target, attested outcome, physical consequence and scoped OBS dock. No other speculative arms.
 - Final ten-screen design wired to these existing behaviors, shared corrected Ark/cockpit, Minecraft illustration, local preferences and read-only full/compact/automatic OBS.
+- Judge Arena relay rehearsal: nine steps through the public endpoints as named practice identities, with labeled simulated raid proof only ([ADR 0035](../decisions/0035-relay-rehearsal-and-attributed-inheritance.md)).
+- Attributed inheritance dossier on the dashboard and OBS (decisions, communities, lost systems, debts linked to their cause); Chronicle lineage graph and season record.
+- Finished voyages release their channel on the next create or accept; presentation, history and `!history` name communities instead of raw IDs; named `!allocate hull 3 oxygen 2`.
+- Stale channel-assignment and mission-ballot protection (migration 011, audit A11), dashboard SSE recovery (ADR 0034), shared channel projections and bounded operational retention (migration 012).
 
 ## Evidence boundaries
 
@@ -28,6 +32,6 @@ Historical genuine Twitch evidence: broadcaster/bot consent, exact enabled chat/
 2. Genuine viewer gameplay command → saved change → visible overlay, with valid open phase and signed provider evidence.
 3. Authentic native raid between separate consenting broadcaster accounts, receiver consent and preserved Ark history. The dedicated bot keeps its role.
 4. Permanent hosting/TLS, durable off-host backups, deployed restart/rollback and measured operational soak.
-5. Audit A07/A11 concurrency/projection debt, wider load/retention work and exhaustive v3 balance. [Requirement matrix](../reviews/2026-10-29-requirement-matrix.md).
+5. Audit A07 state-size and full-history read costs (A11 is fixed on this branch), request throttling and log correlation (A08), wider load/soak work and exhaustive v3 balance. [Requirement matrix](../reviews/2026-10-29-requirement-matrix.md).
 
 No new genuine Twitch or native raid success is claimed by the frontend work. Provider-fixture tests and saved practice remain labeled. Real current reachability must be rechecked; a historical tunnel or screenshot is not a durable deployment.

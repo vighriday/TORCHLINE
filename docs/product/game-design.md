@@ -32,9 +32,9 @@ Current commands are `!scan`, `!route`, `!patch`, `!vote`, `!inspect engine|carg
 | --- | --- | --- |
 | `!inspect engine`, `!inspect cargo`, `!inspect life` | Latest eligible selection per account during investigation | Top selection reveals one authored clue at close; a tie uses content-defined order; one participant is sufficient |
 | `!scan A`, `!route S A C T` | Bounded node discovery and candidate path submission during a challenge | Reveals puzzle constraints and tests an actual solution; first valid solution locks one authored reward |
-| `!allocate hull 3 oxygen 2` | Latest valid preference per account; total preference units at most five | Distributes a creator-declared power budget across repairs using normalized preferences |
+| `!allocate hull 3 oxygen 2` or `!allocate 3 2` | Latest valid preference per account; total preference units one to five | Distributes a creator-declared power budget across repairs using normalized preferences |
 | `!vote 1`, `!vote 2` | Latest eligible vote per Twitch user ID in the current decision | Advisory tally; repeat messages never add voting weight |
-| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or a read-only history link; never one reply per message |
+| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or the last two captain decisions with their communities; never one reply per message |
 | Creator commit | Authenticated custodian; valid phase, state version and affordable option | Applies the selected option, allocation, and future obligations once |
 
 Viewer eligibility means an identified account sending an allowed command in the active host's chat during the current phase window. It does not prove physical viewership or one human per account. Use ordinary viewer privileges without subscriber/follower weighting. Exclude the application's bot. Accept the broadcaster's account at normal weight if it participates.

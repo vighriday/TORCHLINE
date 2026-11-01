@@ -66,7 +66,7 @@ Keep rules/content immutable once a world starts. New balancing creates a new ve
 | `/auth/twitch`, `/auth/twitch/callback`, `/auth/logout` | One-time state, server token exchange, validated identity, session lifecycle |
 | `POST /integrations/twitch/eventsub` | Signed raw-body verification; challenge/revocation/notification handling; no browser session requirement |
 | `GET /api/me`, `/api/worlds`, `/api/worlds/:id` | Creator session; authorized private views |
-| `POST /api/worlds` | Creator session; idempotent world creation |
+| `POST /api/worlds` | Creator session; one world per free channel (a finished voyage is released first); a repeat while a world is active fails closed with `CHANNEL_BUSY` |
 | `POST /api/worlds/:id/commands` | Session, CSRF/origin, custody, mode, expected version, idempotency key |
 | `POST /api/handoffs`, `/api/handoffs/:id/accept`, `/decline`, `/cancel` | Source/recipient identity by action; state-machine and transaction checks |
 | `POST /api/creator/presence`, `/receive-opt-in` | Creator-controlled readiness, separate from actual raid proof |
@@ -85,9 +85,9 @@ Persist event ID, world ID, sequence, schema version, rules version, mode, accep
 
 Presentation feeds include channel sequence, world ID/version, phase/window ID, server time, deadline, resources, sanitized choices, public clues/puzzle board, aggregate participation and current host. They exclude tokens, raw chat, individual ballots, internal proof secrets and private operational details. Client animations use event/revision IDs to avoid playing twice after reconnection.
 
-## Data minimization and retention proposal
+## Data minimization and retention
 
-These are product defaults to implement and verify against applicable Twitch terms; they are not a claim of legal compliance.
+These are product defaults to verify against applicable Twitch terms; they are not a claim of legal compliance. Implemented today (`012_retention.sql`): terminal inbox and chat-dedup rows are pruned after 14 days, delivered outbox rows after 7, expired sessions after 24 hours, and lifetime diagnostics are folded into totals first. The tighter windows below are the target, not current behavior.
 
 - Raw chat bodies are parsed transiently and not retained. A verified notification's minimal normalized content is stored before acknowledgement; filter unrelated chat to a durable ignored/delivery marker without archiving its text.
 - Keep failed minimal inbox payloads at most seven days for diagnosis; processed payloads at most 24 hours. Keep delivery-ID tombstones 24 hours, beyond the initial ten-minute freshness window.

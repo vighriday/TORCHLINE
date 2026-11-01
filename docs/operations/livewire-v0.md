@@ -1,6 +1,6 @@
 # Run and verify LIVEWIRE v0
 
-Use the current `feat/frontend-replacement` candidate; LIVEWIRE is inherited from the separately verified `feat/livewire-v0` source. The original `feat/gameplay-foundation` worktree and preview remain separate. Do not replace the live database with test fixtures.
+LIVEWIRE ships in `main` since v0.1.0-preview.2. Do not replace the live database with test fixtures.
 
 ## Local practice
 
@@ -24,7 +24,7 @@ All views share the same scoped read grant. Generating a new grant rotates them 
 
 Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed.
 
-After this branch passes review, apply migrations 009–010 to the intended candidate database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart that candidate. Do not claim that the current public baseline has this feature enabled.
+Apply all migrations (currently through 013) to the intended database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart. Do not claim a deployment has the feature enabled until its configuration says so.
 
 1. At a ready chapter boundary, the broadcaster opens a clearly described mission before the gaming attempt.
 2. As the broadcaster or another genuine participant, send one displayed legal `!stake` command in that exact channel. Observe count/choice in the dashboard and actual OBS source. Do not send as the bot.

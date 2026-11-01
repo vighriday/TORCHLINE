@@ -1,8 +1,8 @@
 # Deployment and operational runbook
 
-Current hardening source requires migration **011_channel_assignment_revision.sql** before startup. It adds durable channel-assignment/authority epochs for stale-response protection; historical Ark state/events are unchanged. Run the existing migration command before switching the application. A pre-011 application can still read the additive schema; keep an extension-capable binary for LIVEWIRE histories.
+Current source requires migration **013_custody_arrival.sql** before startup and readiness. Migrations 011–013 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention and custody arrival attribution. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
 
-Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster are running/verified as described in the README; no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
+Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
 
 ## Recommended topology
 
@@ -15,7 +15,7 @@ Status: cloud deployment remains proposed. The local app and isolated PostgreSQL
 3. Create and drill an encrypted pre-release backup. Run **one** migration job from this image: `node scripts/migrate.ts` with the target `DATABASE_URL`. Do not run migrations concurrently in every replica.
 4. Start **one replica** with the same configuration. No local volume holds authoritative state. Give graceful shutdown at least 15 seconds and disable proxy buffering for SSE. `/health/ready` must pass before traffic. Container smoke exercises a read-only filesystem, dropped Linux capabilities and no-new-privileges; configure equivalent host restrictions where supported.
 5. Register the exact new OAuth callback in the Twitch developer console; verify callback delivery/subscriptions, actual chat/replies, private OBS source/reconnect and consented native raid using the live checklist. A healthy container cannot prove these external integrations.
-6. Keep the prior compatible image digest for rollback. Additive migration 008 is retained during code rollback; do not reverse data or reset delivery deduplication. After recovery explicitly resume paused episodes and inspect uncertain outbound sends.
+6. Keep the prior compatible image digest for rollback. Additive migrations (008 onward) are retained during code rollback; do not reverse data or reset delivery deduplication. After recovery explicitly resume paused episodes and inspect uncertain outbound sends.
 
 The image contains a migration CLI but no pg_dump/restore utilities or backup key. Run backup operations from a trusted operator checkout/tooling environment as documented in [backup and restore](backup-and-restore.md). No public restore/admin endpoint is added.
 
@@ -48,7 +48,7 @@ Database work is now bounded at PostgreSQL: `DB_STATEMENT_TIMEOUT_MS=10000`, `DB
 
 `/health/live` indicates that the process is responding; `/health/ready` checks database access and migration compatibility. Expose Twitch health separately: an expired grant can affect one creator without marking every world unavailable.
 
-Structured logs include request/command ID, world ID, channel ID, mode, version, subscription/delivery ID, job attempt and error classification. Redact authorization headers, OAuth codes/tokens, cookies, overlay capabilities, encryption keys and raw chat text. Avoid logging full URLs with fragments/query secrets or raw signed request bodies.
+Fastify request logs carry a request ID, method, path and status. World, channel, delivery and job identifiers are not yet attached to log lines; add them before relying on logs for incident tracing. Redact authorization headers, OAuth codes/tokens, cookies, overlay capabilities, encryption keys and raw chat text. Avoid logging full URLs with fragments/query secrets or raw signed request bodies.
 
 Monitor ingress acknowledgement latency, inbox age/failures, outbox age, accepted/rejected commands by reason, phase close lag, handoff outcome/reason, database lock waits/pool utilization, event-loop lag, active feeds, dropped slow clients and token/subscription health. Establish alerts from measured baselines; do not invent production SLO achievement.
 

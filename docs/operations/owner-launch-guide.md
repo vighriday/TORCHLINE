@@ -126,7 +126,7 @@ Webhook URL: `https://YOUR_ORIGIN/integrations/twitch/eventsub`. It accepts auth
 1. In **Mission Control**, use the existing live Ark. At chapter 1 **awaiting-commit**, choose your preferred consequence, then start the next chapter at the ready boundary. Create/start chapter 1 only on a fresh account with no Ark. Follow the [phase-specific live steps](controlled-account-live-test.md#2-prove-real-gameplay-without-another-account).
 2. Open that broadcaster's **actual Twitch chat**, using the ordinary Twitch site or mobile app. Send `!scan A` from a participant account. Look for the discovered clue in TORCHLINE and an increase in **chat actions applied** under Broadcast.
 3. Share scans, discover the constraints, and submit a route using `!route` followed by space-separated nodes, such as the path the crew has solved. A successful solution must change canonical resources and repair shields; reloading must preserve it.
-4. Choose **Open final decision**, then send `!vote 1`. Its advisory tally should change. The captain reviews the forecast and commits; chat votes cannot directly commit a sacrifice.
+4. Choose **Close challenge**, then send `!vote 1`. Its advisory tally should change. The captain reviews the forecast and commits; chat votes cannot directly commit a sacrifice.
 5. Send `!status` or `!history`. Confirm the dedicated bot visibly replies in Twitch chat and that Broadcast records a sent outcome. Repeated requests are coalesced for ten seconds; wait before retrying.
 6. In chapter 3, use `!scan A`, then `!patch A`, and cooperate on the remaining prerequisites. Repairs should change life support, oxygen and future consequences. The interface explains the current reward.
 
@@ -164,7 +164,7 @@ Arrange **two consenting live broadcasters**. This external dependency is not ye
 
 No hosting has been purchased or deployed. Review the provider plan, region and backup policy before creating billable resources. The approved topology is **one always-on Node web service and one managed PostgreSQL 17 database** in the same region. A sleeping web service is unsuitable for timely callbacks and live play.
 
-1. In Render, connect the private GitHub repository with the account that has access. Select the reviewed commit/branch; current implementation is on `feat/gameplay-foundation`, not the older planning-only `main`. Set auto-deploy **Off** during initial setup so incremental pushes do not publish unreviewed changes. Later use **After CI Checks Pass** when approved. [Render deployment controls](https://render.com/docs/deploys)
+1. In Render, connect the private GitHub repository with the account that has access. Select the reviewed commit or release tag you intend to present (the consolidated `main`; `feat/gameplay-foundation` is an older branch without the final interface or LIVEWIRE). Set auto-deploy **Off** during initial setup so incremental pushes do not publish unreviewed changes. Later use **After CI Checks Pass** when approved. [Render deployment controls](https://render.com/docs/deploys)
 2. Create managed PostgreSQL 17, note its private connection URL, and configure backups/retention. Start a fresh live database or arrange a controlled backup/restore of the existing live database; do not casually copy data or replace the encryption key.
 3. Create a **Node web service** at the repository root, one replica, no persistent local filesystem dependency. Obtain its assigned HTTPS origin. Keep the repository private; a public Git URL is unnecessary. [Render Node service setup](https://render.com/docs/deploy-node-express-app)
 4. Pin Node to `.node-version` (24.22.1) and pnpm to packageManager (12.4.2). Proposed build command: `npx --yes pnpm@12.4.2 install --frozen-lockfile && npx --yes pnpm@12.4.2 build`. Proposed pre-deploy command: `npx --yes pnpm@12.4.2 db:migrate`. Start command: `node apps/server/src/main.ts`. These cloud commands require a first deployment test; local build/migrations are already exercised. [Node version selection](https://render.com/docs/node-version)
@@ -183,11 +183,11 @@ During investigation viewers use `!inspect engine`, `!inspect cargo` or `!inspec
 
 Pause, park, authorization disconnect and verified offline delivery stop the current episode; returning online never resumes automatically. After a server restart, check the recovery explanation and click Resume. Pre-cutoff accepted chat drains before closure. Messages first received after the deadline are rejected. Broadcast diagnostics show pending/retrying/quarantined input; retry is available only for quarantined chat still in your current window. It never resends uncertain bot replies or reuses raid evidence.
 
-Actual installed OBS verification was attempted on October 27, but computer-use initialization failed before any app action. Chromium overlay coverage does not replace your OBS browser-source, cookie refresh and frame-time check in stage 9. Restoring the ngrok credential and a real two-broadcaster raid remain external dependencies; no new account registration is needed for the already validated grants.
+Actual installed OBS verification was attempted on October 27, but computer-use initialization failed before any app action. Chromium overlay coverage does not replace your OBS browser-source, cookie refresh and frame-time check in stage 9. Restoring public HTTPS (the SSH tunnel or permanent hosting) and a real two-broadcaster raid remain external dependencies; no new account registration is needed for the already validated grants.
 
 | Symptom | Check next |
 | --- | --- |
-| ngrok offline / `ERR_NGROK_4018` | Saved ngrok account credential and `--config .local/ngrok.yml`; local port 3001 must also be running |
+| Tunnel offline / origin unreachable | Run `pnpm live:check`, then `pnpm live:up` to restart the SSH tunnel; local port 3001 must also be running. The native ngrok agent is quarantined and not used |
 | OAuth redirect mismatch | Exact redirect in Twitch console and `.env.live`; restart after editing |
 | Wrong Twitch account shown | Stop that consent flow; use the intended browser account. Do not convert your main creator into the bot. |
 | Bot grant missing | Separate operator-protected bot consent; creator login alone does not authorize it |
