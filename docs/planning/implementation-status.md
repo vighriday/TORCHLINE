@@ -27,10 +27,16 @@ Seven physical fixtures are engine-generated. The balance enumeration covers 2,3
 
 Historical genuine Twitch evidence: broadcaster/bot consent, exact enabled chat/online/offline subscriptions, signed callback challenges and four incoming query chats. None of those four deliveries proved a persisted gameplay change. Two outbound replies were provider-accepted but absent to another viewer. Manual bot messages were also absent to other viewers after completed account/channel checks; account restriction remains a hypothesis, not a proven root cause. Replies are independently paused, with no gameplay dependency. [Investigation](../reports/2026-10-29-integration-diagnosis.md).
 
+Later genuine evidence comes from the live database, read back on 1 November without changes:
+- On 30 October, between 23:05 and 23:08 IST, three viewer chat messages arrived as signed `channel.chat.message` EventSub notifications.
+- They were saved, one-to-one, as `scan` gameplay events on a live Ark. Each event has actor role `viewer` and a command ID derived from its EventSub message.
+
+This establishes genuine viewer command → saved change. An overlay update caused by such a command has not been recorded.
+
 ## Still open
 
 1. Owner final-design acceptance and sustained native OBS/mobile broadcast performance on this exact build. Native rendering/refresh/rotation over loopback are verified.
-2. Genuine viewer gameplay command → saved change → visible overlay, with valid open phase and signed provider evidence.
+2. A visible overlay update recorded from a genuine viewer gameplay command. The command → saved change step has signed provider evidence (above).
 3. Authentic native raid between separate consenting broadcaster accounts, receiver consent and preserved Ark history. The dedicated bot keeps its role.
 4. Permanent hosting/TLS, durable off-host backups, deployed restart/rollback and measured operational soak.
 5. Audit A07 state-size and full-history read costs (A11 is fixed on this branch), request throttling and log correlation (A08), wider load/soak work and exhaustive v3 balance. [Requirement matrix](../reviews/2026-10-29-requirement-matrix.md).
