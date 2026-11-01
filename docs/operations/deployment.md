@@ -1,6 +1,6 @@
 # Deployment and operational runbook
 
-Current source requires migration **013_custody_arrival.sql** before startup and readiness. Migrations 011–013 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention and custody arrival attribution. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
+Current source requires migration **014_world_shares.sql** before startup and readiness. Migrations 011–014 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention, custody arrival attribution and public Chronicle link hashes. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
 
 Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
 

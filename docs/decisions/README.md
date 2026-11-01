@@ -39,6 +39,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0033](0033-figma-v2-presentation.md) | Preserve the final ten-screen Figma design, corrected shared Ark and Minecraft scene with real state | Presentation/rendering, all C1–C13 |
 | [0034](0034-dashboard-feed-recovery.md) | Recover authenticated dashboard SSE feeds after transient failures without accepting stale authority | Recovery/presentation, C1–C13 |
 | [0035](0035-relay-rehearsal-and-attributed-inheritance.md) | Guided practice relay through public endpoints, attributed inheritance dossier, lineage view and finished-voyage release | Custody/presentation/recovery, all C1–C13 |
+| [0036](0036-public-chronicle-links.md) | Revocable, hash-stored public Chronicle links so communities can follow an Ark across channels | Access/privacy/presentation, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

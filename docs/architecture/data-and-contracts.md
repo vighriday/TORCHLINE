@@ -67,6 +67,8 @@ Keep rules/content immutable once a world starts. New balancing creates a new ve
 | `POST /integrations/twitch/eventsub` | Signed raw-body verification; challenge/revocation/notification handling; no browser session requirement |
 | `GET /api/me`, `/api/worlds`, `/api/worlds/:id` | Creator session; authorized private views |
 | `POST /api/worlds` | Creator session; one world per free channel (a finished voyage is released first); a repeat while a world is active fails closed with `CHANNEL_BUSY` |
+| `POST /api/worlds/:id/share` | Current custodian; publishes or rotates that creator's read-only public Chronicle link (hash stored) |
+| `POST /api/chronicle` | Public; token in body; read-only presentation and paginated history for a shared world, 404 when unknown or withdrawn |
 | `POST /api/worlds/:id/commands` | Session, CSRF/origin, custody, mode, expected version, idempotency key |
 | `POST /api/handoffs`, `/api/handoffs/:id/accept`, `/decline`, `/cancel` | Source/recipient identity by action; state-machine and transaction checks |
 | `POST /api/creator/presence`, `/receive-opt-in` | Creator-controlled readiness, separate from actual raid proof |

@@ -31,7 +31,7 @@ When a captain hands the Ark on, the receiving stream sees an **inheritance doss
 
 <a href="assets/readme/lineage.png"><img src="assets/readme/lineage.png" width="1440" alt="The Chronicle lineage: three practice communities as rows and five chapters as columns. Arrows link alpha's navigation sacrifice to beta's Blind Jump, and beta's and gamma's repairs to later chapters; dotted markers show each custody change."></a>
 
-Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided.
+Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided. A captain can publish a revocable, read-only **public Chronicle link** so their community can keep following the Ark after it leaves their channel.
 
 <a href="assets/readme/season-record.png"><img src="assets/readme/season-record.png" width="1440" alt="Season record: A New Home. 216 passengers landed. Simulation alpha sacrificed navigation, Simulation beta rebuilt it, Simulation gamma restored life support, salvaged and landed."></a>
 

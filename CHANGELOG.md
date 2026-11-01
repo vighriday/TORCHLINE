@@ -5,13 +5,15 @@
 - Add the Judge Arena **Relay Rehearsal**: nine explicit steps move one Ark between two practice communities through the same public endpoints the dashboard uses. Alpha's crew solves the shield relay, the captain sacrifices navigation, a receiver opts in, alpha prepares the relay, a labeled practice raid proof arrives, the receiver accepts and reads the dossier, and chapter two applies alpha's debt. Autoplay stops before the receiver's first command. Practice offers last 15 minutes; live offers are unchanged. Regression: `tests/browser/relay-rehearsal.spec.ts`.
 - Hand the receiver an attributed **inheritance dossier**: every captain commitment with its community, lost systems, and each pending debt linked to the decision that created it. Mission Control and the read-only OBS view both show it. Automatic OBS layout now switches to the full view while an arrival is pending. Regression: `tests/custody-arrival.test.ts`.
 - Add the Chronicle **lineage graph** (communities × chapters, saved cause links, custody markers) and a **season record** of each community's commitments and the voyage outcome.
+- Publish revocable, read-only **public Chronicle links** (`/chronicle/#token`) so the community that handed an Ark on, returning viewers and judges can follow it across channels. Only a hash is stored (migration 014, now required). Regression: `tests/chronicle-share.test.ts`. [ADR 0036](docs/decisions/0036-public-chronicle-links.md).
+- Budget unsigned entry routes per client (429 with `Retry-After`) and flag receivers that are hosting a playable Ark.
 - Free the channel held by a finished voyage when the captain creates a world or accepts a handoff. Previously "Create new world" failed with CHANNEL_BUSY after any ending. Regression: `tests/storage.test.ts`.
 - Name communities in presentation, history and `!history` replies instead of raw creator IDs; stored events keep the IDs replay needs.
 - Accept `!allocate hull 3 oxygen 2` as well as `!allocate 3 2`, matching what chat is taught.
 - Fix UI defects: the flight recorder, "last saved consequence", the signal strip and the relay screen read the oldest event as the latest; supplies rendered as a percentage; the allocation form capped preferences at the power budget; the chat hint suggested an invalid `!allocate 0 0`; relay offers showed raw IDs and gave no reason when disabled; an ended voyage had no way forward.
 - Raise about 130 HUD labels from 6–9px to legible sizes and make every one follow the HUD text-scale setting.
 - Report `genuineRaidVerified` from committed live custody instead of a hard-coded false.
-- Reject stale channel assignments and stale mission ballots (migration 011, `snapshot-order.ts`), recover dashboard SSE feeds after transient failures (ADR 0034), and keep private paths outside the SPA fallback. Startup requires migration `013_custody_arrival.sql`.
+- Reject stale channel assignments and stale mission ballots (migration 011, `snapshot-order.ts`), recover dashboard SSE feeds after transient failures (ADR 0034), and keep private paths outside the SPA fallback. Startup requires migration `014_world_shares.sql`.
 
 ## Release hardening (unreleased, included above)
 
