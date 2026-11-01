@@ -1,6 +1,9 @@
 import type { WorldPresentation, TwitchIntegrationStatus } from '@torchline/contracts';
 export interface HandoffView {
   id: string;
+  world_id?: string;
+  source_label?: string | null;
+  target_label?: string | null;
   source_id: string;
   target_id: string;
   status: string;
@@ -70,7 +73,7 @@ export async function request<T = unknown>(
       response.headers.get('content-type') ?? '',
     )
   )
-    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+    throw new ConnectionError('TORCHLINE could not reach its server. Please retry the connection.');
   let result;
   try {
     result = await response.json();
@@ -78,7 +81,7 @@ export async function request<T = unknown>(
     throw new ConnectionError('The connection was interrupted. Please retry the connection.');
   }
   if (result === null || typeof result !== 'object')
-    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+    throw new ConnectionError('TORCHLINE could not reach its server. Please retry the connection.');
   if (!response.ok)
     throw new HttpError(
       typeof result.message === 'string' ? result.message : 'The request did not complete.',

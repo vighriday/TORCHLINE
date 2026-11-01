@@ -14,11 +14,12 @@ import {
 } from './platform.tsx';
 import type { Mode, Sector, World } from './types.ts';
 import type { WorldPresentation } from '@torchline/contracts';
-import { systemLabels } from './condition.ts';
 import { SceneBoundary } from './SceneBoundary.tsx';
+import { ArrivalDossier } from './Dossier.tsx';
 import { SoundEffects } from './SoundEffects.tsx';
 import './index.css';
 import './integration.css';
+import './experience.css';
 const Ark3D = lazy(() => import('./Ark3D.tsx').then((module) => ({ default: module.Ark3D })));
 const sectorData = {
   bridge: { name: 'Navigation Bridge', code: 'NAV-01' },
@@ -254,7 +255,7 @@ export function MissionControl({
   setSelected: (s: Sector) => void;
   world: World;
 }) {
-  const { canonical: ship } = useGame();
+  const { canonical: ship, readOnly } = useGame();
   const [view, setView] = useState<'exterior' | 'cockpit'>('exterior');
   const dead = navigation === 0;
   if (!ship) return null;
@@ -275,24 +276,12 @@ export function MissionControl({
       <section className="left-rail">
         <div className="chapter-block">
           <span className="eyebrow">
-            CHAPTER {ship.chapter} / EVENT {ship.gameVersion}
+            {ship.chapter === 0 ? 'PRE-LAUNCH' : `CHAPTER ${ship.chapter}`} / EVENT{' '}
+            {ship.gameVersion}
           </span>
           <strong>{ship.title}</strong>
           <p>{ship.recap}</p>
-          {ship.arrival && (
-            <aside className="arrival-brief" data-arrival-from={ship.arrival.from.id}>
-              <span className="eyebrow">
-                INHERITED ARK · {ship.arrival.from.label.toUpperCase()}
-              </span>
-              <p>{ship.arrival.briefing}</p>
-              {ship.arrival.lostSystems.length > 0 && (
-                <small>
-                  LOST ON ARRIVAL ·{' '}
-                  {ship.arrival.lostSystems.map((id) => systemLabels[id]).join(' · ')}
-                </small>
-              )}
-            </aside>
-          )}
+          {!readOnly && <ArrivalDossier world={ship} />}
           <PhaseClock world={ship} />
         </div>
         <div className="vital-stack">
@@ -315,7 +304,8 @@ export function MissionControl({
           <ResourceBar
             label="SUPPLIES"
             value={world.supplies}
-            tone={world.supplies < 25 ? 'critical' : 'warning'}
+            unit="crates"
+            tone={world.supplies < 30 ? 'critical' : 'warning'}
           />
         </div>
         <div className="passenger-readout">
@@ -329,7 +319,7 @@ export function MissionControl({
         <div className="captain-note">
           <span>FLIGHT RECORDER / {ship.gameVersion}</span>
           <p>
-            {ship.events[0]?.summary ??
+            {ship.events.at(-1)?.summary ??
               'No recorded consequence yet. Every commitment will stay with this Ark.'}
           </p>
         </div>
@@ -394,7 +384,7 @@ export function MissionControl({
               STATE <b>{ship.worldVersion}</b>
             </span>
             <span>
-              PHASE <b>{ship.phase}</b>
+              PHASE <b>{ship.phase.replaceAll('-', ' ').toUpperCase()}</b>
             </span>
           </div>
           <div className="view-switch">
@@ -413,6 +403,7 @@ export function MissionControl({
           </div>
         </div>
         <ArkShip selected={selected} navigation={navigation} onSelect={setSelected} view={view} />
+        {readOnly && <ArrivalDossier world={ship} variant="broadcast" />}
         <div className="spatial-reticle" aria-hidden="true">
           <span />
           <span />
@@ -454,7 +445,9 @@ export function MissionControl({
           ))}
         </div>
         <div className="signal-strip">
-          <span className="signal-label">{ship.events[0]?.summary ?? ship.phase}</span>
+          <span className="signal-label">
+            {ship.events.at(-1)?.summary ?? 'Awaiting the first saved command'}
+          </span>
           <div className="signal-wave">
             {Array.from({ length: 48 }).map((_, i) => (
               <i key={i} style={{ '--h': `${8 + ((i * 17) % 28)}px` } as React.CSSProperties} />

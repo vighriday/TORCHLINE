@@ -619,7 +619,15 @@ export async function createApp(
       .object({ worldId: NodeText, targetId: NodeText, expectedVersion: z.number().int() })
       .parse(request.body);
     if (config.mode === 'live') await lifecycle.readyForTransfer(creator.id, body.targetId);
-    return store.prepare(body.worldId, creator, body.targetId, body.expectedVersion);
+    // A live offer covers the minutes around a real raid. Practice relays are read and explained
+    // step by step, so they get a longer window; their proof still cannot move a live world.
+    return store.prepare(
+      body.worldId,
+      creator,
+      body.targetId,
+      body.expectedVersion,
+      config.mode === 'simulation' ? 900000 : undefined,
+    );
   });
   app.post('/api/handoffs/:id/:action', async (request) => {
     const creator = await currentCreator(request);

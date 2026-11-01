@@ -59,6 +59,9 @@ export interface Handoff {
   proof_id: string | null;
   prepared_at: Date;
   expires_at: Date;
+  /** Display names, present when read through `handoffs()`. */
+  source_label?: string | null;
+  target_label?: string | null;
 }
 export interface RaidProof {
   messageId: string;
@@ -648,7 +651,7 @@ export class Store {
   async handoffs(channel: string): Promise<Handoff[]> {
     return (
       await this.pool.query(
-        'SELECT * FROM handoffs WHERE source_id=$1 OR target_id=$1 ORDER BY prepared_at DESC LIMIT 20',
+        'SELECT h.*,s.label AS source_label,t.label AS target_label FROM handoffs h LEFT JOIN creators s ON s.id=h.source_id LEFT JOIN creators t ON t.id=h.target_id WHERE h.source_id=$1 OR h.target_id=$1 ORDER BY h.prepared_at DESC LIMIT 20',
         [channel],
       )
     ).rows;
