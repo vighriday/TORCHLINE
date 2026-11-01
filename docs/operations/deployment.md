@@ -32,6 +32,7 @@ A live-mode deployment refuses practice identities and simulated raid evidence b
 - Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true`.
 - Give it its **own** PostgreSQL database and independent secrets. Never share the live database or keys.
 - Give it its own HTTPS origin, for example a `demo` subdomain, and set `PUBLIC_BASE_URL` to it. No Twitch credentials are needed.
+- Behind the provider's load balancer, set `TRUST_PROXY_HOPS=1` (on the live service too). Otherwise every visitor shares the proxy's address and one per-client request budget, and several judges running the rehearsal at once could be throttled.
 
 Point judges at **Command OS → Judge Arena → Autoplay to the handoff**. The live service keeps genuine Twitch worlds. Public Chronicle links from the live service can show a real world's lineage without granting any control.
 

@@ -93,6 +93,13 @@ export function runtimeConfig(env: NodeJS.ProcessEnv) {
     twitchRedirectUri: env.TWITCH_REDIRECT_URI,
     eventsubSecret: env.EVENTSUB_SECRET,
     botUserId: env.TWITCH_BOT_USER_ID,
+    trustProxyHops: (() => {
+      if (env.TRUST_PROXY_HOPS === undefined) return 0;
+      const hops = Number(env.TRUST_PROXY_HOPS);
+      if (!Number.isInteger(hops) || hops < 0 || hops > 5)
+        throw new Error('TRUST_PROXY_HOPS must be an integer from 0 to 5.');
+      return hops;
+    })(),
     livewireEnabled: (() => {
       if (env.LIVEWIRE_ENABLED === undefined) return false;
       if (!['true', 'false'].includes(env.LIVEWIRE_ENABLED))

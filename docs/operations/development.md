@@ -31,6 +31,7 @@ For free play, use **Launch the Ark** and Mission Control. Practice chat (in Mis
 | `DATABASE_URL` | PostgreSQL URL; remote production requires `sslmode=verify-full` | Yes |
 | `PUBLIC_BASE_URL` | Exact external origin used for cookies, OAuth and overlay links | No |
 | `PORT`, `HOST` | Listener (defaults 3000 simulation / 3001 live, loopback) | No |
+| `TRUST_PROXY_HOPS` | Reverse proxies in front of the process (0–5, default 0) so per-client request budgets see real client addresses | No |
 | `SESSION_SECRET` | 64 hex characters; keys session and participant hashing | Yes |
 | `TOKEN_ENCRYPTION_KEY` | 64 hex characters; encrypts stored OAuth grants | Yes |
 | `BOT_SETUP_SECRET` | Operator-only bot authorization secret (required in production) | Yes |

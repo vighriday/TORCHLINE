@@ -72,6 +72,8 @@ export interface AppConfig {
   livewireEnabled?: boolean;
   inputPolicy?: InputPolicy;
   feedLimits?: { perChannel: number; total: number };
+  /** Reverse proxies between the client and this process; 0 trusts no forwarded address. */
+  trustProxyHops?: number;
 }
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 const escapeHtml = (value: string) =>
@@ -100,6 +102,12 @@ export async function createApp(
     config.mode === 'simulation' ? 'torchline_sim_session' : 'torchline_session';
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
+    // Behind a hosting proxy every client otherwise shares the proxy's address, collapsing
+    // per-client budgets into one. Trusting an exact hop count reads the address the nearest
+    // proxy recorded instead of a client-supplied header.
+    trustProxy: config.trustProxyHops
+      ? (_address: string, hop: number) => hop < config.trustProxyHops!
+      : false,
     bodyLimit: 65536,
     requestTimeout: 15000,
     connectionTimeout: 20000,
@@ -207,8 +215,13 @@ export async function createApp(
     if (path.startsWith('/integrations/twitch/')) return;
     const session = request.cookies[SessionCookie];
     const entry = ['/auth/twitch', '/api/simulator/login', '/api/operator/bot-authorization'];
+    // A guided practice relay signs in several practice captains per run, so practice login has a
+    // larger allowance than OAuth starts.
     const allowed = entry.includes(path)
-      ? spend(`entry:${request.ip}`, 30)
+      ? spend(
+          `entry:${path}:${request.ip}`,
+          path === '/api/simulator/login' && config.mode === 'simulation' ? 120 : 30,
+        )
       : request.method !== 'POST' ||
         spend(session ? `s:${digest(session)}` : `ip:${request.ip}`, 300);
     if (!allowed) {

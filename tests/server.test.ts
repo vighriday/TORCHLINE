@@ -16,6 +16,37 @@ const baseConfig: AppConfig = {
   eventsubSecret: 'eventsub-test-secret-adequate-length',
 };
 describe('HTTP authorization, projections and Twitch integration contracts', () => {
+  it('budgets each client behind a trusted proxy instead of the proxy address', () =>
+    database(async (store) => {
+      const start = (app: Awaited<ReturnType<typeof createApp>>, client: string) =>
+        app.inject({
+          url: '/auth/twitch',
+          remoteAddress: '10.0.0.5',
+          headers: { 'x-forwarded-for': client },
+        });
+      const proxied = await createApp(
+        store,
+        { ...baseConfig, trustProxyHops: 1 },
+        { workers: false },
+      );
+      try {
+        for (let index = 0; index < 30; index++)
+          expect((await start(proxied, '203.0.113.1')).statusCode).not.toBe(429);
+        expect((await start(proxied, '203.0.113.1')).statusCode).toBe(429);
+        // Another client behind the same proxy keeps its own budget.
+        expect((await start(proxied, '203.0.113.2')).statusCode).not.toBe(429);
+      } finally {
+        await proxied.close();
+      }
+      // Without a configured hop count, forwarded headers are ignored and cannot mint budgets.
+      const direct = await createApp(store, baseConfig, { workers: false });
+      try {
+        for (let index = 0; index < 30; index++) await start(direct, `198.51.100.${index}`);
+        expect((await start(direct, '198.51.100.250')).statusCode).toBe(429);
+      } finally {
+        await direct.close();
+      }
+    }));
   it('bounds unsigned entry routes per client and answers 429 without touching the database', () =>
     database(async (store) => {
       const app = await createApp(store, baseConfig, { workers: false });
@@ -27,7 +58,8 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
             payload: { channel: 'alpha' },
             headers: header,
           });
-        for (let index = 0; index < 30; index++) expect((await attempt()).statusCode).toBe(200);
+        // Practice login allows a guided relay's several sign-ins; OAuth starts stay at 30.
+        for (let index = 0; index < 120; index++) expect((await attempt()).statusCode).toBe(200);
         const sessions = (await store.pool.query('SELECT count(*)::int AS n FROM sessions')).rows[0]
           .n;
         const limited = await attempt();
@@ -38,6 +70,10 @@ describe('HTTP authorization, projections and Twitch integration contracts', () 
         expect((await store.pool.query('SELECT count(*)::int AS n FROM sessions')).rows[0].n).toBe(
           sessions,
         );
+        // Budgets are per route: OAuth starts keep their own, smaller allowance.
+        for (let index = 0; index < 30; index++)
+          expect((await app.inject({ url: '/auth/twitch' })).statusCode).not.toBe(429);
+        expect((await app.inject({ url: '/auth/twitch' })).statusCode).toBe(429);
         const webhook = await app.inject({
           method: 'POST',
           url: '/integrations/twitch/eventsub',

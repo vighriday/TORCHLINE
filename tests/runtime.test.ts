@@ -12,6 +12,8 @@ const env = {
 };
 it('rejects insecure or ambiguous release configuration without echoing credentials', () => {
   expect(runtimeConfig(env).host).toBe('127.0.0.1');
+  expect(runtimeConfig(env).config.trustProxyHops).toBe(0);
+  expect(runtimeConfig({ ...env, TRUST_PROXY_HOPS: '1' }).config.trustProxyHops).toBe(1);
   const production = { ...env, NODE_ENV: 'production', PUBLIC_BASE_URL: 'https://game.example' };
   expect(runtimeConfig(production).config.mode).toBe('simulation');
   for (const change of [
@@ -28,6 +30,9 @@ it('rejects insecure or ambiguous release configuration without echoing credenti
     { DB_STATEMENT_TIMEOUT_MS: '0' },
     { DB_LOCK_TIMEOUT_MS: 'NaN' },
     { DB_IDLE_TRANSACTION_TIMEOUT_MS: '60001' },
+    { TRUST_PROXY_HOPS: '-1' },
+    { TRUST_PROXY_HOPS: '6' },
+    { TRUST_PROXY_HOPS: 'all' },
     { DATABASE_URL: 'invalid-private-sentinel' },
     { DATABASE_URL: 'postgresql://user:private-sentinel@remote.example/db?sslmode=require' },
     { WORLD_MODE: 'live' },
