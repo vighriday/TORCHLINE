@@ -2,9 +2,7 @@ import { FrameBudget } from './SceneRuntime.tsx';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-
-export type GameContext = 'voxel' | 'rocket' | 'souls';
-export type FeedPhase = 'idle' | 'jump' | 'hold' | 'land' | 'fall';
+import type { FeedPhase } from './feedKit.tsx';
 
 const X_MIN = -30;
 const X_MAX = 36;
@@ -398,7 +396,7 @@ function PlayerCamera({ phase }: { phase: FeedPhase }) {
         .copy(START)
         .add(new THREE.Vector3(Math.sin(t * 0.6) * 0.04, Math.sin(t * 2.1) * 0.035, 0));
       direction.copy(DIR_CANYON);
-    } else if (phase === 'jump') {
+    } else if (phase === 'attempt') {
       const p = Math.min(1, local / 1.6);
       jumpPoint(0.5 * smooth(p, 0.2, 1), position);
       direction
@@ -409,7 +407,7 @@ function PlayerCamera({ phase }: { phase: FeedPhase }) {
       // Freeze-frame at the apex while the streamer attests the real outcome.
       jumpPoint(0.5, position).y += Math.sin(t * 1.4) * 0.04;
       direction.copy(DIR_ACROSS);
-    } else if (phase === 'land') {
+    } else if (phase === 'win') {
       const q = Math.min(1, local / 0.7);
       jumpPoint(0.5 + 0.5 * q * q, position);
       if (q === 1) position.y += Math.sin(t * 2.1) * 0.035;
@@ -429,46 +427,22 @@ function PlayerCamera({ phase }: { phase: FeedPhase }) {
   return null;
 }
 
-const palettes: Record<
-  GameContext,
-  { sky: string; fog: string; cloud: string; sun: string; hemi: number; sunLight: number }
-> = {
-  voxel: {
-    sky: '#86b9e6',
-    fog: '#a9cdea',
-    cloud: '#ffffff',
-    sun: '#fff4c4',
-    hemi: 1.25,
-    sunLight: 1.6,
-  },
-  rocket: {
-    sky: '#e0926a',
-    fog: '#e8ab86',
-    cloud: '#ffe1cc',
-    sun: '#ffd27a',
-    hemi: 1.05,
-    sunLight: 1.3,
-  },
-  souls: {
-    sky: '#1c2630',
-    fog: '#25313b',
-    cloud: '#56636e',
-    sun: '#dfe8f0',
-    hemi: 0.42,
-    sunLight: 0.35,
-  },
+const palette = {
+  sky: '#86b9e6',
+  fog: '#a9cdea',
+  cloud: '#ffffff',
+  sun: '#fff4c4',
+  hemi: 1.25,
+  sunLight: 1.6,
 };
 
 export function VoxelScene({
   phase,
-  context,
   reducedMotion = false,
 }: {
   phase: FeedPhase;
-  context: GameContext;
   reducedMotion?: boolean;
 }) {
-  const palette = palettes[context];
   return (
     <Canvas
       className="voxel-canvas"
@@ -477,7 +451,7 @@ export function VoxelScene({
       camera={{ fov: 72, near: 0.1, far: 220, position: START.toArray() }}
       gl={{ antialias: true }}
     >
-      <FrameBudget reducedMotion={reducedMotion} renderKey={`${context}:${phase}`} />
+      <FrameBudget reducedMotion={reducedMotion} renderKey={`voxel:${phase}`} />
       <color attach="background" args={[palette.sky]} />
       <fog attach="fog" args={[palette.fog, 20, 74]} />
       <hemisphereLight args={['#d6ebff', '#5a4632', palette.hemi]} />

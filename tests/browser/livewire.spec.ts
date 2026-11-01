@@ -66,3 +66,43 @@ test('Minecraft LIVEWIRE persists a crew lock and one attested consequence acros
       await page.goto('about:blank');
     }
   }));
+
+test('each LIVEWIRE preset renders its own practice feed and a saved mission reopens in its scene', async ({
+  page,
+}) =>
+  serve(async () => {
+    test.setTimeout(120000);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    try {
+      await launch(page);
+      await navigate(page, 'livewire');
+      await expect(page.locator('.game-hud--voxel')).toBeVisible();
+      await page.locator('.controls-toggle').click();
+      for (const [preset, hud] of [
+        ['Souls Run', 'souls'],
+        ['Rocket League', 'rocket'],
+      ] as const) {
+        await page.getByRole('button', { name: new RegExp(`^${preset}`) }).click();
+        await expect(page.locator(`.game-hud--${hud}`)).toBeVisible();
+        await expect(page.locator('.voxel-canvas')).toHaveAttribute('data-scene-ready', 'true', {
+          timeout: 45000,
+        });
+      }
+      await page
+        .getByRole('button', { name: 'Open mission · spend 1 supply', exact: true })
+        .click();
+      await expect(page.locator('.livewire-world')).toHaveAttribute('data-stage', 'voting');
+      // The saved mission, not the default preset, decides which feed a reload shows.
+      await page.reload();
+      await expect(page.locator('.game-hud--rocket')).toBeVisible();
+      await expect(page.locator('.game-feed-label')).toContainText('ROCKET LEAGUE / AERIAL GOAL');
+      await expect(page.locator('.voxel-canvas')).toHaveAttribute('data-scene-ready', 'true', {
+        timeout: 45000,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.goto('about:blank');
+    }
+  }));

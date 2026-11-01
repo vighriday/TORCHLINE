@@ -1,28 +1,18 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { debtCopy } from './Dossier.tsx';
 import type { LivewireTarget } from '@torchline/contracts';
 import { ArkShip } from './App.tsx';
 import { Button, Brand, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
-import { SceneBoundary } from './SceneBoundary.tsx';
+import { contextForPreset, GameFeed, GameHud, gameContexts } from './LivewireFeed.tsx';
+import type { FeedPhase } from './feedKit.tsx';
 import type { GameContext, Risk } from './types.ts';
-const VoxelScene = lazy(() =>
-  import('./VoxelScene.tsx').then((module) => ({ default: module.VoxelScene })),
-);
 const risks: Risk[] = ['Navigation', 'Hull', 'Life Support'];
 const targets: LivewireTarget[] = ['navigation', 'hull', 'oxygen'];
 const targetFor: Record<Risk, LivewireTarget> = {
   Navigation: 'navigation',
   Hull: 'hull',
   'Life Support': 'oxygen',
-};
-const gameContexts: Record<
-  GameContext,
-  { name: string; attempt: string; preset: 'challenge' | 'match' | 'boss' }
-> = {
-  voxel: { name: 'Minecraft', attempt: 'LAVA GAP JUMP', preset: 'challenge' },
-  rocket: { name: 'Rocket League', attempt: 'AERIAL GOAL', preset: 'match' },
-  souls: { name: 'Souls Run', attempt: 'BOSS ATTEMPT', preset: 'boss' },
 };
 const stakeSteps = [
   ['open', 'OPEN STAKE'],
@@ -70,6 +60,8 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
     setAttempting(false);
     setFinished(false);
     setSolo('');
+    // A saved mission replays in the scene of the preset it was opened with, even after reload.
+    if (stake) setGame(contextForPreset(stake.preset));
   }, [stake?.id]);
   useEffect(() => {
     if (!attempting) return;
@@ -104,8 +96,10 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
   const timer = stake?.deadlineAt
     ? Math.max(0, Math.ceil((Date.parse(stake.deadlineAt) - now) / 1000))
     : 0;
-  const attemptName = stake?.label ?? attempt;
-  const gameName = stake?.game ?? gameContexts[game].name;
+  // The saved mission names the feed until the captain picks another game for the next one.
+  const savedScene = !!stake && (unresolved || game === contextForPreset(stake.preset));
+  const attemptName = stake && savedScene ? stake.label : attempt;
+  const gameName = stake && savedScene ? stake.game : gameContexts[game].name;
   const history =
     world?.events.filter((event) => /livewire|mission|stake/i.test(event.summary)) ?? [];
   const stageIndex = stakeSteps.findIndex(
@@ -175,6 +169,19 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                   }
                 : { label: 'CONTINUE THE VOYAGE', run: () => setMode('mission'), disabled: false };
   const wonSaved = stake?.status === 'success';
+  const feedPhase: FeedPhase = !preferences.motion
+    ? 'idle'
+    : stage === 'attempting'
+      ? 'attempt'
+      : stage === 'result'
+        ? 'hold'
+        : stage === 'consequence' && savedScene
+          ? wonSaved
+            ? 'win'
+            : 'loss'
+          : 'idle';
+  const hudPhase: FeedPhase =
+    stage === 'consequence' && savedScene ? (wonSaved ? 'win' : 'loss') : feedPhase;
   const message =
     stage === 'cooldown'
       ? 'This chapter boundary has already been used. Cancellation and expiry do not refund the opening. Continue the voyage.'
@@ -193,7 +200,7 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
     return (
       <main className="platform-page livewire-empty">
         <Brand />
-        <span className="eyebrow">LIVEWIRE / MINECRAFT EDITION</span>
+        <span className="eyebrow">LIVEWIRE / THE GAME YOU ALREADY STREAM</span>
         <h1>ONE ATTEMPT. ONE LASTING CONSEQUENCE.</h1>
         <p>
           {visibleError ||
@@ -216,55 +223,15 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
       {!overlay && (
         <div className="game-scene">
           {!chroma && (
-            <SceneBoundary>
-              <Suspense
-                fallback={
-                  <div className="ark-canvas-loading">
-                    <span>LOADING ILLUSTRATIVE PRACTICE SCENE</span>
-                    <b>{gameName}</b>
-                  </div>
-                }
-              >
-                <VoxelScene
-                  phase={
-                    !preferences.motion
-                      ? 'idle'
-                      : stage === 'attempting'
-                        ? 'jump'
-                        : stage === 'result'
-                          ? 'hold'
-                          : stage === 'consequence'
-                            ? wonSaved
-                              ? 'land'
-                              : 'fall'
-                            : 'idle'
-                  }
-                  context={game}
-                  reducedMotion={!preferences.motion}
-                />
-              </Suspense>
-            </SceneBoundary>
+            <GameFeed context={game} phase={feedPhase} reducedMotion={!preferences.motion} />
           )}
-          <div className="game-hud" aria-hidden="true">
-            <div className="game-feed-label">
-              <span>ILLUSTRATIVE GAMEPLAY — NOT GAME TELEMETRY</span>
-              <b>
-                {gameName.toUpperCase()} / {attemptName}
-              </b>
-              {stage === 'result' && <em>AWAITING STREAMER ATTESTATION</em>}
-            </div>
-            <div className="game-crosshair" />
-            <div className="game-hotbar">
-              {Array.from({ length: 9 }, (_, i) => (
-                <i key={i} className={i === 2 ? 'active' : ''} />
-              ))}
-            </div>
-            <div className="game-hearts">
-              {Array.from({ length: 10 }, (_, i) => (
-                <i key={i} className={i > 7 ? 'empty' : ''} />
-              ))}
-            </div>
-          </div>
+          <GameHud
+            context={game}
+            phase={hudPhase}
+            game={gameName}
+            attempt={attemptName}
+            awaiting={stage === 'result'}
+          />
         </div>
       )}
       {!readOnly && (
