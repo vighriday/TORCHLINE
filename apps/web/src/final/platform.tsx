@@ -1095,12 +1095,15 @@ export function Codex() {
           </div>
           <div className="command-reference">
             <span>QUICK COMMAND REFERENCE</span>
+            <code>!inspect engine</code>
             <code>!scan A</code>
             <code>!route S A C T</code>
             <code>!patch A</code>
-            <code>!allocate 1 0</code>
+            <code>!allocate hull 3 oxygen 2</code>
             <code>!vote 1</code>
             <code>!stake 2</code>
+            <code>!status</code>
+            <code>!history</code>
             <small>
               Use the displayed legal command during its open window. Bot replies are optional.
             </small>
