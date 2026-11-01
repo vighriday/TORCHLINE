@@ -2,13 +2,13 @@
 
 Current source requires migration **014_world_shares.sql** before startup and readiness. Migrations 011–014 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention, custody arrival attribution and public Chronicle link hashes. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
 
-Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
+Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks. No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
 
 ## Recommended topology
 
 ### Candidate image and release order
 
-`Dockerfile` pins Node/pnpm, typechecks/builds the browser in a separate stage and runs only production dependencies as a non-root user. `.dockerignore` allowlists source inputs; no credentials/private concept/local tools enter the image. Linux CI builds it and runs `node scripts/smoke-container.mjs torchline:check` against a disposable schema. Docker is not installed on this Windows machine; see the release report for actual CI results.
+`Dockerfile` pins Node/pnpm, typechecks/builds the browser in a separate stage and runs only production dependencies as a non-root user. `.dockerignore` allowlists source inputs; no credentials/private concept/local tools enter the image. Linux CI builds the image and runs smoke-container and smoke-compose on every push: `node scripts/smoke-container.mjs torchline:check` against a disposable schema, then the [`compose.yaml`](../../compose.yaml) practice preview checked by `scripts/smoke-compose.mjs`.
 
 1. Review a green commit and build `docker build --build-arg SOURCE_REVISION=COMMIT -t torchline:COMMIT .`. Record the resulting image digest. Scan it with the chosen hosting/registry scanner before release; version tags alone do not freeze base-image bytes.
 2. Provision approved PostgreSQL/HTTPS service and runtime secrets. Use `NODE_ENV=production`, `WORLD_MODE=live`, `HOST=0.0.0.0`, provider `PORT`, HTTPS `PUBLIC_BASE_URL`, exact `TWITCH_REDIRECT_URI`, `DATABASE_URL` with trusted remote TLS, independent session/token/operator/EventSub secrets and the registered Twitch credentials. Retain the existing token key when migrating saved grants. Keep the backup key in the operator secret store.
@@ -27,14 +27,16 @@ Railway, Fly or a managed VM can substitute if they provide the same contract: p
 
 ### Public judge instance
 
-A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. To give judges hands-on access without Twitch accounts, run a **second** service from the same image:
+Proposed; not deployed or tested. No public judge instance exists. Judges can run the same practice locally with `docker compose up --build` ([development guide](development.md#one-command-with-docker)), which CI starts on every push.
+
+A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. A hosted judge instance would run a **second** service from the same image:
 
 - Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true`.
 - Give it its **own** PostgreSQL database and independent secrets. Never share the live database or keys.
 - Give it its own HTTPS origin, for example a `demo` subdomain, and set `PUBLIC_BASE_URL` to it. No Twitch credentials are needed.
 - Behind the provider's load balancer, set `TRUST_PROXY_HOPS=1` (on the live service too). Otherwise every visitor shares the proxy's address and one per-client request budget, and several judges running the rehearsal at once could be throttled.
 
-Point judges at **Command OS → Judge Arena → Autoplay to the handoff**. The live service keeps genuine Twitch worlds. Public Chronicle links from the live service can show a real world's lineage without granting any control.
+Judges would open **Command OS → Judge Arena → Autoplay to the handoff**. The live service keeps genuine Twitch worlds. Public Chronicle links from the live service can show a real world's lineage without granting any control.
 
 ## Pre-deployment gate
 
@@ -80,7 +82,7 @@ Monitor ingress acknowledgement latency, inbox age/failures, outbox age, accepte
 
 ## Backups and judge availability
 
-The [implemented encrypted backup/restore helper](backup-and-restore.md) now verifies native snapshot restoration, row fingerprints and world replay into an isolated database. The actual local live database scratch drill succeeds; remote backup scheduling and provider recovery remain unverified.
+The [implemented encrypted backup/restore helper](backup-and-restore.md) now verifies native snapshot restoration, row fingerprints and world replay into an isolated database. The actual local live database scratch drills succeeded on October 28 and 29; remote backup scheduling and provider recovery remain unverified.
 
 Use provider backups with verified restore instructions, encrypted access, and a tested export/restore path. Keep a sanitized demo seed separately from real world data. Verify retention and recovery point/recovery time from actual provider features before launch; no recovery guarantee is assumed here.
 

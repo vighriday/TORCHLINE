@@ -73,7 +73,7 @@ export function analyzeBalance() {
   return {
     rulesVersion: 'ark-v2',
     dimensions:
-      'All authored choices × route solved/skipped × five valid repair subsets; scan ordering and equivalent valid routes collapsed. Timed phases and allocation are not implemented.',
+      'All authored choices × route solved/skipped × five valid repair subsets; scan ordering and equivalent valid routes collapsed. Timed phases and allocation are outside this historical ark-v2 analysis (both are implemented in ark-v3).',
     terminalPaths: Object.values(endings).reduce((a, b) => a + b, 0),
     endings,
     endingChapters,

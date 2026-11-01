@@ -1,5 +1,7 @@
 # ADR 0034 — Recover authenticated dashboard feeds
 
+Status: Accepted and implemented 30 October 2026.
+
 ## Context
 
 The authenticated dashboard uses a read-only SSE feed. A transient projection or

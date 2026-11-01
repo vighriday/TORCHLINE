@@ -1,6 +1,6 @@
 # ADR 0006: Authored deterministic gameplay with meaningful viewer challenges
 
-Status: proposed, 2026-10-26. Coverage: D9, D11, D14; PR-04, PR-09–11.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D9, D11, D14; PR-04, PR-09–11.
 
 ## Context and decision
 

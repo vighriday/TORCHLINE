@@ -1,6 +1,6 @@
 # ADR 0001: Separate game, episodes and custody
 
-Status: proposed, 2026-10-26. Coverage: D15; PR-02, PR-05, PR-09–12.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D15; PR-02, PR-05, PR-09–12.
 
 ## Context and decision
 

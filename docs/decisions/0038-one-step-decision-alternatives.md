@@ -1,10 +1,10 @@
 # ADR 0038 — One-step decision alternatives and whole-record replay verification
 
-Date: 2026-11-01. Status: accepted and implemented on the platform-completion branch.
+Date: 2026-11-01. Status: Accepted and implemented 1 November 2026; merged to main through PRs #3–#5.
 
 ## Context
 
-Every saved consequence in TORCHLINE comes from a pure, versioned engine applied to an append-only event log. A judge or a viewer could see what happened, but not what the other option would have done. The private planning notes proposed a "counterfactual time machine" that replays a whole alternate future. The red-team review rejected that form: later saved inputs might be illegal on a different branch, so a full alternate future would be invented, not replayed. It also asked that nothing be labelled verified unless a real recomputation and comparison exists.
+Every saved consequence in TORCHLINE comes from a pure, versioned engine applied to an append-only event log. A judge or a viewer could see what happened, but not what the other option would have done. An earlier idea replayed whole alternate futures; it was rejected because later inputs may be illegal on another branch and later communities' choices cannot be guessed. The design review also asked that nothing be labelled verified unless a real recomputation and comparison exists.
 
 ## Decision
 
@@ -25,6 +25,7 @@ Every saved consequence in TORCHLINE comes from a pure, versioned engine applied
 
 - A viewer can see the road not taken, with numbers, for any decision aboard: for example, sealing the rear habitat would have kept navigation but cost 48 passengers.
 - The recomputation is a visible, checkable demonstration that the engine is deterministic. The whole-record check turns "the history reproduces the ship" from a claim into a button anyone with access can press.
+- "Verify this record" replays the stored log and compares SHA-256 digests of the replayed and stored state. It is not a signed attestation, would not detect a consistent rewrite of both log and state, and does not prove that inputs were genuine Twitch chat or native raids.
 - An uncached request replays the world's log up to the decision. The per-event cache bounds repeated cost.
 
 ## Validation

@@ -1,6 +1,6 @@
 # The Ark Protocol: game design
 
-Status: revised balancing contract, version `ark-v2`; implementation authorized 2026-10-26. Numerical balance is checked by exhaustive authored-tree analysis; entertainment and difficulty require playtesting. `ark-v1` is archived as an executable audit fixture, not used for new worlds.
+Status as of 1 November 2026: `ark-v3` for new worlds; `ark-v2` kept for replay of existing worlds; `ark-v1` kept only as an executable audit fixture, not used for new worlds. The balance figures below are the historical `ark-v2` enumeration. This revised balancing contract was authorized for implementation on 2026-10-26. Numerical balance is checked by exhaustive authored-tree analysis; entertainment and difficulty require playtesting.
 
 ## Baseline defect and revision
 
@@ -26,7 +26,7 @@ Pause stores the prior phase and remaining time. Resume creates a new participat
 
 ## Audience and creator authority
 
-Current commands are `!scan`, `!route`, `!patch`, `!vote`, `!inspect engine|cargo|life`, and `!allocate H O` (1–5 preference points total). `!status` and `!history` have durable bot reply paths. New phases require an ark-v3 world; existing worlds keep their original rules. These commands have signed-provider-fixture coverage; genuine live delivery remains a separate acceptance gate.
+Current commands are `!scan`, `!route`, `!patch`, `!vote`, `!inspect engine|cargo|life`, and `!allocate H O` (1–5 preference points total). `!status` and `!history` bot replies are implemented and accepted by Twitch's API, but paused in the live configuration; visible delivery unverified. New phases require an ark-v3 world; existing worlds keep their original rules. These commands have signed-provider-fixture coverage. Status as of 1 November 2026: on 30 October 2026 three genuine viewer chat messages from an ordinary viewer account arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. An overlay update from live chat has not been recorded on video, and the other gameplay commands have signed-fixture evidence only.
 
 | Interaction | Rule | Effect |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ Current commands are `!scan`, `!route`, `!patch`, `!vote`, `!inspect engine|carg
 | `!scan A`, `!route S A C T` | Bounded node discovery and candidate path submission during a challenge | Reveals puzzle constraints and tests an actual solution; first valid solution locks one authored reward |
 | `!allocate hull 3 oxygen 2` or `!allocate 3 2` | Latest valid preference per account; total preference units one to five | Distributes a creator-declared power budget across repairs using normalized preferences |
 | `!vote 1`, `!vote 2` | Latest eligible vote per Twitch user ID in the current decision | Advisory tally; repeat messages never add voting weight |
-| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or the last two captain decisions with their communities; never one reply per message |
+| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or the last two captain decisions with their communities; never one reply per message. Implemented and accepted by Twitch's API, but paused in the live configuration; visible delivery unverified |
 | Creator commit | Authenticated custodian; valid phase, state version and affordable option | Applies the selected option, allocation, and future obligations once |
 
 Viewer eligibility means an identified account sending an allowed command in the active host's chat during the current phase window. It does not prove physical viewership or one human per account. Use ordinary viewer privileges without subscriber/follower weighting. Exclude the application's bot. Accept the broadcaster's account at normal weight if it participates.
@@ -49,13 +49,13 @@ Voting does not automatically commit. With zero votes or a tie, the creator sele
 
 Polls and resource meters alone do not provide enough sustained audience agency. The complete-season target includes a shared graph puzzle displayed on the overlay. Six to eight authored nodes represent relays or salvage stations. Viewers scan nodes to reveal constraints, discuss the route, and submit paths. A valid path must connect the endpoints, avoid blocked relays, stay within a power/risk budget, and satisfy a required waypoint. The reducer evaluates those constraints; it does not compare popularity or ask an LLM to judge an answer.
 
-Parallel clue discovery lets several viewers contribute distinct information. One viewer can scan every node sequentially, and the creator can use the same dashboard controls when alone. Revealed clues are public. There is no claim of private or origin-specific information. Candidate paths have bounded length, per-account cooldowns and a cap on displayed failures. Correct solutions close the challenge once; further submissions cannot farm rewards.
+Parallel clue discovery lets several viewers contribute distinct information. One viewer can scan every node sequentially, and the creator can use the same dashboard controls when alone. Revealed clues are public. There is no claim of private or origin-specific information. Candidate paths have bounded length and a cap on displayed failures. Chat input passes a per-viewer admission rate limit (by default a burst of six that refills at one per second: `INPUT_VIEWER_BURST`, `INPUT_VIEWER_PER_SECOND`); no route-specific cooldown exists. Correct solutions close the challenge once; further submissions cannot farm rewards.
 
 Route completion has chapter-specific mechanical rewards. Chapter 1 restores shield routing (+15 hull and +10 recovered capacitor power), preventing blind-jump damage in chapter 2 and reducing debris damage in chapter 4. Chapter 2 jury-rigs navigation (+20 navigation) and reduces the cost of charting the route. Chapter 4 unlocks precision salvage (five hull damage and no oxygen loss instead of fifteen hull and ten oxygen). Chapter 5 aligns landing beacons (+15 navigation and +5 hull). Each reward is applied once and updates persistent physical condition.
 
 Chapter 3 uses a cooperative repair work order. Viewers scan the damaged nodes, then patch A and B in either order; C requires both. A restores four oxygen, B repairs four hull, and C recovers five power and restores another ten oxygen. Completing the work order physically repairs life support, prevents the chapter-4 leak, and reduces the final repair choice from twenty to ten power. Each task is globally claimable once, not once per account; replaying/spamming a command cannot farm resources. One person can complete the same work order, and the broadcaster can participate through the same domain commands.
 
-The captain can close a challenge early or use the persisted deadline/manual policy. Investigation and allocation are implemented for new ark-v3 worlds; per-account cooldown enforcement remains separate hardening. Failure/skip preserves ordinary choices rather than forcing an arbitrary death.
+The captain can close a challenge early or use the persisted deadline/manual policy. Investigation and allocation are implemented for new ark-v3 worlds. Route submissions are bounded by the per-viewer admission rate limit above, not by a route-specific cooldown. Failure/skip preserves ordinary choices rather than forcing an arbitrary death.
 
 Author each graph with at least one verified solution. Generate variation only from checked, seeded configurations. Persist clues, accepted candidate order, solver attribution and outcome for replay. Default challenge time is 90 seconds, adjustable or pausable by the creator; no reflex-speed gameplay depends on broadcast latency. The reference journey below assumes no challenge bonus. Full-season playtests must assess whether the puzzles produce collaboration, whether people understand submissions on mobile, and whether the strategic choices remain consequential after bonuses.
 

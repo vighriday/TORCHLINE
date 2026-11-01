@@ -2,7 +2,7 @@
 
 Accepted 2026-10-27. Extends the existing Fastify/PostgreSQL read model without changing gameplay, custody transitions or the presentation version.
 
-The complete Archive uses bounded cursor pages of immutable gameplay events and custody records. Individual ballots, participant IDs, raw chat, commands, tokens and proof payloads are excluded. Current connected custodians can inspect active, parked and terminal worlds. Previous custodians do not acquire permanent access to future activity. Pagination pins the gameplay sequence and uses the custody record ID to compare the original PostgreSQL timestamp, avoiding millisecond cursor truncation.
+The complete Archive uses bounded cursor pages of immutable gameplay events and custody records. Individual ballots, participant IDs, raw chat, commands, tokens and proof payloads are excluded. Current connected custodians can inspect active, parked and terminal worlds. Previous custodians do not acquire permanent access to future activity. Refined by [ADR 0036](0036-public-chronicle-links.md) (public Chronicle links). Pagination pins the gameplay sequence and uses the custody record ID to compare the original PostgreSQL timestamp, avoiding millisecond cursor truncation.
 
 A prepared offer explicitly grants its two connected parties a read-only projection of that frozen world. Preview requires current mode, unexpired prepared/verified intent, exact frozen revision, source custody/hosting and receiver opt-in. Cancellation, expiry, disconnect, opt-out and acceptance end preview access. Reading a preview cannot verify a raid or accept custody. All mutation capability flags are false.
 

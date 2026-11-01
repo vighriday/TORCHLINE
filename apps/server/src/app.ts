@@ -752,7 +752,10 @@ export async function createApp(
     const command = parseChatCommand(text);
     const stake = parseLivewireVote(text);
     if (!command && !stake)
-      denied('INVALID_INPUT', 'Use !scan, !route, !patch or !vote with valid arguments.');
+      denied(
+        'INVALID_INPUT',
+        'Use !inspect, !scan, !route, !patch, !allocate, !vote or !stake with valid arguments.',
+      );
     const world = await store.active(creator.id);
     if (!world) denied('NOT_FOUND', 'Create a world first.');
     if (

@@ -510,9 +510,11 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                       >
                         <div>
                           <span>
-                            {eligible
-                              ? `SUCCESS +${option?.success ?? 3} / FAILURE ${option?.failure ?? -6}`
-                              : 'UNAVAILABLE · LOST OR SEALED'}
+                            {!eligible
+                              ? 'UNAVAILABLE · LOST OR SEALED'
+                              : option
+                                ? `SUCCESS +${option.success} / FAILURE −${Math.abs(option.failure)}`
+                                : 'UP TO +3 / UP TO −6'}
                           </span>
                           <strong>{item}</strong>
                         </div>

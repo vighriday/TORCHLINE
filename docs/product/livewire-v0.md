@@ -1,6 +1,6 @@
 # LIVEWIRE v0
 
-Status: shipped in v0.1.0-preview.2 behind the default-off `LIVEWIRE_ENABLED` flag. Real Twitch mission acceptance remains a release gate. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
+Status: shipped in v0.1.0-preview.2 behind the default-off `LIVEWIRE_ENABLED` flag; practice previews (`docker compose`, `pnpm db:up`) enable it, and live remains opt-in. Per-preset illustrated feeds arrived after preview.2 ([ADR 0037](../decisions/0037-cross-game-livewire-relay.md)). Status as of 1 November 2026: no live attested LIVEWIRE result has been recorded, so real Twitch mission acceptance remains a release gate. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
 
 ## One complete mission
 
@@ -24,7 +24,7 @@ Resolve or cancel before starting another chapter, parking or preparing a handof
 | Requirement | Implementation and evidence boundary |
 | --- | --- |
 | L01 Current custodian controls missions | Session API, mode/connected/custody/slot rechecks under SQL locks; negative authority tests |
-| L02 Real chat can choose a system | Existing exact HMAC/subscription ingress; normalized SQL ballots; signed local fixtures pass, genuine service command pending |
+| L02 Real chat can choose a system | Existing exact HMAC/subscription ingress; normalized SQL ballots; signed local fixtures pass, genuine service command pending as of 1 November 2026 |
 | L03 Pre-attempt immutable commitment | Explicit transactional lock; finite authored options and tally snapshot; solo/tie/race tests |
 | L04 One attested consequence | Engine extension and atomic state/event/status/outbox; duplicate/concurrent result and injected-failure tests |
 | L05 Finite economy | One allowance per boundary, one supply on open, repair caps, no revival; lifecycle and full-season witnesses |
@@ -33,9 +33,11 @@ Resolve or cancel before starting another chapter, parking or preparing a handof
 | L08 Core game remains playable | Only between chapters; existing phases retained; regression/browser suite and mission → chapter journey |
 | L09 Physical persistence | Canonical system integrity/condition/marks, resource effects, cause-linked ship log; not a separate decorative score |
 | L10 Read-only compact OBS | Existing capability/cookie/SSE with compact/auto query layout; browser/native evidence tracked in report |
-| L11 Safe release boundary | Default-off flag and additive migrations 009–010; merged into main in preview.2 without enabling it by default |
+| L11 Safe release boundary | Default-off flag and additive migrations 009–010; merged into main in preview.2 without enabling it by default; practice previews (`docker compose`, `pnpm db:up`) enable it, and live remains opt-in |
 | L12 Authenticity and scope | Streamer-attested result, signed-versus-simulation input classes; no automatic game detection or simulated native-raid claim |
 
-The preset describes the attempted activity and picks the illustrated practice scene (voxel jump, arena aerial, boss courtyard); the streamer names the game they actually play, validated by the same plain-text rule as the attempt label. All three presets intentionally use the same bounded economic policy. The game name is context, not a claimed game integration or a difficulty-dependent reward.
+The preset describes the attempted activity and picks the illustrated practice scene: a voxel "Minecraft" lava gap jump (Personal challenge), a car-soccer "Rocket League" aerial goal (Match) or a "Souls Run" boss attempt (Boss attempt). A saved mission reopens in its own preset's scene. The scenes are illustrations with no game telemetry; the streamer names the game they actually play, validated by the same plain-text rule as the attempt label. All three presets intentionally use the same bounded economic policy. The game name is context, not a claimed game integration or a difficulty-dependent reward.
+
+Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them; its practice scenes are original illustrations and never read game data.
 
 See [ADR 0031](../decisions/0031-livewire-v0.md) for the C1–C13 review and [operations](../operations/livewire-v0.md) for setup and acceptance. Other proposed expansion arms are not part of v0.

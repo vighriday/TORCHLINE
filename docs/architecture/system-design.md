@@ -1,6 +1,6 @@
 # System architecture
 
-Status: approved architecture with a working first slice, 2026-10-26. Core gameplay, persistence, browser delivery and isolated custody are implemented and locally tested; production throughput and genuine Twitch/OBS behavior remain unverified. See [implementation status](../planning/implementation-status.md) and [decision stress review](decision-stress-review.md).
+Status: approved architecture with a working first slice, 2026-10-26. Core gameplay, persistence, browser delivery and isolated custody are implemented and locally tested; production throughput remains unverified. Status as of 1 November 2026: real broadcaster and bot consent and signed EventSub callbacks are verified, and on 30 October 2026 three genuine viewer chat messages arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. Native OBS 32.2.2 rendered the 30 Oct final-design build in isolated saved practice; the current build is not re-verified in OBS. An overlay update from live chat on video, visible bot replies, a live attested LIVEWIRE result, a native raid between two broadcasters and permanent hosting remain unverified. See [implementation status](../planning/implementation-status.md) and [decision stress review](decision-stress-review.md).
 
 ## Three separate responsibilities
 
@@ -95,4 +95,4 @@ Live and simulated worlds use separate databases/deployments where practical, ma
 
 Independent worlds do not share game locks. Begin with one application replica; correctness still uses database constraints, not in-memory ownership. Before a second replica, provide database-backed cross-process notification or per-instance durable outbox fan-out, shared sessions/rate limits, worker leases and single-owner subscription reconciliation. A one-consumer outbox alone does not notify clients connected to another replica.
 
-Broader collaboration can add opt-in recipient discovery, scheduled relay readiness, spectators and delegated cohost roles using the identity/custody boundary. Later non-raid transfers, if desired, must be an explicitly separate policy with consent and audit rules. Raid authenticity remains the signature demonstrated path.
+Broader collaboration can add opt-in recipient discovery, scheduled relay readiness, spectators and delegated cohost roles using the identity/custody boundary. Later non-raid transfers, if desired, must be an explicitly separate policy with consent and audit rules. Raid authenticity remains the signature path; a live native raid has not yet been demonstrated (the Judge Arena uses labelled simulated proof).

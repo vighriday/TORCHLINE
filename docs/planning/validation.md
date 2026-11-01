@@ -1,6 +1,6 @@
 # Validation and stress-test plan
 
-Status: initial domain, PostgreSQL, HTTP/Twitch-contract and browser tests have run locally. [Implementation status](implementation-status.md) and the changelog record exact evidence and limits. The full matrix below remains the wider acceptance plan; unexecuted load, soak, real Twitch and actual OBS checks must not be marked passed.
+Status (1 November 2026): CI is green, running 164 Vitest tests in 43 files against real PostgreSQL, 25 Playwright journeys, generated-artifact drift checks, the restricted release-container smoke and the `docker compose` preview smoke. [Implementation status](implementation-status.md) and the changelog record exact evidence and limits. The full matrix below remains the wider acceptance plan; unexecuted load, soak, live Twitch (native raid, attested LIVEWIRE result, recorded overlay update from chat) and broadcast OBS checks must not be marked passed. Real Twitch evidence so far covers broadcaster and bot consent, signed EventSub delivery and genuine viewer chat saved as gameplay on 30 October; native OBS rendering is verified only in saved practice.
 
 ## Evidence layers
 
@@ -8,7 +8,7 @@ Status: initial domain, PostgreSQL, HTTP/Twitch-contract and browser tests have 
 | --- | --- | --- | --- |
 | Domain | Vitest + seeded generated command sequences | Rules, puzzle constraints, replay, invariants without network | Twitch behavior, DB locks or OBS compatibility |
 | Storage | Real PostgreSQL 17 with independent connections | Constraints, lock order, races, jobs and crash recovery | Genuine Twitch delivery |
-| Adapter | Twitch CLI and signed fixtures | HMAC, schema/condition mapping, duplicates, revocation, proof policy | That Twitch will emit a specific real raid |
+| Adapter | In-repo HMAC-signed EventSub fixtures | HMAC, schema/condition mapping, duplicates, revocation, proof policy | That Twitch will emit a specific real raid |
 | Browser | Playwright with controlled backend | Dashboard, overlay, privacy, stale state and reconnect | Actual OBS embedded-browser performance |
 | Deployed | Actual service + actual OBS | Streaming, sessions, headers, source lifecycle, frame/readability behavior | Creator adoption or raid completeness in every configuration |
 | Live | Consenting broadcasters on Twitch | Genuine chat and native raid-to-custody continuity | Unlimited scale or platform-wide reliability |
@@ -64,4 +64,4 @@ Simulator fixtures support every step except native proof. A demonstration must 
 
 Before release: all required core/complete requirements have acceptance evidence; live native transfer verified; complete solo season playable; no unresolved custody, data-loss, authorization or replay blocker; clean setup and judge access reproduced; assets/environment documentation complete. Additional features require their affected invariants and component review to be rerun.
 
-Current evidence includes the working commands `pnpm build`, `pnpm test`, `pnpm test:browser`, `pnpm audit:balance` and `pnpm design:fixtures`. They establish the explicitly recorded local behavior. Linux CI executes the full suite, browser journeys, generated-fixture checks and restricted release-container smoke. The [October 28 report](../reports/2026-10-28-release-readiness.md) records exact results and remaining native Twitch/OBS/deployment gates.
+Current evidence (1 November 2026) includes the working commands `pnpm build`, `pnpm test`, `pnpm test:browser`, `pnpm audit:balance`, `pnpm design:fixtures` and `pnpm readme:proof`. They establish the explicitly recorded local behavior. Linux CI ([workflow](../../.github/workflows/verify.yml)) executes format and version checks, the full suite on real PostgreSQL 17, browser journeys, generated-artifact drift checks (balance report, design fixtures and README proof), repository checks, the restricted release-container smoke and the `docker compose` preview smoke ([`smoke-compose.mjs`](../../scripts/smoke-compose.mjs)). Older dated evidence: the [October 28 report](../reports/2026-10-28-release-readiness.md) records that date's exact results and the native Twitch/OBS/deployment gates then remaining.

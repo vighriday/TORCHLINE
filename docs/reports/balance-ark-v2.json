@@ -1,6 +1,6 @@
 {
   "rulesVersion": "ark-v2",
-  "dimensions": "All authored choices × route solved/skipped × five valid repair subsets; scan ordering and equivalent valid routes collapsed. Timed phases and allocation are not implemented.",
+  "dimensions": "All authored choices × route solved/skipped × five valid repair subsets; scan ordering and equivalent valid routes collapsed. Timed phases and allocation are outside this historical ark-v2 analysis (both are implemented in ark-v3).",
   "terminalPaths": 2398,
   "endings": {
     "colony": 964,

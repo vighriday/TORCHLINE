@@ -46,7 +46,11 @@ export function ArrivalDossier({
       role={variant === 'broadcast' ? 'status' : undefined}
     >
       <header>
-        <span className="eyebrow">INHERITED ARK · RELAY RECEIVED</span>
+        <span className="eyebrow">
+          {world.mode === 'live'
+            ? 'INHERITED ARK · RELAY RECEIVED'
+            : 'INHERITED ARK · PRACTICE RELAY · SIMULATED RAID PROOF'}
+        </span>
         <strong>
           {arrival.from.label} <em>handed this Ark on</em>
         </strong>

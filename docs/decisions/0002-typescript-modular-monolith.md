@@ -1,6 +1,6 @@
 # ADR 0002: TypeScript modular monolith
 
-Status: proposed, 2026-10-26. Coverage: D1, D2, D3, D12.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D1, D2, D3, D12.
 
 ## Context and decision
 

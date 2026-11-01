@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { applyCommand, createWorld, replayEvents } from '@torchline/engine';
+import { applyCommand, createWorld, previewChoices, replayEvents } from '@torchline/engine';
 import { CURRENT_RULES_VERSION } from '@torchline/contracts';
-import type { Command, WorldEvent } from '@torchline/contracts';
+import type { Command, WorldEvent, WorldState } from '@torchline/contracts';
 import { isDeepStrictEqual } from 'node:util';
 
 function journey(viewerPatch: boolean) {
@@ -72,6 +72,51 @@ for (const command of [
   ).state;
 if (without.state.outcome !== 'wreck' || withPatch.state.outcome !== 'partial')
   throw new Error('README counterfactual changed; review the copy before publishing.');
+
+// The README's "captain's chair": both chapter-one commitments and both chapter-two answers to
+// the crisis each one leaves behind, with no viewer repairs, exactly as the engine computes them.
+let step = 0;
+const captain = (state: WorldState, command: Command) =>
+  applyCommand(
+    state,
+    command,
+    { id: 'example-captain', role: 'host', community: 'Example community' },
+    { commandId: `chair-${++step}`, at: '2026-10-28T10:00:00.000Z' },
+  ).state;
+const snapshot = (state: WorldState) => ({
+  crisis: state.crisis,
+  resources: state.resources,
+  lost: Object.entries(state.systems)
+    .filter(([, system]) => ['destroyed', 'sealed'].includes(system.condition))
+    .map(([id, system]) => `${id} ${system.condition}`),
+  debts: state.obligations
+    .filter((debt) => debt.status === 'pending')
+    .map((debt) => `${debt.kind} due chapter ${debt.dueChapter}`),
+});
+const storm = captain(
+  captain(createWorld('readme-chair', CURRENT_RULES_VERSION), { type: 'start' }),
+  {
+    type: 'close-challenge',
+  },
+);
+const captainChair = previewChoices(storm).map((first) => {
+  const committed = captain(storm, { type: 'commit', option: first.id });
+  const next = captain(committed, { type: 'start' });
+  const decision = captain(next, { type: 'close-challenge' });
+  return {
+    option: first.id,
+    label: first.label,
+    after: snapshot(committed),
+    next: {
+      ...snapshot(next),
+      options: previewChoices(decision).map((second) => ({
+        option: second.id,
+        label: second.label,
+        after: snapshot(captain(decision, { type: 'commit', option: second.id })),
+      })),
+    },
+  };
+});
 const summarize = (result: ReturnType<typeof journey>) => ({
   outcome: result.state.outcome,
   chapter: result.state.chapter,
@@ -104,6 +149,7 @@ await writeFile(
         },
         sealHabitat: { resources: seal.resources, condition: seal.systems.habitat.condition },
       },
+      captainChair,
     },
     null,
     2,

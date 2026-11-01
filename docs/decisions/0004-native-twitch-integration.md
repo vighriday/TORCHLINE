@@ -1,6 +1,6 @@
 # ADR 0004: Hosted Twitch webhooks and consented native transfers
 
-Status: proposed, 2026-10-26. Coverage: D6, D17; PR-01, PR-03, PR-05, PR-08.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D6, D17; PR-01, PR-03, PR-05, PR-08.
 
 ## Context and decision
 

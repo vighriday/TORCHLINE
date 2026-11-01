@@ -4,7 +4,7 @@ LIVEWIRE ships in `main` since v0.1.0-preview.2. Do not replace the live databas
 
 ## Local practice
 
-Use the normal [development setup](development.md) with Node 24, pnpm 12.4.2 and an isolated development PostgreSQL database. In its ignored `.env`, set `LIVEWIRE_ENABLED=true` and `WORLD_MODE=simulation`. Run `pnpm db:migrate`, `pnpm build`, then `pnpm dev`. Use the configured local origin.
+Use the normal [development setup](development.md) with Node 24, pnpm 12.4.2 and an isolated development PostgreSQL database. Practice previews enable LIVEWIRE while the server default stays off: `pnpm db:up` adds `LIVEWIRE_ENABLED=true` and `WORLD_MODE=simulation` to its ignored `.env` when they are missing, and `docker compose up --build` sets both for its container. With another database, set both in its ignored `.env` yourself. Run `pnpm db:migrate`, `pnpm build`, then `pnpm dev`. Use the configured local origin.
 
 Create/resume an Ark, open **Livewire** through **Command OS**, then open a mission. Use **Practice chat** to send `!stake 2`; lock and confirm a result. Check the same ship's resources and Archive. Return to Mission Control and continue the chapter. Practice inputs are explicitly simulated and never go to Twitch.
 
@@ -22,9 +22,9 @@ All views share the same scoped read grant. Generating a new grant rotates them 
 
 ## Real Twitch acceptance — still required
 
-Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed.
+Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed. As of November 1 no attested live result exists: one live mission was opened and expired.
 
-Apply all migrations (currently through 013) to the intended database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart. Do not claim a deployment has the feature enabled until its configuration says so.
+Apply all migrations (currently through 014) to the intended database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart. Do not claim a deployment has the feature enabled until its configuration says so.
 
 1. At a ready chapter boundary, the broadcaster opens a clearly described mission before the gaming attempt.
 2. As the broadcaster or another genuine participant, send one displayed legal `!stake` command in that exact channel. Observe count/choice in the dashboard and actual OBS source. Do not send as the bot.
@@ -32,7 +32,7 @@ Apply all migrations (currently through 013) to the intended database, set `LIVE
 4. Compare the saved Ark, physical condition and Archive; reload dashboard/OBS. Check one result event and unchanged state after retry/restart. Keep the result explicitly labeled streamer-attested.
 5. Resolve/cancel before any native handoff. The [real raid checklist](controlled-account-live-test.md#4-authentic-raid--only-when-a-second-broadcaster-is-available) is unchanged and needs a second consenting broadcaster.
 
-No repeated bot-status trials are needed. Replies are independently paused on the current preview. Do not weaken bot roles, channel protections, native proof or receiving consent to accelerate acceptance.
+No repeated bot-status trials are needed. Replies are disabled in the live configuration (`BOT_REPLIES_ENABLED=false`). Do not weaken bot roles, channel protections, native proof or receiving consent to accelerate acceptance.
 
 Run `pnpm twitch:verify:livewire` with that candidate's ignored `.env.live`. It reads a consistent database snapshot and joins accepted signed-input receipts, the locked crew choice and one cause-linked attested result. It writes a private `.local/livewire-live-result.json` and exits 2 while incomplete. It sends no chat, chooses no result and never turns simulation, a solo choice, OBS rendering or provider metadata into genuine gameplay proof. Native OBS and the actual game attempt still require separate observation.
 

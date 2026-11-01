@@ -1,115 +1,466 @@
-<p align="center"><strong>TORCHLINE</strong> · THE ARK PROTOCOL</p>
-<p align="center"><strong>The stream ends. The world doesn't.</strong></p>
+<div align="center">
 
-<a href="assets/readme/awakening.png"><img src="assets/readme/awakening.png" width="1440" alt="TORCHLINE's Awakening: the persistent Ark rolls above a planet. Final Figma v2 design, with the corrected ship nose."></a>
+<a href="#watch">
+  <picture>
+    <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/awakening.png">
+    <img src="assets/readme/hero-awakening.webp" width="960" alt="TORCHLINE's opening scene: the persistent generation ship ARK-001 rolls above a planet beside the line 'The stream ends. The world doesn't.' Recorded from the app in saved practice.">
+  </picture>
+</a>
 
-<p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#one-crews-choice-becomes-the-next-crews-crisis">The relay</a> · <a href="#livewire--your-next-attempt-matters">LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
+<h1>TORCHLINE · The Ark Protocol</h1>
 
-<p align="center"><a href="docs/releases/v0.1.0-preview.2.md">v0.1.0-preview.2</a> · Development preview · Built with Codex for the Codex x TwitchCon Hackathon</p>
+<h3>The stream ends. The world doesn't.</h3>
 
-## A stream that leaves something behind
+<p>A persistent survival game for Twitch. Chat keeps one starship alive.<br>The games you already stream can scar or repair it. A raid hands that exact ship to the next community.</p>
 
-**A shared survival game that remembers its community.** Your audience is aboard a ship carrying 216 people. Viewers uncover clues, solve emergencies and choose where to help. The captain makes the hard calls. Every repair, sacrifice and mistake stays with that same Ark.
+<p>
+<a href="#play"><b>▶&nbsp;Play in two minutes</b></a> &nbsp;·&nbsp;
+<a href="#watch">Watch</a> &nbsp;·&nbsp;
+<a href="#chair">Take the captain's chair</a> &nbsp;·&nbsp;
+<a href="#livewire">LIVEWIRE</a> &nbsp;·&nbsp;
+<a href="#codex">Built with Codex</a> &nbsp;·&nbsp;
+<a href="#proven">What is proven</a> &nbsp;·&nbsp;
+<a href="docs/README.md">Docs</a>
+</p>
 
-Play all five chapters on one channel. Or prepare a handoff and perform a genuine Twitch raid: the next captain inherits your passengers, damaged systems and unfinished story. **A raid moves the world. It isn't required to enjoy it.**
+<sub><a href="docs/releases/v0.1.0-preview.3.md">v0.1.0-preview.3</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
+
+</div>
+
+> [!IMPORTANT]
+> **Built with OpenAI Codex.** Codex was TORCHLINE's lead engineer. Working in VS Code, it planned the product and its architecture, then built:
+> - the deterministic game engine and PostgreSQL storage;
+> - Twitch OAuth and signed EventSub;
+> - the OBS overlay and the ten-screen interface from the Figma design;
+> - LIVEWIRE.
+>
+> It wrote tests against real PostgreSQL as it went, from 26 to 31 October 2026.<br>
+> **Codex session ID: `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`** · [How Codex built it ↓](#codex)
+
+> [!TIP]
+> **Judges, no Twitch account needed.** Run `docker compose up --build`, open http://localhost:3000, then choose **Command OS → Judge Arena → Autoplay to the handoff**. In about two minutes you watch two communities in two different games change one Ark. [More ways to run it ↓](#play)
+
+## The idea in three moves
+
+<table>
+<tr>
+<th width="33%">🧠 Chat solves the crisis</th>
+<th width="33%">🎮 Your game counts</th>
+<th width="33%">🔁 A raid moves the world</th>
+</tr>
+<tr>
+<td><a href="assets/readme/mission-control.png"><img src="assets/readme/mission-control.png" alt="Mission Control during the radiation storm: resources, the shield-relay challenge and captain controls."></a></td>
+<td><a href="assets/readme/livewire-voxel.webp"><img src="assets/readme/livewire-voxel.webp" alt="LIVEWIRE with the voxel lava-jump preset: an illustrated game feed above the mission dock."></a></td>
+<td><a href="assets/readme/relay-broadcast.png"><img src="assets/readme/relay-broadcast.png" alt="The read-only OBS view of a received Ark with its inheritance dossier."></a></td>
+</tr>
+<tr>
+<td>Viewers scan relays, route power and patch failing systems. Solving the problem changes the ship. Then the captain makes the hard call.</td>
+<td>Before a risky attempt in the game you are already streaming, chat stakes one Ark system on it. The choice locks before you try; you confirm the result; the Ark keeps it.</td>
+<td>At a chapter boundary, a Twitch raid hands the exact scarred ship, with its unpaid debts, to the next community. They see who caused every scar.</td>
+</tr>
+</table>
+
+You can play all five chapters on one channel. **A raid moves the world; you don't need one to enjoy it.** The native raid handoff is built end to end, but a live raid between two broadcasters has not been verified yet. The Judge Arena rehearses it with labelled simulated proof.
+
+<a id="watch"></a>
+
+## 🎬 Watch two games share one Ark
 
 <picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/awakening.png">
-  <img src="assets/readme/ark-roll.gif" width="960" alt="Actual final-design Ark footage. Saved practice presentation, not Twitch acceptance footage.">
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/cross-game-relay.png">
+  <img src="assets/readme/relay-two-games.webp" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission fails and the hull loses 6. After the handoff, channel B's aerial-goal mission succeeds and the same hull gains 3.">
 </picture>
 
-<sub>Recorded from the integrated app. [Full-size still](assets/readme/awakening.png) · [SVG animation container](assets/readme/ark-roll.svg) · [Capture and provenance](assets/readme/README.md).</sub>
-
-## One crew's choice becomes the next crew's crisis
-
-<a href="assets/readme/relay-broadcast.png"><img src="assets/readme/relay-broadcast.png" width="1440" alt="The read-only OBS view of a received Ark: an inheritance dossier names Simulation alpha, their decision to sacrifice navigation, the lost navigation system and the blind-jump debt now due in chapter two."></a>
-
-When a captain hands the Ark on, the receiving stream sees an **inheritance dossier** over the ship: who handed it over, every decision aboard and the community that made it, what other games did to the hull, the systems already lost, and each debt still waiting, linked to the decision that created it. Starting the next chapter makes the debt real. The new audience inherits a problem it can trace to people it has never met.
-
-<a href="assets/readme/cross-game-relay.png"><img src="assets/readme/cross-game-relay.png" width="1440" alt="The Judge Arena relay rehearsal: channel A streams Minecraft and its LIVEWIRE lava-jump mission failed, hull −6; channel B streams Rocket League and its aerial-goal mission succeeded, hull +3. Both results are streamer-attested and saved to the same Ark."></a>
-
-Different games, different communities, one Ark: alpha's Minecraft mission cracks the hull, the raid hands the ship on, and the receiver's Rocket League mission repairs that same hull. Results are streamer-attested; the feeds are illustrations, not game telemetry.
+<sub>This is the Judge Arena, recorded from the app in saved practice. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are scripted practice attestations, saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
 
 <details>
-<summary><strong>⇄ Follow one Ark through three communities</strong></summary>
+<summary><b>The eleven steps of the relay rehearsal</b>: every one calls the same API the dashboard uses</summary>
+<br>
 
-<a href="assets/readme/lineage.png"><img src="assets/readme/lineage.png" width="1440" alt="The Chronicle lineage: three practice communities as rows and five chapters as columns. Arrows link alpha's navigation sacrifice to beta's Blind Jump, and beta's and gamma's repairs to later chapters; dotted markers show each custody change."></a>
+1. **Alpha takes command** of a fresh Ark: 216 passengers, five chapters.
+2. **Chat stakes the hull on one jump.** Three crew ballots lock the hull before the attempt. The practice captain confirms the scripted failure, and the hull loses 6.
+3. **The crew solves the shield relay** through practice chat. It is the same parser Twitch chat uses.
+4. **Alpha sacrifices navigation.** Everyone survives, but a blind jump is now owed.
+5. **Another community opts in** to receive an Ark.
+6. **Alpha prepares the relay** before raiding.
+7. **The raid lands.** The raid proof here is simulated and labelled; a live world refuses it.
+8. **The receiver accepts** the inherited Ark, then reads the dossier.
+9. **A different game repairs the same Ark.** The receiver's aerial goal adds 3 hull.
+10. **Alpha's decision becomes their crisis.** Chapter two starts with the blind jump. Alpha's crew repaired the shields, so it costs no hull.
+11. **Trace the lineage across both communities** in the Chronicle.
 
-Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided. Select any decision and ask **What if they had chosen differently?**: the engine replays every option once from the saved state before it and confirms that recomputing the real choice reproduces the record. **Verify this record** replays the whole saved log and compares SHA-256 digests of the replayed and the saved ship. A captain can publish a revocable, read-only **public Chronicle link** so their community can keep following the Ark after it leaves their channel.
-
-<a href="assets/readme/season-finale.png"><img src="assets/readme/season-finale.png" width="1440" alt="The read-only OBS view at the end of the voyage: a season finale card reads A New Home, 216 of 216 aboard, and lists chapter 1 Simulation alpha (sacrifice navigation), chapter 2 Simulation beta (rebuild navigation) and chapters 3 to 5 Simulation gamma, carried by three communities and two relays."></a>
-
-<a href="assets/readme/season-record.png"><img src="assets/readme/season-record.png" width="1440" alt="Season record: A New Home. 216 passengers landed. Simulation alpha sacrificed navigation, Simulation beta rebuilt it, Simulation gamma restored life support, salvaged and landed."></a>
-
-Captured from the integrated app in saved practice. The relays used labeled simulated raid evidence, not native Twitch raids.
+**Autoplay** stops at step 9, so a person reads the dossier before the receiver acts. Regression test: [`tests/browser/relay-rehearsal.spec.ts`](tests/browser/relay-rehearsal.spec.ts).
 
 </details>
 
-## LIVEWIRE — your next attempt matters
+### How one Ark travels between streams
 
-Keep playing your usual game. Before a difficult Minecraft jump, a Rocket League aerial or a boss attempt, open one mission. Chat chooses which Ark system is at risk. Lock that commitment, make the attempt, then confirm what happened. A small repair or scar is written to the real saved ship—once. Each preset has its own illustrated feed and game-styled HUD.
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Channel A · captain + chat
+    participant T as Twitch
+    participant S as TORCHLINE
+    participant B as Channel B · receiver
+    A->>T: Chat commands (!scan, !route, !stake …)
+    T->>S: Signed EventSub chat notifications
+    S-->>A: The Ark changes · OBS overlay updates
+    A->>S: Captain commits a sacrifice · a debt is recorded
+    A->>S: Prepare a handoff to B at a chapter boundary
+    A->>T: Native raid to B
+    T->>S: Signed channel.raid notification
+    S-->>B: Matching intent and time window → inherited Ark offered
+    B->>S: Accept inherited Ark
+    S-->>B: Custody moves in one transaction · dossier on stream
+    B->>S: Start the next chapter · A's debt comes due
+```
 
-<a href="assets/readme/minecraft-livewire.png"><img src="assets/readme/minecraft-livewire.png" width="1440" alt="Minecraft LIVEWIRE: an illustrative lava-gap challenge above the persistent Ark's tactical mission dock."></a>
+<sub>The live raid path is implemented end to end, but no native raid between two broadcasters has been verified yet ([what is proven](#proven)). A prepared intent, Twitch's signed notification and the receiver's consent must all agree. Chat, screenshots and simulator events can never move a live world.</sub>
+
+<a id="chair"></a>
+
+## 🪑 Take the captain's chair
+
+> **Chapter 1 · Radiation Storm.** ARK-001 carries 216 sleepers. A radiation storm hits before your crew has finished the shield relay. You are the captain, so open a card to commit.<br>
+> **Starting ship:** 216 passengers · hull 70 · power 60 · oxygen 65 · navigation 70 · supplies 50
 
 <details>
-<summary><strong>▶ See the Minecraft mission scene move</strong></summary>
+<summary><b>🅰 Sacrifice navigation</b>: save every passenger</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| **216** | 65 | 50 | 65 | **0 · destroyed** | 50 |
+
+**Debt created:** a blind jump, due in chapter 2.
+
+**Chapter 2 · Blind Jump.** The debt lands. The shields were never repaired, so the jump costs hull: 65 → 55. With navigation gone, you choose again:
+
+<details>
+<summary>Rebuild navigation</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| 216 | 55 | **35** | 65 | **60** | **25** |
+
+Navigation comes back, but it costs power and supplies, plus **a new debt: a supply debt due in chapter 4.** Repairs are never free.
+
+</details>
+
+<details>
+<summary>Fly the debris field manually</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| 216 | **30** | 50 | **55** | 0 · destroyed | 50 |
+
+No new debt, but nearly half the remaining hull is gone.
+
+</details>
+
+> 💡 If chat had solved the shield relay first, this blind jump would have cost no hull. That is exactly what happens in the Judge Arena.
+
+</details>
+
+<details>
+<summary><b>🅱 Seal the rear habitat</b>: keep navigation, lose 48 people</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| **168** | 60 | 60 | 60 | 70 | 50 |
+
+The sealed habitat stays visible on the ship and in the record.
+
+**Chapter 2 · Safe Corridor.** Navigation survived, so there is a charted way through. You choose again:
+
+<details>
+<summary>Search the derelict</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| 168 | **45** | 55 | 60 | 70 | **65** |
+
+The search finds 15 supplies, at a cost of 15 hull and 5 power.
+
+</details>
+
+<details>
+<summary>Take the safe corridor</summary>
+<br>
+
+| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| 168 | 60 | **55** | 60 | 70 | 50 |
+
+The hull holds and only five power is spent.
+
+</details>
+
+</details>
+
+<details>
+<summary><b>One viewer. Four oxygen. A different ending.</b></summary>
+<br>
+
+Follow the same planned captain's route twice, with no viewer help except one person:
+
+- **Without** a chapter-three life-support repair, oxygen runs out and the voyage ends as a wreck in chapter 5.
+- **With** one viewer's `!scan A` and `!patch A` in chapter 3, **156 passengers reach the surface with four oxygen left.** They land, though not as a viable colony.
+
+Open the [flight recorder](assets/readme/flight-log.csv) and search for **patch**.
+
+</details>
+
+<sub>Every number above comes from the real engine, and replay checks it ([proof](assets/readme/proof.json)). `pnpm readme:proof` regenerates the file, and CI fails if the proof drifts from the rules.</sub>
+
+<a id="crew"></a>
+
+## 🧠 Your chat is the crew
+
+<a href="assets/readme/mission-control.png"><img src="assets/readme/mission-control.png" width="960" alt="Mission Control during chapter one's radiation storm: resource meters, the cooperative shield-relay challenge and captain controls."></a>
+
+Voting is only one part of the job. A correct shared solution changes resources, ship condition and the choices that come later.
+
+| Type in chat | What it does |
+| --- | --- |
+| <kbd>!scan A</kbd> | Reveals a relay clue that the crew shares |
+| <kbd>!route A B C</kbd> | Submits a power route; the right one repairs the shields |
+| <kbd>!patch A</kbd> | Patches failing equipment |
+| <kbd>!inspect engine</kbd> | Investigates an area (engine, cargo or life support) |
+| <kbd>!allocate hull 3 oxygen 2</kbd> | Splits the crew's repair effort |
+| <kbd>!vote 1</kbd> | Advises the captain; only the captain commits |
+| <kbd>!stake 2</kbd> · <kbd>!stake hull</kbd> | Picks the system at risk in a LIVEWIRE mission |
+
+Every chat message reaches TORCHLINE as a signed EventSub notification. It is deduplicated and applied at most once, and the overlay shows the result.
+
+<a id="livewire"></a>
+
+## 🎮 LIVEWIRE: your next attempt matters
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/minecraft-livewire.png">
-  <img src="assets/readme/minecraft-livewire.gif" width="960" alt="Actual browser capture of the Minecraft illustration and saved mission dock. The streamer judges the real attempt; the illustration is not game telemetry.">
+  <img src="assets/readme/livewire-attempt.webp" width="960" alt="A LIVEWIRE mission on the voxel preset: chat's hull stake is locked, the lava-gap jump is attempted, the streamer confirms the loss and the hull damage is written to the Ark.">
 </picture>
 
-The scene illustrates the attempt; it does not read Minecraft or decide the result. Missions cost one supply, have a finite allowance and cannot resurrect a destroyed system. [Exact rules](docs/product/livewire-v0.md).
+Keep playing your usual game. Before a difficult jump, an aerial or a boss attempt, open one mission:
+1. Chat chooses which Ark system is at risk.
+2. The commitment locks before you try.
+3. You confirm what happened.
+4. One small repair or scar is written to the real saved ship, exactly once.
 
-</details>
+<table>
+<tr>
+<td width="33%"><img src="assets/readme/livewire-voxel.webp" alt="Voxel preset: lava gap jump with hotbar, hearts and crosshair HUD."></td>
+<td width="33%"><img src="assets/readme/livewire-rocket.webp" alt="Car-soccer preset: arena, scoreboard and boost gauge HUD."></td>
+<td width="33%"><img src="assets/readme/livewire-souls.webp" alt="Souls-style preset: boss courtyard with boss bar and vitals HUD."></td>
+</tr>
+<tr>
+<td align="center"><b>Minecraft</b> preset · lava gap jump</td>
+<td align="center"><b>Rocket League</b> preset · aerial goal</td>
+<td align="center"><b>Souls Run</b> preset · boss attempt</td>
+</tr>
+</table>
 
-<sub>Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them. Its game scenes are original illustrations and never read game data.</sub>
+The preset only picks the illustrated scene. The streamer names the game they are really playing.
 
-## Your chat can change who survives
-
-<a href="assets/readme/mission-control.png"><img src="assets/readme/mission-control.png" width="1440" alt="Mission Control with the actual saved radiation-storm chapter, resource meters, cooperative relay challenge and captain controls."></a>
-
-Discover a relay with `!scan A`, connect the safe route, patch failing equipment or help divide repairs. Solving the shared problem changes resources, ship condition and future choices. Voting is only one part of the job.
-
-<details>
-<summary><strong>◇ You're the captain. Save navigation—or save everyone?</strong></summary>
-
-The storm arrives before the shield challenge is solved.
-
-| Your commitment | What the next chapter inherits |
+| Rule | Value |
 | --- | --- |
-| Sacrifice navigation | All 216 people survive. Guidance is destroyed. You face a blind jump. |
-| Seal the rear habitat | 168 people survive. Navigation remains available. The sealed habitat stays in the record. |
+| When | At a chapter boundary, once per boundary (five per voyage at most) |
+| Cost | 1 supply, never refunded |
+| Chat picks | Navigation, hull or life support with <kbd>!stake 1</kbd>, <kbd>!stake 2</kbd> or <kbd>!stake 3</kbd> |
+| Success | Up to **+3** to that system |
+| Failure | Up to **−6**, never below 1 |
+| Lasting mark | The system is also marked repaired (win) or damaged (loss), and that can matter later. For example, damaged life support leaks 15 oxygen in chapter 4 |
+| Never | Revives a destroyed system, reads game data or decides the result |
+| Evidence | Every result is labelled **streamer-attested** |
 
-These are real engine results. [Inspect the generated proof](assets/readme/proof.json).
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Open: streamer opens · costs 1 supply
+    Open --> Locked: chat's choice locks before the attempt
+    Locked --> Resolved: streamer confirms win or loss
+    Resolved --> [*]: one bounded change saved to the Ark
+    Open --> Cancelled
+    Locked --> Cancelled
+    Open --> Expired: window closes
+    Locked --> Expired: window closes
+```
 
-</details>
+[Exact rules](docs/product/livewire-v0.md) · [Design decision](docs/decisions/0037-cross-game-livewire-relay.md)
+
+<a id="relay"></a>
+
+## 🔁 The relay: someone else's decision becomes your crisis
+
+<table>
+<tr>
+<td width="44%"><a href="assets/readme/dossier.png"><img src="assets/readme/dossier.png" alt="The inheritance dossier: Simulation alpha handed this Ark on; their decision was to sacrifice navigation; what other games did to it was a failed lava gap jump costing 6 hull; a blind-jump debt is due in chapter 2."></a></td>
+<td>
+
+When a captain hands the Ark on, the receiving stream sees an **inheritance dossier**:
+- who handed it over;
+- every decision aboard and the community that made it;
+- **what other games did to the hull**;
+- the systems already lost;
+- each debt still waiting, linked to the decision that created it.
+
+Starting the next chapter makes the debt real. The new audience inherits a problem it can trace to people it has never met.
+
+Custody moves only when three things agree: a prepared handoff intent, Twitch's signed `channel.raid` notification, and the receiver's explicit acceptance. All three commit in one database transaction.
+
+</td>
+</tr>
+</table>
+
+<a id="chronicle"></a>
+
+## 📜 The Chronicle remembers, and lets you check
+
+<a href="assets/readme/lineage.png"><img src="assets/readme/lineage.png" width="960" alt="The Chronicle lineage: communities as rows, chapters as columns, arrows linking each decision to the crisis it caused, and dotted custody markers."></a>
+
+Rows are communities, columns are chapters. Arrows are saved cause links, such as a sacrifice that became a crisis or a repair that prevented a leak. Dotted markers are custody changes.
+
+<table>
+<tr>
+<th width="50%">What if they had chosen differently?</th>
+<th width="50%">Verify this record</th>
+</tr>
+<tr>
+<td align="center"><img src="assets/readme/what-if.png" width="260" alt="What if? panel: the chosen branch, sacrifice navigation, keeps 216 passengers and leaves a blind jump due; the branch not taken, seal the rear habitat, keeps 168 passengers and leaves no new debt. The recomputed choice matches the saved record."></td>
+<td align="center"><img src="assets/readme/verify.png" alt="Replay verified: 18 saved events replayed through ark-v3 reproduce this exact ship, with matching SHA-256 digests."></td>
+</tr>
+<tr>
+<td>Select any decision or attested mission. The server rebuilds the world exactly as it was before that event and applies every option with the same rules, actor and timestamp. It says <i>"matches the saved record"</i> only when the recomputed choice equals the stored event. Later chapters are never guessed.</td>
+<td>Replays the whole saved log from the start through its pinned rules version, then compares SHA-256 digests of the replayed ship and the saved ship. In tests, an altered saved state is caught. This checks that the stored history reproduces the stored ship. It is not a signature, and it cannot prove the inputs were genuine Twitch chat.</td>
+</tr>
+</table>
+
+A captain can also publish a revocable, read-only **public Chronicle link**, so the community that handed an Ark on can keep following it, and so can judges.
 
 <details>
-<summary><strong>One viewer. Four oxygen. A different ending.</strong></summary>
+<summary><b>Season finale and season record</b></summary>
+<br>
 
-Follow the same planned captain's route twice. Without a chapter-three life-support repair, oxygen runs out before landing. With that repair, 156 passengers reach the surface with four oxygen remaining. It saves the voyage, without guaranteeing a perfect colony.
+<a href="assets/readme/season-finale.png"><img src="assets/readme/season-finale.png" width="960" alt="The OBS season finale: A New Home, 216 of 216 aboard, naming each chapter's community and decision."></a>
 
-Open the [flight recorder](assets/readme/flight-log.csv) and search **patch** in GitHub's table. The record comes from deterministic engine commands and is checked by replay. It is a saved simulation, not a real audience session.
+<a href="assets/readme/season-record.png"><img src="assets/readme/season-record.png" width="960" alt="Season record: A New Home, listing what each of three practice communities decided."></a>
+
+Captured from the app in saved practice. Those relays used labelled simulated raid evidence.
 
 </details>
+
+<a id="codex"></a>
+
+## 🤖 Built with OpenAI Codex
+
+<table>
+<tr><td><b>Codex session ID</b></td><td><code>01a176fc-1e4a-7e83-b21e-1043aa17e8bc</code></td></tr>
+<tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–31 October 2026</td></tr>
+<tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
+</table>
+
+Codex built TORCHLINE as its lead engineer. We gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
+
+> - Pure deterministic engine; explicit versioned content and events; no network, clock, or random calls inside transitions.
+> - PostgreSQL is authoritative. Custody, state, domain events, and publish intents commit atomically.
+> - Never treat a chat message, browser notification, simulator event, or screenshot as verified native raid proof.
+> - Mark implemented versus simulated versus unverified behavior explicitly.
 
 ```mermaid
 flowchart LR
-  A[Chat finds a way] --> B[Captain commits]
-  B --> C[The same Ark changes]
-  C --> D[Next chapter]
-  D --> A
-  G[Your usual game] --> L[LIVEWIRE mission]
-  L --> C
-  C --> R[Prepared native raid]
-  R --> N[Next captain accepts]
-  N --> D
-  style C fill:#172322,stroke:#df9d47,color:#e1dccf
-  style L fill:#172322,stroke:#76c6c5,color:#e1dccf
+    B["AGENTS.md brief"] --> P["Plan · requirements, rules, architecture, stress review"]
+    P --> I["Implement in small, reviewable commits"]
+    I --> T["Test · Vitest on real PostgreSQL, Playwright journeys"]
+    T --> V["Verify live · credential-safe Twitch checks"]
+    V --> R["Record honest status · implemented, simulated, unverified"]
+    R --> I
 ```
 
-## Try it
+| Day | What Codex built |
+| --- | --- |
+| **26&nbsp;Oct** | The product plan, requirements, architecture and decision stress review. Then the persistent-Ark engine and the Twitch foundation: OAuth, signed EventSub webhooks and bot replies that never block gameplay |
+| **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
+| **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
+| **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
+| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2 |
+| **31&nbsp;Oct** | Shared channel projections, bounded retention, attributed custody arrivals, and property-based balance tests |
+
+Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and the replies stay paused.
+
+### The rest of the team
+
+| | Role |
+| --- | --- |
+| **OpenAI Codex** | Lead engineer: everything above, in session `01a176fc-1e4a-7e83-b21e-1043aa17e8bc` |
+| **Claude Code** | Reviewer and checker. It audited the build against the hackathon rules and the tests, and verified the live evidence. On 1 November it also built the final layer: the Judge Arena relay rehearsal, the inheritance dossier, lineage and public Chronicle links, *What if?* and *Verify this record*, and the Docker preview. It also integrated the per-game LIVEWIRE scenes from Figma |
+| **Claude Design** and **Figma** | UI/UX. Claude Design shaped the first command-deck and OBS layouts; Figma holds the final ten-screen design and the LIVEWIRE game scenes |
+| **The creator** | The vision, the game design direction, the Figma design and every product decision |
+
+<a id="architecture"></a>
+
+## 🧱 Architecture
+
+```mermaid
+flowchart LR
+    subgraph Twitch
+        C["Viewer chat"] --> E["Signed EventSub webhooks"]
+        R["Native raid"] --> E
+    end
+    E --> Q[("Inbox · deduplicated")]
+    Q --> G["Pure engine · ark-v3 + LIVEWIRE"]
+    D["Captain dashboard"] -->|"session + request checks"| G
+    G --> P[("PostgreSQL · state, events, custody, outbox")]
+    P --> F["Server-sent events"]
+    F --> D
+    F --> O["OBS overlay · read-only"]
+    P --> X["Chronicle · lineage, What if?, Verify"]
+```
+
+<details>
+<summary><b>Invariants the code enforces</b></summary>
+<br>
+
+- **Deterministic rules.** A transition never reads the clock, the network or randomness, so every saved world replays exactly. Rules are versioned (`ark-v3`, LIVEWIRE `v0`), and each world pins the version it started with.
+- **One source of truth.** State, domain events, custody and publish intents commit in one PostgreSQL transaction, with optimistic versions and idempotency keys.
+- **At-least-once Twitch.** Deliveries are signature-checked, deduplicated and processed through a durable inbox. Nothing is claimed to be exactly-once.
+- **Authority.** Every mutation is authorized by the server session and current custody. Overlays are read-only links that can be rotated.
+- **Practice and live are separate.** Simulation and live worlds are separated both visibly and technically. Practice raid proof is refused by live worlds.
+- **No pretend proof.** Animations, bot replies and illustrated game feeds never decide outcomes.
+
+[System design](docs/architecture/system-design.md) · [Data and contracts](docs/architecture/data-and-contracts.md) · [All decisions (ADRs)](docs/decisions/README.md)
+
+</details>
+
+<a id="proven"></a>
+
+## ✅ What is proven
+
+| Area | Status | Evidence |
+| --- | :-: | --- |
+| Engine, storage, replay | ✅ | 164 Vitest tests in 43 files on real PostgreSQL; every saved world replays to its stored state |
+| Judge Arena relay, dossier, lineage, *What if?*, *Verify* | ✅ | Playwright journey through the full two-game relay; the raid proof is simulated and labelled |
+| LIVEWIRE missions | ✅ | Locked ballots, one attested consequence, reload and history, all in saved practice |
+| One-command preview | ✅ | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)) |
+| OBS views | ✅ | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md)) |
+| Real Twitch chat → live Ark | ✅ | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md)) |
+| Overlay updating from live chat, on video | ⏳ | Being recorded |
+| LIVEWIRE on live Twitch | ⏳ | One live mission was opened and expired on 30 Oct; no live streamer-attested result yet |
+| Bot replies | ⚠️ | Twitch accepted the sends, but other viewers did not see them; replies are paused and gameplay does not depend on them |
+| Native raid between two broadcasters | ⏳ | Implemented, not yet verified; the Judge Arena uses labelled simulated evidence |
+| Permanent hosting | ⏳ | Not yet; live runs from the creator's machine through a tunnel |
+
+<sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
+
+<a id="play"></a>
+
+<a id="run-it"></a>
+
+## 🚀 Run it
 
 **One command, with Docker:**
 
@@ -117,7 +468,7 @@ flowchart LR
 docker compose up --build    # then open http://localhost:3000
 ```
 
-This runs saved practice with LIVEWIRE on. Every start uses a fresh practice database, and no Twitch account is involved.
+This starts saved practice with LIVEWIRE on, on a fresh in-memory database, bound to this machine only. No Twitch account is involved.
 
 **Or with Node 24**, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
 
@@ -129,41 +480,66 @@ pnpm build
 pnpm start        # http://localhost:3000
 ```
 
-**The two-minute path:** open the app, choose **Command OS → Judge Arena**, then **Autoplay to the handoff**. Alpha streams Minecraft and a LIVEWIRE mission fails; their crew plays chapter one, prepares a relay, and the receiver accepts the Ark and stops on the inheritance dossier. Every step calls the same API as the dashboard. The raid proof is labeled simulation and can never move a live world. Then run step 9 (the receiver streams Rocket League and repairs the same hull) and step 10 (the inherited debt arrives), and open the Chronicle lineage.
+**The two-minute path:**
+1. Choose **Command OS → Judge Arena → Autoplay to the handoff**.
+2. Read the dossier.
+3. Run step 9 (a different game repairs the same hull) and step 10 (the inherited debt arrives).
+4. Open the Chronicle, then try **What if?** and **Verify this record**.
 
-For free play choose **Launch the Ark** and use **Command OS** for all ten destinations. No Twitch messages are sent in saved practice.
+**Free play:** choose **Launch the Ark**, then use **Command OS** to reach all ten destinations.
 
-For the real stream, follow the [owner setup guide](docs/operations/owner-launch-guide.md) in order: HTTPS → exact Twitch callback → broadcaster/bot consent → subscriptions → OBS → genuine chat → native raid. Keep the bot's role and every private OBS link private.
-
-## What is proven
-
-| Layer | Honest status |
-| --- | --- |
-| Saved survival + LIVEWIRE | Implemented with actual PostgreSQL, deterministic consequences, replay and automated tests |
-| Relay rehearsal, inheritance dossier, lineage | Implemented. A browser journey runs the full two-community, two-game practice relay and checks the saved custody, both attested missions, scars, debt and lineage. The raid evidence there is simulated and labeled |
-| Final design + OBS | Ten screens integrated; browser checks and native full/dock rendering, refresh and rotation pass in saved practice. [Evidence and limits](docs/reports/2026-10-30-final-frontend.md) |
-| Twitch | Real consent and signed callbacks. On 30 Oct, three genuine viewer chat commands arrived as signed EventSub notifications and were saved as `scan` gameplay events on a live Ark. A recording of the overlay updating from live chat is still pending |
-| Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |
-| Native raid + permanent hosting | Still open. Simulation does not satisfy either gate |
-
-This is a development preview, not a production-ready claim. The final design, LIVEWIRE and recovery work share one reviewed source baseline; deployment and real Twitch acceptance remain separate. [Consolidation record](docs/reports/2026-10-30-main-consolidation.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md) · [LIVEWIRE acceptance](docs/operations/livewire-v0.md).
+**On your real stream:** follow the [owner setup guide](docs/operations/owner-launch-guide.md) in order: HTTPS → exact Twitch callback → broadcaster and bot consent → subscriptions → OBS → genuine chat → native raid.
 
 <details>
-<summary><strong>For builders and judges</strong></summary>
-
-React and TypeScript present the world. A pure engine decides consequences. PostgreSQL saves state, history and custody together. Twitch supplies signed input; a read-only stream updates the dashboard and OBS. Animations and bot replies never decide game outcomes.
+<summary><b>Checks</b></summary>
+<br>
 
 ```powershell
-pnpm test
-pnpm test:browser
-pnpm audit:balance
-pnpm design:fixtures
-pnpm readme:proof
-pnpm check:repo
+pnpm typecheck
+pnpm test            # Vitest: engine, storage (real PostgreSQL), server, Twitch fixtures
+pnpm test:browser    # Playwright journeys, including the full relay
+pnpm format:check
+pnpm check:repo      # private inputs excluded, local links valid
+pnpm check:version   # versions, release notes and this README agree
+pnpm readme:proof    # regenerate the engine proof behind this README
 ```
 
-[Requirements](docs/product/requirements.md) · [Architecture](docs/architecture/system-design.md) · [Decisions](docs/decisions/README.md) · [Twitch research](docs/research/twitch-integration.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md).
+</details>
 
-The creator supplied the vision and final design direction. Codex helped research, implement and verify the system. The owner-supplied Figma v2 design supplies the final visual experience. [Asset provenance](assets/design-provenance.md).
+<details>
+<summary><b>Repository map</b></summary>
+<br>
+
+| Path | What lives there |
+| --- | --- |
+| [`apps/server`](apps/server) | Fastify API, Twitch webhooks and OAuth, server-sent event feeds |
+| [`apps/web`](apps/web) | React 19 + React Three Fiber client: ten screens, OBS views, LIVEWIRE scenes |
+| [`packages/engine`](packages/engine) | Pure deterministic rules (`ark-v3`) and the LIVEWIRE extension |
+| [`packages/storage`](packages/storage) | PostgreSQL authority, migrations, replay, *What if?* and verification |
+| [`packages/contracts`](packages/contracts) | Zod schemas shared by every package |
+| [`packages/twitch`](packages/twitch) | OAuth, EventSub signature checks, chat parsing, bot delivery |
+| [`tests`](tests) | Vitest suites on real PostgreSQL and Playwright journeys |
+| [`docs`](docs/README.md) | Product, architecture, operations, decisions and dated reports |
 
 </details>
+
+---
+
+<div align="center">
+
+<sub>
+<a href="docs/product/requirements.md">Requirements</a> ·
+<a href="docs/product/game-design.md">Game design</a> ·
+<a href="docs/architecture/system-design.md">Architecture</a> ·
+<a href="docs/decisions/README.md">Decisions</a> ·
+<a href="docs/research/twitch-integration.md">Twitch research</a> ·
+<a href="CHANGELOG.md">Changelog</a> ·
+<a href="SECURITY.md">Security</a> ·
+<a href="assets/design-provenance.md">Asset provenance</a>
+</sub>
+
+<br><br>
+
+<sub>Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them, or by Twitch or OpenAI. Its game scenes are original illustrations and never read game data.</sub>
+
+</div>
