@@ -14,7 +14,7 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0008](0008-balanced-consequences-and-physical-state.md) | Reachable catastrophe, meaningful challenge rewards and persistent physical state | D4, D9, D11, D14–16 |
 | [0009](0009-bot-delivery-and-account-boundaries.md) | Durable bot output, explicit account roles and private diagnostics | D6–8, D10, D11, D17 |
 | [0010](0010-explicit-empty-account-bot-conversion.md) | Named, one-use confirmation for an empty creator's bot conversion | D6–8, D11, D17 |
-| [0011](0011-claude-design-integration.md) | Superseded presentation decision; see ADR 0033 | D3–5, all C1–C13 |
+| [0011](0011-superseded-presentation.md) | Superseded presentation decision; see ADR 0033 | D3–5, all C1–C13 |
 | [0012](0012-scoped-world-records.md) | Complete paginated world records and consent-scoped incoming previews | D5, D7, D10, D16, all C1–C13 |
 | [0013](0013-versioned-cooperation.md) | Immutable cooperation rules, bounded allocation and explicit vote freezing | D9, D11, D15–16, all C1–C13 |
 | [0014](0014-durable-episode-policy.md) | Persisted phase deadlines, worker fencing and scoped input recovery | D5, D7–11, D15–17, all C1–C13 |
@@ -36,9 +36,9 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0030](0030-spatial-hud-and-saved-controls.md) | Superseded presentation decision; see ADR 0033 | Presentation/reliability, all C1–C13 |
 | [0031](0031-livewire-v0.md) | Finite, versioned missions in the persistent Ark; isolated release boundary | Gameplay/participation/custody, all C1–C13 |
 | [0032](0032-final-frontend-replacement.md) | Archive rejected visuals and replace one presentation entry while retaining real session/game/overlay behavior | Presentation/controller boundary, all C1–C13 |
-
 | [0033](0033-figma-v2-presentation.md) | Preserve the final ten-screen Figma design, corrected shared Ark and Minecraft scene with real state | Presentation/rendering, all C1–C13 |
 | [0034](0034-dashboard-feed-recovery.md) | Recover authenticated dashboard SSE feeds after transient failures without accepting stale authority | Recovery/presentation, C1–C13 |
+| [0035](0035-relay-rehearsal-and-attributed-inheritance.md) | Guided practice relay through public endpoints, attributed inheritance dossier, lineage view and finished-voyage release | Custody/presentation/recovery, all C1–C13 |
 
 The [component stress review](../architecture/decision-stress-review.md) evaluates all choices across all component boundaries. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 

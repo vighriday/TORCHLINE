@@ -4,7 +4,7 @@ Status: target design with an implemented first slice, 2026-10-26. Actual schema
 
 The implemented world row uses an application `revision` for gameplay, hosting and custody writes; the engine state's `version` sequences gameplay events only. `WorldPresentation.worldVersion` is the concurrency revision; `gameVersion` is the replay sequence. Custody and hosting do not silently insert game actions or reset physical state. Gameplay replay verifies recorded accepted commands and their derived event effects under immutable rules; custody has a separate atomic audit trail.
 
-Physical system state, scars, challenge reward event IDs and future cause links are canonical. The presentation contract supplies stable system IDs and derived severity for Claude Design. See [frontend contracts](frontend-contracts.md).
+Physical system state, scars, challenge reward event IDs and future cause links are canonical. The presentation contract supplies stable system IDs and derived severity for the renderer. See [frontend contracts](frontend-contracts.md).
 
 ## Core records
 
