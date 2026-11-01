@@ -113,7 +113,9 @@ export function lineageNodes(events: RecordedWorldEvent[]): LineageNode[] {
       summary: event.summary,
       causes: event.causes,
       ended: cues.includes('world-ended'),
-      loss: Object.values(event.resourceDelta).some((value) => (value ?? 0) < 0),
+      // Only environmental arrivals are tinted as damage; nearly every commitment spends something.
+      loss:
+        kind === 'arrival' && Object.values(event.resourceDelta).some((value) => (value ?? 0) < 0),
     });
   }
   return nodes;
@@ -124,7 +126,7 @@ const NODE_W = 172;
 const NODE_H = 30;
 const LEFT = 132;
 const TOP = 46;
-const clip = (text: string, length = 24) =>
+const clip = (text: string, length = 27) =>
   text.length > length ? `${text.slice(0, length - 1)}…` : text;
 
 /**
