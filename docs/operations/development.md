@@ -7,6 +7,19 @@ Everything below runs locally in **saved simulation**: real engine, real Postgre
 - Node.js 24 (see `.node-version`) and pnpm 12.4.2 (pinned in `package.json`).
 - PostgreSQL 17. `pnpm db:up` creates a private cluster under `.local/` on `127.0.0.1:54329`. It expects the PostgreSQL binaries at `C:/Program Files/PostgreSQL/17/bin` on Windows or on `PATH` elsewhere; set `PG_BIN` to point somewhere else. Any isolated PostgreSQL database works if you set `DATABASE_URL` yourself.
 
+## One command with Docker
+
+```powershell
+docker compose up --build    # http://localhost:3000
+```
+
+[`compose.yaml`](../../compose.yaml) builds the release image and starts it beside PostgreSQL 17. You get saved practice with LIVEWIRE on.
+
+- **Fresh on every start.** The database lives in memory and is gone when the stack stops. The app generates new random secrets each time it starts.
+- **Local only.** The port is bound to `127.0.0.1` and the app uses loopback HTTP, so this is not a hosted or live configuration.
+- **Stop it** with `docker compose down`.
+- **Checked in CI** on every push by `scripts/smoke-compose.mjs`: readiness, web bundle, practice sign-in, a new Ark and LIVEWIRE-enabled dashboard state.
+
 ## Run saved practice
 
 ```powershell

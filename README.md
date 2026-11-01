@@ -109,7 +109,15 @@ flowchart LR
 
 ## Try it
 
-With Node 24, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
+**One command, with Docker:**
+
+```powershell
+docker compose up --build    # then open http://localhost:3000
+```
+
+This runs saved practice with LIVEWIRE on. Every start uses a fresh practice database, and no Twitch account is involved.
+
+**Or with Node 24**, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
 
 ```powershell
 pnpm install --frozen-lockfile

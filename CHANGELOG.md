@@ -2,6 +2,11 @@
 
 ## Unreleased — Relay experience and platform completion
 
+- Add a one-command local preview: `docker compose up --build` starts the release image beside PostgreSQL 17 at `http://localhost:3000`, with saved practice and LIVEWIRE on.
+  - Every start uses an in-memory practice database and fresh random secrets.
+  - The port is bound to loopback only.
+  - CI starts the stack on every push and checks readiness, the web bundle, practice sign-in, a new Ark and LIVEWIRE-enabled dashboard state (`scripts/smoke-compose.mjs`).
+
 - Add **Verify this record** to the season record in the Chronicle and the public Chronicle: the server replays the Ark's whole saved log through its pinned rules and compares SHA-256 digests of the replayed and the saved ship, reporting the event count, both digests or the rules' refusal. A saved state the log does not produce is caught. [ADR 0038](docs/decisions/0038-one-step-decision-alternatives.md).
 - Add **What if?** to the Chronicle and the public Chronicle: any captain decision or attested LIVEWIRE result can be replayed once, read only, from the saved state just before it, showing every option's resources, debts, destroyed systems or ending. The chosen branch is recomputed and compared with the saved event, and the panel says so only when they match. Later chapters are never simulated. [ADR 0038](docs/decisions/0038-one-step-decision-alternatives.md).
 - Give each LIVEWIRE preset its own illustrative feed and game-styled HUD: the voxel lava jump, an arena aerial goal and a boss-courtyard duel. The deck previously drew the Minecraft scene for every preset. A saved mission reopens in its own preset's scene, and outcome banners appear only after the streamer-attested result is saved. The streamer now names the game they really play (for example Elden Ring on the boss preset), checked client-side by the server's plain-text rule before a supply is spent. [ADR 0037](docs/decisions/0037-cross-game-livewire-relay.md).
