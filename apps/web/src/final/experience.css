@@ -871,3 +871,34 @@
   margin: 10px 0 0;
   font: 600 16px var(--display);
 }
+
+/* Broadcast studio: step guidance and a usable single action in practice mode. */
+.setup-guide {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--amber);
+  background: rgba(201, 152, 81, 0.06);
+}
+.setup-guide p {
+  margin: 6px 0 0;
+  color: #b9bdb4;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.studio-actions {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.studio-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  text-align: left;
+}
+.studio-actions button:only-child {
+  background: var(--amber);
+  color: #111;
+}
+.broadcast-grid > .obs-preview {
+  align-self: start;
+}

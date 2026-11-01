@@ -413,6 +413,17 @@ export function Inheritance({
   );
 }
 
+// One line per scarred system, e.g. "Hull 6 damage, 3 repair", instead of every mark in turn.
+function scarSummary(world: WorldPresentation) {
+  return world.systems
+    .filter((system) => system.marks.length)
+    .map((system) => {
+      const counts = new Map<string, number>();
+      for (const mark of system.marks) counts.set(mark.kind, (counts.get(mark.kind) ?? 0) + 1);
+      return `${systemLabels[system.id]} ${[...counts].map(([kind, n]) => `${n} ${kind}`).join(', ')}`;
+    })
+    .join(' · ');
+}
 // Every Ark keeps the vessel name; a short registry code tells saved worlds apart.
 export const registry = (worldId: string) => worldId.replaceAll('-', '').slice(0, 4).toUpperCase();
 export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
@@ -478,7 +489,9 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
                       : 'ACTIVE'}
                 </strong>
                 <small>
-                  {id === record?.worldId ? `HULL ${record.resources.hull}%` : 'SELECT TO INSPECT'}
+                  {item.id === record?.worldId
+                    ? `HULL ${record.resources.hull}%`
+                    : 'SELECT TO INSPECT'}
                 </small>
               </div>
               <Icon name="chevron" />
@@ -544,11 +557,7 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
             <span>PERMANENT SCARS</span>
             <p>
               {record
-                ? record.systems
-                    .flatMap((system) =>
-                      system.marks.map((mark) => `${systemLabels[system.id]}: ${mark.kind}`),
-                    )
-                    .join(' · ') || 'No recorded damage.'
+                ? scarSummary(record) || 'No recorded damage.'
                 : 'No invented world or history is shown.'}
             </p>
           </div>
@@ -590,6 +599,38 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
   );
 }
 
+// What each setup step means in this mode; the step list now explains itself instead of only
+// highlighting.
+function setupGuide(live: boolean) {
+  return [
+    {
+      title: 'Connect broadcaster',
+      body: live
+        ? 'Sign in with the Twitch account that streams. Creator consent covers chat and raid events for your own channel only.'
+        : 'Saved practice uses local identities. Switch between alpha, beta and gamma below; each keeps its own Ark and no Twitch message is sent.',
+    },
+    {
+      title: 'Authorize dedicated bot',
+      body: live
+        ? 'Operator only: open the dedicated bot setup below and sign in with the separate bot account. Replies are optional; gameplay never depends on them.'
+        : 'Not needed in saved practice.',
+    },
+    {
+      title: 'Select overlay preset',
+      body: 'Tactical dock is a low strip for gameplay streams. Full expedition shows the whole ship and HUD. Automatic shows the dock between chapters and the full view during chapters and right after an Ark arrives.',
+    },
+    {
+      title: 'Copy OBS source',
+      body: 'Generate the private source and copy it. In OBS add a Browser Source at 1920×1080 with that URL. Rotating the source ends access for every earlier copy.',
+    },
+    {
+      title: 'Verify real delivery',
+      body: live
+        ? 'Start a chapter and ask a viewer to send the displayed command. Health counts signed chat deliveries and applied actions; only an applied action proves the full loop.'
+        : 'Send practice chat from Mission Control or the Judge Arena; the overlay updates from the same saved state.',
+    },
+  ];
+}
 export function BroadcastStudio() {
   const { data, canonical, overlayUrl, makeOverlay, busy, perform } = useGame();
   const [preset, setPreset] = useState<'dock' | 'expedition' | 'auto'>('dock'),
@@ -603,21 +644,29 @@ export function BroadcastStudio() {
         preset === 'dock' ? '/?view=compact#' : preset === 'auto' ? '/?view=auto#' : '/#',
       )
     : '';
+  const live = data?.mode === 'live';
+  const practice = 'NOT USED IN PRACTICE';
   const health = [
-    ['BOT PERMISSION', integration?.botAuthorized ? 'AUTHORIZED' : 'PENDING'],
-    ['EVENTSUB', details?.chatReady ? 'CHAT READY' : 'PENDING'],
+    ['BOT PERMISSION', !live ? practice : integration?.botAuthorized ? 'AUTHORIZED' : 'PENDING'],
+    ['EVENTSUB', !live ? practice : details?.chatReady ? 'CHAT READY' : 'PENDING'],
     [
       'NATIVE RAID',
-      integration?.genuineRaidVerified
-        ? 'VERIFIED TRANSFER RECORDED'
-        : details?.raidReady
-          ? 'SUBSCRIBED · NOT LIVE PROOF'
-          : 'PENDING',
+      !live
+        ? 'SIMULATED RELAYS ONLY'
+        : integration?.genuineRaidVerified
+          ? 'VERIFIED TRANSFER RECORDED'
+          : details?.raidReady
+            ? 'SUBSCRIBED · NOT LIVE PROOF'
+            : 'PENDING',
     ],
     ['OVERLAY ACCESS', overlayUrl ? 'GENERATED' : 'NOT GENERATED'],
     [
       'BOT REPLIES',
-      integration?.botRepliesEnabled === false ? 'PAUSED · OPTIONAL' : 'SEPARATE VERIFICATION',
+      !live
+        ? practice
+        : integration?.botRepliesEnabled === false
+          ? 'PAUSED · OPTIONAL'
+          : 'SEPARATE VERIFICATION',
     ],
   ];
   return (
@@ -676,6 +725,12 @@ export function BroadcastStudio() {
                 </small>
               </Button>
             ))}
+          </div>
+          <div className="setup-guide" role="region" aria-label="Setup step guidance">
+            <span className="eyebrow">
+              STEP 0{step} · {setupGuide(live)[step - 1].title.toUpperCase()}
+            </span>
+            <p>{setupGuide(live)[step - 1].body}</p>
           </div>
           <div className="studio-actions">
             <Button disabled={busy || !data?.me} onClick={makeOverlay}>
