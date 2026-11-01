@@ -1260,7 +1260,7 @@ export function Settings() {
     ['CINEMATIC AUDIO', 'audio', 'Short synthesized consequence cues after you enable audio.'],
     ['FULL MOTION', 'motion', 'Camera orbit, ship drift, particles and cinematic transitions.'],
     ['HIGH CONTRAST HUD', 'contrast', 'Increase panel separation and diagnostic brightness.'],
-    ['CAPTIONS', 'captions', 'Keep saved consequence text visible.'],
+    ['CAPTIONS', 'captions', 'Show each newly saved consequence as a short text caption.'],
   ] as const;
   return (
     <main className="platform-page settings-page">

@@ -1028,3 +1028,53 @@
     text-overflow: ellipsis;
   }
 }
+
+/* Consequence captions (Settings → Captions). */
+.consequence-caption {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  top: calc(150px + env(safe-area-inset-top, 0px));
+  width: min(620px, calc(100% - 32px));
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border: 1px solid rgba(111, 170, 169, 0.45);
+  border-left: 3px solid var(--cyan);
+  background: rgba(6, 11, 12, 0.94);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: caption-in 260ms ease-out both;
+}
+.consequence-caption[data-tone='loss'] {
+  border-color: rgba(185, 71, 53, 0.5);
+  border-left-color: var(--crimson-bright);
+}
+.consequence-caption span {
+  color: #8fb6ba;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.consequence-caption[data-tone='loss'] span {
+  color: #e08a75;
+}
+.consequence-caption p {
+  margin: 4px 0 0;
+  color: var(--bone);
+  font: 500 calc(13px * var(--hud-scale, 1)) / 1.4 var(--mono);
+}
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+[data-motion='reduced'] .consequence-caption {
+  animation: none;
+}
+/* Settings profile rows: labels and values no longer run together when a value wraps. */
+.settings-layout > aside > div {
+  gap: 14px;
+}
+.settings-layout > aside > div b {
+  text-align: right;
+}

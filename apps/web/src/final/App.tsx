@@ -17,6 +17,7 @@ import type { WorldPresentation } from '@torchline/contracts';
 import { SceneBoundary } from './SceneBoundary.tsx';
 import { ArrivalDossier, SeasonFinale } from './Dossier.tsx';
 import { SoundEffects } from './SoundEffects.tsx';
+import { ConsequenceCaptions } from './Captions.tsx';
 import './index.css';
 import './integration.css';
 import './experience.css';
@@ -690,6 +691,7 @@ export default function FinalFrontend() {
   return (
     <GameSession>
       <SoundEffects />
+      <ConsequenceCaptions />
       <Application />
     </GameSession>
   );
