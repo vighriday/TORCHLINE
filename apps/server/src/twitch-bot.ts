@@ -1,6 +1,6 @@
 import type { Store } from '@torchline/storage';
 import type { WorldState } from '@torchline/contracts';
-import { DomainError } from '@torchline/contracts';
+import { DomainError, attributeSummary } from '@torchline/contracts';
 import { BOT_SCOPES, CREATOR_SCOPES, sendChatMessage } from '@torchline/twitch';
 import type { Fetcher } from '@torchline/twitch';
 import type { AppConfig } from './app.ts';
@@ -56,14 +56,14 @@ export function twitchBot(
       } else if (state) {
         const events = (
           await c.query(
-            "SELECT event->>'summary' AS summary FROM world_events WHERE world_id=$1 AND event->'command'->>'type'='commit' ORDER BY sequence DESC LIMIT 2",
+            "SELECT e.event->>'summary' AS summary,e.event->'actor'->>'community' AS community,c.label FROM world_events e LEFT JOIN creators c ON c.id=e.event->'actor'->>'community' WHERE e.world_id=$1 AND e.event->'command'->>'type'='commit' ORDER BY e.sequence DESC LIMIT 2",
             [row.id],
           )
         ).rows;
         body = events.length
           ? `TORCHLINE history: ${events
               .reverse()
-              .map((item) => item.summary)
+              .map((item) => attributeSummary(item.summary, item.community, item.label))
               .join(' | ')}`
           : 'TORCHLINE history: This Ark has not committed a chapter decision yet.';
       }

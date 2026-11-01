@@ -1,5 +1,5 @@
 import type { PoolClient } from 'pg';
-import { DomainError } from '@torchline/contracts';
+import { DomainError, attributeSummary } from '@torchline/contracts';
 import type { WorldHistoryPage } from '@torchline/contracts';
 import type { Creator, StoredWorld, Store } from './index.ts';
 
@@ -85,7 +85,7 @@ export async function readWorldHistory(
         chapter: event.chapter,
         at: event.at,
         community: { id: event.actor.community, label: community_label ?? event.actor.community },
-        summary: event.summary,
+        summary: attributeSummary(event.summary, event.actor.community, community_label),
         resourceDelta: event.resourceDelta,
         cues: event.cues,
         causes: event.causes,

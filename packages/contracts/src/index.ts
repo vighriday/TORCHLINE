@@ -188,6 +188,12 @@ export interface ChoicePresentation {
   unavailableReason: string | null;
   preview: { resources: Resources; outcome: Ending | null; warnings: string[] } | null;
 }
+export interface ArrivalDecision {
+  eventId: string;
+  chapter: number;
+  choice: string;
+  community: string;
+}
 export interface WorldPresentation {
   livewire?: LivewirePresentation;
   schemaVersion: typeof PRESENTATION_VERSION;
@@ -232,6 +238,16 @@ export interface WorldPresentation {
     from: { id: string; label: string };
     briefing: string;
     lostSystems: SystemId[];
+    /** Captain commitments this Ark carries, oldest first, named by the deciding community. */
+    decisions?: ArrivalDecision[];
+    /** Saved obligations still waiting for a later chapter, linked to the decision behind them. */
+    debts?: {
+      kind: Obligation['kind'];
+      dueChapter: number;
+      origin: ArrivalDecision | null;
+    }[];
+    /** Distinct communities that have committed decisions aboard this Ark. */
+    communities?: number;
   };
   /** Current-window audience input that did not apply, so the streamer can explain it. */
   rejections?: { reason: string; dropped: number }[];
@@ -300,6 +316,15 @@ export interface HandoffPreview {
   source: { id: string; label: string };
   target: { id: string; label: string };
   world: WorldPresentation;
+}
+/**
+ * Saved events keep the immutable community ID that replay depends on. Presentation names the
+ * community instead, so a broadcast never shows a raw Twitch user ID as the deciding crew.
+ */
+export function attributeSummary(summary: string, community: string, label?: string | null) {
+  return label && label !== community
+    ? summary.replace(`committed by ${community}.`, `committed by ${label}.`)
+    : summary;
 }
 export class DomainError extends Error {
   readonly code: string;

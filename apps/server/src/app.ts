@@ -12,7 +12,7 @@ import {
   LivewireRequestSchema,
   SYSTEM_IDS,
 } from '@torchline/contracts';
-import type { Command } from '@torchline/contracts';
+import type { Command, WorldPresentation } from '@torchline/contracts';
 import {
   Store,
   participantIdentity,
@@ -251,12 +251,7 @@ export async function createApp(
   // current only while the receiver has not changed the world, so it clears itself on their first
   // command instead of becoming permanent decoration. World revision is part of the key because a
   // second transfer can arrive at the same state version.
-  interface ArrivalBriefing {
-    at: string;
-    from: { id: string; label: string };
-    briefing: string;
-    lostSystems: (typeof SYSTEM_IDS)[number][];
-  }
+  type ArrivalBriefing = NonNullable<WorldPresentation['arrival']>;
   const arrivals = new Map<string, ArrivalBriefing | undefined>();
   const arrivalBriefing = async (world: StoredWorld): Promise<ArrivalBriefing | undefined> => {
     const key = `${world.id}:${world.state.version}:${world.revision}`;
@@ -270,15 +265,40 @@ export async function createApp(
       )
     ).rows[0];
     const marks = SYSTEM_IDS.reduce((total, id) => total + world.state.systems[id].marks.length, 0);
-    const briefing =
-      !row || row.state_version === null || row.state_version !== world.state.version
-        ? undefined
-        : {
-            at: (row.created_at as Date).toISOString(),
-            from: { id: row.source_id as string, label: row.source_label as string },
-            briefing: `Received from ${row.source_label} · ${world.state.resources.passengers} passengers aboard · ${marks} lasting marks · chapter ${world.state.chapter}`,
-            lostSystems: SYSTEM_IDS.filter((id) => world.state.systems[id].integrity === 0),
-          };
+    let briefing: ArrivalBriefing | undefined;
+    if (row && row.state_version !== null && row.state_version === world.state.version) {
+      // Every captain commitment aboard, named by the community that made it. Summaries begin
+      // with the authored choice label, so no rules version needs a separate lookup table.
+      const decisions = (
+        await store.pool.query(
+          `SELECT e.event->>'id' AS id,(e.event->>'chapter')::integer AS chapter,e.event->>'summary' AS summary,
+                  e.event->'actor'->>'community' AS community,c.label
+           FROM world_events e LEFT JOIN creators c ON c.id=e.event->'actor'->>'community'
+           WHERE e.world_id=$1 AND e.event->'command'->>'type'='commit' ORDER BY e.sequence`,
+          [world.id],
+        )
+      ).rows.map((item) => ({
+        eventId: item.id as string,
+        chapter: item.chapter as number,
+        choice: (item.summary as string).split(': committed by ')[0],
+        community: (item.label as string | null) ?? (item.community as string),
+      }));
+      briefing = {
+        at: (row.created_at as Date).toISOString(),
+        from: { id: row.source_id as string, label: row.source_label as string },
+        briefing: `Received from ${row.source_label} · ${world.state.resources.passengers} passengers aboard · ${marks} lasting marks · chapter ${world.state.chapter}`,
+        lostSystems: SYSTEM_IDS.filter((id) => world.state.systems[id].integrity === 0),
+        decisions,
+        debts: world.state.obligations
+          .filter((obligation) => obligation.status === 'pending')
+          .map((obligation) => ({
+            kind: obligation.kind,
+            dueChapter: obligation.dueChapter,
+            origin: decisions.find((item) => item.eventId === obligation.originEventId) ?? null,
+          })),
+        communities: new Set([...decisions.map((item) => item.community), world.label]).size,
+      };
+    }
     if (arrivals.size > 512) arrivals.clear();
     arrivals.set(key, briefing);
     return briefing;

@@ -43,6 +43,8 @@ export interface StoredWorld {
   frozen_by: string | null;
   label: string;
   events: WorldEvent[];
+  /** Display names for every community referenced by the loaded events and physical marks. */
+  labels?: Record<string, string>;
   clock?: EpisodeClock;
   input_suspended?: boolean;
 }
@@ -410,7 +412,16 @@ export class Store {
         [id, row.state.window, row.state.phase],
       )
     ).rows[0];
-    return { ...row, events: recentOnly ? events.reverse() : events, clock };
+    const communities = new Set<string>([row.custodian_id]);
+    for (const event of events as WorldEvent[]) communities.add(event.actor.community);
+    for (const system of Object.values((row.state as WorldState).systems))
+      for (const mark of system.marks) communities.add(mark.community);
+    const labels = Object.fromEntries(
+      (
+        await this.pool.query('SELECT id,label FROM creators WHERE id=ANY($1)', [[...communities]])
+      ).rows.map((creator) => [creator.id as string, creator.label as string]),
+    );
+    return { ...row, events: recentOnly ? events.reverse() : events, labels, clock };
   }
   async active(channel: string, recentOnly = false): Promise<StoredWorld | null> {
     const row = (

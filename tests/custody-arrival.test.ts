@@ -78,6 +78,32 @@ describe('custody arrival briefing', () => {
         expect(Number.isFinite(Date.parse(world.arrival.at))).toBe(true);
         // The source's first chapter ended by burning navigation; the receiver inherits that loss.
         expect(world.arrival.lostSystems).toEqual(['navigation']);
+        // The dossier names the decision and the debt it created, attributed to its community.
+        expect(world.arrival.decisions).toEqual([
+          expect.objectContaining({
+            chapter: 1,
+            choice: 'Sacrifice navigation',
+            community: 'First community',
+          }),
+        ]);
+        expect(world.arrival.debts).toEqual([
+          {
+            kind: 'blind-jump',
+            dueChapter: 2,
+            origin: world.arrival.decisions[0],
+          },
+        ]);
+        expect(world.arrival.communities).toBe(2);
+        // Presentation names communities; saved events keep the immutable IDs replay needs.
+        expect(world.events.at(-1).summary).toContain('committed by First community.');
+        expect(world.events.at(-1).summary).not.toContain(source.id);
+        expect(
+          world.systems.find((system: { id: string }) => system.id === 'navigation').marks[0]
+            .community,
+        ).toBe('First community');
+        expect((await store.get(id)).events.at(-1)?.summary).toContain(
+          `committed by ${source.id}.`,
+        );
         // The transfer stays attributable in the archive after the briefing clears. Labels are read
         // from the current creator record, so this is checked before the simulator login below
         // replaces that label.
