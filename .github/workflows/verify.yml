@@ -27,6 +27,8 @@ jobs:
         with:
           node-version-file: .node-version
       - run: npm install --global pnpm@12.4.2
+      - name: Record toolchain versions
+        run: node --version && pnpm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm check:version
