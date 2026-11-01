@@ -1404,3 +1404,167 @@
   gap: 3px;
   margin-left: 12px;
 }
+/* Relay rehearsal: both practice channels side by side, each in its own game. */
+.relay-streams {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.rehearsal-stage--dossier .relay-streams {
+  grid-column: 1 / -1;
+}
+.relay-stream {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  opacity: 0.6;
+  transition: opacity 0.35s;
+}
+.relay-stream--live {
+  opacity: 1;
+}
+.relay-stream figcaption {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: #9cc7c6;
+  font: 600 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.relay-stream figcaption b {
+  color: var(--bone);
+  font: 700 15px var(--display);
+  letter-spacing: 0.08em;
+}
+.relay-stream figcaption em {
+  margin-left: auto;
+  color: var(--amber-bright);
+  font-style: normal;
+}
+.relay-stream--live figcaption em::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #e5484d;
+  box-shadow: 0 0 8px #e5484d;
+  vertical-align: 1px;
+}
+.relay-feed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(111, 170, 169, 0.25);
+  background: #05080a;
+}
+.relay-stream--live .relay-feed {
+  border-color: rgba(229, 72, 77, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(229, 72, 77, 0.25),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.relay-feed .voxel-canvas,
+.relay-feed .ark-canvas-loading {
+  position: absolute;
+  inset: 0;
+}
+.relay-feed > small {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffd38a;
+  font: 600 calc(8.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.relay-result {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 7px 10px;
+  border-left: 3px solid #e08a75;
+  background: rgba(6, 9, 10, 0.86);
+}
+.relay-result--success {
+  border-left-color: #7fd6a4;
+}
+.relay-result b {
+  color: var(--bone);
+  font: 700 14px var(--display);
+  letter-spacing: 0.06em;
+}
+.relay-result span {
+  color: #c7cbc4;
+  font: 500 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.08em;
+}
+@media (max-width: 900px) {
+  .relay-streams {
+    grid-template-columns: 1fr;
+  }
+}
+/* The step header stays compact so the feeds and the run control share one screen. */
+.rehearsal .rehearsal-head .sim-orbit {
+  width: 58px;
+  height: 58px;
+  font-size: 18px;
+}
+.rehearsal .rehearsal-head .sim-orbit i {
+  inset: 8px;
+}
+.rehearsal .rehearsal-copy > strong {
+  font-size: clamp(28px, 2.7vw, 44px);
+}
+/* Away from the bridge and the dock, captions sit low so they never cover a page title. */
+body:has(.platform-page) .consequence-caption {
+  top: auto;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+/* Mission ledger: what other games did to this Ark, attributed to the attesting community. */
+.dossier-missions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.dossier-missions li {
+  display: grid;
+  grid-template-columns: minmax(78px, auto) 1fr;
+  gap: 2px 10px;
+  padding: 6px 8px;
+  border-left: 2px solid #e08a75;
+  background: rgba(111, 170, 169, 0.06);
+}
+.dossier-missions li[data-outcome='success'] {
+  border-left-color: #7fd6a4;
+}
+.dossier-missions b {
+  grid-row: span 2;
+  color: #9cc7c6;
+  font: 600 11px var(--mono);
+  letter-spacing: 0.04em;
+}
+.dossier-missions span {
+  color: var(--bone);
+  font: 600 14px/1.15 var(--display);
+  letter-spacing: 0.02em;
+}
+.dossier-missions small {
+  color: #8d948e;
+  font: 400 10px var(--mono);
+}
+.season-finale .dossier-block {
+  margin-top: 14px;
+  text-align: left;
+}

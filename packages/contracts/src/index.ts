@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import type { LivewireState, LivewirePresentation, LivewireCommand } from './livewire.ts';
+import type {
+  LivewireState,
+  LivewirePresentation,
+  LivewireCommand,
+  LivewireTarget,
+} from './livewire.ts';
 export * from './livewire.ts';
 
 export const RULES_VERSION = 'ark-v2' as const;
@@ -194,6 +199,17 @@ export interface ArrivalDecision {
   choice: string;
   community: string;
 }
+/** One streamer-attested LIVEWIRE result saved to the Ark, named by the attesting community. */
+export interface ArrivalMission {
+  eventId: string;
+  chapter: number;
+  game: string;
+  attempt: string;
+  outcome: 'success' | 'failure';
+  target: LivewireTarget;
+  delta: number;
+  community: string;
+}
 export interface WorldPresentation {
   livewire?: LivewirePresentation;
   schemaVersion: typeof PRESENTATION_VERSION;
@@ -248,12 +264,15 @@ export interface WorldPresentation {
     }[];
     /** Distinct communities that have committed decisions aboard this Ark. */
     communities?: number;
+    /** LIVEWIRE results the Ark carries, oldest first: what other games did to this ship. */
+    missions?: ArrivalMission[];
   };
   /** Present once a voyage ends: every captain commitment and how many relays carried it. */
   season?: {
     decisions: ArrivalDecision[];
     communities: number;
     relays: number;
+    missions?: ArrivalMission[];
   };
   /** Current-window audience input that did not apply, so the streamer can explain it. */
   rejections?: { reason: string; dropped: number }[];
