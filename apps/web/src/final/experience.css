@@ -1369,21 +1369,15 @@
 [data-motion='reduced'] .game-hud--rocket[data-phase='win'] .arena-team--blue b {
   animation: none;
 }
+/* On phones the dock covers the feed, so only the feed label and outcome banner remain. */
 @media (max-width: 900px) {
   .arena-boost,
   .arena-cam,
+  .arena-score,
   .souls-vitals,
+  .souls-boss,
   .game-xp {
     display: none;
-  }
-  .arena-score {
-    top: 70px;
-    transform: translateX(-50%) scale(0.72);
-    transform-origin: top center;
-  }
-  .souls-boss {
-    top: 70px;
-    width: 80vw;
   }
   .game-banner strong,
   .game-hud--souls .game-banner strong {

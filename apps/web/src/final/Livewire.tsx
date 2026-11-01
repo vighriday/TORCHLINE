@@ -14,6 +14,8 @@ const targetFor: Record<Risk, LivewireTarget> = {
   Hull: 'hull',
   'Life Support': 'oxygen',
 };
+// Mirrors the server's mission text rule so a bad label is caught before a supply is spent.
+const plainText = /^[\p{L}\p{N} .,!?'’():+\-]{1,64}$/u;
 const stakeSteps = [
   ['open', 'OPEN STAKE'],
   ['voting', 'VIEWER VOTING'],
@@ -47,6 +49,8 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
     [attempting, setAttempting] = useState(false),
     [finished, setFinished] = useState(false);
   const [attempt, setAttempt] = useState(gameContexts.voxel.attempt),
+    // The streamer names the game they actually play; the preset only picks the practice scene.
+    [title, setTitle] = useState(gameContexts.voxel.name),
     [actor, setActor] = useState('crew-one');
   const [now, setNow] = useState(Date.now());
   const saved = world?.livewire,
@@ -99,7 +103,7 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
   // The saved mission names the feed until the captain picks another game for the next one.
   const savedScene = !!stake && (unresolved || game === contextForPreset(stake.preset));
   const attemptName = stake && savedScene ? stake.label : attempt;
-  const gameName = stake && savedScene ? stake.game : gameContexts[game].name;
+  const gameName = stake && savedScene ? stake.game : title.trim() || gameContexts[game].name;
   const history =
     world?.events.filter((event) => /livewire|mission|stake/i.test(event.summary)) ?? [];
   const stageIndex = stakeSteps.findIndex(
@@ -126,7 +130,7 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
     mission({
       type: 'open',
       preset: gameContexts[game].preset,
-      game: gameContexts[game].name,
+      game: title.trim() || gameContexts[game].name,
       label: attempt.trim(),
     });
   const action =
@@ -134,7 +138,8 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
       ? {
           label: 'Open mission · spend 1 supply',
           run: open,
-          disabled: !saved?.available || !attempt.trim(),
+          disabled:
+            !saved?.available || !plainText.test(attempt.trim()) || !plainText.test(gameName),
         }
       : stage === 'voting'
         ? {
@@ -262,6 +267,7 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                       disabled={unresolved}
                       onClick={() => {
                         setGame(key);
+                        setTitle(gameContexts[key].name);
                         setAttempt(gameContexts[key].attempt);
                       }}
                     >
@@ -269,6 +275,15 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                       <small>PRESET / {gameContexts[key].attempt}</small>
                     </Button>
                   ))}
+                  <label>
+                    Your game
+                    <input
+                      value={unresolved ? gameName : title}
+                      disabled={unresolved}
+                      maxLength={64}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </label>
                   <label>
                     One attempt
                     <input
@@ -278,9 +293,14 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                       onChange={(e) => setAttempt(e.target.value)}
                     />
                   </label>
+                  {(!plainText.test(gameName) || !plainText.test(attempt.trim())) && (
+                    <p role="alert">
+                      Use letters, numbers and simple punctuation, up to 64 characters.
+                    </p>
+                  )}
                   <p>
-                    Game context changes only before a new stake. The illustrated scene never
-                    verifies the actual attempt.
+                    Name the game you are really playing; the preset only picks the practice scene.
+                    Both change only before a new stake, and the scene never verifies the attempt.
                   </p>
                 </div>
               )}
