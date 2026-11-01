@@ -25,6 +25,16 @@ Render supports long-running web services and managed TLS URLs. Its free service
 
 Railway, Fly or a managed VM can substitute if they provide the same contract: public HTTPS callback, unbuffered streaming or WebSocket fallback, durable process, secrets, database connectivity, logs, rollback and backup recovery. Do not rewrite the game for a provider-specific database or edge runtime without revisiting the component review.
 
+### Public judge instance
+
+A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. To give judges hands-on access without Twitch accounts, run a **second** service from the same image:
+
+- Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true`.
+- Give it its **own** PostgreSQL database and independent secrets. Never share the live database or keys.
+- Give it its own HTTPS origin, for example a `demo` subdomain, and set `PUBLIC_BASE_URL` to it. No Twitch credentials are needed.
+
+Point judges at **Command OS → Judge Arena → Autoplay to the handoff**. The live service keeps genuine Twitch worlds. Public Chronicle links from the live service can show a real world's lineage without granting any control.
+
 ## Pre-deployment gate
 
 Runtime configuration now rejects ambiguous mode, non-HTTPS public/production origin, mismatched live redirect, reused secrets, invalid limits and remote production PostgreSQL without `sslmode=verify-full`. Install the provider's trusted certificate through its documented mechanism when the system trust store is insufficient. Do not bypass certificate verification. Local loopback HTTP remains permitted outside production so a tunnel can start. Default bind remains `127.0.0.1`; a hosted service must explicitly set `HOST=0.0.0.0`.
