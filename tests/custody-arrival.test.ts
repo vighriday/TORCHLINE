@@ -130,6 +130,36 @@ describe('custody arrival briefing', () => {
       }
     }));
 
+  it('names every community in the season record once a relayed voyage ends', () =>
+    database(async (store) => {
+      const { target, id } = await transfer(store);
+      for (const option of ['chart-route', 'repair-life', 'salvage', 'land'])
+        for (const input of [
+          { type: 'start' },
+          { type: 'close-challenge' },
+          { type: 'commit', option },
+        ] as Command[])
+          await command(store, id, target, input);
+      const app = await createApp(store, config, { workers: false });
+      try {
+        const receiver = await session(app, 'beta');
+        const world = (await app.inject({ url: '/api/state', headers: receiver })).json().world;
+        expect(world.outcome).toBeTruthy();
+        expect(world.season.relays).toBe(1);
+        expect(world.season.communities).toBe(2);
+        expect(world.season.decisions.map((item: { choice: string }) => item.choice)).toEqual([
+          'Sacrifice navigation',
+          'Rebuild navigation',
+          'Restore life support',
+          'Risk the cargo station',
+          'Standard atmospheric entry',
+        ]);
+        expect(world.season.decisions[0].community).toBe('First community');
+        expect(world.season.decisions[1].community).toBe('Simulation beta');
+      } finally {
+        await app.close();
+      }
+    }));
   it('reports the inherited damage it can name and never invents an arrival for an untransferred world', () =>
     database(async (store) => {
       const solo = await store.ensureCreator('sim-gamma', 'Solo community', 'simulation');

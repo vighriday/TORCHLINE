@@ -262,7 +262,11 @@ export function GameControls() {
         <p>{world.recap}</p>
       </div>
       {world.outcome && (
-        <div className="consequence consequence--loss" role="status">
+        <div
+          className={`consequence ${world.outcome === 'colony' ? '' : 'consequence--loss'}`}
+          data-outcome={world.outcome}
+          role="status"
+        >
           <span>VOYAGE COMPLETE</span>
           <strong>
             {world.outcome === 'colony'

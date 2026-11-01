@@ -296,6 +296,45 @@ export async function createApp(
       (await store.pool.query("SELECT 1 FROM custody_events WHERE mode='live' LIMIT 1")).rowCount,
     );
   const arrivals = new Map<string, ArrivalBriefing | undefined>();
+  // Every captain commitment aboard, oldest first, named by the community that made it. Summaries
+  // begin with the authored choice label, so no rules version needs a separate lookup table.
+  const commitments = async (worldId: string) =>
+    (
+      await store.pool.query(
+        `SELECT e.event->>'id' AS id,(e.event->>'chapter')::integer AS chapter,e.event->>'summary' AS summary,
+                e.event->'actor'->>'community' AS community,c.label
+         FROM world_events e LEFT JOIN creators c ON c.id=e.event->'actor'->>'community'
+         WHERE e.world_id=$1 AND e.event->'command'->>'type'='commit' ORDER BY e.sequence`,
+        [worldId],
+      )
+    ).rows.map((item) => ({
+      eventId: item.id as string,
+      chapter: item.chapter as number,
+      choice: (item.summary as string).split(': committed by ')[0],
+      community: (item.label as string | null) ?? (item.community as string),
+    }));
+  const seasons = new Map<string, NonNullable<WorldPresentation['season']>>();
+  const seasonRecord = async (world: StoredWorld) => {
+    // An ended world never changes again, so its record is computed once per process.
+    const cached = seasons.get(world.id);
+    if (cached) return cached;
+    const decisions = await commitments(world.id);
+    const relays = Number(
+      (
+        await store.pool.query('SELECT count(*)::int AS n FROM custody_events WHERE world_id=$1', [
+          world.id,
+        ])
+      ).rows[0].n,
+    );
+    const record = {
+      decisions,
+      communities: new Set(decisions.map((item) => item.community)).size,
+      relays,
+    };
+    if (seasons.size > 512) seasons.clear();
+    seasons.set(world.id, record);
+    return record;
+  };
   const arrivalBriefing = async (world: StoredWorld): Promise<ArrivalBriefing | undefined> => {
     const key = `${world.id}:${world.state.version}:${world.revision}`;
     if (arrivals.has(key)) return arrivals.get(key);
@@ -310,22 +349,7 @@ export async function createApp(
     const marks = SYSTEM_IDS.reduce((total, id) => total + world.state.systems[id].marks.length, 0);
     let briefing: ArrivalBriefing | undefined;
     if (row && row.state_version !== null && row.state_version === world.state.version) {
-      // Every captain commitment aboard, named by the community that made it. Summaries begin
-      // with the authored choice label, so no rules version needs a separate lookup table.
-      const decisions = (
-        await store.pool.query(
-          `SELECT e.event->>'id' AS id,(e.event->>'chapter')::integer AS chapter,e.event->>'summary' AS summary,
-                  e.event->'actor'->>'community' AS community,c.label
-           FROM world_events e LEFT JOIN creators c ON c.id=e.event->'actor'->>'community'
-           WHERE e.world_id=$1 AND e.event->'command'->>'type'='commit' ORDER BY e.sequence`,
-          [world.id],
-        )
-      ).rows.map((item) => ({
-        eventId: item.id as string,
-        chapter: item.chapter as number,
-        choice: (item.summary as string).split(': committed by ')[0],
-        community: (item.label as string | null) ?? (item.community as string),
-      }));
+      const decisions = await commitments(world.id);
       briefing = {
         at: (row.created_at as Date).toISOString(),
         from: { id: row.source_id as string, label: row.source_label as string },
@@ -359,6 +383,8 @@ export async function createApp(
       const arrival = await arrivalBriefing(world);
       if (arrival) visibleWorld.arrival = arrival;
     }
+    if (world && visibleWorld && world.state.outcome)
+      visibleWorld.season = await seasonRecord(world);
     if (
       world &&
       visibleWorld &&

@@ -15,7 +15,7 @@ import {
 import type { Mode, Sector, World } from './types.ts';
 import type { WorldPresentation } from '@torchline/contracts';
 import { SceneBoundary } from './SceneBoundary.tsx';
-import { ArrivalDossier } from './Dossier.tsx';
+import { ArrivalDossier, SeasonFinale } from './Dossier.tsx';
 import { SoundEffects } from './SoundEffects.tsx';
 import './index.css';
 import './integration.css';
@@ -282,6 +282,7 @@ export function MissionControl({
           <strong>{ship.title}</strong>
           <p>{ship.recap}</p>
           {!readOnly && <ArrivalDossier world={ship} />}
+          {!readOnly && <SeasonFinale world={ship} />}
           <PhaseClock world={ship} />
         </div>
         <div className="vital-stack">
@@ -404,6 +405,7 @@ export function MissionControl({
         </div>
         <ArkShip selected={selected} navigation={navigation} onSelect={setSelected} view={view} />
         {readOnly && <ArrivalDossier world={ship} variant="broadcast" />}
+        {readOnly && <SeasonFinale world={ship} variant="broadcast" />}
         <div className="spatial-reticle" aria-hidden="true">
           <span />
           <span />

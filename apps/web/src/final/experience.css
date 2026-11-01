@@ -902,3 +902,109 @@
 .broadcast-grid > .obs-preview {
   align-self: start;
 }
+
+/* Season finale: the ending names the communities that carried the Ark. */
+.season-finale {
+  margin: 0 0 14px;
+  padding: 12px 12px 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber);
+  background:
+    linear-gradient(135deg, rgba(201, 152, 81, 0.12), transparent 60%), rgba(6, 12, 13, 0.94);
+}
+.season-finale--colony {
+  border-left-color: var(--cyan);
+}
+.season-finale--wreck {
+  border-left-color: var(--crimson-bright);
+}
+.season-finale > strong {
+  display: block;
+  margin: 6px 0 4px;
+  font: 700 26px/1 var(--display);
+  letter-spacing: 0.04em;
+}
+.season-finale--colony > strong {
+  color: #9fd3d1;
+}
+.season-finale--wreck > strong {
+  color: var(--crimson-bright);
+}
+.season-finale > p {
+  margin: 0 0 8px;
+  color: #a9ada5;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.season-finale ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.season-finale li {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 1px 8px;
+  padding: 6px 7px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.season-finale li b {
+  grid-row: span 2;
+  color: var(--amber-bright);
+  font: 600 10.5px var(--mono);
+}
+.season-finale li span {
+  font: 600 15px var(--display);
+}
+.season-finale li small {
+  color: #b8bcb3;
+  font: 400 10px/1.4 var(--mono);
+}
+.season-finale footer {
+  margin-top: 8px;
+  color: #8d948e;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.season-finale--broadcast {
+  position: absolute;
+  z-index: 6;
+  top: 84px;
+  left: 28px;
+  width: min(480px, calc(100% - 56px));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: dossier-arrive 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.season-finale--broadcast > strong {
+  font-size: 40px;
+}
+.season-finale--broadcast li span {
+  font-size: 19px;
+}
+.season-finale--broadcast li small,
+.season-finale--broadcast > p {
+  font-size: 12px;
+}
+[data-motion='reduced'] .season-finale--broadcast {
+  animation: none;
+}
+@media (max-width: 900px) {
+  .season-finale--broadcast {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin: 12px;
+  }
+}
+.consequence[data-outcome='colony'] > span {
+  color: #9fd3d1;
+}
+.consequence[data-outcome='partial'] {
+  border-color: var(--amber);
+  background: rgba(201, 152, 81, 0.08);
+}
+.consequence[data-outcome='partial'] > span {
+  color: var(--amber-bright);
+}

@@ -249,6 +249,12 @@ export interface WorldPresentation {
     /** Distinct communities that have committed decisions aboard this Ark. */
     communities?: number;
   };
+  /** Present once a voyage ends: every captain commitment and how many relays carried it. */
+  season?: {
+    decisions: ArrivalDecision[];
+    communities: number;
+    relays: number;
+  };
   /** Current-window audience input that did not apply, so the streamer can explain it. */
   rejections?: { reason: string; dropped: number }[];
   events: Pick<WorldEvent, 'id' | 'chapter' | 'summary' | 'resourceDelta' | 'cues' | 'causes'>[];

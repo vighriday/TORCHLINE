@@ -130,3 +130,65 @@ export function ArrivalDossier({
     </section>
   );
 }
+
+const finaleTitle = {
+  colony: 'A NEW HOME',
+  partial: 'SURVIVORS REACH LAND',
+  wreck: 'THE ARK IS LOST',
+} as const;
+
+/**
+ * How a finished voyage ended and which communities carried it, in command order. Shown to the
+ * captain and, sized for broadcast, to the audience: the ending names its authors instead of
+ * just declaring a result.
+ */
+export function SeasonFinale({
+  world,
+  variant = 'dashboard',
+}: {
+  world: WorldPresentation;
+  variant?: 'dashboard' | 'broadcast';
+}) {
+  const season = world.season;
+  if (!world.outcome || !season) return null;
+  const crews: { community: string; chapters: number[]; choices: string[] }[] = [];
+  for (const decision of season.decisions) {
+    const last = crews.at(-1);
+    if (last?.community === decision.community) {
+      last.chapters.push(decision.chapter);
+      last.choices.push(decision.choice);
+    } else
+      crews.push({
+        community: decision.community,
+        chapters: [decision.chapter],
+        choices: [decision.choice],
+      });
+  }
+  return (
+    <section
+      className={`season-finale season-finale--${variant} season-finale--${world.outcome}`}
+      aria-label="Season finale"
+      role={variant === 'broadcast' ? 'status' : undefined}
+    >
+      <span className="eyebrow">VOYAGE COMPLETE · {world.resources.passengers} OF 216 ABOARD</span>
+      <strong>{finaleTitle[world.outcome]}</strong>
+      <p>{world.endingReason}</p>
+      <ol>
+        {crews.map((crew, index) => (
+          <li key={`${crew.community}-${index}`}>
+            <b>
+              CH. {crew.chapters[0]}
+              {crew.chapters.length > 1 ? `–${crew.chapters.at(-1)}` : ''}
+            </b>
+            <span>{crew.community}</span>
+            <small>{crew.choices.join(' → ')}</small>
+          </li>
+        ))}
+      </ol>
+      <footer>
+        One Ark · {season.communities} {season.communities === 1 ? 'community' : 'communities'} ·{' '}
+        {season.relays} {season.relays === 1 ? 'relay' : 'relays'}
+      </footer>
+    </section>
+  );
+}
