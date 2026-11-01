@@ -6,6 +6,7 @@
   - Every start uses an in-memory practice database and fresh random secrets.
   - The port is bound to loopback only.
   - CI starts the stack on every push and checks readiness, the web bundle, practice sign-in, a new Ark and LIVEWIRE-enabled dashboard state (`scripts/smoke-compose.mjs`).
+- State in the README that the game names used by LIVEWIRE presets are their owners' trademarks and that TORCHLINE is not affiliated with them.
 
 - Add **Verify this record** to the season record in the Chronicle and the public Chronicle: the server replays the Ark's whole saved log through its pinned rules and compares SHA-256 digests of the replayed and the saved ship, reporting the event count, both digests or the rules' refusal. A saved state the log does not produce is caught. [ADR 0038](docs/decisions/0038-one-step-decision-alternatives.md).
 - Add **What if?** to the Chronicle and the public Chronicle: any captain decision or attested LIVEWIRE result can be replayed once, read only, from the saved state just before it, showing every option's resources, debts, destroyed systems or ending. The chosen branch is recomputed and compared with the saved event, and the panel says so only when they match. Later chapters are never simulated. [ADR 0038](docs/decisions/0038-one-step-decision-alternatives.md).

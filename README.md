@@ -63,6 +63,8 @@ The scene illustrates the attempt; it does not read Minecraft or decide the resu
 
 </details>
 
+<sub>Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them. Its game scenes are original illustrations and never read game data.</sub>
+
 ## Your chat can change who survives
 
 <a href="assets/readme/mission-control.png"><img src="assets/readme/mission-control.png" width="1440" alt="Mission Control with the actual saved radiation-storm chapter, resource meters, cooperative relay challenge and captain controls."></a>
