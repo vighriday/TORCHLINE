@@ -60,5 +60,157 @@
       },
       "condition": "sealed"
     }
-  }
+  },
+  "captainChair": [
+    {
+      "option": "burn-navigation",
+      "label": "Sacrifice navigation",
+      "after": {
+        "crisis": "storm",
+        "resources": {
+          "passengers": 216,
+          "hull": 65,
+          "power": 50,
+          "oxygen": 65,
+          "navigation": 0,
+          "supplies": 50
+        },
+        "lost": [
+          "navigation destroyed"
+        ],
+        "debts": [
+          "blind-jump due chapter 2"
+        ]
+      },
+      "next": {
+        "crisis": "blind-jump",
+        "resources": {
+          "passengers": 216,
+          "hull": 55,
+          "power": 50,
+          "oxygen": 65,
+          "navigation": 0,
+          "supplies": 50
+        },
+        "lost": [
+          "navigation destroyed"
+        ],
+        "debts": [],
+        "options": [
+          {
+            "option": "chart-route",
+            "label": "Rebuild navigation",
+            "after": {
+              "crisis": "blind-jump",
+              "resources": {
+                "passengers": 216,
+                "hull": 55,
+                "power": 35,
+                "oxygen": 65,
+                "navigation": 60,
+                "supplies": 25
+              },
+              "lost": [],
+              "debts": [
+                "supply-debt due chapter 4"
+              ]
+            }
+          },
+          {
+            "option": "manual-flight",
+            "label": "Fly the debris field manually",
+            "after": {
+              "crisis": "blind-jump",
+              "resources": {
+                "passengers": 216,
+                "hull": 30,
+                "power": 50,
+                "oxygen": 55,
+                "navigation": 0,
+                "supplies": 50
+              },
+              "lost": [
+                "navigation destroyed"
+              ],
+              "debts": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "option": "seal-habitat",
+      "label": "Seal the rear habitat",
+      "after": {
+        "crisis": "storm",
+        "resources": {
+          "passengers": 168,
+          "hull": 60,
+          "power": 60,
+          "oxygen": 60,
+          "navigation": 70,
+          "supplies": 50
+        },
+        "lost": [
+          "habitat sealed"
+        ],
+        "debts": []
+      },
+      "next": {
+        "crisis": "safe-corridor",
+        "resources": {
+          "passengers": 168,
+          "hull": 60,
+          "power": 60,
+          "oxygen": 60,
+          "navigation": 70,
+          "supplies": 50
+        },
+        "lost": [
+          "habitat sealed"
+        ],
+        "debts": [],
+        "options": [
+          {
+            "option": "derelict-salvage",
+            "label": "Search the derelict",
+            "after": {
+              "crisis": "safe-corridor",
+              "resources": {
+                "passengers": 168,
+                "hull": 45,
+                "power": 55,
+                "oxygen": 60,
+                "navigation": 70,
+                "supplies": 65
+              },
+              "lost": [
+                "habitat sealed"
+              ],
+              "debts": []
+            }
+          },
+          {
+            "option": "bypass",
+            "label": "Take the safe corridor",
+            "after": {
+              "crisis": "safe-corridor",
+              "resources": {
+                "passengers": 168,
+                "hull": 60,
+                "power": 55,
+                "oxygen": 60,
+                "navigation": 70,
+                "supplies": 50
+              },
+              "lost": [
+                "habitat sealed"
+              ],
+              "debts": []
+            }
+          }
+        ]
+      }
+    }
+  ]
 }
