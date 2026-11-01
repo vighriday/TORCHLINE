@@ -168,6 +168,43 @@ describe('real PostgreSQL consistency', () => {
       expect((await store.get(finished)).state).toMatchObject({ phase: 'ended', outcome: 'wreck' });
       expect((await store.library(receiver.id)).map((row) => row.id)).toContain(finished);
     }));
+  it('returns a bounded projection from commands however long the saved log grows', () =>
+    database(async (store) => {
+      const owner = await store.ensureCreator('captain', 'Captain', 'simulation');
+      const id = await store.create(owner);
+      const host = { id: owner.id, role: 'host' as const, community: owner.id };
+      for (const command of [{ type: 'start' }, { type: 'close-challenge' }] as Command[])
+        await store.command(
+          id,
+          host,
+          'simulation',
+          (await store.get(id)).revision,
+          randomUUID(),
+          command,
+        );
+      for (let index = 0; index < 45; index++)
+        await store.command(
+          id,
+          { id: `viewer-${index}`, role: 'viewer', community: owner.id },
+          'simulation',
+          (await store.get(id, true)).revision,
+          randomUUID(),
+          { type: 'vote', option: String((index % 2) + 1) },
+        );
+      const returned = await store.command(
+        id,
+        host,
+        'simulation',
+        (await store.get(id, true)).revision,
+        randomUUID(),
+        { type: 'commit', option: 'seal-habitat' },
+      );
+      expect((await store.get(id)).events.length).toBeGreaterThan(45);
+      // Votes stay out of the recent projection, and it never carries the whole log.
+      expect(returned.events.length).toBeLessThanOrEqual(30);
+      expect(returned.events.some((event) => event.command.type === 'vote')).toBe(false);
+      expect(returned.state.phase).toBe('ready');
+    }));
   it('deduplicates commands and refuses a reused ID with different content', () =>
     database(async (store) => {
       const owner = await store.ensureCreator('source', 'A', 'simulation');

@@ -654,7 +654,9 @@ export class Store {
           [ingress.id],
         );
     });
-    return this.get(id, Boolean(ingress));
+    // Return the bounded recent projection. Loading the full log here made every vote and scan
+    // read every earlier event, so command cost grew with the life of the world.
+    return this.get(id, true);
   }
   async handoffs(channel: string): Promise<Handoff[]> {
     return (
@@ -868,7 +870,7 @@ export class Store {
         w.revision + 1,
       ]);
     });
-    return this.get(info!.world_id);
+    return this.get(info!.world_id, true);
   }
   async cancel(intentId: string, channel: string, status: 'cancelled' | 'declined' | 'expired') {
     const info = (await this.pool.query('SELECT * FROM handoffs WHERE id=$1', [intentId])).rows[0];
