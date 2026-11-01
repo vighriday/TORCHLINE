@@ -1008,3 +1008,23 @@
 .consequence[data-outcome='partial'] > span {
   color: var(--amber-bright);
 }
+
+/* Phones and narrow tablets: the exterior/cockpit switch sits in the stage heading instead of
+   falling to the bottom of the stage, where it covered the signal strip's text. */
+@media (max-width: 900px) {
+  .ship-stage .view-switch {
+    position: static;
+    transform: none;
+    width: max-content;
+    margin-top: 8px;
+  }
+  .ship-stage .view-switch button {
+    white-space: nowrap;
+  }
+  .signal-strip .signal-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
