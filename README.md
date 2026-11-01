@@ -23,7 +23,7 @@
 <a href="docs/README.md">Docs</a>
 </p>
 
-<sub><a href="docs/releases/v0.1.0-preview.2.md">v0.1.0-preview.2</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
+<sub><a href="docs/releases/v0.1.0-preview.3.md">v0.1.0-preview.3</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
 
 </div>
 
