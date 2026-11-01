@@ -63,6 +63,8 @@ The scene illustrates the attempt; it does not read Minecraft or decide the resu
 
 </details>
 
+<sub>Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them. Its game scenes are original illustrations and never read game data.</sub>
+
 ## Your chat can change who survives
 
 <a href="assets/readme/mission-control.png"><img src="assets/readme/mission-control.png" width="1440" alt="Mission Control with the actual saved radiation-storm chapter, resource meters, cooperative relay challenge and captain controls."></a>
@@ -109,7 +111,15 @@ flowchart LR
 
 ## Try it
 
-With Node 24, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
+**One command, with Docker:**
+
+```powershell
+docker compose up --build    # then open http://localhost:3000
+```
+
+This runs saved practice with LIVEWIRE on. Every start uses a fresh practice database, and no Twitch account is involved.
+
+**Or with Node 24**, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
 
 ```powershell
 pnpm install --frozen-lockfile
@@ -132,7 +142,7 @@ For the real stream, follow the [owner setup guide](docs/operations/owner-launch
 | Saved survival + LIVEWIRE | Implemented with actual PostgreSQL, deterministic consequences, replay and automated tests |
 | Relay rehearsal, inheritance dossier, lineage | Implemented. A browser journey runs the full two-community, two-game practice relay and checks the saved custody, both attested missions, scars, debt and lineage. The raid evidence there is simulated and labeled |
 | Final design + OBS | Ten screens integrated; browser checks and native full/dock rendering, refresh and rotation pass in saved practice. [Evidence and limits](docs/reports/2026-10-30-final-frontend.md) |
-| Twitch | Real consent, signed callbacks and incoming query chat observed; genuine chat changing the Ark still needs acceptance |
+| Twitch | Real consent and signed callbacks. On 30 Oct, three genuine viewer chat commands arrived as signed EventSub notifications and were saved as `scan` gameplay events on a live Ark. A recording of the overlay updating from live chat is still pending |
 | Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |
 | Native raid + permanent hosting | Still open. Simulation does not satisfy either gate |
 

@@ -1,0 +1,62 @@
+# One-command local preview: saved practice with LIVEWIRE on, served at http://localhost:3000.
+# Every start is a fresh practice database. No Twitch account, credentials or messages are involved.
+# Not a hosted or live configuration: see docs/operations/deployment.md for those.
+name: torchline-preview
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: torchline
+      POSTGRES_PASSWORD: local-preview
+      POSTGRES_DB: torchline
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U torchline -d torchline']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Loopback HTTP preview. Production mode requires an HTTPS origin and verified database TLS.
+      NODE_ENV: development
+      WORLD_MODE: simulation
+      LIVEWIRE_ENABLED: 'true'
+      DATABASE_URL: postgresql://torchline:local-preview@db:5432/torchline
+      PUBLIC_BASE_URL: http://localhost:3000
+      HOST: 0.0.0.0
+      PORT: '3000'
+    # Fresh random secrets on every start; none are stored in this file.
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        export
+        SESSION_SECRET=$$(node -p "require('node:crypto').randomBytes(32).toString('hex')")
+        TOKEN_ENCRYPTION_KEY=$$(node -p "require('node:crypto').randomBytes(32).toString('hex')")
+        && node scripts/migrate.ts
+        && exec node apps/server/src/main.ts
+    ports:
+      - '127.0.0.1:3000:3000'
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 40

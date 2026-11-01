@@ -51,3 +51,8 @@ jobs:
       - run: git diff --exit-code -- docs/reports docs/design/fixtures assets/readme/proof.json assets/readme/flight-log.csv
       - run: docker build --build-arg SOURCE_REVISION=${{ github.sha }} -t torchline:check .
       - run: node scripts/smoke-container.mjs torchline:check
+      - name: One-command preview (docker compose)
+        run: docker compose up --build --wait --wait-timeout 240 && node scripts/smoke-compose.mjs
+      - name: Stop the preview
+        if: always()
+        run: docker compose down --volumes
