@@ -503,8 +503,8 @@ function Awakening({ setMode }: { setMode: (mode: Mode) => void }) {
           <em>THE WORLD DOESN'T.</em>
         </strong>
         <p>
-          One generation ship. 216 sleeping lives. Every audience decision leaves a physical
-          scar—and every captain inherits what came before.
+          One generation ship. 216 sleeping lives. Every committed decision is saved to the ship—and
+          every captain inherits what came before.
         </p>
         <div className="awakening-actions">
           <Button onClick={launch}>

@@ -11,8 +11,9 @@ import type { GameContext, Mode } from './types.ts';
 
 // A guided two-community relay for judges and new creators. Every step calls the same public
 // endpoints the dashboard uses, as the named practice identity, so the engine, PostgreSQL
-// transactions and custody rules decide each outcome. Only the raid proof is simulated, and the
-// server refuses that proof for live worlds. Each community keeps streaming its own game: their
+// transactions and custody rules decide each outcome. The practice identities, chat lines, scripted
+// mission results and raid proof are simulated, and the server refuses that proof for live worlds.
+// Each community keeps streaming its own game: their
 // LIVEWIRE missions change the same Ark, and the feeds are illustrations, never game telemetry.
 type Captain = 'alpha' | 'beta' | 'gamma';
 type Side = 'alpha' | 'receiver';
@@ -206,7 +207,7 @@ async function playMission(context: Context, side: Side, plan: MissionPlan) {
   context.save({ missions: { ...context.progress.missions, [side]: record } });
   context.note(
     label(captain),
-    `Attested ${record.outcome} · streamer-confirmed, not read from the game`,
+    `Attested ${record.outcome} · scripted practice result, not read from any game`,
     'evidence',
   );
   context.note(
@@ -349,7 +350,7 @@ const steps: Step[] = [
     side: 'alpha',
     status: ['PREPARING THE RELAY', 'OPTED IN · WAITING'],
     title: 'Alpha prepares the relay before raiding',
-    body: 'Alpha names the receiver at a finished chapter boundary. The Ark freezes until the raid is verified and accepted, the receiver declines, or the offer expires.',
+    body: 'Alpha names the receiver at a finished chapter boundary. The Ark freezes until raid evidence is recorded (simulated here) and the receiver accepts, the receiver declines, or the offer expires.',
     proof: 'POST /api/handoffs',
     run: async (context) => {
       await login('alpha');
@@ -530,7 +531,7 @@ function RelayStreams({
                   </b>
                   <span>
                     {result.target.toUpperCase()} {result.delta > 0 ? '+' : ''}
-                    {result.delta} · STREAMER-ATTESTED · SAVED TO ARK—001
+                    {result.delta} · PRACTICE ATTESTATION · SAVED TO ARK—001
                   </span>
                 </p>
               )}
@@ -660,7 +661,10 @@ export function Rehearsal({ setMode }: { setMode: (mode: Mode) => void }) {
           <code className="rehearsal-proof">{step.proof}</code>
           {handoff && ['prepared', 'verified'].includes(handoff.status) && (
             <p className="rehearsal-expiry" role="status">
-              Relay {handoff.status} · expires {new Date(handoff.expires_at).toLocaleTimeString()}
+              {handoff.status === 'verified'
+                ? 'Relay ready to accept · simulated raid proof'
+                : 'Relay prepared'}{' '}
+              · expires {new Date(handoff.expires_at).toLocaleTimeString()}
             </p>
           )}
           {failure && (
@@ -753,7 +757,7 @@ export function Rehearsal({ setMode }: { setMode: (mode: Mode) => void }) {
           <b>REAL VS SIMULATED</b>
           <p>
             Real: engine, PostgreSQL, authority and custody checks. Simulated: practice identities,
-            chat lines and the labeled raid proof.
+            chat lines, scripted mission results and the labeled raid proof.
           </p>
           <Button disabled={busy} onClick={() => restart('beta')}>
             Restart with Simulation beta

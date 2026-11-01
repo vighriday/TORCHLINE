@@ -239,14 +239,16 @@ export function GameControls() {
         ? `!scan ${unknown.id}`
         : challenge?.kind === 'work-order' && unpatched
           ? `!patch ${unpatched.id}`
-          : '!route S A C T'
+          : '!route S … T'
       : world.phase === 'decision'
         ? '!vote 1'
         : world.phase === 'investigation'
           ? '!inspect engine'
           : world.phase === 'allocation'
             ? '!allocate hull 3 oxygen 2'
-            : '!status';
+            : world.livewire?.stake?.status === 'open'
+              ? '!stake 1 · 2 · 3'
+              : 'commands open when the chapter starts';
   return (
     <div className="game-directives" aria-label="Game controls">
       <div className="panel-cut">
@@ -493,7 +495,7 @@ export function GameControls() {
           {challenge.kind === 'route' && world.phase === 'challenge' && !challenge.solved && (
             <div className="route-entry">
               <p>
-                Chat: <code>!route S A C T</code> · discover safe relays before submitting.
+                Chat: <code>!route S … T</code> · discover safe relays before submitting.
               </p>
               {!readOnly && (
                 <form

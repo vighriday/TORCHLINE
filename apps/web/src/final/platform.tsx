@@ -123,6 +123,14 @@ export function AccountPanel() {
   );
 }
 
+// A stored offer status as people see it: practice raid proof never reads as a verified raid.
+const offerLabel = (status: string, mode?: string) =>
+  status === 'verified'
+    ? mode === 'live'
+      ? 'RAID VERIFIED'
+      : 'SIMULATED RAID PROOF RECORDED'
+    : status.toUpperCase();
+
 export function Inheritance({
   setMode,
   navigation,
@@ -230,7 +238,9 @@ export function Inheritance({
         />
       </div>
       <div className="captain-transfer">
-        <span className="eyebrow">CHAIN OF COMMAND / {offer?.status ?? 'NO OPEN OFFER'}</span>
+        <span className="eyebrow">
+          CHAIN OF COMMAND / {offer ? offerLabel(offer.status, data?.mode) : 'NO OPEN OFFER'}
+        </span>
         <div className="captain-names">
           <div>
             <small>PREVIOUS CAPTAIN</small>
@@ -342,8 +352,8 @@ export function Inheritance({
             <select value={offer?.id ?? ''} onChange={(e) => setSelected(e.target.value)}>
               {offers.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.status} · {item.source_label ?? item.source_id} →{' '}
-                  {item.target_label ?? item.target_id}
+                  {offerLabel(item.status, data?.mode)} · {item.source_label ?? 'Unnamed community'}{' '}
+                  → {item.target_label ?? 'Unnamed community'}
                 </option>
               ))}
             </select>
@@ -373,7 +383,9 @@ export function Inheritance({
         ) : (
           <p>
             {offer
-              ? 'Waiting for verified evidence and the receiver’s acceptance.'
+              ? data?.mode === 'live'
+                ? 'Waiting for Twitch’s signed raid notification and the receiver’s acceptance.'
+                : 'Waiting for the practice raid proof and the receiver’s acceptance.'
               : 'No incoming offer. Existing worlds stay playable.'}
           </p>
         )}
@@ -1173,15 +1185,14 @@ export function Codex() {
             <span>QUICK COMMAND REFERENCE</span>
             <code>!inspect engine</code>
             <code>!scan A</code>
-            <code>!route S A C T</code>
+            <code>!route S … T</code>
             <code>!patch A</code>
             <code>!allocate hull 3 oxygen 2</code>
             <code>!vote 1</code>
             <code>!stake 2</code>
-            <code>!status</code>
-            <code>!history</code>
             <small>
-              Use the displayed legal command during its open window. Bot replies are optional.
+              Use the displayed legal command during its open window. <code>!status</code> and{' '}
+              <code>!history</code> ask the optional bot, which a channel may keep paused.
             </small>
           </div>
         </article>
@@ -1224,13 +1235,14 @@ export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
           : 'LIVE MODE / PRACTICE INPUTS DISABLED'}
       </div>
       <div className="platform-title">
-        <span className="eyebrow">JUDGE ARENA / REAL SAVED GAMEPLAY</span>
+        <span className="eyebrow">JUDGE ARENA / SIMULATED CREWS · REAL SAVED STATE</span>
         <strong>THE RELAY REHEARSAL</strong>
         <p>
           Two practice communities, two games, one Ark. Watch a Minecraft failure and one
           crew&rsquo;s sacrifice become the next crew&rsquo;s crisis, then a Rocket League win
-          repair the same hull. Every step runs the real engine, database and custody rules; no
-          Twitch messages are sent.
+          repair the same hull. Every step runs the real engine, database and custody rules with
+          practice crews, scripted mission results and a labeled simulated raid; no Twitch messages
+          are sent.
         </p>
       </div>
       {data?.mode === 'simulation' ? (
