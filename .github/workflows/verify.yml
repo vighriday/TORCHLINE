@@ -4,6 +4,9 @@ permissions:
   contents: read
 jobs:
   checks:
+    # Every push is verified once. A pull request from this repository already has that push run,
+    # so its duplicate run is skipped; pull requests from forks still run here.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     services:
       postgres:
