@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import type { HandoffPreview, RecordedWorldEvent, WorldPresentation } from '@torchline/contracts';
+import type {
+  DecisionAlternatives,
+  HandoffPreview,
+  ReplayVerification,
+  RecordedWorldEvent,
+  WorldPresentation,
+} from '@torchline/contracts';
 import { ArkShip } from './App.tsx';
 import { Brand, Button, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
@@ -10,6 +16,7 @@ import type { Mode } from './types.ts';
 import { systemLabels } from './condition.ts';
 import { Rehearsal } from './Rehearsal.tsx';
 import { Lineage, SeasonRecord } from './Lineage.tsx';
+import { WhatIf } from './WhatIf.tsx';
 
 export function AccountPanel() {
   const { data, busy, perform, botSetup } = useGame();
@@ -871,7 +878,10 @@ function ChronicleRecords({ world }: { world: WorldPresentation }) {
     record?.events[0];
   return (
     <>
-      <SeasonRecord world={world} />
+      <SeasonRecord
+        world={world}
+        verify={() => request<ReplayVerification>(`/api/worlds/${world.worldId}/verify`)}
+      />
       <section className="archive-layout">
         <div className="archive-ship">
           <ArkShip
@@ -935,6 +945,17 @@ function ChronicleRecords({ world }: { world: WorldPresentation }) {
                 </span>
               ))}
           </div>
+          {event && (
+            <WhatIf
+              eventId={event.id}
+              summary={event.summary}
+              load={(eventId) =>
+                request<DecisionAlternatives>(
+                  `/api/worlds/${world.worldId}/alternatives?event=${encodeURIComponent(eventId)}`,
+                )
+              }
+            />
+          )}
           {event?.causes.length ? (
             <div className="cause-links">
               <span>INHERITED CAUSES</span>
@@ -1206,8 +1227,9 @@ export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
         <span className="eyebrow">JUDGE ARENA / REAL SAVED GAMEPLAY</span>
         <strong>THE RELAY REHEARSAL</strong>
         <p>
-          Two practice communities, one Ark. Watch one crew&rsquo;s decision become the next
-          crew&rsquo;s crisis. Every step runs the real engine, database and custody rules; no
+          Two practice communities, two games, one Ark. Watch a Minecraft failure and one
+          crew&rsquo;s sacrifice become the next crew&rsquo;s crisis, then a Rocket League win
+          repair the same hull. Every step runs the real engine, database and custody rules; no
           Twitch messages are sent.
         </p>
       </div>

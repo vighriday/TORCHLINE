@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type {
   CustodyStep,
   RecordedWorldEvent,
+  ReplayVerification,
   WorldHistoryPage,
   WorldPresentation,
 } from '@torchline/contracts';
@@ -98,7 +99,8 @@ export function lineageNodes(events: RecordedWorldEvent[]): LineageNode[] {
           : cues.includes('chapter-arrived')
             ? 'arrival'
             : null;
-    if (!kind || event.chapter < 1) continue;
+    // Missions run between chapters, including the boundary before chapter one.
+    if (!kind || (event.chapter < 1 && kind !== 'livewire')) continue;
     const title =
       kind === 'decision'
         ? event.summary.split(': committed by ')[0]
@@ -163,12 +165,14 @@ export function Lineage({
       for (const party of [step.source, step.target])
         if (!communities.some((item) => item.id === party.id)) communities.push(party);
     const cell = new Map<string, number>();
+    // A mission before chapter one sits in the first chapter column.
+    const column = (node: LineageNode) => Math.max(1, node.chapter);
     const rowHeight = communities.map((community) => {
       let tallest = 1;
       for (let chapter = 1; chapter <= 5; chapter++)
         tallest = Math.max(
           tallest,
-          nodes.filter((n) => n.community.id === community.id && n.chapter === chapter).length,
+          nodes.filter((n) => n.community.id === community.id && column(n) === chapter).length,
         );
       return 34 + tallest * (NODE_H + 8);
     });
@@ -178,11 +182,11 @@ export function Lineage({
     const positions = new Map<string, { x: number; y: number }>();
     for (const node of nodes) {
       const row = communities.findIndex((item) => item.id === node.community.id);
-      const key = `${row}:${node.chapter}`;
+      const key = `${row}:${column(node)}`;
       const slot = cell.get(key) ?? 0;
       cell.set(key, slot + 1);
       positions.set(node.id, {
-        x: LEFT + (node.chapter - 1) * COLUMN + 12,
+        x: LEFT + (column(node) - 1) * COLUMN + 12,
         y: rowTop[row] + 20 + slot * (NODE_H + 8),
       });
     }
@@ -382,12 +386,60 @@ const endingTitle = {
  * The season's closing record: how the voyage ended and what each community contributed. It
  * reads only saved events; nothing here is scored or invented.
  */
+/**
+ * Proof on demand: the server replays every saved event through the pinned rules and compares
+ * SHA-256 digests of the replayed and the saved ship. Plain buttons, because the public
+ * Chronicle renders this without a dashboard session.
+ */
+function ReplayCheck({ verify }: { verify: () => Promise<ReplayVerification> }) {
+  const [result, setResult] = useState<ReplayVerification | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  if (!result)
+    return (
+      <div className="replay-check">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            setError('');
+            verify()
+              .then(setResult)
+              .catch((failure: Error) => setError(failure.message))
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? 'REPLAYING THE SAVED LOG…' : 'VERIFY THIS RECORD'}
+        </button>
+        {error && <p role="alert">{error}</p>}
+      </div>
+    );
+  return (
+    <div className="replay-check" data-matches={result.matches} role="status">
+      <b>{result.matches ? 'REPLAY VERIFIED' : 'REPLAY DIFFERS'}</b>
+      <span>
+        {result.matches
+          ? `${result.events} saved events replayed through ${result.rulesVersion} reproduce this exact ship.`
+          : (result.failure ?? 'The replayed ship does not match the saved one.')}
+      </span>
+      <small>
+        SHA-256 · saved {result.savedDigest.slice(0, 12)}…
+        {result.replayedDigest ? ` · replayed ${result.replayedDigest.slice(0, 12)}…` : ''}
+      </small>
+    </div>
+  );
+}
+
 export function SeasonRecord({
   world,
   loader,
+  verify,
 }: {
   world: WorldPresentation;
   loader?: HistoryLoader;
+  /** Replays the saved log and compares digests; omitted where no record access exists. */
+  verify?: () => Promise<ReplayVerification>;
 }) {
   const { record } = useFullHistory(world.worldId, world.gameVersion, loader);
   const nodes = record ? lineageNodes(record.events) : [];
@@ -403,7 +455,8 @@ export function SeasonRecord({
       crew = { community: node.community, chapters: [], decisions: [], solved: 0 };
       crews.push(crew);
     }
-    if (!crew.chapters.includes(node.chapter)) crew.chapters.push(node.chapter);
+    const chapter = Math.max(1, node.chapter);
+    if (!crew.chapters.includes(chapter)) crew.chapters.push(chapter);
     if (node.kind === 'decision') crew.decisions.push(node);
     if (node.kind === 'solve') crew.solved++;
   }
@@ -424,6 +477,7 @@ export function SeasonRecord({
             ? world.endingReason
             : 'Every community that has commanded this Ark, and what it decided. The voyage is still open.'}
         </p>
+        {verify && <ReplayCheck key={world.gameVersion} verify={verify} />}
         <div className="season-resources">
           {(
             [

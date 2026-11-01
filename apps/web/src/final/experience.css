@@ -1078,3 +1078,679 @@
 .settings-layout > aside > div b {
   text-align: right;
 }
+/* LIVEWIRE practice feeds: game-styled HUDs over the illustrative scenes. They mirror the feed
+   phase and the saved outcome only; nothing here claims to read the real game. */
+.game-feed-label em {
+  color: #ffcf7a;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  font-style: normal;
+  letter-spacing: 0.12em;
+}
+.game-xp {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 157px);
+  width: 342px;
+  height: 6px;
+  transform: translateX(-50%);
+  background: rgba(10, 22, 6, 0.85);
+  box-shadow: 0 0 0 1px #000;
+}
+.game-xp i {
+  display: block;
+  width: 36%;
+  height: 100%;
+  background: linear-gradient(#a8f06a, #5bbd2a);
+  transition: width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s;
+}
+.game-hud--voxel[data-phase='win'] .game-xp i {
+  width: 100%;
+}
+.game-hud--voxel .game-hearts i {
+  transition: background-color 0.3s;
+}
+.game-hud--voxel[data-phase='loss'] .game-hearts i {
+  background: #3a1517;
+}
+.arena-score {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  display: flex;
+  height: 64px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+}
+.arena-team {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 138px;
+  padding: 0 24px;
+  color: #fff;
+}
+.arena-team--blue {
+  justify-content: flex-end;
+  background: linear-gradient(100deg, #1f5fe0, #3d8bff);
+  clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%);
+}
+.arena-team--orange {
+  background: linear-gradient(100deg, #ff9a32, #f2731a);
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+}
+.arena-team small,
+.arena-clock small {
+  font: 700 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.16em;
+}
+.arena-team b {
+  font: italic 800 46px/1 var(--display);
+}
+.arena-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 164px;
+  background: #0d1426;
+  color: #fff;
+}
+.arena-clock small {
+  color: #ffc46b;
+}
+.arena-clock b {
+  font: italic 800 38px/1 var(--display);
+}
+.game-hud--rocket[data-phase='win'] .arena-team--blue b {
+  animation: arena-score 0.9s ease-out 2;
+}
+@keyframes arena-score {
+  50% {
+    transform: scale(1.35);
+    text-shadow: 0 0 18px #9cc4ff;
+  }
+}
+.arena-boost {
+  position: absolute;
+  right: 34px;
+  bottom: 40px;
+  width: 156px;
+  height: 156px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a2236 0 58%, #0b1020 59% 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.arena-boost svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(120deg);
+}
+.arena-boost circle {
+  fill: none;
+  stroke-width: 9;
+}
+.arena-boost-track {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-dasharray: 83 100;
+}
+.arena-boost-fill {
+  stroke: #ffb02e;
+  stroke-dasharray: 83 100;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(255, 170, 40, 0.7));
+  transition: stroke-dasharray 1.8s linear;
+}
+.game-hud--rocket:not([data-phase='idle']) .arena-boost-fill {
+  stroke-dasharray: 10 100;
+}
+.arena-boost b {
+  position: relative;
+  color: #fff;
+  font: italic 800 52px/0.9 var(--display);
+}
+.arena-boost small {
+  position: relative;
+  color: #c9d4ea;
+  font: 700 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.18em;
+}
+.arena-cam {
+  position: absolute;
+  right: 72px;
+  bottom: 206px;
+  padding: 5px 9px;
+  background: rgba(8, 12, 22, 0.82);
+  color: #fff;
+  font: 700 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.14em;
+}
+.souls-vitals {
+  position: absolute;
+  top: 142px;
+  left: 24px;
+  display: grid;
+  gap: 5px;
+}
+.souls-vital {
+  display: block;
+  height: 9px;
+  background: rgba(10, 8, 6, 0.78);
+  border: 1px solid rgba(201, 176, 120, 0.55);
+}
+.souls-vital em {
+  display: block;
+  height: 100%;
+  transition: width 0.8s ease;
+}
+.souls-vital--health {
+  width: 300px;
+}
+.souls-vital--health em {
+  width: 92%;
+  background: linear-gradient(#c43a2c, #8a1d14);
+}
+.souls-vital--focus {
+  width: 190px;
+}
+.souls-vital--focus em {
+  width: 70%;
+  background: linear-gradient(#4a72c8, #2a4a8e);
+}
+.souls-vital--stamina {
+  width: 240px;
+}
+.souls-vital--stamina em {
+  width: 100%;
+  background: linear-gradient(#5aa35a, #2f6e34);
+}
+.game-hud--souls:is([data-phase='attempt'], [data-phase='hold']) .souls-vital--stamina em {
+  width: 32%;
+  transition-duration: 1.6s;
+}
+.game-hud--souls[data-phase='loss'] .souls-vital--health em {
+  width: 0;
+  transition: width 0.5s ease-in 0.25s;
+}
+.souls-boss {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  width: min(620px, 56vw);
+  transform: translateX(-50%);
+}
+.souls-boss span {
+  display: block;
+  margin-bottom: 7px;
+  color: #e8dfcc;
+  font:
+    500 19px/1 Georgia,
+    'Times New Roman',
+    serif;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 6px #000;
+}
+.souls-boss i {
+  display: block;
+  height: 10px;
+  background: rgba(10, 6, 4, 0.8);
+  border: 1px solid rgba(201, 176, 120, 0.5);
+}
+.souls-boss em {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(#a31f16, #5e0d08);
+  transition: width 0.9s ease-out 0.3s;
+}
+.game-hud--souls[data-phase='win'] .souls-boss em {
+  width: 0;
+}
+.game-banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 22px 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.62) 22%,
+    rgba(0, 0, 0, 0.62) 78%,
+    transparent
+  );
+  animation: banner-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.game-banner strong {
+  color: #fff;
+  font: 800 64px/1 var(--display);
+  letter-spacing: 0.08em;
+}
+.game-banner small {
+  color: #ffd38a;
+  font: 600 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.16em;
+}
+.game-banner--loss strong {
+  color: #ff6a5a;
+}
+.game-hud--rocket .game-banner--win strong {
+  color: #9cc4ff;
+  font-style: italic;
+  text-shadow: 0 0 28px rgba(80, 150, 255, 0.8);
+}
+.game-hud--souls .game-banner strong {
+  font:
+    400 72px/1 Georgia,
+    'Times New Roman',
+    serif;
+  letter-spacing: 0.1em;
+}
+.game-hud--souls .game-banner--win strong {
+  color: #f0d48a;
+}
+.game-hud--souls .game-banner--loss strong {
+  color: #b3261e;
+}
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+[data-motion='reduced'] .game-banner,
+[data-motion='reduced'] .game-hud--rocket[data-phase='win'] .arena-team--blue b {
+  animation: none;
+}
+/* On phones the dock covers the feed, so only the feed label and outcome banner remain. */
+@media (max-width: 900px) {
+  .arena-boost,
+  .arena-cam,
+  .arena-score,
+  .souls-vitals,
+  .souls-boss,
+  .game-xp {
+    display: none;
+  }
+  .game-banner strong,
+  .game-hud--souls .game-banner strong {
+    font-size: 40px;
+  }
+}
+/* The in-app collapsed dock grows with its status lines instead of clipping them. */
+.livewire-world:not(.livewire-world--overlay) .dock--collapsed {
+  height: auto;
+  min-height: 62px;
+  padding-block: 9px;
+}
+.livewire-world:not(.livewire-world--overlay) .dock--collapsed .mini-status {
+  flex: 1;
+  min-width: 0;
+}
+.livewire-world:not(.livewire-world--overlay) .dock--collapsed .compact-resources {
+  gap: 3px;
+  margin-left: 12px;
+}
+/* Relay rehearsal: both practice channels side by side, each in its own game. */
+.relay-streams {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.rehearsal-stage--dossier .relay-streams {
+  grid-column: 1 / -1;
+}
+.relay-stream {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  opacity: 0.6;
+  transition: opacity 0.35s;
+}
+.relay-stream--live {
+  opacity: 1;
+}
+.relay-stream figcaption {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: #9cc7c6;
+  font: 600 calc(10px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.relay-stream figcaption b {
+  color: var(--bone);
+  font: 700 15px var(--display);
+  letter-spacing: 0.08em;
+}
+.relay-stream figcaption em {
+  margin-left: auto;
+  color: var(--amber-bright);
+  font-style: normal;
+}
+.relay-stream--live figcaption em::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #e5484d;
+  box-shadow: 0 0 8px #e5484d;
+  vertical-align: 1px;
+}
+.relay-feed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(111, 170, 169, 0.25);
+  background: #05080a;
+}
+.relay-stream--live .relay-feed {
+  border-color: rgba(229, 72, 77, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(229, 72, 77, 0.25),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.relay-feed .voxel-canvas,
+.relay-feed .ark-canvas-loading {
+  position: absolute;
+  inset: 0;
+}
+.relay-feed > small {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffd38a;
+  font: 600 calc(8.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.relay-result {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 7px 10px;
+  border-left: 3px solid #e08a75;
+  background: rgba(6, 9, 10, 0.86);
+}
+.relay-result--success {
+  border-left-color: #7fd6a4;
+}
+.relay-result b {
+  color: var(--bone);
+  font: 700 14px var(--display);
+  letter-spacing: 0.06em;
+}
+.relay-result span {
+  color: #c7cbc4;
+  font: 500 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.08em;
+}
+@media (max-width: 900px) {
+  .relay-streams {
+    grid-template-columns: 1fr;
+  }
+}
+/* The step header stays compact so the feeds and the run control share one screen. */
+.rehearsal .rehearsal-head .sim-orbit {
+  width: 58px;
+  height: 58px;
+  font-size: 18px;
+}
+.rehearsal .rehearsal-head .sim-orbit i {
+  inset: 8px;
+}
+.rehearsal .rehearsal-copy > strong {
+  font-size: clamp(28px, 2.7vw, 44px);
+}
+/* Away from the bridge and the dock, captions sit low so they never cover a page title. */
+body:has(.platform-page) .consequence-caption {
+  top: auto;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+/* Mission ledger: what other games did to this Ark, attributed to the attesting community. */
+.dossier-missions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.dossier-missions li {
+  display: grid;
+  grid-template-columns: minmax(78px, auto) 1fr;
+  gap: 2px 10px;
+  padding: 6px 8px;
+  border-left: 2px solid #e08a75;
+  background: rgba(111, 170, 169, 0.06);
+}
+.dossier-missions li[data-outcome='success'] {
+  border-left-color: #7fd6a4;
+}
+.dossier-missions b {
+  grid-row: span 2;
+  color: #9cc7c6;
+  font: 600 11px var(--mono);
+  letter-spacing: 0.04em;
+}
+.dossier-missions span {
+  color: var(--bone);
+  font: 600 14px/1.15 var(--display);
+  letter-spacing: 0.02em;
+}
+.dossier-missions small {
+  color: #8d948e;
+  font: 400 10px var(--mono);
+}
+.season-finale .dossier-block {
+  margin-top: 14px;
+  text-align: left;
+}
+/* What if: every option of one saved decision, replayed once from the state before it. */
+.what-if {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(111, 170, 169, 0.3);
+  background: rgba(6, 11, 12, 0.72);
+  text-align: left;
+}
+.what-if--closed {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.what-if--closed button {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px dashed rgba(111, 170, 169, 0.55);
+  background: rgba(111, 170, 169, 0.08);
+  color: #9cc7c6;
+  font: 600 calc(10.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.08em;
+}
+.what-if--closed p {
+  margin: 6px 0 0;
+  color: #f1b3a5;
+  font: 400 11px var(--mono);
+}
+.what-if header {
+  display: grid;
+  gap: 3px;
+}
+.what-if header span {
+  color: var(--amber);
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.what-if header strong {
+  color: var(--bone);
+  font: 700 18px/1.1 var(--display);
+}
+.what-if header small {
+  color: #8d948e;
+  font: 400 10px var(--mono);
+}
+.what-if header em {
+  justify-self: start;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border: 1px solid rgba(127, 214, 164, 0.5);
+  color: #7fd6a4;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  font-style: normal;
+}
+.what-if header em[data-verified='false'] {
+  border-color: rgba(224, 138, 117, 0.6);
+  color: #e08a75;
+}
+.what-if ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.what-if li {
+  display: grid;
+  gap: 6px;
+  padding: 8px 9px;
+  border-left: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+}
+.what-if li[data-chosen='true'] {
+  border-left-color: var(--amber-bright);
+  background: rgba(201, 152, 81, 0.08);
+}
+.what-if li[data-available='false'] {
+  opacity: 0.7;
+}
+.what-if-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.what-if-head b {
+  color: #9cc7c6;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.what-if li[data-chosen='true'] .what-if-head b {
+  color: var(--amber-bright);
+}
+.what-if-head strong {
+  color: var(--bone);
+  font: 600 15px var(--display);
+}
+.what-if-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+/* The public record is wide enough for one row of six. */
+.public-chronicle-record .what-if-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.what-if-grid span {
+  display: grid;
+  gap: 1px;
+  padding: 4px 5px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.what-if-grid small {
+  color: #7f8a86;
+  font: 500 calc(8.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.06em;
+}
+.what-if-grid b {
+  color: var(--bone);
+  font: 600 14px var(--display);
+}
+.what-if-grid i {
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  font-style: normal;
+  color: #7fd6a4;
+}
+.what-if-grid i[data-tone='loss'] {
+  color: #e08a75;
+}
+.what-if li p,
+.what-if footer {
+  margin: 0;
+  color: #a8ada6;
+  font: 400 11px/1.5 var(--mono);
+}
+.what-if footer {
+  color: #7f8a86;
+  font-size: 10px;
+}
+@media (max-width: 900px) {
+  .public-chronicle-record .what-if-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* Replay check: the saved log replayed through the pinned rules, digests compared. */
+.replay-check {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  margin-top: 12px;
+}
+.replay-check button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(127, 214, 164, 0.55);
+  background: rgba(127, 214, 164, 0.08);
+  color: #9fe0bb;
+  font: 600 calc(10.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.replay-check[data-matches] {
+  padding: 8px 11px;
+  border-left: 3px solid #7fd6a4;
+  background: rgba(127, 214, 164, 0.07);
+}
+.replay-check[data-matches='false'] {
+  border-left-color: #e08a75;
+  background: rgba(224, 138, 117, 0.08);
+}
+.replay-check b {
+  color: #7fd6a4;
+  font: 700 calc(11px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.replay-check[data-matches='false'] b {
+  color: #e08a75;
+}
+.replay-check span {
+  color: var(--bone);
+  font: 500 12px/1.45 var(--mono);
+}
+.replay-check small {
+  color: #7f8a86;
+  font: 400 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  overflow-wrap: anywhere;
+}
+.replay-check p {
+  margin: 0;
+  color: #f1b3a5;
+  font: 400 11px var(--mono);
+}

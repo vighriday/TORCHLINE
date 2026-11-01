@@ -1,4 +1,4 @@
-import type { Obligation, WorldPresentation } from '@torchline/contracts';
+import type { ArrivalMission, Obligation, WorldPresentation } from '@torchline/contracts';
 import { systemLabels } from './condition.ts';
 
 // Plain-language consequences for each saved obligation. The rules engine decides when a debt
@@ -96,6 +96,7 @@ export function ArrivalDossier({
           </ol>
         </div>
       )}
+      <MissionLedger missions={arrival.missions ?? []} title="WHAT OTHER GAMES DID TO IT" />
       <div className="dossier-block">
         <span className="dossier-label">YOUR CONSEQUENCES</span>
         {debts.length ? (
@@ -128,6 +129,31 @@ export function ArrivalDossier({
           : 'Their decisions. Your consequences. This briefing clears when you issue your first command.'}
       </footer>
     </section>
+  );
+}
+
+const targetLabel = { navigation: 'Navigation', hull: 'Hull', oxygen: 'Life support' } as const;
+
+/** What other games did to this Ark: each streamer-attested LIVEWIRE result and its effect. */
+function MissionLedger({ missions, title }: { missions: ArrivalMission[]; title: string }) {
+  if (!missions.length) return null;
+  return (
+    <div className="dossier-block">
+      <span className="dossier-label">{title}</span>
+      <ol className="dossier-missions">
+        {missions.map((mission) => (
+          <li key={mission.eventId} data-outcome={mission.outcome}>
+            <b>{mission.game}</b>
+            <span>
+              {mission.attempt} · {mission.outcome === 'success' ? 'success' : 'failure'} ·{' '}
+              {targetLabel[mission.target]} {mission.delta > 0 ? '+' : ''}
+              {mission.delta}
+            </span>
+            <small>{mission.community} · streamer-attested</small>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -185,6 +211,7 @@ export function SeasonFinale({
           </li>
         ))}
       </ol>
+      <MissionLedger missions={season.missions ?? []} title="LIVEWIRE MISSIONS ABOARD" />
       <footer>
         One Ark · {season.communities} {season.communities === 1 ? 'community' : 'communities'} ·{' '}
         {season.relays} {season.relays === 1 ? 'relay' : 'relays'}

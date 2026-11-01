@@ -1,7 +1,16 @@
 import type { PoolClient } from 'pg';
 import { createHash } from 'node:crypto';
-import { DomainError, attributeSummary } from '@torchline/contracts';
-import type { WorldHistoryPage } from '@torchline/contracts';
+import { DomainError, SYSTEM_IDS, attributeSummary } from '@torchline/contracts';
+import type {
+  AlternativeBranch,
+  Command,
+  DecisionAlternatives,
+  ReplayVerification,
+  WorldEvent,
+  WorldHistoryPage,
+  WorldState,
+} from '@torchline/contracts';
+import { applyCommand, previewChoices, replayEvents } from '@torchline/engine';
 import type { Creator, StoredWorld, Store } from './index.ts';
 
 const deny = (): never => {
@@ -153,6 +162,242 @@ export async function readSharedChronicle(store: Store, token: string, query: Hi
     if (!row)
       throw new DomainError('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
     return { world: await projected(c, row), history: await historyPage(c, row, query) };
+  });
+}
+// History is append-only, so a decision's alternatives never change once computed.
+const alternativeCache = new Map<string, DecisionAlternatives>();
+// JSON semantics with sorted keys: absent and undefined fields compare equal, as in storage.
+const canonical = (value: unknown): string =>
+  Array.isArray(value)
+    ? `[${value.map((item) => (item === undefined ? 'null' : canonical(item))).join(',')}]`
+    : value !== null && typeof value === 'object'
+      ? `{${Object.keys(value)
+          .filter((key) => (value as Record<string, unknown>)[key] !== undefined)
+          .sort()
+          .map(
+            (key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`,
+          )
+          .join(',')}}`
+      : JSON.stringify(value);
+const digest = (value: unknown) => createHash('sha256').update(canonical(value)).digest('hex');
+
+// The replay of a given saved version never changes; the saved state is re-hashed every time.
+const replayCache = new Map<
+  string,
+  { digest: string | null; failure: string | null; events: number }
+>();
+/**
+ * Replays a world's entire saved event log from genesis through its pinned rules version and
+ * compares a SHA-256 digest of the result with a digest of the saved state. A refusal by the
+ * rules (a stored effect they no longer produce, a sequence gap) is reported, never hidden.
+ */
+async function verifyReplay(
+  c: PoolClient,
+  row: { id: string; state: StoredWorld['state'] },
+): Promise<ReplayVerification> {
+  const key = `${row.id}:${row.state.version}`;
+  let replay = replayCache.get(key);
+  if (!replay) {
+    const events: WorldEvent[] = (
+      await c.query(
+        'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
+        [row.id, row.state.version],
+      )
+    ).rows.map((item) => item.event);
+    try {
+      replay = {
+        digest: digest(replayEvents(row.id, events, row.state.rulesVersion)),
+        failure: null,
+        events: events.length,
+      };
+    } catch (error) {
+      if (!(error instanceof DomainError)) throw error;
+      replay = { digest: null, failure: error.message, events: events.length };
+    }
+    if (replayCache.size > 256) replayCache.clear();
+    replayCache.set(key, replay);
+  }
+  const savedDigest = digest(row.state);
+  return {
+    schemaVersion: 'world-records-2026-10-27.1',
+    worldId: row.id,
+    rulesVersion: row.state.rulesVersion,
+    events: replay.events,
+    throughSequence: row.state.version,
+    savedDigest,
+    replayedDigest: replay.digest,
+    matches: replay.digest === savedDigest,
+    failure: replay.failure,
+  };
+}
+export async function verifyWorldReplay(store: Store, creator: Creator, id: string) {
+  return store.transaction(async (c) => {
+    await store.lockChannels(c, [creator.id]);
+    return verifyReplay(c, await owned(c, creator, id));
+  });
+}
+export async function verifySharedReplay(store: Store, token: string) {
+  return store.transaction(async (c) => {
+    const row = (
+      await c.query(
+        'SELECT w.id,w.mode,w.state FROM world_shares s JOIN worlds w ON w.id=s.world_id WHERE s.hash=$1 FOR SHARE OF w',
+        [createHash('sha256').update(token).digest('hex')],
+      )
+    ).rows[0];
+    if (!row)
+      throw new DomainError('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: row.mode as Creator['mode'], verification: await verifyReplay(c, row) };
+  });
+}
+
+/**
+ * Rebuilds the saved world just before one decision from its own event log, then applies every
+ * option of that decision (or both attested LIVEWIRE results) once, with the original actor,
+ * command ID and timestamp. Nothing is written. The chosen branch must reproduce the saved
+ * event, which is reported rather than assumed.
+ */
+async function alternativesFor(
+  c: PoolClient,
+  worldId: string,
+  eventId: string,
+): Promise<DecisionAlternatives> {
+  const key = `${worldId}:${eventId}`;
+  const cached = alternativeCache.get(key);
+  if (cached) return cached;
+  const target = (
+    await c.query("SELECT sequence FROM world_events WHERE world_id=$1 AND event->>'id'=$2", [
+      worldId,
+      eventId,
+    ])
+  ).rows[0];
+  if (!target) throw new DomainError('NOT_FOUND', 'This decision is not in the saved record.');
+  const events: WorldEvent[] = (
+    await c.query(
+      'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
+      [worldId, target.sequence],
+    )
+  ).rows.map((row) => row.event);
+  const event = events.at(-1)!;
+  if (event.command.type !== 'commit' && event.command.type !== 'livewire-resolve')
+    throw new DomainError(
+      'NOT_A_DECISION',
+      'Only captain decisions and attested LIVEWIRE results have alternatives.',
+    );
+  const before = replayEvents(worldId, events.slice(0, -1), event.rulesVersion);
+  const context = { commandId: event.commandId, at: event.at };
+  const branch = (
+    option: string,
+    label: string,
+    chosen: boolean,
+    command: Command,
+  ): AlternativeBranch & { event?: WorldEvent } => {
+    try {
+      const next = applyCommand(before, command, event.actor, context);
+      const state: WorldState = next.state;
+      return {
+        option,
+        label,
+        chosen,
+        available: true,
+        unavailableReason: null,
+        resources: state.resources,
+        outcome: state.outcome,
+        debts: state.obligations
+          .filter(
+            (item) =>
+              item.status === 'pending' && !before.obligations.some((old) => old.id === item.id),
+          )
+          .map((item) => ({ kind: item.kind, dueChapter: item.dueChapter })),
+        lost: SYSTEM_IDS.filter(
+          (id) => state.systems[id].integrity === 0 && before.systems[id].integrity > 0,
+        ),
+        event: next.event,
+      };
+    } catch (error) {
+      if (!(error instanceof DomainError)) throw error;
+      return {
+        option,
+        label,
+        chosen,
+        available: false,
+        unavailableReason: error.message,
+        resources: null,
+        outcome: null,
+        debts: [],
+        lost: [],
+      };
+    }
+  };
+  let title: string;
+  let computed: (AlternativeBranch & { event?: WorldEvent })[];
+  if (event.command.type === 'commit') {
+    const picked = event.command.option;
+    const choices = previewChoices(before);
+    title = choices.find((choice) => choice.id === picked)?.label ?? picked;
+    computed = choices.map((choice) =>
+      branch(choice.id, choice.label, choice.id === picked, { type: 'commit', option: choice.id }),
+    );
+  } else {
+    const stake = before.livewire!.stake;
+    const picked = event.command.outcome;
+    title = `${stake.game} · ${stake.label}`;
+    computed = (['success', 'failure'] as const).map((outcome) =>
+      branch(outcome, outcome === 'success' ? 'Success' : 'Failure', outcome === picked, {
+        type: 'livewire-resolve',
+        stakeId: stake.id,
+        outcome,
+      }),
+    );
+  }
+  const chosen = computed.find((item) => item.chosen);
+  const label = (await c.query('SELECT label FROM creators WHERE id=$1', [event.actor.community]))
+    .rows[0]?.label as string | undefined;
+  const result: DecisionAlternatives = {
+    schemaVersion: 'world-records-2026-10-27.1',
+    worldId,
+    eventId,
+    chapter: event.chapter,
+    rulesVersion: event.rulesVersion,
+    kind: event.command.type === 'commit' ? 'decision' : 'livewire',
+    title,
+    community: { id: event.actor.community, label: label ?? event.actor.community },
+    before: before.resources,
+    verified: !!chosen?.event && canonical(chosen.event) === canonical(event),
+    // The chosen branch leads; every branch keeps the engine's option order otherwise.
+    branches: [...computed]
+      .sort((a, b) => Number(b.chosen) - Number(a.chosen))
+      .map(({ event: _event, ...rest }) => rest),
+  };
+  if (alternativeCache.size > 256) alternativeCache.clear();
+  alternativeCache.set(key, result);
+  return result;
+}
+export async function readAlternatives(
+  store: Store,
+  creator: Creator,
+  id: string,
+  eventId: string,
+) {
+  return store.transaction(async (c) => {
+    await store.lockChannels(c, [creator.id]);
+    const row = await owned(c, creator, id);
+    return alternativesFor(c, row.id, eventId);
+  });
+}
+export async function readSharedAlternatives(store: Store, token: string, eventId: string) {
+  return store.transaction(async (c) => {
+    const row = (
+      await c.query(
+        'SELECT w.id,w.mode FROM world_shares s JOIN worlds w ON w.id=s.world_id WHERE s.hash=$1',
+        [createHash('sha256').update(token).digest('hex')],
+      )
+    ).rows[0];
+    if (!row)
+      throw new DomainError('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return {
+      mode: row.mode as Creator['mode'],
+      alternatives: await alternativesFor(c, row.id, eventId),
+    };
   });
 }
 export async function readHandoffPreview(store: Store, creator: Creator, id: string) {

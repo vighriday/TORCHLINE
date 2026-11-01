@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { RecordedWorldEvent, WorldHistoryPage, WorldPresentation } from '@torchline/contracts';
+import type {
+  DecisionAlternatives,
+  RecordedWorldEvent,
+  ReplayVerification,
+  WorldHistoryPage,
+  WorldPresentation,
+} from '@torchline/contracts';
 import { request } from '../api.ts';
 import { Brand } from './primitives.tsx';
 import { Lineage, SeasonRecord } from './Lineage.tsx';
 import type { HistoryLoader } from './Lineage.tsx';
+import { WhatIf } from './WhatIf.tsx';
 import './index.css';
 import './integration.css';
 import './experience.css';
@@ -73,7 +80,17 @@ export function PublicChronicle() {
       {!shared && !error && <p className="lineage-empty">Reading the saved record…</p>}
       {shared && (
         <>
-          <SeasonRecord world={shared.world} loader={loader} />
+          <SeasonRecord
+            world={shared.world}
+            loader={loader}
+            verify={async () =>
+              (
+                await request<{ verification: ReplayVerification }>('/api/chronicle/verify', {
+                  token,
+                })
+              ).verification
+            }
+          />
           <section className="lineage-panel" aria-label="Lineage across communities">
             <div className="section-label">
               <span>LINEAGE · WHO CAUSED WHAT</span>
@@ -92,6 +109,18 @@ export function PublicChronicle() {
               </span>
               <strong>{event.summary}</strong>
               <small>{new Date(event.at).toLocaleString()}</small>
+              <WhatIf
+                eventId={event.id}
+                summary={event.summary}
+                load={async (eventId) =>
+                  (
+                    await request<{ alternatives: DecisionAlternatives }>(
+                      '/api/chronicle/alternatives',
+                      { token, event: eventId },
+                    )
+                  ).alternatives
+                }
+              />
             </section>
           )}
           <section className="public-chronicle-custody" aria-label="Custody chain">

@@ -10,6 +10,7 @@ Only the owner-supplied Figma v2 design appears here. The bridge's floating blue
 | minecraft-livewire.png, minecraft-livewire.gif | Real saved mission dock with illustrative Minecraft scene; not game telemetry or automatic result detection |
 | relay-broadcast.png | Read-only OBS view of a received Ark showing the inheritance dossier after a practice relay |
 | relay-rehearsal.png | Judge Arena relay rehearsal stopped on the receiver's dossier |
+| cross-game-relay.png | Judge Arena relay after both LIVEWIRE missions: alpha's Minecraft failure and the receiver's Rocket League repair on the same Ark; illustrative feeds, streamer-attested results |
 | lineage.png, season-record.png | Chronicle lineage and season record for one Ark carried by three practice communities to a colony |
 | season-finale.png | Read-only OBS view of the same finished voyage with its season finale card |
 | proof.json, flight-log.csv | Pure-engine examples, actual resource consequences and replay-checked repair witness |

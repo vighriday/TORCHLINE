@@ -12,7 +12,7 @@ import {
   LivewireRequestSchema,
   SYSTEM_IDS,
 } from '@torchline/contracts';
-import type { Command, WorldPresentation } from '@torchline/contracts';
+import type { Command, LivewireTarget, WorldPresentation } from '@torchline/contracts';
 import {
   Store,
   participantIdentity,
@@ -20,6 +20,10 @@ import {
   readWorldHistory,
   readHandoffPreview,
   readSharedChronicle,
+  readAlternatives,
+  readSharedAlternatives,
+  verifyWorldReplay,
+  verifySharedReplay,
   shareWorld,
   advanceEpisodes,
   recoverEpisodes,
@@ -326,6 +330,38 @@ export async function createApp(
       choice: (item.summary as string).split(': committed by ')[0],
       community: (item.label as string | null) ?? (item.community as string),
     }));
+  // Every streamer-attested LIVEWIRE result aboard, oldest first, with the game and attempt the
+  // captain named when the mission opened. Effects come from the saved resource delta; a result
+  // that changed nothing (a repair at full integrity) still records its target.
+  const missions = async (worldId: string) =>
+    (
+      await store.pool.query(
+        `SELECT r.event->>'id' AS id,(r.event->>'chapter')::integer AS chapter,
+                r.event->'command'->>'outcome' AS outcome,r.event->'resourceDelta' AS delta,
+                r.event->>'summary' AS summary,r.event->'actor'->>'community' AS community,c.label,
+                o.event->'command'->>'game' AS game,o.event->'command'->>'label' AS attempt
+         FROM world_events r
+         JOIN world_events o ON o.world_id=r.world_id
+          AND o.event->'command'->>'type'='livewire-open'
+          AND o.event->'command'->>'stakeId'=r.event->'command'->>'stakeId'
+         LEFT JOIN creators c ON c.id=r.event->'actor'->>'community'
+         WHERE r.world_id=$1 AND r.event->'command'->>'type'='livewire-resolve' ORDER BY r.sequence`,
+        [worldId],
+      )
+    ).rows.map((item) => {
+      const delta = Object.entries((item.delta ?? {}) as Record<string, number>)[0];
+      const named = /\b(navigation|hull|oxygen) [+-]?\d+;/.exec(item.summary as string);
+      return {
+        eventId: item.id as string,
+        chapter: item.chapter as number,
+        game: item.game as string,
+        attempt: item.attempt as string,
+        outcome: item.outcome as 'success' | 'failure',
+        target: (delta?.[0] ?? named?.[1] ?? 'hull') as LivewireTarget,
+        delta: delta?.[1] ?? 0,
+        community: (item.label as string | null) ?? (item.community as string),
+      };
+    });
   const seasons = new Map<string, NonNullable<WorldPresentation['season']>>();
   const seasonRecord = async (world: StoredWorld) => {
     // An ended world never changes again, so its record is computed once per process.
@@ -343,6 +379,7 @@ export async function createApp(
       decisions,
       communities: new Set(decisions.map((item) => item.community)).size,
       relays,
+      missions: await missions(world.id),
     };
     if (seasons.size > 512) seasons.clear();
     seasons.set(world.id, record);
@@ -377,6 +414,7 @@ export async function createApp(
             origin: decisions.find((item) => item.eventId === obligation.originEventId) ?? null,
           })),
         communities: new Set([...decisions.map((item) => item.community), world.label]).size,
+        missions: await missions(world.id),
       };
     }
     if (arrivals.size > 512) arrivals.clear();
@@ -595,6 +633,43 @@ export async function createApp(
     const token = randomBytes(32).toString('hex');
     await shareWorld(store, creator, id, token);
     return { url: `${config.baseUrl}/chronicle/#${token}` };
+  });
+  // One-step alternatives for a saved decision: read only, recomputed from the event log, never
+  // stored. The custodian reads them with their session; anyone with a public link reads them too.
+  app.get('/api/worlds/:id/alternatives', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const { event } = z
+      .object({ event: z.string().min(1).max(160) })
+      .strict()
+      .parse(request.query);
+    return readAlternatives(store, creator, id, event);
+  });
+  app.post('/api/chronicle/alternatives', async (request) => {
+    const { token, event } = z
+      .object({ token: z.string().regex(/^[a-f\d]{64}$/), event: z.string().min(1).max(160) })
+      .strict()
+      .parse(request.body);
+    const shared = await readSharedAlternatives(store, token, event);
+    if (shared.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, alternatives: shared.alternatives };
+  });
+  // Replays the whole saved log through the pinned rules and compares digests. Read only.
+  app.get('/api/worlds/:id/verify', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    return verifyWorldReplay(store, creator, id);
+  });
+  app.post('/api/chronicle/verify', async (request) => {
+    const { token } = z
+      .object({ token: z.string().regex(/^[a-f\d]{64}$/) })
+      .strict()
+      .parse(request.body);
+    const shared = await verifySharedReplay(store, token);
+    if (shared.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, verification: shared.verification };
   });
   app.post('/api/chronicle', async (request) => {
     const body = z

@@ -66,3 +66,45 @@ test('Minecraft LIVEWIRE persists a crew lock and one attested consequence acros
       await page.goto('about:blank');
     }
   }));
+
+test('each LIVEWIRE preset renders its own practice feed and a saved mission keeps its named game and scene', async ({
+  page,
+}) =>
+  serve(async () => {
+    test.setTimeout(120000);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    try {
+      await launch(page);
+      await navigate(page, 'livewire');
+      await expect(page.locator('.game-hud--voxel')).toBeVisible();
+      await page.locator('.controls-toggle').click();
+      for (const [preset, hud] of [
+        ['Rocket League', 'rocket'],
+        ['Souls Run', 'souls'],
+      ] as const) {
+        await page.getByRole('button', { name: new RegExp(`^${preset}`) }).click();
+        await expect(page.locator(`.game-hud--${hud}`)).toBeVisible();
+        await expect(page.locator('.voxel-canvas')).toHaveAttribute('data-scene-ready', 'true', {
+          timeout: 45000,
+        });
+      }
+      // The streamer names the game they really play; the preset only picks the scene.
+      await page.getByLabel('Your game').fill('Elden Ring');
+      await page
+        .getByRole('button', { name: 'Open mission · spend 1 supply', exact: true })
+        .click();
+      await expect(page.locator('.livewire-world')).toHaveAttribute('data-stage', 'voting');
+      // The saved mission, not the default preset, decides which feed a reload shows.
+      await page.reload();
+      await expect(page.locator('.game-hud--souls')).toBeVisible();
+      await expect(page.locator('.game-feed-label')).toContainText('ELDEN RING / BOSS ATTEMPT');
+      await expect(page.locator('.voxel-canvas')).toHaveAttribute('data-scene-ready', 'true', {
+        timeout: 45000,
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.goto('about:blank');
+    }
+  }));

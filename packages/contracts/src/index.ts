@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import type { LivewireState, LivewirePresentation, LivewireCommand } from './livewire.ts';
+import type {
+  LivewireState,
+  LivewirePresentation,
+  LivewireCommand,
+  LivewireTarget,
+} from './livewire.ts';
 export * from './livewire.ts';
 
 export const RULES_VERSION = 'ark-v2' as const;
@@ -194,6 +199,17 @@ export interface ArrivalDecision {
   choice: string;
   community: string;
 }
+/** One streamer-attested LIVEWIRE result saved to the Ark, named by the attesting community. */
+export interface ArrivalMission {
+  eventId: string;
+  chapter: number;
+  game: string;
+  attempt: string;
+  outcome: 'success' | 'failure';
+  target: LivewireTarget;
+  delta: number;
+  community: string;
+}
 export interface WorldPresentation {
   livewire?: LivewirePresentation;
   schemaVersion: typeof PRESENTATION_VERSION;
@@ -248,12 +264,15 @@ export interface WorldPresentation {
     }[];
     /** Distinct communities that have committed decisions aboard this Ark. */
     communities?: number;
+    /** LIVEWIRE results the Ark carries, oldest first: what other games did to this ship. */
+    missions?: ArrivalMission[];
   };
   /** Present once a voyage ends: every captain commitment and how many relays carried it. */
   season?: {
     decisions: ArrivalDecision[];
     communities: number;
     relays: number;
+    missions?: ArrivalMission[];
   };
   /** Current-window audience input that did not apply, so the streamer can explain it. */
   rejections?: { reason: string; dropped: number }[];
@@ -313,6 +332,54 @@ export interface WorldHistoryPage {
   nextCursor: number | null;
   custody: CustodyStep[];
   nextCustodyCursor: string | null;
+}
+/** One option of a saved decision, applied once to the pinned state just before it. */
+export interface AlternativeBranch {
+  option: string;
+  label: string;
+  chosen: boolean;
+  available: boolean;
+  unavailableReason: string | null;
+  resources: Resources | null;
+  outcome: Ending | null;
+  /** Obligations this branch would have created, due in a later chapter. */
+  debts: { kind: Obligation['kind']; dueChapter: number }[];
+  /** Systems this branch would have destroyed. */
+  lost: SystemId[];
+}
+/**
+ * A one-step replay of a captain decision or an attested LIVEWIRE result. Every branch starts
+ * from the same saved pre-decision state under the same rules version, actor and timestamp.
+ * Later chapters are deliberately not simulated: later inputs might not be legal on another
+ * branch.
+ */
+export interface DecisionAlternatives {
+  schemaVersion: 'world-records-2026-10-27.1';
+  worldId: string;
+  eventId: string;
+  chapter: number;
+  rulesVersion: RulesVersion;
+  kind: 'decision' | 'livewire';
+  title: string;
+  community: { id: string; label: string };
+  before: Resources;
+  /** The recomputed chosen branch reproduced the saved event exactly. */
+  verified: boolean;
+  branches: AlternativeBranch[];
+}
+/** The whole saved event log replayed through the world's pinned rules and compared. */
+export interface ReplayVerification {
+  schemaVersion: 'world-records-2026-10-27.1';
+  worldId: string;
+  rulesVersion: RulesVersion;
+  events: number;
+  throughSequence: number;
+  /** SHA-256 of the canonical saved state and of the state the replay produced. */
+  savedDigest: string;
+  replayedDigest: string | null;
+  matches: boolean;
+  /** Why the pinned rules refused the log, when they did. */
+  failure: string | null;
 }
 export interface HandoffPreview {
   schemaVersion: 'world-records-2026-10-27.1';

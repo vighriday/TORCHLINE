@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
-import type { Command } from '@torchline/contracts';
-import { readWorldHistory } from '@torchline/storage';
+import type { Command, LivewireRequest } from '@torchline/contracts';
+import { mutateLivewire, readWorldHistory } from '@torchline/storage';
 import type { Creator, Store } from '@torchline/storage';
 import { createApp } from '../apps/server/src/app.ts';
 import type { AppConfig } from '../apps/server/src/app.ts';
@@ -25,11 +25,12 @@ async function command(store: Store, id: string, creator: Creator, input: Comman
     input,
   );
 }
-async function transfer(store: Store) {
+async function transfer(store: Store, before?: (id: string, source: Creator) => Promise<void>) {
   const source = await store.ensureCreator('sim-alpha', 'First community', 'simulation');
   const target = await store.ensureCreator('sim-beta', 'Next community', 'simulation');
   await store.optIn(target.id, true);
   const id = await store.create(source);
+  await before?.(id, source);
   for (const input of [
     { type: 'start' },
     { type: 'close-challenge' },
@@ -156,6 +157,59 @@ describe('custody arrival briefing', () => {
         ]);
         expect(world.season.decisions[0].community).toBe('First community');
         expect(world.season.decisions[1].community).toBe('Simulation beta');
+      } finally {
+        await app.close();
+      }
+    }));
+  it('names what another game did to the Ark in the dossier and the season record', () =>
+    database(async (store) => {
+      const mission = async (id: string, creator: Creator, action: LivewireRequest['action']) =>
+        mutateLivewire(
+          store,
+          creator,
+          id,
+          { expectedVersion: (await store.get(id)).revision, commandId: randomUUID(), action },
+          true,
+        );
+      const { target, id } = await transfer(store, async (id, source) => {
+        await mission(id, source, {
+          type: 'open',
+          preset: 'challenge',
+          game: 'Minecraft',
+          label: 'Lava gap jump',
+        });
+        const stakeId = (await store.get(id)).state.livewire!.stake.id;
+        await mission(id, source, { type: 'lock', stakeId, solo: 'hull' });
+        await mission(id, source, { type: 'resolve', stakeId, outcome: 'failure' });
+      });
+      const app = await createApp(store, { ...config, livewireEnabled: true }, { workers: false });
+      try {
+        const receiver = await session(app, 'beta');
+        const arrived = (await app.inject({ url: '/api/state', headers: receiver })).json().world;
+        // The receiver learns which game cracked the hull and who attested it, before acting.
+        expect(arrived.arrival.missions).toEqual([
+          expect.objectContaining({
+            chapter: 0,
+            game: 'Minecraft',
+            attempt: 'Lava gap jump',
+            outcome: 'failure',
+            target: 'hull',
+            delta: -6,
+            community: 'First community',
+          }),
+        ]);
+        for (const option of ['chart-route', 'repair-life', 'salvage', 'land'])
+          for (const input of [
+            { type: 'start' },
+            { type: 'close-challenge' },
+            { type: 'commit', option },
+          ] as Command[])
+            await command(store, id, target, input);
+        const ended = (await app.inject({ url: '/api/state', headers: receiver })).json().world;
+        expect(ended.outcome).toBeTruthy();
+        expect(ended.season.missions).toEqual([
+          expect.objectContaining({ game: 'Minecraft', outcome: 'failure', delta: -6 }),
+        ]);
       } finally {
         await app.close();
       }

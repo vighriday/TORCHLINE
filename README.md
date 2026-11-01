@@ -3,7 +3,7 @@
 
 <a href="assets/readme/awakening.png"><img src="assets/readme/awakening.png" width="1440" alt="TORCHLINE's Awakening: the persistent Ark rolls above a planet. Final Figma v2 design, with the corrected ship nose."></a>
 
-<p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#one-crews-choice-becomes-the-next-crews-crisis">The relay</a> · <a href="#livewire--your-next-attempt-matters">Minecraft LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
+<p align="center"><a href="#a-stream-that-leaves-something-behind">The idea</a> · <a href="#one-crews-choice-becomes-the-next-crews-crisis">The relay</a> · <a href="#livewire--your-next-attempt-matters">LIVEWIRE</a> · <a href="#try-it">Play</a> · <a href="#what-is-proven">What is proven</a> · <a href="docs/README.md">Docs</a></p>
 
 <p align="center"><a href="docs/releases/v0.1.0-preview.2.md">v0.1.0-preview.2</a> · Development preview · Built with Codex for the Codex x TwitchCon Hackathon</p>
 
@@ -24,14 +24,18 @@ Play all five chapters on one channel. Or prepare a handoff and perform a genuin
 
 <a href="assets/readme/relay-broadcast.png"><img src="assets/readme/relay-broadcast.png" width="1440" alt="The read-only OBS view of a received Ark: an inheritance dossier names Simulation alpha, their decision to sacrifice navigation, the lost navigation system and the blind-jump debt now due in chapter two."></a>
 
-When a captain hands the Ark on, the receiving stream sees an **inheritance dossier** over the ship: who handed it over, every decision aboard and the community that made it, the systems already lost, and each debt still waiting, linked to the decision that created it. Starting the next chapter makes the debt real. The new audience inherits a problem it can trace to people it has never met.
+When a captain hands the Ark on, the receiving stream sees an **inheritance dossier** over the ship: who handed it over, every decision aboard and the community that made it, what other games did to the hull, the systems already lost, and each debt still waiting, linked to the decision that created it. Starting the next chapter makes the debt real. The new audience inherits a problem it can trace to people it has never met.
+
+<a href="assets/readme/cross-game-relay.png"><img src="assets/readme/cross-game-relay.png" width="1440" alt="The Judge Arena relay rehearsal: channel A streams Minecraft and its LIVEWIRE lava-jump mission failed, hull −6; channel B streams Rocket League and its aerial-goal mission succeeded, hull +3. Both results are streamer-attested and saved to the same Ark."></a>
+
+Different games, different communities, one Ark: alpha's Minecraft mission cracks the hull, the raid hands the ship on, and the receiver's Rocket League mission repairs that same hull. Results are streamer-attested; the feeds are illustrations, not game telemetry.
 
 <details>
 <summary><strong>⇄ Follow one Ark through three communities</strong></summary>
 
 <a href="assets/readme/lineage.png"><img src="assets/readme/lineage.png" width="1440" alt="The Chronicle lineage: three practice communities as rows and five chapters as columns. Arrows link alpha's navigation sacrifice to beta's Blind Jump, and beta's and gamma's repairs to later chapters; dotted markers show each custody change."></a>
 
-Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided. A captain can publish a revocable, read-only **public Chronicle link** so their community can keep following the Ark after it leaves their channel.
+Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided. Select any decision and ask **What if they had chosen differently?**: the engine replays every option once from the saved state before it and confirms that recomputing the real choice reproduces the record. **Verify this record** replays the whole saved log and compares SHA-256 digests of the replayed and the saved ship. A captain can publish a revocable, read-only **public Chronicle link** so their community can keep following the Ark after it leaves their channel.
 
 <a href="assets/readme/season-finale.png"><img src="assets/readme/season-finale.png" width="1440" alt="The read-only OBS view at the end of the voyage: a season finale card reads A New Home, 216 of 216 aboard, and lists chapter 1 Simulation alpha (sacrifice navigation), chapter 2 Simulation beta (rebuild navigation) and chapters 3 to 5 Simulation gamma, carried by three communities and two relays."></a>
 
@@ -43,7 +47,7 @@ Captured from the integrated app in saved practice. The relays used labeled simu
 
 ## LIVEWIRE — your next attempt matters
 
-Keep playing your usual game. Before a difficult Minecraft jump, open one mission. Chat chooses which Ark system is at risk. Lock that commitment, make the attempt, then confirm what happened. A small repair or scar is written to the real saved ship—once.
+Keep playing your usual game. Before a difficult Minecraft jump, a Rocket League aerial or a boss attempt, open one mission. Chat chooses which Ark system is at risk. Lock that commitment, make the attempt, then confirm what happened. A small repair or scar is written to the real saved ship—once. Each preset has its own illustrated feed and game-styled HUD.
 
 <a href="assets/readme/minecraft-livewire.png"><img src="assets/readme/minecraft-livewire.png" width="1440" alt="Minecraft LIVEWIRE: an illustrative lava-gap challenge above the persistent Ark's tactical mission dock."></a>
 
@@ -115,7 +119,7 @@ pnpm build
 pnpm start        # http://localhost:3000
 ```
 
-**The two-minute path:** open the app, choose **Command OS → Judge Arena**, then **Autoplay to the handoff**. Two practice communities play chapter one, prepare a relay, accept the Ark and stop on the inheritance dossier. Every step calls the same API as the dashboard. The raid proof is labeled simulation and can never move a live world. Then run step 8 to meet the debt and open the Chronicle lineage.
+**The two-minute path:** open the app, choose **Command OS → Judge Arena**, then **Autoplay to the handoff**. Alpha streams Minecraft and a LIVEWIRE mission fails; their crew plays chapter one, prepares a relay, and the receiver accepts the Ark and stops on the inheritance dossier. Every step calls the same API as the dashboard. The raid proof is labeled simulation and can never move a live world. Then run step 9 (the receiver streams Rocket League and repairs the same hull) and step 10 (the inherited debt arrives), and open the Chronicle lineage.
 
 For free play choose **Launch the Ark** and use **Command OS** for all ten destinations. No Twitch messages are sent in saved practice.
 
@@ -126,7 +130,7 @@ For the real stream, follow the [owner setup guide](docs/operations/owner-launch
 | Layer | Honest status |
 | --- | --- |
 | Saved survival + LIVEWIRE | Implemented with actual PostgreSQL, deterministic consequences, replay and automated tests |
-| Relay rehearsal, inheritance dossier, lineage | Implemented. A browser journey runs the full two-community practice relay and checks the saved custody, scars, debt and lineage. The raid evidence there is simulated and labeled |
+| Relay rehearsal, inheritance dossier, lineage | Implemented. A browser journey runs the full two-community, two-game practice relay and checks the saved custody, both attested missions, scars, debt and lineage. The raid evidence there is simulated and labeled |
 | Final design + OBS | Ten screens integrated; browser checks and native full/dock rendering, refresh and rotation pass in saved practice. [Evidence and limits](docs/reports/2026-10-30-final-frontend.md) |
 | Twitch | Real consent, signed callbacks and incoming query chat observed; genuine chat changing the Ark still needs acceptance |
 | Bot replies | Provider accepted sends; other viewers did not see them. Replies are optional and independently paused |

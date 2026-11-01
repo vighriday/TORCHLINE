@@ -19,7 +19,7 @@ pnpm start        # http://localhost:3000
 
 `pnpm db:up` writes only missing keys to the ignored `.env`: a simulation `WORLD_MODE`, `DATABASE_URL`, three independent 64-hex secrets and `LIVEWIRE_ENABLED=true`. It never prints credentials.
 
-Open the app and choose **Command OS → Judge Arena**. The **Relay Rehearsal** walks two practice communities through one Ark: alpha's crew solves a relay, the captain sacrifices navigation, a receiving captain opts in, alpha prepares the relay, a labeled practice raid proof arrives, the receiver accepts and reads the inheritance dossier, and chapter two applies alpha's debt. Each step calls the same endpoints the dashboard uses. **Autoplay to the handoff** runs the first seven steps and stops on the dossier.
+Open the app and choose **Command OS → Judge Arena**. The **Relay Rehearsal** walks two practice communities, each streaming a different game, through one Ark. Alpha streams Minecraft and a LIVEWIRE stake on the hull fails; alpha's crew solves a relay; the captain sacrifices navigation; a receiving captain opts in; alpha prepares the relay; a labeled practice raid proof arrives; the receiver accepts and reads the inheritance dossier; the receiver streams Rocket League and a stake on the same hull scores; chapter two applies alpha's debt. Each step calls the same endpoints the dashboard uses. **Autoplay to the handoff** runs the first eight steps and stops on the dossier.
 
 For free play, use **Launch the Ark** and Mission Control. Practice chat (in Mission Control and the Judge Arena) sends commands through the same parser as Twitch chat.
 

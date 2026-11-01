@@ -27,6 +27,10 @@ export {
   readWorldHistory,
   readHandoffPreview,
   readSharedChronicle,
+  readAlternatives,
+  readSharedAlternatives,
+  verifyWorldReplay,
+  verifySharedReplay,
   shareWorld,
 } from './records.ts';
 export { sweepRetention, RETENTION_POLICY } from './retention.ts';
