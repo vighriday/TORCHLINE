@@ -1,10 +1,12 @@
 # ADR 0007: Always-on hosting, scoped access and measured growth
 
-Status: proposed, 2026-10-26. Coverage: D13, D17.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D13, D17.
 
 ## Context and decision
 
 Use one always-on application service and managed PostgreSQL, with Render as the recommended initial provider subject to price/region/streaming checks. Keep secrets server-side, creator actions behind sessions/CSRF and current custody checks, and overlays behind revocable read-only capabilities. Separate live and simulation deployments/data. Keep the submitted candidate available through the conservative judging window.
+
+Status as of 1 November 2026: not provisioned; judges use the Docker Compose practice preview; live features need the owner's development tunnel.
 
 ## Alternatives and consequences
 

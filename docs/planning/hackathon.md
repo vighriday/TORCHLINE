@@ -1,10 +1,10 @@
 # Hackathon and submission plan
 
-Checked 2026-10-26. This is an engineering delivery checklist based on organizer publications, not a legal eligibility determination. The owner must verify their entry details and current organizer instructions.
+Dated planning record: organizer pages checked 2026-10-26; status updated 1 November 2026. This is an engineering delivery checklist based on organizer publications, not a legal eligibility determination. The owner must verify their entry details and current organizer instructions.
 
 ## Verified requirements
 
-The [official rules](https://twitchcon-codex.devpost.com/rules) require new work during the October 23–November 2 submission period, a functioning interactive Twitch experience built with Codex, a runnable source repository with required assets/instructions, a feature/build description, the primary Codex session ID, and a public YouTube demonstration showing Twitch functionality and Codex use. Keep the video below three minutes. Testing access must be free and available through judging. Private repositories are permitted with the specified judge access. Materials must be in English or translated. Innovation, impact, technical implementation and design are equally weighted. Entrants must check individual/team eligibility; organizations cannot enter as organizations.
+As checked on 2026-10-26, the [official rules](https://twitchcon-codex.devpost.com/rules) require new work during the October 23–November 2 submission period, a functioning interactive Twitch experience built with Codex, a runnable source repository with required assets/instructions, a feature/build description, the primary Codex session ID, and a public YouTube demonstration showing Twitch functionality and Codex use. Keep the video below three minutes. Testing access must be free and available through judging. Private repositories are permitted with the specified judge access. Materials must be in English or translated. Innovation, impact, technical implementation and design are equally weighted. Entrants must check individual/team eligibility; organizations cannot enter as organizations.
 
 ## Schedule discrepancy and conservative operating plan
 
@@ -21,20 +21,20 @@ Plan judge availability from the earlier published judging start through **Novem
 ## Artifact checklist
 
 - [ ] Runnable candidate matches the claims in the description and video.
-- [ ] Authentic Twitch chat and native raid evidence recorded without credentials.
+- [ ] Authentic Twitch chat and native raid evidence recorded without credentials. Genuine viewer chat → saved gameplay was observed on 30 October; a native raid is not yet verified.
 - [ ] Complete solo gameplay and a non-voting puzzle contribution demonstrated.
-- [ ] Repository includes all application source, owned/licensed assets, environment template, setup, database migrations and test instructions.
-- [ ] Actual primary Codex session ID captured from the development session; no fabricated ID or raw private session export.
+- [x] Repository includes all application source, owned/licensed assets, environment template, setup, database migrations and test instructions.
+- [x] Actual primary Codex session ID captured from the development session; no fabricated ID or raw private session export.
 - [ ] Description explains product functionality and concrete Codex contributions.
 - [ ] Public YouTube video below three minutes, link checked from a signed-out browser.
 - [ ] Judge access configured according to the current organizer instructions, including private repo access if applicable.
-- [ ] Hosted project and dependency services available without payment/access barriers for judges.
+- [ ] Hosted project and dependency services available without payment/access barriers for judges. Nothing is hosted; the one-command `docker compose` saved-practice preview needs no Twitch account or hosted service.
 - [ ] Asset provenance, third-party permissions and branding checked; original private idea file absent from repository and recordings.
 - [ ] Entrant/team representative and eligibility reviewed by the owner.
 - [ ] Devpost entry explicitly submitted; a saved draft is not enough.
 - [ ] Final URL, submitted commit/tag, video URL, session ID and confirmation stored in a sanitized submission record.
 
-These are pending tasks. No submission, registration, sharing, invitation, publishing or hosting action has been performed.
+Status as of 1 November 2026: the repository is pushed to GitHub as a private repository, and pre-releases v0.1.0-preview.1 and v0.1.0-preview.2 are published there; v0.1.0-preview.3 is being prepared. No submission has been made. Nothing is hosted: the live configuration runs only on the owner's PC behind a temporary development tunnel when started.
 
 ## Proposed 2:55 video
 
@@ -42,7 +42,7 @@ These are pending tasks. No submission, registration, sharing, invitation, publi
 | --- | --- |
 | 0:00–0:15 | Establish the persistent ship and two communities: one world's decisions survive its host. |
 | 0:15–0:45 | Show viewers discover a clue/solve a route and help choose a consequential action on Twitch. |
-| 0:45–1:20 | Show A prepare, perform a genuine raid and B accept the same damaged world. |
+| 0:45–1:20 | Show A prepare the relay and B accept the same damaged world. Show a genuine raid only if captured; otherwise show Judge Arena step 7 with its on-screen simulated-evidence label and say a live raid is not yet verified. |
 | 1:20–1:50 | B faces and acts on the inherited consequence; show cause attribution and preserved resources. |
 | 1:50–2:10 | Show lineage and the wider five-chapter season; explain solo play, persistence and optional handoffs. |
 | 2:10–2:30 | Show quick onboarding, private controls, pause/recovery and readable OBS output. |
@@ -50,3 +50,5 @@ These are pending tasks. No submission, registration, sharing, invitation, publi
 | 2:48–2:55 | End on the world and the contributing communities. |
 
 Record genuine evidence as gates pass; the final edit can compress waiting time without implying an unobserved transfer or pretending a simulator event came from Twitch. Describe only shipped features. Do not promise a functioning creator network, perfect anti-bot protection, market-first originality or performance that has not been measured.
+
+Guardrail: no third-party game names, logos or footage on screen in the video (blur preset labels).

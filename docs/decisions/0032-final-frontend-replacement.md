@@ -1,6 +1,6 @@
 # ADR 0032: Replace the visual application from one owner-supplied design
 
-Date: October 30, 2026. Status: controller separation retained; final Figma v2 adapted, regression and acceptance in progress.
+Date: October 30, 2026. Status: controller separation retained; final Figma v2 adapted. Implemented via [ADR 0033](0033-figma-v2-presentation.md) (v0.1.0-preview.2); owner and live acceptance are tracked separately.
 
 The owner rejected the current presentation and the separate UI-LAB direction. The next interface must follow the incoming complete design. Supplement missing screens using that same design vocabulary. Existing screenshots, fonts, animated treatments and components are historical references, not competing art direction.
 

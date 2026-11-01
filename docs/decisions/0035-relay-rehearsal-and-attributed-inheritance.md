@@ -1,6 +1,6 @@
 # ADR 0035 — Relay rehearsal, attributed inheritance and lineage
 
-Date: 2026-11-01. Status: accepted and implemented on the platform-completion branch.
+Date: 2026-11-01. Status: Accepted and implemented 1 November 2026; merged to main through PRs #3–#5.
 
 ## Context
 
@@ -14,7 +14,7 @@ The defining TORCHLINE moment is one community receiving another community's unf
 
 ## Decision
 
-1. **Guided practice relay.** The Judge Arena runs nine explicit steps. Each step calls the same public endpoints as the dashboard, signed in as the named practice identity: login, create, start, simulated chat, commit, opt-in, prepare, simulated raid proof, accept, start. Only the raid proof is simulated, and the existing server rule still refuses that proof outside simulation mode. Step progress is a per-browser convenience; the saved world remains the record. Autoplay stops before the receiver's first command so a person reads the dossier before the debt applies. Practice relays get a 15-minute offer window; live offers keep the existing window.
+1. **Guided practice relay.** The Judge Arena runs nine explicit steps (eleven since [ADR 0037](0037-cross-game-livewire-relay.md) added two LIVEWIRE missions). Each step calls the same public endpoints as the dashboard, signed in as the named practice identity: login, create, start, simulated chat, commit, opt-in, prepare, simulated raid proof, accept, start. Real: public endpoints, engine, PostgreSQL, authority and custody checks. Simulated: practice identities, chat lines, the labelled raid proof and (since ADR 0037) the scripted mission attestations. The existing server rule still refuses the simulated raid proof outside simulation mode. Step progress is a per-browser convenience; the saved world remains the record. Autoplay stops before the receiver's first command so a person reads the dossier before the debt applies. Practice relays get a 15-minute offer window; live offers keep the existing window.
 2. **Attributed inheritance dossier.** The arrival projection adds every captain commitment (chapter, authored choice, deciding community), each pending obligation linked to the decision that created it, and the number of deciding communities. It still clears on the receiver's first command. The dashboard shows it in the Mission Control rail. The read-only OBS view shows a broadcast-sized version over the ship.
 3. **Presentation names, storage keeps IDs.** Saved events keep the community ID that replay depends on. The world projection, history API and `!history` reply substitute the community's current display name.
 4. **Lineage and season record.** The Chronicle draws communities as rows, chapters as columns, saved cause links as arrows and custody changes as markers. It reads only the paginated history API, pinned to one sequence. A season record lists each community's commitments and the voyage outcome.

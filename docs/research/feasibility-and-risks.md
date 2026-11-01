@@ -1,6 +1,6 @@
 # Feasibility, concept gaps and risks
 
-Assessment date: 2026-10-26. The platform documentation supports the core design. Local gameplay/database/browser and provider-contract evidence now exists in [implementation status](../planning/implementation-status.md). No genuine account/raid, deployment, actual OBS, human playtest or load/soak evidence exists yet. Priority expresses consequence and dependency, not a statistical estimate of failure.
+Assessment date: 2026-10-26. The platform documentation supports the core design. Local gameplay/database/browser and provider-contract evidence now exists in [implementation status](../planning/implementation-status.md). As of that date no genuine account/raid, deployment, actual OBS, human playtest or load/soak evidence existed. Later evidence (real consent, genuine viewer chat saved as gameplay, native OBS in saved practice) is recorded there; native raid, deployment, human playtest and load/soak evidence are still absent. Priority expresses consequence and dependency, not a statistical estimate of failure.
 
 ## Feasibility conclusion
 
@@ -29,7 +29,7 @@ Delivery can be ambitious without guessing implementation capacity: establish me
 | R15 | Medium / security | Overlay URL or dashboard credentials leak on stream | Read-only revocable capability, fragment exchange, narrow sessions, secret redaction and rotation. Controls remain separately authenticated. |
 | R16 | Medium / backend | Multi-world traffic starves control/handoff work | Separate work classes, bounded batches, ballot indexes, world isolation, mixed-load/queue-age tests; tune before adding another service. |
 | R17 | Medium / product/research | Originality overstated | Bounded adjacent-product review, demonstrate continuity and real custody, avoid market-first claims; broaden prior-art review when evidence warrants it. |
-| R18 | Medium / assets/owner | Concept images lack usage rights; product name/license unresolved | Commission/create original assets or record explicit licenses. Keep linked inspiration out of shipped assets. Branding and project licensing remain owner decisions before publication. |
+| R18 | Medium / assets/owner | Concept images lack usage rights; product name/license unresolved | Shipped assets are the owner-supplied Figma v2 export plus OFL fonts, recorded in the [asset register](../../assets/design-provenance.md); linked inspiration stays out. No license has been chosen yet: all rights are reserved and the source is shared for judging. Branding and licensing remain owner decisions. |
 | R19 | Medium / operations | Hosting cost, availability or persistence unsuitable | Provision only after budget/region/streaming/backup review. Avoid sleeping instances for the final demo; keep data outside the app filesystem. |
 | R20 | Medium / privacy | Replay becomes an excuse to store raw chat and identities | Normalize commands, pseudonymize actors, public community attribution only, documented retention/deletion and sanitized evidence. |
 

@@ -10,7 +10,7 @@ TORCHLINE has an approved architecture and a working functional slice. Begin wit
 4. Record architectural changes in [an ADR](docs/decisions/README.md). Update requirements when behavior changes.
 5. Explain the resulting behavior, validation performed, and remaining limitations in the pull request.
 
-Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `chore:`. Every push and pull request runs `.github/workflows/verify.yml`: type checks, unit and PostgreSQL tests, browser journeys, fixture drift, repository checks and the container smoke test. No branch protection is configured.
+Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `chore:`. Every push, and pull requests from forks, runs `.github/workflows/verify.yml`: format and version checks, build, unit and PostgreSQL tests, browser journeys, fixture drift, repository checks, the container smoke test and the docker compose smoke test. No branch protection is configured.
 
 ## Before committing
 
@@ -22,4 +22,4 @@ Suggested commit prefixes: `docs:`, `feat:`, `fix:`, `test:`, `refactor:`, and `
 
 ## Licensing
 
-No project license has been chosen. Do not add third-party code, art, music, fonts, or dependencies without recording their license and intended use. Do not reuse artwork linked in private concept notes without permission. The [asset register](assets/README.md) will track shipped assets.
+No license has been chosen; all rights are reserved and the source is shared for evaluation. Do not add third-party code, art, music, fonts, or dependencies without recording their license and intended use. Do not reuse artwork linked in private concept notes without permission. The asset register in [assets/design-provenance.md](assets/design-provenance.md) tracks shipped assets.

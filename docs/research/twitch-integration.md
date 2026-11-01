@@ -1,6 +1,6 @@
 # Twitch integration research
 
-Checked against official documentation on **2026-10-26**. Documentation feasibility is established; account authorization, deployed callbacks, and real raid delivery have **not** been exercised. Source links are direct references, with a consolidated [source register](sources.md).
+Checked against official documentation on **2026-10-26**. Documentation feasibility is established; as of that date account authorization, deployed callbacks and real raid delivery had **not** been exercised. Later live evidence (real consent, signed callbacks and genuine viewer chat saved as gameplay; still no native raid or permanent hosting) is in [implementation status](../planning/implementation-status.md). Source links are direct references, with a consolidated [source register](sources.md).
 
 ## Recommended integration model
 
@@ -91,4 +91,4 @@ The raid-start API exists, but TORCHLINE will let creators execute the native ra
 
 Before claiming live transfer support, register the app, authorize the bot and two creators, verify a public callback, receive genuine chat in each channel, arm a world intent, perform a native raid, capture its authentic notification and accept the world once. Record actual scope responses, subscription conditions, timing, IDs, target settings and state continuity without recording credentials. Test cancellation and an absent notification too.
 
-Until two broadcasters are available, use Twitch CLI signed fixtures and the isolated domain simulator to test parsing, proof policy, races and state transfer. Neither substitutes for the live gate. [Twitch CLI](https://dev.twitch.tv/docs/cli/)
+Until two broadcasters are available, use in-repo HMAC-signed EventSub fixtures ([tests/twitch-provider.ts](../../tests/twitch-provider.ts)) and the isolated domain simulator to test parsing, proof policy, races and state transfer. Neither substitutes for the live gate.

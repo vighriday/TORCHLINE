@@ -1,10 +1,10 @@
 # ADR 0005: SVG/DOM presentation and server-sent updates
 
-Status: proposed, 2026-10-26. Coverage: D4, D5.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D4, D5.
 
 ## Context and decision
 
-The first season displays ship systems, clues, a small route graph, decisions and aggregate state. Use React with original SVG/CSS and semantic DOM; reserve Canvas for effects justified by profiling. Send sanitized, versioned snapshots over SSE; use authenticated HTTP for creator commands. Overlays follow a channel's current hosted world through a scoped read session.
+The first season displays ship systems, clues, a small route graph, decisions and aggregate state. Use React with original SVG/CSS and semantic DOM; reserve Canvas for effects justified by profiling. (This rendering clause is superseded by [ADR 0033](0033-figma-v2-presentation.md), which uses React Three Fiber scenes; the SSE/HTTP decision stands.) Send sanitized, versioned snapshots over SSE; use authenticated HTTP for creator commands. Overlays follow a channel's current hosted world through a scoped read session.
 
 ## Alternatives and consequences
 

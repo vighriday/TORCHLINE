@@ -8,13 +8,15 @@ October 30, 2026. Candidate branch: **feat/frontend-replacement**. Cutover sourc
 
 The final owner-supplied Figma v2 design now owns the application. All ten destinations, Ark/cockpit, original visual vocabulary and Minecraft scene are retained as typed React components. Prototype voting, fictional accounts, automatic outcomes and browser-owned resources are replaced with actual saved state and authorized APIs.
 
+Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them; its practice scenes are original illustrations and never read game data.
+
 The extra emissive blue rectangle at the ship's nose is removed. The bridge shell, running light, cockpit and navigation damage remain. Awakening, Mission Control, inheritance, history and OBS use the same corrected model. Permanent marks follow the ship's movement and miniature scale rather than floating separately.
 
 | Surface | Working connection |
 | --- | --- |
 | Awakening | Create/resume actual practice or existing creator OAuth |
 | Mission Control | All chapter windows, shared clues/routes/work orders, allocation, exact choices, private commit, pause/resume, parking and saved manual/custom clocks |
-| LIVEWIRE | Paid opening, real ballot totals, explicit lock/solo target, recovery, streamer attestation and one persistent consequence |
+| LIVEWIRE | Supply-cost opening (one in-game supply), real ballot totals, explicit lock/solo target, recovery, streamer attestation and one persistent consequence |
 | Inheritance | Opt-in, actual offers/recipients, frozen preview, prepare/cancel/decline/accept; native requirements unchanged |
 | Hangar / Chronicle | Actual library, parked/terminal worlds, paginated events/causes and custody |
 | Creator Studio | Separate creator/bot setup, named operator confirmation, subscription health and private scoped OBS sources |

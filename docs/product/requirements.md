@@ -4,6 +4,8 @@ The isolated [LIVEWIRE v0 requirements](livewire-v0.md) add bounded, streamer-at
 
 Status: approved product direction with implementation underway, 2026-10-26. [Current evidence](../planning/implementation-status.md) distinguishes working foundations from unfinished requirements. The owner-supplied Figma v2 export governs final UI/UX, art and motion; its typed adaptation consumes stable physical-state and challenge contracts. Owner roles below indicate responsibility, not staffing assignments.
 
+Status as of 1 November 2026: real broadcaster and bot consent and signed EventSub callbacks are verified, and on 30 October 2026 three genuine viewer chat messages from an ordinary viewer account arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. Still unverified: an overlay update from live chat on video (the rest of PR-03), a native raid between two broadcasters (PR-05), bot replies that viewers can see, a live attested LIVEWIRE result and permanent hosting.
+
 ## Product thesis
 
 A Twitch audience can help create a consequential game world that survives the broadcast and becomes playable by another creator's community. TORCHLINE turns creator collaboration into shared authorship: each community inherits obligations, makes bounded decisions, and leaves a history others can understand.
@@ -82,4 +84,4 @@ Track setup completion, unique participants, chapter completion, handoff attempt
 
 ## Review decisions and external inputs
 
-The technical recommendations are in the ADRs. The review should settle the first season's tone, visual direction, acceptable hosting spend before provisioning, branding/license choice before publication, and which extra features to pursue once the core gates pass. None requires assuming team capacity. Two consenting broadcasters and a real raid remain necessary to validate PR-05; the simulator reduces development dependence on their availability.
+The technical recommendations are in the ADRs. As of 26 October 2026 the review was to settle the first season's tone, visual direction (since governed by the owner-supplied Figma v2 export), acceptable hosting spend before provisioning, branding/license choice before publication, and which extra features to pursue once the core gates pass. None requires assuming team capacity. As of 1 November 2026 no project license has been chosen: the source is all rights reserved and shared for judging. Shipped assets are adapted from owner-supplied Figma v2 design files, plus self-hosted SIL Open Font License fonts ([design provenance](../../assets/design-provenance.md)). Two consenting broadcasters and a real raid remain necessary to validate PR-05; the simulator reduces development dependence on their availability.

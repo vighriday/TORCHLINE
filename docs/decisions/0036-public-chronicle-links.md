@@ -1,10 +1,10 @@
 # ADR 0036 — Public, revocable Chronicle links
 
-Date: 2026-11-01. Status: accepted and implemented on the platform-completion branch.
+Date: 2026-11-01. Status: Accepted and implemented 1 November 2026; merged to main through PRs #3–#5.
 
 ## Context
 
-A world's history was readable only by its current custodian. After a relay, the community that handed the Ark on lost every view of what became of its decisions. Viewers never had a view at all, apart from an optional two-decision `!history` bot reply. That reply is currently paused because of the provider delivery issue. The product promise is that decisions outlive the stream and that returning viewers can trace them. That promise needs a record people can open.
+A world's history was readable only by its current custodian. After a relay, the community that handed the Ark on lost every view of what became of its decisions. Viewers never had a view at all, apart from an optional two-decision `!history` bot reply. That reply is currently paused because of an unresolved bot-reply visibility issue. The product promise is that decisions outlive the stream and that returning viewers can trace them. That promise needs a record people can open.
 
 ## Decision
 
@@ -21,7 +21,8 @@ A world's history was readable only by its current custodian. After a relay, the
 
 ## Consequences
 
-- Communities can follow an Ark across channels, and judges or viewers can inspect a real world's lineage without an account.
+- Communities can follow an Ark across channels, and judges or viewers can inspect a real world's lineage without an account on any reachable deployment (none is permanently hosted as of 1 November 2026).
+- A published link lets any holder, including a former custodian, read the world's later activity until it is withdrawn.
 - The public record shows community display names and event summaries. Pseudonymous participant identities and individual ballots stay private.
 
 ## Validation

@@ -1,6 +1,6 @@
 # ADR 0003: Explicit PostgreSQL consistency and durable history
 
-Status: proposed, 2026-10-26. Coverage: D7, D8, D10, D16.
+Status: proposed, 2026-10-26; approved 2026-10-26 (see [index](README.md)). Coverage: D7, D8, D10, D16.
 
 ## Context and decision
 

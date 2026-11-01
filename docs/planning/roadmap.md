@@ -1,8 +1,10 @@
 # Delivery roadmap
 
-October 30: the isolated [LIVEWIRE v0](../product/livewire-v0.md) lane implements one complete companion mission, with finite economics and unchanged native custody. Keep the existing release protected; require its [candidate acceptance](../operations/livewire-v0.md) before activation. Genuine gameplay chat, native raid, permanent hosting and submission packaging remain independent priorities. Other speculative expansion arms are deferred.
+Current status (1 November 2026): genuine viewer chat → saved gameplay change was observed on 30 October; the final design and LIVEWIRE, with three presets, are on main; native OBS rendering is verified in saved practice. The native raid (G3b) and permanent hosting remain open. [Implementation status](implementation-status.md).
 
-Plan date: 2026-10-26. Architecture review is complete and implementation is underway. [Current evidence](implementation-status.md) records G1 gameplay progress, G2 adapter/UI work, and G3a independent custody checks. G2 live/OBS and G3b authentic raid remain unsatisfied external gates. No team size, daily capacity, or broadcaster availability is assumed.
+As of October 30: the isolated [LIVEWIRE v0](../product/livewire-v0.md) lane implements one complete companion mission, with finite economics and unchanged native custody. Keep the existing release protected; require its [candidate acceptance](../operations/livewire-v0.md) before activation. Genuine gameplay chat, native raid, permanent hosting and submission packaging remain independent priorities. Other speculative expansion arms are deferred.
+
+Plan date: 2026-10-26. Status as of 2026-10-26: architecture review was complete and implementation was underway. [Implementation evidence](implementation-status.md) then recorded G1 gameplay progress, G2 adapter/UI work, and G3a independent custody checks; G2 live/OBS and G3b authentic raid were unsatisfied external gates. No team size, daily capacity, or broadcaster availability is assumed.
 
 ## Outcome and ordering
 
@@ -22,9 +24,9 @@ Deliver an engaging persistent community game, then demonstrate its signature au
 
 Do not interpret G6 as permission to postpone reliability: every earlier gate includes its own correctness checks. Likewise, do not wait for a five-chapter polished season before trying the first real raid.
 
-## Calendar checkpoints
+## Calendar checkpoints (original targets)
 
-These are target checkpoints, not promises about unknown capacity. Dates are in Asia/Calcutta. Move work earlier whenever gates pass; revise feature order based on measured progress.
+These are the original target checkpoints set with the 2026-10-26 plan, not promises about unknown capacity or a record of what happened; actual progress is in [implementation status](implementation-status.md). Dates are in Asia/Calcutta. Move work earlier whenever gates pass; revise feature order based on measured progress.
 
 | Date | Target evidence/review |
 | --- | --- |

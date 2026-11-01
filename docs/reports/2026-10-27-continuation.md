@@ -29,7 +29,7 @@ The October 27 read-only provider recheck validates the real application, one br
 
 1. Restore the saved ngrok account credential (already deferred by the owner), run the tunnel to port 3001 and confirm actual HTTPS health/callback delivery. Existing validated grants do not require another registration.
 2. Verify real `!inspect`/`!scan`/`!allocate`/`!vote` in their open phases, then visible `!status`/`!history` bot replies. A signed offline notification must pause a running episode, with explicit resume.
-3. Test an actual OBS Browser Source: current private grant, 1280×720/1920×1080, refresh/cookie persistence, reduced-motion/fallback, reconnect and frame time. Native automation could not initialize because its kernel-assets path was missing; no OBS app action or broadcast occurred.
+3. Test an actual OBS Browser Source: current private grant, 1280×720/1920×1080, refresh/cookie persistence, reduced-motion/fallback, reconnect and frame time. The development automation helper (not part of TORCHLINE) failed to start because its kernel-assets path was missing; no OBS app action or broadcast occurred.
 4. Arrange two consenting live broadcasters: opted-in idle receiver, ready-boundary source intent, real native raid evidence and explicit receiver acceptance before expiry. Verify identical world/scars and former-host authority loss. Never manufacture proof to complete this gate.
 
 Exact owner steps and confirmations remain in the [launch guide](../operations/owner-launch-guide.md). No manual test was used as a reason to halt independent implementation.

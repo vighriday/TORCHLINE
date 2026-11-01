@@ -1,6 +1,6 @@
 # Public capability and authority review
 
-Current follow-up: the owner resumed reviewed incremental pushes on 2026-10-26. The baseline findings below are historical; R1–R4 have regression-tested fixes. Real app/broadcaster/bot OAuth, explicit named conversion, HTTPS, three signed challenges and enabled current subscriptions are verified. Genuine chat effects, visible bot output, actual OBS and native raid acceptance remain pending. See [current status](../planning/implementation-status.md).
+Follow-up as of 2026-10-26: the owner resumed reviewed incremental pushes on 2026-10-26. The baseline findings below are historical; R1–R4 have regression-tested fixes. Real app/broadcaster/bot OAuth, explicit named conversion, HTTPS, three signed challenges and enabled current subscriptions are verified. Genuine chat effects, visible bot output, actual OBS and native raid acceptance remain pending. See [current status](../planning/implementation-status.md).
 
 Date: 2026-10-26, Asia/Calcutta. Reviewed implementation: `00250ce`. Review only: no application fixes, release tag, deployment, merge or further push is included. The owner requested local review before publishing further changes.
 
