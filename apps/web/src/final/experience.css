@@ -731,3 +731,33 @@
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
 }
+
+/* The Chronicle ship is a bounded, sticky viewport. A long voyage's timeline used to stretch
+   this canvas to thousands of pixels until the camera framed a single hull texture. */
+.archive-layout {
+  align-items: start;
+}
+.archive-ship {
+  position: sticky;
+  top: 84px;
+  min-height: 0;
+}
+.archive-ship > .ark-viewport {
+  height: min(520px, 62vh);
+}
+.archive-ship > .scar-legend {
+  top: calc(min(520px, 62vh) - 44px);
+  bottom: auto;
+}
+@media (max-width: 900px) {
+  .archive-ship {
+    position: relative;
+    top: auto;
+  }
+  .archive-ship > .ark-viewport {
+    height: 340px;
+  }
+  .archive-ship > .scar-legend {
+    top: 296px;
+  }
+}
