@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
-import type { HandoffPreview, RecordedWorldEvent, WorldPresentation } from '@torchline/contracts';
+import type {
+  DecisionAlternatives,
+  HandoffPreview,
+  RecordedWorldEvent,
+  WorldPresentation,
+} from '@torchline/contracts';
 import { ArkShip } from './App.tsx';
 import { Brand, Button, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
@@ -10,6 +15,7 @@ import type { Mode } from './types.ts';
 import { systemLabels } from './condition.ts';
 import { Rehearsal } from './Rehearsal.tsx';
 import { Lineage, SeasonRecord } from './Lineage.tsx';
+import { WhatIf } from './WhatIf.tsx';
 
 export function AccountPanel() {
   const { data, busy, perform, botSetup } = useGame();
@@ -935,6 +941,17 @@ function ChronicleRecords({ world }: { world: WorldPresentation }) {
                 </span>
               ))}
           </div>
+          {event && (
+            <WhatIf
+              eventId={event.id}
+              summary={event.summary}
+              load={(eventId) =>
+                request<DecisionAlternatives>(
+                  `/api/worlds/${world.worldId}/alternatives?event=${encodeURIComponent(eventId)}`,
+                )
+              }
+            />
+          )}
           {event?.causes.length ? (
             <div className="cause-links">
               <span>INHERITED CAUSES</span>

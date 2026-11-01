@@ -2,6 +2,7 @@
 
 ## Unreleased — Relay experience and platform completion
 
+- Add **What if?** to the Chronicle and the public Chronicle: any captain decision or attested LIVEWIRE result can be replayed once, read only, from the saved state just before it, showing every option's resources, debts, destroyed systems or ending. The chosen branch is recomputed and compared with the saved event, and the panel says so only when they match. Later chapters are never simulated. [ADR 0038](docs/decisions/0038-one-step-decision-alternatives.md).
 - Give each LIVEWIRE preset its own illustrative feed and game-styled HUD: the voxel lava jump, an arena aerial goal and a boss-courtyard duel. The deck previously drew the Minecraft scene for every preset. A saved mission reopens in its own preset's scene, and outcome banners appear only after the streamer-attested result is saved. [ADR 0037](docs/decisions/0037-cross-game-livewire-relay.md).
 - Make the relay rehearsal a two-game story: alpha streams Minecraft and a LIVEWIRE stake on the hull fails (−6); after the handoff the receiver streams Rocket League and a stake on the same hull scores (+3). Both channels are on screen side by side, each mission through the public endpoint and labelled streamer-attested. Eleven steps; autoplay still stops at the dossier.
 - List every attested LIVEWIRE result in the inheritance dossier ("What other games did to it") and the season record, with game, attempt, outcome, effect and attesting community. The lineage graph now keeps missions opened before chapter one.

@@ -101,6 +101,14 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
     await expect(page.locator('.lineage-edge').first()).toBeAttached();
     await page.locator('.lineage-node[data-kind=decision]').first().click();
     await expect(page.locator('.event-record')).toContainText('Sacrifice navigation');
+    // The road not taken, replayed once from the saved state before the decision.
+    await page.getByRole('button', { name: 'WHAT IF THEY HAD CHOSEN DIFFERENTLY?' }).click();
+    const whatIf = page.locator('section.what-if');
+    await expect(whatIf).toContainText('Recomputed choice matches the saved record');
+    await expect(whatIf.locator('li[data-option=seal-habitat]')).toContainText('168');
+    await expect(whatIf.locator('li[data-chosen=true]')).toContainText(
+      'Leaves blind jump due ch.2',
+    );
 
     // The receiver publishes a read-only link; a browser with no session can follow the Ark.
     await page.getByRole('button', { name: /Share public Chronicle/ }).click();
@@ -116,6 +124,12 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
         'Simulation alpha → Simulation beta',
       );
       await expect(reader.getByRole('button', { name: /Commit|Start chapter/ })).toHaveCount(0);
+      await reader.locator('.lineage-node[data-kind=livewire]').first().click();
+      await reader.getByRole('button', { name: 'WHAT IF THEY HAD CHOSEN DIFFERENTLY?' }).click();
+      await expect(reader.locator('section.what-if')).toContainText('Minecraft · LAVA GAP JUMP');
+      await expect(reader.locator('section.what-if li[data-option=success]')).toContainText(
+        'NOT TAKEN',
+      );
     } finally {
       await visitor.close();
     }

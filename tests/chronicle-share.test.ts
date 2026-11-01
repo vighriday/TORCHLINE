@@ -114,6 +114,50 @@ describe('public Chronicle links', () => {
         ).toBe(true);
         expect(JSON.stringify(body)).not.toContain('"sim-alpha.');
 
+        // The road not taken: the custodian and the public link replay the same decision once.
+        const decision = (await store.get(id)).events.find(
+          (event) => event.command.type === 'commit',
+        )!;
+        const own = await app.inject({
+          url: `/api/worlds/${id}/alternatives?event=${encodeURIComponent(decision.id)}`,
+          headers: receiver,
+        });
+        expect(own.statusCode).toBe(200);
+        expect(own.json()).toMatchObject({ title: 'Sacrifice navigation', verified: true });
+        expect(own.json().branches.map((branch: { option: string }) => branch.option)).toEqual([
+          'burn-navigation',
+          'seal-habitat',
+        ]);
+        const publicBranches = await app.inject({
+          method: 'POST',
+          url: '/api/chronicle/alternatives',
+          payload: { token, event: decision.id },
+          headers: header,
+        });
+        expect(publicBranches.statusCode).toBe(200);
+        expect(publicBranches.json().alternatives).toEqual(own.json());
+        // The previous custodian has no session authority over the record any more.
+        expect(
+          (
+            await app.inject({
+              url: `/api/worlds/${id}/alternatives?event=${encodeURIComponent(decision.id)}`,
+              headers: previous,
+            })
+          ).statusCode,
+        ).toBe(403);
+        // Non-decisions have no alternatives.
+        const start = (await store.get(id)).events[0];
+        expect(
+          (
+            await app.inject({
+              method: 'POST',
+              url: '/api/chronicle/alternatives',
+              payload: { token, event: start.id },
+              headers: header,
+            })
+          ).statusCode,
+        ).toBe(409);
+
         // Rotating replaces only this creator's link.
         const rotated = new URL(
           (

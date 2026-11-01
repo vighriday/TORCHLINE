@@ -333,6 +333,40 @@ export interface WorldHistoryPage {
   custody: CustodyStep[];
   nextCustodyCursor: string | null;
 }
+/** One option of a saved decision, applied once to the pinned state just before it. */
+export interface AlternativeBranch {
+  option: string;
+  label: string;
+  chosen: boolean;
+  available: boolean;
+  unavailableReason: string | null;
+  resources: Resources | null;
+  outcome: Ending | null;
+  /** Obligations this branch would have created, due in a later chapter. */
+  debts: { kind: Obligation['kind']; dueChapter: number }[];
+  /** Systems this branch would have destroyed. */
+  lost: SystemId[];
+}
+/**
+ * A one-step replay of a captain decision or an attested LIVEWIRE result. Every branch starts
+ * from the same saved pre-decision state under the same rules version, actor and timestamp.
+ * Later chapters are deliberately not simulated: later inputs might not be legal on another
+ * branch.
+ */
+export interface DecisionAlternatives {
+  schemaVersion: 'world-records-2026-10-27.1';
+  worldId: string;
+  eventId: string;
+  chapter: number;
+  rulesVersion: RulesVersion;
+  kind: 'decision' | 'livewire';
+  title: string;
+  community: { id: string; label: string };
+  before: Resources;
+  /** The recomputed chosen branch reproduced the saved event exactly. */
+  verified: boolean;
+  branches: AlternativeBranch[];
+}
 export interface HandoffPreview {
   schemaVersion: 'world-records-2026-10-27.1';
   intentId: string;

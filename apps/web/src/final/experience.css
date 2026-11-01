@@ -1568,3 +1568,148 @@ body:has(.platform-page) .consequence-caption {
   margin-top: 14px;
   text-align: left;
 }
+/* What if: every option of one saved decision, replayed once from the state before it. */
+.what-if {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(111, 170, 169, 0.3);
+  background: rgba(6, 11, 12, 0.72);
+  text-align: left;
+}
+.what-if--closed {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.what-if--closed button {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px dashed rgba(111, 170, 169, 0.55);
+  background: rgba(111, 170, 169, 0.08);
+  color: #9cc7c6;
+  font: 600 calc(10.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.08em;
+}
+.what-if--closed p {
+  margin: 6px 0 0;
+  color: #f1b3a5;
+  font: 400 11px var(--mono);
+}
+.what-if header {
+  display: grid;
+  gap: 3px;
+}
+.what-if header span {
+  color: var(--amber);
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.what-if header strong {
+  color: var(--bone);
+  font: 700 18px/1.1 var(--display);
+}
+.what-if header small {
+  color: #8d948e;
+  font: 400 10px var(--mono);
+}
+.what-if header em {
+  justify-self: start;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border: 1px solid rgba(127, 214, 164, 0.5);
+  color: #7fd6a4;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  font-style: normal;
+}
+.what-if header em[data-verified='false'] {
+  border-color: rgba(224, 138, 117, 0.6);
+  color: #e08a75;
+}
+.what-if ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.what-if li {
+  display: grid;
+  gap: 6px;
+  padding: 8px 9px;
+  border-left: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+}
+.what-if li[data-chosen='true'] {
+  border-left-color: var(--amber-bright);
+  background: rgba(201, 152, 81, 0.08);
+}
+.what-if li[data-available='false'] {
+  opacity: 0.7;
+}
+.what-if-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.what-if-head b {
+  color: #9cc7c6;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.what-if li[data-chosen='true'] .what-if-head b {
+  color: var(--amber-bright);
+}
+.what-if-head strong {
+  color: var(--bone);
+  font: 600 15px var(--display);
+}
+.what-if-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+/* The public record is wide enough for one row of six. */
+.public-chronicle-record .what-if-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.what-if-grid span {
+  display: grid;
+  gap: 1px;
+  padding: 4px 5px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.what-if-grid small {
+  color: #7f8a86;
+  font: 500 calc(8.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.06em;
+}
+.what-if-grid b {
+  color: var(--bone);
+  font: 600 14px var(--display);
+}
+.what-if-grid i {
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  font-style: normal;
+  color: #7fd6a4;
+}
+.what-if-grid i[data-tone='loss'] {
+  color: #e08a75;
+}
+.what-if li p,
+.what-if footer {
+  margin: 0;
+  color: #a8ada6;
+  font: 400 11px/1.5 var(--mono);
+}
+.what-if footer {
+  color: #7f8a86;
+  font-size: 10px;
+}
+@media (max-width: 900px) {
+  .public-chronicle-record .what-if-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

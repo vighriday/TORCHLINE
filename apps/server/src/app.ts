@@ -20,6 +20,8 @@ import {
   readWorldHistory,
   readHandoffPreview,
   readSharedChronicle,
+  readAlternatives,
+  readSharedAlternatives,
   shareWorld,
   advanceEpisodes,
   recoverEpisodes,
@@ -629,6 +631,27 @@ export async function createApp(
     const token = randomBytes(32).toString('hex');
     await shareWorld(store, creator, id, token);
     return { url: `${config.baseUrl}/chronicle/#${token}` };
+  });
+  // One-step alternatives for a saved decision: read only, recomputed from the event log, never
+  // stored. The custodian reads them with their session; anyone with a public link reads them too.
+  app.get('/api/worlds/:id/alternatives', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const { event } = z
+      .object({ event: z.string().min(1).max(160) })
+      .strict()
+      .parse(request.query);
+    return readAlternatives(store, creator, id, event);
+  });
+  app.post('/api/chronicle/alternatives', async (request) => {
+    const { token, event } = z
+      .object({ token: z.string().regex(/^[a-f\d]{64}$/), event: z.string().min(1).max(160) })
+      .strict()
+      .parse(request.body);
+    const shared = await readSharedAlternatives(store, token, event);
+    if (shared.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, alternatives: shared.alternatives };
   });
   app.post('/api/chronicle', async (request) => {
     const body = z
