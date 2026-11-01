@@ -1173,11 +1173,17 @@ export function Codex() {
                 {canonical?.chapter === index + 1 ? canonical.title : `Chapter ${index + 1}`}
               </span>
               <small>
-                {canonical && canonical.chapter > index + 1
-                  ? 'RECORDED'
-                  : canonical?.chapter === index + 1
-                    ? 'CURRENT'
-                    : 'AHEAD'}
+                {!canonical
+                  ? 'AHEAD'
+                  : canonical.outcome ||
+                      canonical.chapter > index + 1 ||
+                      (canonical.chapter === index + 1 && canonical.phase === 'ready')
+                    ? 'RECORDED'
+                    : canonical.chapter === index + 1
+                      ? 'CURRENT'
+                      : canonical.chapter + 1 === index + 1 && canonical.phase === 'ready'
+                        ? 'NEXT'
+                        : 'AHEAD'}
               </small>
             </div>
           ))}
