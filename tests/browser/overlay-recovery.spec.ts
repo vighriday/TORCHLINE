@@ -82,7 +82,11 @@ test('overlay survives initial and mid-feed dependency failures, reads the saved
         { type: 'start' },
       );
       await expect(page.locator('.mission')).toBeVisible();
-      await expect(page.locator('body')).not.toContainText('Overlay reconnecting');
+      // Same requirement (recover by itself, no reload); a two-core CI runner rendering the scene in
+      // software needs longer than a workstation to observe it.
+      await expect(page.locator('body')).not.toContainText('Overlay reconnecting', {
+        timeout: 20000,
+      });
       expect((await store.get(id)).state.version).toBe(before.version + 1);
       expect(paths.every((path) => path === '/overlay/sim-alpha/session')).toBe(true);
       const read = await page.request.get('/overlay/sim-alpha/state');

@@ -1,0 +1,1080 @@
+/* Relay rehearsal, inheritance dossier, lineage and season record.
+   Same tokens and type ramp as the Figma v2 screens; sized for legibility at 720p. */
+
+.arrival-dossier {
+  position: relative;
+  margin: 0 0 14px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(111, 170, 169, 0.42);
+  border-left: 3px solid var(--cyan);
+  background:
+    linear-gradient(135deg, rgba(111, 170, 169, 0.12), transparent 55%), rgba(6, 12, 13, 0.92);
+}
+.arrival-dossier header strong {
+  display: block;
+  margin: 6px 0 4px;
+  font: 600 20px/1.05 var(--display);
+  letter-spacing: 0.03em;
+  color: var(--bone);
+}
+.arrival-dossier header strong em {
+  font-style: normal;
+  color: #8fb6ba;
+}
+.arrival-dossier header small,
+.arrival-dossier footer {
+  display: block;
+  color: #8d948e;
+  font: 400 10px/1.5 var(--mono);
+  letter-spacing: 0.03em;
+}
+.arrival-dossier .eyebrow {
+  color: #8fb6ba;
+}
+.dossier-vitals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 4px;
+  margin: 10px 0;
+}
+.dossier-vitals div {
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.035);
+  border-top: 1px solid rgba(208, 202, 184, 0.14);
+}
+.dossier-vitals span {
+  display: block;
+  color: #7f867f;
+  font: 500 9px var(--mono);
+  letter-spacing: 0.08em;
+}
+.dossier-vitals b {
+  font: 600 18px var(--display);
+  color: var(--bone);
+}
+.dossier-vitals .critical b {
+  color: var(--crimson-bright);
+}
+.dossier-lost {
+  margin: 0 0 8px;
+  color: #e08a75;
+  font: 500 10px/1.5 var(--mono);
+  letter-spacing: 0.06em;
+}
+.dossier-block {
+  margin-top: 10px;
+}
+.dossier-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--amber);
+  font: 600 10px var(--mono);
+  letter-spacing: 0.12em;
+}
+.dossier-decisions,
+.dossier-debts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.dossier-decisions li {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 2px 8px;
+  padding: 6px 7px;
+  background: rgba(201, 152, 81, 0.07);
+}
+.dossier-decisions b {
+  grid-row: span 2;
+  color: var(--amber-bright);
+  font: 600 11px var(--mono);
+}
+.dossier-decisions span {
+  color: var(--bone);
+  font: 600 14px/1.15 var(--display);
+  letter-spacing: 0.02em;
+}
+.dossier-decisions small {
+  color: #8d948e;
+  font: 400 10px var(--mono);
+}
+.dossier-debts li {
+  padding: 7px 8px;
+  border: 1px solid rgba(185, 71, 53, 0.4);
+  background: rgba(185, 71, 53, 0.09);
+}
+.dossier-debts li div {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.dossier-debts b {
+  color: var(--crimson-bright);
+  font: 600 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.dossier-debts strong {
+  font: 600 15px var(--display);
+  color: var(--bone);
+}
+.dossier-debts p,
+.dossier-clear {
+  margin: 4px 0 0;
+  color: #b8bcb3;
+  font: 400 10.5px/1.45 var(--mono);
+}
+.dossier-debts small {
+  display: block;
+  margin-top: 4px;
+  color: #d39b8e;
+  font: 500 10px/1.4 var(--mono);
+}
+.arrival-dossier footer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: #a9ada5;
+}
+
+/* Broadcast variant: the receiving audience sees the inheritance over the ship itself. */
+.arrival-dossier--broadcast {
+  position: absolute;
+  z-index: 6;
+  top: 84px;
+  left: 28px;
+  width: min(460px, calc(100% - 56px));
+  max-height: calc(100% - 150px);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: dossier-arrive 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.arrival-dossier--broadcast header strong {
+  font-size: 30px;
+}
+.arrival-dossier--broadcast .dossier-vitals b {
+  font-size: 24px;
+}
+.arrival-dossier--broadcast .dossier-decisions span {
+  font-size: 18px;
+}
+.arrival-dossier--broadcast .dossier-debts strong {
+  font-size: 19px;
+}
+.arrival-dossier--broadcast .dossier-debts p,
+.arrival-dossier--broadcast .dossier-clear,
+.arrival-dossier--broadcast header small,
+.arrival-dossier--broadcast footer {
+  font-size: 12px;
+}
+@keyframes dossier-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+[data-motion='reduced'] .arrival-dossier--broadcast {
+  animation: none;
+}
+
+/* Relay rehearsal */
+.rehearsal {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) 330px 300px;
+  gap: 20px;
+  align-items: start;
+}
+.rehearsal-stage {
+  justify-content: flex-start;
+  min-height: 520px;
+  padding: 36px 40px;
+}
+.rehearsal-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.rehearsal-head .sim-orbit {
+  margin-bottom: 0;
+}
+.rehearsal-head > div:last-child {
+  display: grid;
+  gap: 6px;
+}
+.rehearsal-actor {
+  display: inline-block;
+  padding: 5px 9px;
+  border: 1px solid rgba(201, 152, 81, 0.5);
+  color: var(--amber-bright);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.1em;
+}
+.rehearsal-stage p {
+  font-size: 12px;
+  color: #a8ada6;
+}
+.rehearsal-proof {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  margin-top: 10px;
+  padding: 5px 8px;
+  background: rgba(111, 170, 169, 0.08);
+  border: 1px solid rgba(111, 170, 169, 0.25);
+  color: #9cc7c6;
+  font: 500 11px var(--mono);
+}
+.rehearsal-expiry {
+  color: #9cc7c6 !important;
+}
+.rehearsal-error {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--crimson-bright);
+  background: rgba(185, 71, 53, 0.12);
+  color: #f1b3a5 !important;
+}
+.rehearsal-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.rehearsal-copy > strong {
+  font-size: clamp(32px, 3.6vw, 52px);
+  line-height: 0.92;
+  margin: 9px 0 15px;
+  max-width: 600px;
+}
+.rehearsal-copy > p {
+  max-width: 540px;
+  font: 400 12px/1.6 var(--mono);
+}
+.rehearsal-stage--dossier {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 470px);
+  gap: 28px;
+  align-items: start;
+}
+.rehearsal-stage .arrival-dossier {
+  width: 100%;
+  margin: 0;
+}
+.rehearsal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+.rehearsal-actions .platform-primary {
+  margin-top: 0;
+}
+.rehearsal-actions button:not(.platform-primary) {
+  min-height: 45px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.06em;
+}
+.rehearsal-path {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-content: start;
+}
+.rehearsal-path button {
+  width: 100%;
+  min-height: 58px;
+}
+.rehearsal-path button span {
+  font-size: 14px;
+}
+.rehearsal-path button small {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+.rehearsal-path button b {
+  font-size: 10px;
+}
+.rehearsal-path button:disabled {
+  opacity: 0.55;
+}
+.rehearsal-log {
+  align-self: start;
+}
+.rehearsal-log > span {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+.rehearsal-identity p {
+  margin: 4px 0 0;
+  color: var(--bone) !important;
+  font: 600 16px var(--display) !important;
+}
+.rehearsal-log ol {
+  max-height: 330px;
+  overflow-y: auto;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+.rehearsal-log li {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border-left: 2px solid #3a4342;
+  background: rgba(255, 255, 255, 0.03);
+}
+.rehearsal-log li b {
+  color: #c7cbc3;
+  font: 600 10px var(--mono);
+}
+.rehearsal-log li span {
+  color: #9da29b;
+  font: 400 10.5px/1.45 var(--mono);
+}
+.rehearsal-log li[data-tone='result'] {
+  border-left-color: var(--cyan);
+}
+.rehearsal-log li[data-tone='evidence'] {
+  border-left-color: var(--amber);
+}
+.rehearsal-log li[data-tone='command'] span {
+  color: #d8d3c5;
+}
+.rehearsal-restart p {
+  font-size: 10px !important;
+}
+.rehearsal-restart button {
+  font-size: 10px !important;
+}
+.rehearsal-extras {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.rehearsal-extras > button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  background: rgba(10, 15, 16, 0.82);
+  text-align: left;
+}
+.rehearsal-extras > button b {
+  color: var(--amber);
+  font: 600 10px var(--mono);
+  letter-spacing: 0.1em;
+}
+.rehearsal-extras > button span {
+  color: var(--bone);
+  font-size: 14px;
+}
+.rehearsal-tools {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: rgba(10, 15, 16, 0.82);
+}
+.rehearsal-tools summary {
+  cursor: pointer;
+  color: var(--amber);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 1500px) {
+  .rehearsal-stage--dossier {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 1180px) {
+  .rehearsal {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rehearsal-stage {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 900px) {
+  .rehearsal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rehearsal-stage {
+    min-height: 0;
+    padding: 24px 20px;
+  }
+  .arrival-dossier--broadcast {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    max-height: none;
+    margin: 12px;
+  }
+}
+
+/* Season record and crew ledger */
+.season-record {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.4fr);
+  gap: 22px;
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 0 0, rgba(201, 152, 81, 0.1), transparent 45%), rgba(8, 13, 14, 0.88);
+}
+.season-record--colony {
+  border-color: rgba(111, 170, 169, 0.5);
+}
+.season-record--wreck {
+  border-color: rgba(185, 71, 53, 0.55);
+}
+.season-record header > strong {
+  display: block;
+  margin: 8px 0 6px;
+  font: 700 clamp(28px, 3vw, 44px) / 0.95 var(--display);
+  letter-spacing: 0.04em;
+}
+.season-record--colony header > strong {
+  color: #9fd3d1;
+}
+.season-record--wreck header > strong {
+  color: var(--crimson-bright);
+}
+.season-record header p {
+  margin: 0;
+  color: #a5aaa3;
+  font: 400 11px/1.55 var(--mono);
+}
+.season-resources {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 14px;
+}
+.season-resources div {
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.season-resources span {
+  display: block;
+  color: #7f867f;
+  font: 500 9px var(--mono);
+  letter-spacing: 0.08em;
+}
+.season-resources b {
+  font: 600 18px var(--display);
+}
+.season-crews {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+.season-crews li {
+  padding: 12px;
+  border-top: 2px solid var(--amber);
+  background: rgba(255, 255, 255, 0.03);
+}
+.season-crews li span {
+  color: var(--amber);
+  font: 600 10px var(--mono);
+  letter-spacing: 0.1em;
+}
+.season-crews li strong {
+  display: block;
+  margin: 4px 0;
+  font: 600 20px var(--display);
+}
+.season-crews li p {
+  margin: 0;
+  color: #d0ccbf;
+  font: 500 14px/1.3 var(--display);
+}
+.season-crews li small {
+  display: block;
+  margin-top: 6px;
+  color: #8a918a;
+  font: 400 10px var(--mono);
+}
+.season-crews-empty {
+  color: #8a918a;
+  font: 400 11px var(--mono);
+}
+
+/* Lineage graph */
+.lineage-panel {
+  position: relative;
+  z-index: 3;
+  margin-top: 22px;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--line);
+  background: rgba(7, 11, 12, 0.88);
+}
+.lineage-panel .section-label {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.lineage-panel .section-label span {
+  color: var(--amber);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.12em;
+}
+.lineage-panel .section-label small {
+  color: #7d847d;
+  font: 500 9px var(--mono);
+  letter-spacing: 0.08em;
+}
+.lineage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.lineage-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #a2a79f;
+  font: 500 10px var(--mono);
+}
+.lineage-legend span:before {
+  content: '';
+  width: 14px;
+  height: 8px;
+  background: var(--lineage-color, #6c716c);
+}
+.lineage-legend [data-kind='decision'],
+.lineage-node[data-kind='decision'] {
+  --lineage-color: var(--amber);
+}
+.lineage-legend [data-kind='solve'],
+.lineage-node[data-kind='solve'] {
+  --lineage-color: var(--cyan);
+}
+.lineage-legend [data-kind='arrival'],
+.lineage-node[data-kind='arrival'] {
+  --lineage-color: #8d948c;
+}
+.lineage-legend [data-kind='livewire'],
+.lineage-node[data-kind='livewire'] {
+  --lineage-color: #b58be0;
+}
+.lineage-legend [data-kind='custody'] {
+  --lineage-color: #e4b66e;
+}
+.lineage-scroll {
+  overflow-x: auto;
+  scrollbar-color: #3a4342 transparent;
+}
+.lineage svg {
+  display: block;
+  width: 100%;
+  min-width: 880px;
+  height: auto;
+}
+.lineage-column rect {
+  fill: rgba(255, 255, 255, 0.018);
+}
+.lineage-column text {
+  fill: #7d847d;
+  font: 600 10px var(--mono);
+  letter-spacing: 0.12em;
+}
+.lineage-row line {
+  stroke: rgba(208, 202, 184, 0.08);
+}
+.lineage-row text {
+  fill: var(--bone);
+  font: 600 15px var(--display);
+}
+.lineage-row .lineage-row-sub {
+  fill: #7d847d;
+  font: 500 9px var(--mono);
+  letter-spacing: 0.1em;
+}
+.lineage-chip {
+  fill: rgba(10, 16, 17, 0.95);
+  stroke: var(--lineage-color);
+  stroke-width: 1.2;
+}
+.lineage-node[data-loss] .lineage-chip {
+  fill: rgba(60, 22, 18, 0.9);
+}
+.lineage-node[data-ended] .lineage-chip {
+  stroke-width: 2.4;
+}
+.lineage-node {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 160ms ease;
+}
+.lineage-node:focus-visible .lineage-chip,
+.lineage-node:hover .lineage-chip {
+  stroke-width: 2.4;
+}
+.lineage-kind {
+  fill: var(--lineage-color);
+  font: 600 7.5px var(--mono);
+  letter-spacing: 0.1em;
+}
+.lineage-title {
+  fill: var(--bone);
+  font: 600 12.5px var(--display);
+  letter-spacing: 0.02em;
+}
+.lineage-edge {
+  fill: none;
+  stroke-width: 1.6;
+  transition: opacity 160ms ease;
+}
+.lineage-edge--decision {
+  stroke: var(--amber);
+  stroke-dasharray: 5 4;
+}
+.lineage-edge--solve,
+.lineage-edge--livewire {
+  stroke: var(--cyan);
+}
+.lineage-edge--arrival {
+  stroke: #8d948c;
+}
+.lineage-arrowhead {
+  fill: #c9c4b6;
+}
+.lineage-custody line {
+  stroke: #e4b66e;
+  stroke-width: 2;
+}
+.lineage-custody[data-mode='simulation'] line {
+  stroke-dasharray: 2 4;
+}
+.lineage-custody text {
+  fill: #e4b66e;
+  font: 600 9px var(--mono);
+  letter-spacing: 0.1em;
+}
+.is-dim {
+  opacity: 0.25;
+}
+.lineage-edge.is-focus {
+  stroke-width: 2.6;
+}
+.lineage-empty {
+  margin: 8px 0 0;
+  color: #8a918a;
+  font: 400 11px/1.5 var(--mono);
+}
+@media (max-width: 900px) {
+  .season-record {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Small control states added with the relay and season record. */
+.ending-actions {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+.ending-actions button:not(.commit-button) {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.05em;
+}
+.commit-hint,
+.relay-blocked {
+  display: block;
+  margin: 8px 0 6px;
+  color: #b9a07a;
+  font: 400 10.5px/1.45 var(--mono);
+}
+.receive-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* The Chronicle ship is a bounded, sticky viewport. A long voyage's timeline used to stretch
+   this canvas to thousands of pixels until the camera framed a single hull texture. */
+.archive-layout {
+  align-items: start;
+}
+.archive-ship {
+  position: sticky;
+  top: 84px;
+  min-height: 0;
+}
+.archive-ship > .ark-viewport {
+  height: min(520px, 62vh);
+}
+.archive-ship > .scar-legend {
+  top: calc(min(520px, 62vh) - 44px);
+  bottom: auto;
+}
+@media (max-width: 900px) {
+  .archive-ship {
+    position: relative;
+    top: auto;
+  }
+  .archive-ship > .ark-viewport {
+    height: 340px;
+  }
+  .archive-ship > .scar-legend {
+    top: 296px;
+  }
+}
+
+/* Public Chronicle link and its read-only page */
+.share-chronicle {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  max-width: 620px;
+  margin: -6px 0 18px;
+}
+.share-chronicle > button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(201, 152, 81, 0.5);
+  background: rgba(201, 152, 81, 0.08);
+  color: var(--amber-bright);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.08em;
+}
+.share-chronicle label {
+  display: grid;
+  gap: 4px;
+  color: #8d948e;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.share-chronicle input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--bone);
+  font: 400 11px var(--mono);
+}
+.share-chronicle .controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.share-chronicle .controls-row button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--bone);
+  font: 600 10px var(--mono);
+}
+.share-chronicle a {
+  color: var(--cyan);
+  font: 500 11px var(--mono);
+}
+.share-chronicle p {
+  margin: 0;
+  color: #8d948e;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.public-chronicle {
+  min-height: 100dvh;
+  padding: 24px clamp(16px, 4vw, 68px) 48px;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(111, 170, 169, 0.08), transparent 40%), var(--void);
+  color: var(--bone);
+}
+.public-chronicle-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+.public-chronicle-bar > span {
+  color: var(--amber);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.12em;
+}
+.public-chronicle-error {
+  padding: 12px 14px;
+  border-left: 3px solid var(--crimson-bright);
+  background: rgba(185, 71, 53, 0.12);
+  color: #f1b3a5;
+  font: 400 12px/1.5 var(--mono);
+}
+.public-chronicle-record,
+.public-chronicle-custody {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  background: rgba(8, 13, 14, 0.88);
+}
+.public-chronicle-record strong {
+  display: block;
+  margin: 8px 0 6px;
+  font: 600 clamp(18px, 1.6vw, 26px) / 1.15 var(--display);
+}
+.public-chronicle-record small,
+.public-chronicle-custody small {
+  display: block;
+  color: #8d948e;
+  font: 400 10.5px var(--mono);
+}
+.public-chronicle-custody p {
+  margin: 10px 0 0;
+  font: 600 16px var(--display);
+}
+
+/* Broadcast studio: step guidance and a usable single action in practice mode. */
+.setup-guide {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--amber);
+  background: rgba(201, 152, 81, 0.06);
+}
+.setup-guide p {
+  margin: 6px 0 0;
+  color: #b9bdb4;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.studio-actions {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.studio-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  text-align: left;
+}
+.studio-actions button:only-child {
+  background: var(--amber);
+  color: #111;
+}
+.broadcast-grid > .obs-preview {
+  align-self: start;
+}
+
+/* Season finale: the ending names the communities that carried the Ark. */
+.season-finale {
+  margin: 0 0 14px;
+  padding: 12px 12px 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber);
+  background:
+    linear-gradient(135deg, rgba(201, 152, 81, 0.12), transparent 60%), rgba(6, 12, 13, 0.94);
+}
+.season-finale--colony {
+  border-left-color: var(--cyan);
+}
+.season-finale--wreck {
+  border-left-color: var(--crimson-bright);
+}
+.season-finale > strong {
+  display: block;
+  margin: 6px 0 4px;
+  font: 700 26px/1 var(--display);
+  letter-spacing: 0.04em;
+}
+.season-finale--colony > strong {
+  color: #9fd3d1;
+}
+.season-finale--wreck > strong {
+  color: var(--crimson-bright);
+}
+.season-finale > p {
+  margin: 0 0 8px;
+  color: #a9ada5;
+  font: 400 10.5px/1.5 var(--mono);
+}
+.season-finale ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+.season-finale li {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 1px 8px;
+  padding: 6px 7px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.season-finale li b {
+  grid-row: span 2;
+  color: var(--amber-bright);
+  font: 600 10.5px var(--mono);
+}
+.season-finale li span {
+  font: 600 15px var(--display);
+}
+.season-finale li small {
+  color: #b8bcb3;
+  font: 400 10px/1.4 var(--mono);
+}
+.season-finale footer {
+  margin-top: 8px;
+  color: #8d948e;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.season-finale--broadcast {
+  position: absolute;
+  z-index: 6;
+  top: 84px;
+  left: 28px;
+  width: min(480px, calc(100% - 56px));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: dossier-arrive 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.season-finale--broadcast > strong {
+  font-size: 40px;
+}
+.season-finale--broadcast li span {
+  font-size: 19px;
+}
+.season-finale--broadcast li small,
+.season-finale--broadcast > p {
+  font-size: 12px;
+}
+[data-motion='reduced'] .season-finale--broadcast {
+  animation: none;
+}
+@media (max-width: 900px) {
+  .season-finale--broadcast {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin: 12px;
+  }
+}
+.consequence[data-outcome='colony'] > span {
+  color: #9fd3d1;
+}
+.consequence[data-outcome='partial'] {
+  border-color: var(--amber);
+  background: rgba(201, 152, 81, 0.08);
+}
+.consequence[data-outcome='partial'] > span {
+  color: var(--amber-bright);
+}
+
+/* Phones and narrow tablets: the exterior/cockpit switch sits in the stage heading instead of
+   falling to the bottom of the stage, where it covered the signal strip's text. */
+@media (max-width: 900px) {
+  .ship-stage .view-switch {
+    position: static;
+    transform: none;
+    width: max-content;
+    margin-top: 8px;
+  }
+  .ship-stage .view-switch button {
+    white-space: nowrap;
+  }
+  .signal-strip .signal-label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Consequence captions (Settings → Captions). */
+.consequence-caption {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  top: calc(150px + env(safe-area-inset-top, 0px));
+  width: min(620px, calc(100% - 32px));
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border: 1px solid rgba(111, 170, 169, 0.45);
+  border-left: 3px solid var(--cyan);
+  background: rgba(6, 11, 12, 0.94);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: caption-in 260ms ease-out both;
+}
+.consequence-caption[data-tone='loss'] {
+  border-color: rgba(185, 71, 53, 0.5);
+  border-left-color: var(--crimson-bright);
+}
+.consequence-caption span {
+  color: #8fb6ba;
+  font: 600 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.consequence-caption[data-tone='loss'] span {
+  color: #e08a75;
+}
+.consequence-caption p {
+  margin: 4px 0 0;
+  color: var(--bone);
+  font: 500 calc(13px * var(--hud-scale, 1)) / 1.4 var(--mono);
+}
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+[data-motion='reduced'] .consequence-caption {
+  animation: none;
+}
+/* Settings profile rows: labels and values no longer run together when a value wraps. */
+.settings-layout > aside > div {
+  gap: 14px;
+}
+.settings-layout > aside > div b {
+  text-align: right;
+}

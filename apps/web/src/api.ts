@@ -1,6 +1,9 @@
 import type { WorldPresentation, TwitchIntegrationStatus } from '@torchline/contracts';
 export interface HandoffView {
   id: string;
+  world_id?: string;
+  source_label?: string | null;
+  target_label?: string | null;
   source_id: string;
   target_id: string;
   status: string;
@@ -10,10 +13,11 @@ export interface HandoffView {
 export interface DashboardSnapshot {
   me: { id: string; label: string; receiveOptIn: boolean } | null;
   mode: 'simulation' | 'live';
+  channelEpoch?: string;
   world: WorldPresentation | null;
   worlds?: { id: string; chapter: number; outcome: string | null; parked: boolean }[];
   handoffs?: HandoffView[];
-  recipients?: { id: string; label: string }[];
+  recipients?: { id: string; label: string; busy?: boolean }[];
   integration: {
     credentialsConfigured: boolean;
     botAuthorized: boolean;
@@ -40,13 +44,14 @@ export async function request<T = unknown>(
   path: string,
   body?: unknown,
   headers?: Record<string, string>,
+  timeoutMs = 15000,
 ): Promise<T> {
   let response: Response;
   try {
     response = await fetch(path, {
       method: body === undefined ? 'GET' : 'POST',
       redirect: 'error',
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Accept: 'application/json',
         ...(typeof location !== 'undefined' && /\.ngrok-free\.(app|dev)$/.test(location.hostname)
@@ -69,7 +74,7 @@ export async function request<T = unknown>(
       response.headers.get('content-type') ?? '',
     )
   )
-    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+    throw new ConnectionError('TORCHLINE could not reach its server. Please retry the connection.');
   let result;
   try {
     result = await response.json();
@@ -77,7 +82,7 @@ export async function request<T = unknown>(
     throw new ConnectionError('The connection was interrupted. Please retry the connection.');
   }
   if (result === null || typeof result !== 'object')
-    throw new ConnectionError('The flight deck could not connect. Please retry the connection.');
+    throw new ConnectionError('TORCHLINE could not reach its server. Please retry the connection.');
   if (!response.ok)
     throw new HttpError(
       typeof result.message === 'string' ? result.message : 'The request did not complete.',

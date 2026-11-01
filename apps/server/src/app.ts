@@ -6,14 +6,21 @@ import { existsSync } from 'node:fs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import { CommandRequestSchema, DomainError, LivewireRequestSchema } from '@torchline/contracts';
-import type { Command } from '@torchline/contracts';
+import {
+  CommandRequestSchema,
+  DomainError,
+  LivewireRequestSchema,
+  SYSTEM_IDS,
+} from '@torchline/contracts';
+import type { Command, WorldPresentation } from '@torchline/contracts';
 import {
   Store,
   participantIdentity,
   readWorldRecord,
   readWorldHistory,
   readHandoffPreview,
+  readSharedChronicle,
+  shareWorld,
   advanceEpisodes,
   recoverEpisodes,
   configureEpisode,
@@ -24,8 +31,9 @@ import {
   castLivewire,
   recoverLivewire,
   expireLivewire,
+  sweepRetention,
 } from '@torchline/storage';
-import type { Creator } from '@torchline/storage';
+import type { Creator, StoredWorld } from '@torchline/storage';
 import type { InputPolicy } from '@torchline/storage';
 import {
   authorizationUrl,
@@ -64,6 +72,8 @@ export interface AppConfig {
   livewireEnabled?: boolean;
   inputPolicy?: InputPolicy;
   feedLimits?: { perChannel: number; total: number };
+  /** Reverse proxies between the client and this process; 0 trusts no forwarded address. */
+  trustProxyHops?: number;
 }
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 const escapeHtml = (value: string) =>
@@ -92,6 +102,12 @@ export async function createApp(
     config.mode === 'simulation' ? 'torchline_sim_session' : 'torchline_session';
   const secure = new URL(config.baseUrl).protocol === 'https:';
   const app = Fastify({
+    // Behind a hosting proxy every client otherwise shares the proxy's address, collapsing
+    // per-client budgets into one. Trusting an exact hop count reads the address the nearest
+    // proxy recorded instead of a client-supplied header.
+    trustProxy: config.trustProxyHops
+      ? (_address: string, hop: number) => hop < config.trustProxyHops!
+      : false,
     bodyLimit: 65536,
     requestTimeout: 15000,
     connectionTimeout: 20000,
@@ -147,7 +163,11 @@ export async function createApp(
               ? 401
               : error.code === 'NOT_CONFIGURED'
                 ? 503
-                : 409,
+                : error.code === 'RATE_LIMITED'
+                  ? 429
+                  : error.code === 'NOT_FOUND'
+                    ? 404
+                    : 409,
         )
         .send({ error: error.code, message: error.message });
     if (error instanceof z.ZodError)
@@ -173,6 +193,41 @@ export async function createApp(
       error: 'DEPENDENCY_FAILURE',
       message: 'The operation did not complete. Refresh and retry.',
     });
+  });
+  // Bounded per-client request budgets keep one client from turning unsigned routes into
+  // unbounded database writes (OAuth states, sessions, commands). Signed Twitch webhooks have
+  // their own persisted admission policy and are exempt. Authenticated traffic is keyed by session,
+  // so creators behind one proxy address do not share a budget.
+  const budgets = new Map<string, { count: number; resetAt: number }>();
+  const spend = (key: string, limit: number) => {
+    const now = Date.now();
+    let entry = budgets.get(key);
+    if (!entry || entry.resetAt <= now) {
+      entry = { count: 0, resetAt: now + 60000 };
+      budgets.set(key, entry);
+    }
+    if (budgets.size > 10000)
+      for (const [name, value] of budgets) if (value.resetAt <= now) budgets.delete(name);
+    return ++entry.count <= limit;
+  };
+  app.addHook('onRequest', async (request, reply) => {
+    const path = request.url.split('?')[0];
+    if (path.startsWith('/integrations/twitch/')) return;
+    const session = request.cookies[SessionCookie];
+    const entry = ['/auth/twitch', '/api/simulator/login', '/api/operator/bot-authorization'];
+    // A guided practice relay signs in several practice captains per run, so practice login has a
+    // larger allowance than OAuth starts.
+    const allowed = entry.includes(path)
+      ? spend(
+          `entry:${path}:${request.ip}`,
+          path === '/api/simulator/login' && config.mode === 'simulation' ? 120 : 30,
+        )
+      : request.method !== 'POST' ||
+        spend(session ? `s:${digest(session)}` : `ip:${request.ip}`, 300);
+    if (!allowed) {
+      reply.header('Retry-After', '60');
+      denied('RATE_LIMITED', 'Too many requests from this client. Wait a minute and retry.');
+    }
   });
   app.addHook('onRequest', async (request) => {
     if (request.method !== 'POST' || request.url.startsWith('/integrations/twitch/')) return;
@@ -241,13 +296,116 @@ export async function createApp(
         'Configure the Twitch client and encryption key in the ignored environment file.',
       );
   };
-  const snapshot = async (creator: Creator, readonly = false) => {
+  // What a receiving custodian inherited, attributed to the community that sent it. The briefing is
+  // current only while the receiver has not changed the world, so it clears itself on their first
+  // command instead of becoming permanent decoration. World revision is part of the key because a
+  // second transfer can arrive at the same state version.
+  type ArrivalBriefing = NonNullable<WorldPresentation['arrival']>;
+  // True only after a live world actually changed custody on signed native raid evidence and
+  // receiver consent. Subscriptions, simulations and screenshots never set it.
+  const genuineRaidVerified = async () =>
+    config.mode === 'live' &&
+    Boolean(
+      (await store.pool.query("SELECT 1 FROM custody_events WHERE mode='live' LIMIT 1")).rowCount,
+    );
+  const arrivals = new Map<string, ArrivalBriefing | undefined>();
+  // Every captain commitment aboard, oldest first, named by the community that made it. Summaries
+  // begin with the authored choice label, so no rules version needs a separate lookup table.
+  const commitments = async (worldId: string) =>
+    (
+      await store.pool.query(
+        `SELECT e.event->>'id' AS id,(e.event->>'chapter')::integer AS chapter,e.event->>'summary' AS summary,
+                e.event->'actor'->>'community' AS community,c.label
+         FROM world_events e LEFT JOIN creators c ON c.id=e.event->'actor'->>'community'
+         WHERE e.world_id=$1 AND e.event->'command'->>'type'='commit' ORDER BY e.sequence`,
+        [worldId],
+      )
+    ).rows.map((item) => ({
+      eventId: item.id as string,
+      chapter: item.chapter as number,
+      choice: (item.summary as string).split(': committed by ')[0],
+      community: (item.label as string | null) ?? (item.community as string),
+    }));
+  const seasons = new Map<string, NonNullable<WorldPresentation['season']>>();
+  const seasonRecord = async (world: StoredWorld) => {
+    // An ended world never changes again, so its record is computed once per process.
+    const cached = seasons.get(world.id);
+    if (cached) return cached;
+    const decisions = await commitments(world.id);
+    const relays = Number(
+      (
+        await store.pool.query('SELECT count(*)::int AS n FROM custody_events WHERE world_id=$1', [
+          world.id,
+        ])
+      ).rows[0].n,
+    );
+    const record = {
+      decisions,
+      communities: new Set(decisions.map((item) => item.community)).size,
+      relays,
+    };
+    if (seasons.size > 512) seasons.clear();
+    seasons.set(world.id, record);
+    return record;
+  };
+  const arrivalBriefing = async (world: StoredWorld): Promise<ArrivalBriefing | undefined> => {
+    const key = `${world.id}:${world.state.version}:${world.revision}`;
+    if (arrivals.has(key)) return arrivals.get(key);
+    const row = (
+      await store.pool.query(
+        `SELECT h.created_at,h.state_version,s.id AS source_id,s.label AS source_label
+         FROM custody_events h JOIN creators s ON s.id=h.source_id
+         WHERE h.world_id=$1 ORDER BY h.created_at DESC,h.id DESC LIMIT 1`,
+        [world.id],
+      )
+    ).rows[0];
+    const marks = SYSTEM_IDS.reduce((total, id) => total + world.state.systems[id].marks.length, 0);
+    let briefing: ArrivalBriefing | undefined;
+    if (row && row.state_version !== null && row.state_version === world.state.version) {
+      const decisions = await commitments(world.id);
+      briefing = {
+        at: (row.created_at as Date).toISOString(),
+        from: { id: row.source_id as string, label: row.source_label as string },
+        briefing: `Received from ${row.source_label} · ${world.state.resources.passengers} passengers aboard · ${marks} lasting marks · chapter ${world.state.chapter}`,
+        lostSystems: SYSTEM_IDS.filter((id) => world.state.systems[id].integrity === 0),
+        decisions,
+        debts: world.state.obligations
+          .filter((obligation) => obligation.status === 'pending')
+          .map((obligation) => ({
+            kind: obligation.kind,
+            dueChapter: obligation.dueChapter,
+            origin: decisions.find((item) => item.eventId === obligation.originEventId) ?? null,
+          })),
+        communities: new Set([...decisions.map((item) => item.community), world.label]).size,
+      };
+    }
+    if (arrivals.size > 512) arrivals.clear();
+    arrivals.set(key, briefing);
+    return briefing;
+  };
+  const buildSnapshot = async (creator: Creator, readonly = false) => {
     const world = await store.active(creator.id, true);
+    if (world && (world.custodian_id !== creator.id || world.mode !== config.mode))
+      denied('STATE_CHANGED', 'The channel assignment changed. Refresh the saved state.');
     const bot = (await store.pool.query("SELECT id FROM oauth_grants WHERE role='bot' LIMIT 1"))
       .rows[0];
     const details =
       config.mode === 'live' && !readonly ? await subscriptions.status(creator.id) : undefined;
     const visibleWorld = world ? presentWorld(world, !readonly) : null;
+    if (world && visibleWorld && world.state.phase === 'ready') {
+      const arrival = await arrivalBriefing(world);
+      if (arrival) visibleWorld.arrival = arrival;
+    }
+    if (world && visibleWorld && world.state.outcome)
+      visibleWorld.season = await seasonRecord(world);
+    if (
+      world &&
+      visibleWorld &&
+      ['investigation', 'challenge', 'allocation', 'decision'].includes(world.state.phase)
+    ) {
+      const rejections = await store.rejections(world.id, world.state.window);
+      if (rejections.length) visibleWorld.rejections = rejections;
+    }
     if (world && visibleWorld && (config.livewireEnabled || world.state.livewire)) {
       const { author: _author, channel: _channel, ...stake } = world.state.livewire?.stake ?? {};
       const chargeAvailable = !world.state.livewire?.spentChapters.includes(world.state.chapter);
@@ -302,14 +460,15 @@ export async function createApp(
         : {
             worlds: (await store.library(creator.id)).map((row) => ({
               id: row.id,
-              chapter: row.state.chapter,
-              outcome: row.state.outcome,
+              chapter: row.chapter,
+              outcome: row.outcome,
               parked: row.parked,
             })),
             handoffs: await store.handoffs(creator.id),
             recipients: (
               await store.pool.query(
-                'SELECT id,label FROM creators WHERE mode=$1 AND id<>$2 AND receive_opt_in=true AND connected=true ORDER BY label',
+                // A receiver hosting a playable Ark cannot accept; say so before preparation fails.
+                "SELECT c.id,c.label,EXISTS(SELECT 1 FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=c.id AND w.state->>'phase'<>'ended') AS busy FROM creators c WHERE c.mode=$1 AND c.id<>$2 AND c.receive_opt_in=true AND c.connected=true ORDER BY c.label",
                 [config.mode, creator.id],
               )
             ).rows,
@@ -319,10 +478,28 @@ export async function createApp(
         botAuthorized: details?.botAuthorized ?? Boolean(bot),
         botRepliesEnabled: config.botRepliesEnabled !== false,
         publicHttps: secure,
-        genuineRaidVerified: false,
+        genuineRaidVerified: await genuineRaidVerified(),
         ...(details ? { details } : {}),
       },
     };
+  };
+  const snapshot = async (creator: Creator, readonly = false) => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const before = await store.creator(creator.id);
+      if (!before?.connected || before.mode !== config.mode)
+        return denied('FORBIDDEN', 'Creator authorization ended.');
+      try {
+        const result = await buildSnapshot(before, readonly);
+        const after = await store.creator(creator.id);
+        if (!after?.connected || after.mode !== config.mode)
+          return denied('FORBIDDEN', 'Creator authorization ended.');
+        if (before.assignment_revision !== after.assignment_revision) continue;
+        return { ...result, channelEpoch: before.assignment_revision };
+      } catch (error) {
+        if (!(error instanceof DomainError && error.code === 'STATE_CHANGED')) throw error;
+      }
+    }
+    return denied('STATE_CHANGED', 'The channel is changing. Reconnect to its saved state.');
   };
   app.get('/health/live', async () => ({ ok: true, mode: config.mode }));
   app.get('/health/ready', async () => {
@@ -358,10 +535,12 @@ export async function createApp(
               ).rowCount,
             ),
           publicHttps: secure,
-          genuineRaidVerified: false,
+          genuineRaidVerified: await genuineRaidVerified(),
         },
       };
-    return snapshot(await currentCreator(request));
+    const result = await snapshot(await currentCreator(request));
+    await currentCreator(request);
+    return result;
   });
   app.post('/api/simulator/login', async (request, reply) => {
     if (config.mode !== 'simulation')
@@ -406,6 +585,33 @@ export async function createApp(
       .strict()
       .parse(request.query);
     return readWorldHistory(store, creator, id, query);
+  });
+  // A public, read-only Chronicle link so communities and returning viewers can follow an Ark after
+  // it leaves their channel. The token lives in the URL fragment and is posted in the body, so it
+  // never appears in a path, query string or request log.
+  app.post('/api/worlds/:id/share', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    const token = randomBytes(32).toString('hex');
+    await shareWorld(store, creator, id, token);
+    return { url: `${config.baseUrl}/chronicle/#${token}` };
+  });
+  app.post('/api/chronicle', async (request) => {
+    const body = z
+      .object({
+        token: z.string().regex(/^[a-f\d]{64}$/),
+        before: z.number().int().min(1).max(2147483647).optional(),
+        through: z.number().int().min(0).max(2147483646).optional(),
+        limit: z.number().int().min(1).max(100).default(100),
+        custodyBefore: NodeText.optional(),
+      })
+      .strict()
+      .parse(request.body);
+    const { token, ...query } = body;
+    const shared = await readSharedChronicle(store, token, query);
+    if (shared.world.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, world: presentWorld(shared.world), history: shared.history };
   });
   app.get('/api/handoffs/:id/preview', async (request) => {
     const creator = await currentCreator(request);
@@ -523,7 +729,15 @@ export async function createApp(
       .object({ worldId: NodeText, targetId: NodeText, expectedVersion: z.number().int() })
       .parse(request.body);
     if (config.mode === 'live') await lifecycle.readyForTransfer(creator.id, body.targetId);
-    return store.prepare(body.worldId, creator, body.targetId, body.expectedVersion);
+    // A live offer covers the minutes around a real raid. Practice relays are read and explained
+    // step by step, so they get a longer window; their proof still cannot move a live world.
+    return store.prepare(
+      body.worldId,
+      creator,
+      body.targetId,
+      body.expectedVersion,
+      config.mode === 'simulation' ? 900000 : undefined,
+    );
   });
   app.post('/api/handoffs/:id/:action', async (request) => {
     const creator = await currentCreator(request);
@@ -940,6 +1154,30 @@ export async function createApp(
   const feedCounts = new Map<string, number>();
   const endFeeds = new Set<() => void>();
   const feedLimits = config.feedLimits ?? { perChannel: 8, total: 256 };
+  // Several views of one channel (dashboard tabs, OBS sources, spectator windows) ask for the same
+  // world. Building that projection clones the whole state and re-reads the library, so concurrent
+  // views share one authoritative read per publication round instead of one each.
+  const projections = new Map<string, { value: unknown; at: number }>();
+  const rounds = new Map<string, Promise<unknown>>();
+  const PROJECTION_REUSE_MS = 200;
+  const CLOCK_RESYNC_MS = 4000;
+  const shareProjection = <T>(key: string, load: () => Promise<T>): Promise<T> => {
+    const held = projections.get(key);
+    if (held && Date.now() - held.at < PROJECTION_REUSE_MS) return Promise.resolve(held.value as T);
+    const pending = rounds.get(key);
+    if (pending) return pending as Promise<T>;
+    const round = load()
+      .then((value) => {
+        if (projections.size > 256)
+          for (const [id, entry] of projections)
+            if (entry.at < Date.now() - PROJECTION_REUSE_MS) projections.delete(id);
+        projections.set(key, { value, at: Date.now() });
+        return value;
+      })
+      .finally(() => rounds.delete(key));
+    rounds.set(key, round);
+    return round;
+  };
   const stream = (
     request: FastifyRequest,
     reply: FastifyReply,
@@ -964,16 +1202,31 @@ export async function createApp(
     let closed = false;
     let sending = false;
     let last = '';
+    let publishedAt = 0;
     const send = async () => {
       if (closed || sending) return;
       sending = true;
       try {
-        const body = JSON.stringify(await load());
+        const value = await load();
         if (closed) return;
-        if (body !== last) {
-          last = body;
+        const body = JSON.stringify(value);
+        // The server clock moves on every read. Publishing it on its own keeps an idle world from
+        // rewriting its whole snapshot several times a second, while a running phase clock stays
+        // exact: the client derives its offset from the last server time it was given.
+        const content = JSON.stringify(value, (key, item) =>
+          key === 'serverAt' ? undefined : item,
+        );
+        const clocked = Boolean((value as { world?: { clock?: unknown } } | null)?.world?.clock);
+        if (content !== last) {
+          last = content;
+          publishedAt = Date.now();
           if (reply.raw.writableLength > 262144) reply.raw.end();
           else reply.raw.write(`event: snapshot\ndata: ${body}\n\n`);
+        } else if (clocked && Date.now() - publishedAt >= CLOCK_RESYNC_MS) {
+          publishedAt = Date.now();
+          reply.raw.write(
+            `event: clock\ndata: ${JSON.stringify({ serverAt: new Date().toISOString() })}\n\n`,
+          );
         }
       } catch (error) {
         if (closed) return;
@@ -1005,23 +1258,32 @@ export async function createApp(
   };
   app.get('/api/live/events', async (request, reply) => {
     const creator = await currentCreator(request);
-    return stream(request, reply, creator.id, async () => snapshot(await currentCreator(request)));
+    return stream(request, reply, creator.id, async () => {
+      // This view rechecks its own authority before and after the read; only the projection is shared.
+      const current = await currentCreator(request);
+      const result = await shareProjection(`creator:${current.id}`, () => snapshot(current));
+      await currentCreator(request);
+      return result;
+    });
   });
   const overlaySnapshot = async (request: FastifyRequest, channel: string) => {
     const token = request.cookies.torchline_overlay ?? '';
-    if (
-      !(
-        await store.pool.query(
-          'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
-          [digest(token), channel],
-        )
-      ).rowCount
-    )
-      denied('FORBIDDEN', 'Overlay access revoked.');
+    const grantValid = async () =>
+      Boolean(
+        (
+          await store.pool.query(
+            'SELECT 1 FROM overlay_grants WHERE hash=$1 AND channel_id=$2 AND (expires_at IS NULL OR expires_at>clock_timestamp())',
+            [digest(token), channel],
+          )
+        ).rowCount,
+      );
+    if (!(await grantValid())) denied('FORBIDDEN', 'Overlay access revoked.');
     const creator = await store.creator(channel);
     if (!creator || creator.mode !== config.mode)
       denied('FORBIDDEN', 'Overlay channel unavailable.');
-    return snapshot(creator!, true);
+    const result = await shareProjection(`overlay:${channel}`, () => snapshot(creator!, true));
+    if (!(await grantValid())) denied('FORBIDDEN', 'Overlay access revoked.');
+    return result;
   };
   app.get('/overlay/:channel/state', async (request) => {
     const { channel } = z.object({ channel: NodeText }).parse(request.params);
@@ -1202,6 +1464,7 @@ export async function createApp(
   let interval: ReturnType<typeof setInterval> | undefined;
   let validationInterval: ReturnType<typeof setInterval> | undefined;
   let botInterval: ReturnType<typeof setInterval> | undefined;
+  let retentionInterval: ReturnType<typeof setInterval> | undefined;
   if (options.workers !== false) {
     app.addHook('onReady', async () => {
       workerLease = await store.pool.connect();
@@ -1253,6 +1516,24 @@ export async function createApp(
         .catch(() => app.log.error('Twitch validation dependency failed.'));
     }, 60000);
     validationInterval.unref();
+    // Operational rows (delivered outbox, terminal inbox, expired sessions and states) otherwise
+    // grow with every broadcast. Counts that diagnostics report are folded, not lost.
+    retentionInterval = setInterval(() => {
+      void sweepRetention(store)
+        .then((result) => {
+          const removed =
+            result.inbox +
+            result.dedup +
+            result.outbox +
+            result.sessions +
+            result.oauthStates +
+            result.inputLimits +
+            result.inputRejections;
+          if (removed) app.log.info(result, 'Retention sweep removed terminal rows.');
+        })
+        .catch(() => app.log.error('Retention sweep dependency failed.'));
+    }, 300000);
+    retentionInterval.unref();
   }
   app.decorate('tick', tick);
   app.decorate('botTick', botReplies.tick);
@@ -1262,6 +1543,7 @@ export async function createApp(
     if (interval) clearInterval(interval);
     if (validationInterval) clearInterval(validationInterval);
     if (botInterval) clearInterval(botInterval);
+    if (retentionInterval) clearInterval(retentionInterval);
     await activeTick;
     await botReplies.close();
     if (workerLease) {
@@ -1279,11 +1561,19 @@ export async function createApp(
   if (existsSync(publicDir)) {
     await app.register(staticFiles, { root: publicDir, wildcard: true });
     app.setNotFoundHandler((request, reply) => {
+      const path = request.url.split('?')[0];
+      const privatePath =
+        /(^|\/)\./.test(path) ||
+        /^\/(?:apps|docs|frontend-design|infrastructure|packages|scripts|tests)(?:\/|$)/i.test(
+          path,
+        ) ||
+        /^\/(?:AGENTS|CHANGELOG|CONTRIBUTING|README|SECURITY)(?:\.|$)/i.test(path);
       if (
         request.method !== 'GET' ||
-        request.url.startsWith('/assets/') ||
-        request.url.startsWith('/api/') ||
-        request.url.startsWith('/integrations/')
+        privatePath ||
+        path.startsWith('/assets/') ||
+        path.startsWith('/api/') ||
+        path.startsWith('/integrations/')
       )
         return reply.code(404).send({ error: 'NOT_FOUND' });
       return reply.sendFile('index.html');

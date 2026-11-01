@@ -1,6 +1,6 @@
 # 0019 — Fail-closed configuration and bounded live feeds
 
-Accepted/implemented 2026-10-28. Preserve the game, Claude Design consumers and existing authority model.
+Accepted/implemented 2026-10-28. Preserve the game, presentation consumers and existing authority model.
 
 Validate configuration before opening the database. Public/production origins require HTTPS; loopback HTTP remains available for local tunnel bootstrap. Production mode must be explicit, remote production PostgreSQL must use `sslmode=verify-full`, OAuth redirect must match the configured origin, secrets must be independent and numeric limits bounded. Startup errors omit dependency connection details. No default public bind or inferred production credentials.
 

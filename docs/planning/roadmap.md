@@ -10,7 +10,7 @@ Deliver an engaging persistent community game, then demonstrate its signature au
 
 | Gate | Deliverable | Required evidence | Dependency |
 | --- | --- | --- | --- |
-| G0: Review | Requirements, architecture, stack, risk register, repository | Approved 2026-10-26; gameplay refinements and Claude Design boundary incorporated | Complete |
+| G0: Review | Requirements, architecture, stack, risk register, repository | Approved 2026-10-26; gameplay refinements and external design boundary incorporated | Complete |
 | G1: Domain foundation | Deterministic world, chapter lifecycle, representative consequence, puzzle template, simulator | Save/reload, solo progression, route-solution check, reference replay, terminal path | G0 |
 | G2: Hosted live play | Twitch login/grants, chat adapter, deployed ingress, private controls, OBS feed | Genuine chat affects a hosted episode; actual OBS/SSE smoke and reconnect; missing consent handled | G0; can be developed alongside G1 |
 | G3a: Custody correctness | Intent/proof/accept state machine, database constraints, isolated handoff harness | Duplicate, target-busy, expired, simultaneous accept and crash cases pass on real PostgreSQL | G1; Twitch fixtures available independently |

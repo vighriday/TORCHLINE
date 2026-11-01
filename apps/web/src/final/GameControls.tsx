@@ -3,6 +3,15 @@ import type { WorldPresentation } from '@torchline/contracts';
 import { Button, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
 import { request } from '../api.ts';
+import { systemLabels } from './condition.ts';
+import { debtCopy } from './Dossier.tsx';
+
+// Reasons an audience member can act on, in the words a streamer would say them out loud.
+const rejectionLabels: Record<string, string> = {
+  INPUT_RATE_LIMITED: 'rate limited',
+  INPUT_BACKLOG: 'queue full',
+  INPUT_WRONG_PHASE: 'wrong phase for the command',
+};
 
 export function PhaseClock({ world }: { world: WorldPresentation }) {
   const [now, setNow] = useState(Date.now());
@@ -40,7 +49,7 @@ export function PhysicalSystems({ world }: { world: WorldPresentation }) {
             data-severity={system.severity}
           >
             <div>
-              <strong>{system.id === 'lifeSupport' ? 'Life support' : system.id}</strong>
+              <strong>{systemLabels[system.id]}</strong>
               <b>{system.integrity}%</b>
             </div>
             <span>
@@ -64,7 +73,7 @@ export function PhysicalSystems({ world }: { world: WorldPresentation }) {
         .filter((o) => o.status === 'pending')
         .map((obligation) => (
           <p key={obligation.id}>
-            Unresolved: {obligation.kind} · due chapter {obligation.dueChapter}
+            Unresolved: {debtCopy[obligation.kind].title} · due chapter {obligation.dueChapter}
           </p>
         ))}
     </details>
@@ -195,7 +204,16 @@ function EpisodeSettings({ world }: { world: WorldPresentation }) {
   );
 }
 export function GameControls() {
-  const { canonical: world, readOnly, busy, send, data, perform } = useGame();
+  const {
+    canonical: world,
+    readOnly,
+    busy,
+    send,
+    data,
+    perform,
+    setMode,
+    setArchiveWorld,
+  } = useGame();
   const [route, setRoute] = useState('');
   const [choice, setChoice] = useState('');
   const [hull, setHull] = useState(0);
@@ -210,7 +228,7 @@ export function GameControls() {
     co = world.cooperation;
   const interactive = !readOnly && !busy;
   const selected = world.choices.find((c) => c.id === choice);
-  const relevant = world.events[0];
+  const relevant = world.events.at(-1);
   const unknown = challenge?.nodes.find((node) => !['S', 'T'].includes(node.id) && !node.revealed);
   const unpatched = challenge?.nodes.find(
     (node) => node.revealed && !node.patched && !['S', 'T'].includes(node.id),
@@ -227,22 +245,28 @@ export function GameControls() {
         : world.phase === 'investigation'
           ? '!inspect engine'
           : world.phase === 'allocation'
-            ? '!allocate 0 0'
+            ? '!allocate hull 3 oxygen 2'
             : '!status';
   return (
     <div className="game-directives" aria-label="Game controls">
       <div className="panel-cut">
-        <span className="eyebrow">CHAPTER {world.chapter} / CANONICAL STATE</span>
+        <span className="eyebrow">
+          {world.chapter === 0 ? 'PRE-LAUNCH' : `CHAPTER ${world.chapter}`} / CANONICAL STATE
+        </span>
         <div className="sector-title">
           <div>
             <strong>{world.title}</strong>
-            <span>{world.phase.toUpperCase()}</span>
+            <span>{world.phase.replaceAll('-', ' ').toUpperCase()}</span>
           </div>
         </div>
         <p>{world.recap}</p>
       </div>
       {world.outcome && (
-        <div className="consequence consequence--loss" role="status">
+        <div
+          className={`consequence ${world.outcome === 'colony' ? '' : 'consequence--loss'}`}
+          data-outcome={world.outcome}
+          role="status"
+        >
           <span>VOYAGE COMPLETE</span>
           <strong>
             {world.outcome === 'colony'
@@ -253,6 +277,30 @@ export function GameControls() {
           </strong>
           <p>{world.endingReason}</p>
           <b>{world.resources.passengers} passengers remain</b>
+          {!readOnly && (
+            <div className="ending-actions">
+              <Button
+                onClick={() => {
+                  setArchiveWorld(world);
+                  setMode('archive');
+                }}
+              >
+                Read the season record
+              </Button>
+              <Button
+                className="commit-button"
+                disabled={!interactive}
+                onClick={() =>
+                  void perform(async () => {
+                    await request('/api/worlds', {});
+                  })
+                }
+              >
+                Launch a new Ark
+                <Icon name="chevron" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
       {co && (
@@ -261,6 +309,20 @@ export function GameControls() {
             <span>CREW COOPERATION</span>
             <small>{world.participantCount} PARTICIPANTS</small>
           </div>
+          {world.rejections && world.rejections.length > 0 && (
+            <p className="rejected-inputs">
+              Not applied this window ·{' '}
+              {world.rejections
+                .map(
+                  (entry) =>
+                    `${entry.dropped} ${
+                      rejectionLabels[entry.reason] ??
+                      entry.reason.toLowerCase().replaceAll('_', ' ')
+                    }`,
+                )
+                .join(' · ')}
+            </p>
+          )}
           {world.phase === 'investigation' ? (
             <>
               <p>
@@ -289,7 +351,9 @@ export function GameControls() {
           {world.phase === 'allocation' && (
             <>
               <p>
-                Chat: <code>!allocate 1 0</code> distributes hull and oxygen repairs.
+                Chat: <code>!allocate hull 3 oxygen 2</code> or <code>!allocate 3 2</code> · up to
+                five preference points each. Preferences share the {co.budget} reserved power; a
+                bigger audience never adds power.
               </p>
               {!readOnly && (
                 <form
@@ -299,26 +363,26 @@ export function GameControls() {
                   }}
                 >
                   <label>
-                    Hull repair
+                    Hull preference
                     <input
                       type="number"
                       min="0"
-                      max={co.budget}
+                      max="5"
                       value={hull}
                       onChange={(e) => setHull(Number(e.target.value))}
                     />
                   </label>
                   <label>
-                    Oxygen repair
+                    Oxygen preference
                     <input
                       type="number"
                       min="0"
-                      max={co.budget}
+                      max="5"
                       value={oxygen}
                       onChange={(e) => setOxygen(Number(e.target.value))}
                     />
                   </label>
-                  <button disabled={!interactive || hull + oxygen > co.budget}>
+                  <button disabled={!interactive || hull + oxygen < 1 || hull + oxygen > 5}>
                     Submit repair plan
                   </button>
                 </form>
@@ -503,14 +567,19 @@ export function GameControls() {
             </div>
           ))}
           {!readOnly && (
-            <Button
-              className="commit-button"
-              disabled={!interactive || !cap.canCommit || !selected?.available}
-              onClick={() => send({ type: 'commit', option: choice })}
-            >
-              <span>Commit directive</span>
-              <Icon name="lock" />
-            </Button>
+            <>
+              {cap.canCommit && !selected && (
+                <p className="commit-hint">Select a directive above, then commit it.</p>
+              )}
+              <Button
+                className="commit-button"
+                disabled={!interactive || !cap.canCommit || !selected?.available}
+                onClick={() => send({ type: 'commit', option: choice })}
+              >
+                <span>Commit directive</span>
+                <Icon name="lock" />
+              </Button>
+            </>
           )}
         </section>
       )}
@@ -546,7 +615,7 @@ export function GameControls() {
               Close voting
             </Button>
           )}
-          {cap.canPause && (
+          {cap.canPause && world.phase !== 'ready' && (
             <Button disabled={!interactive} onClick={() => send({ type: 'pause' })}>
               Pause chapter
             </Button>

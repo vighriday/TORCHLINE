@@ -15,9 +15,12 @@ import {
 import type { Mode, Sector, World } from './types.ts';
 import type { WorldPresentation } from '@torchline/contracts';
 import { SceneBoundary } from './SceneBoundary.tsx';
+import { ArrivalDossier, SeasonFinale } from './Dossier.tsx';
 import { SoundEffects } from './SoundEffects.tsx';
+import { ConsequenceCaptions } from './Captions.tsx';
 import './index.css';
 import './integration.css';
+import './experience.css';
 const Ark3D = lazy(() => import('./Ark3D.tsx').then((module) => ({ default: module.Ark3D })));
 const sectorData = {
   bridge: { name: 'Navigation Bridge', code: 'NAV-01' },
@@ -153,7 +156,7 @@ const navigationItems: Array<{ mode: Mode; index: string; name: string; descript
   { mode: 'broadcast', index: '06', name: 'Broadcast', description: 'Creator and OBS studio' },
   { mode: 'archive', index: '07', name: 'Archive', description: 'Persistent world chronicle' },
   { mode: 'codex', index: '08', name: 'The Codex', description: 'Field manual and rules' },
-  { mode: 'simulator', index: '09', name: 'Judge Arena', description: 'Guided deterministic demo' },
+  { mode: 'simulator', index: '09', name: 'Judge Arena', description: 'Guided two-crew relay' },
   { mode: 'settings', index: '10', name: 'Settings', description: 'Display and accessibility' },
 ];
 
@@ -253,7 +256,7 @@ export function MissionControl({
   setSelected: (s: Sector) => void;
   world: World;
 }) {
-  const { canonical: ship } = useGame();
+  const { canonical: ship, readOnly } = useGame();
   const [view, setView] = useState<'exterior' | 'cockpit'>('exterior');
   const dead = navigation === 0;
   if (!ship) return null;
@@ -274,10 +277,13 @@ export function MissionControl({
       <section className="left-rail">
         <div className="chapter-block">
           <span className="eyebrow">
-            CHAPTER {ship.chapter} / EVENT {ship.gameVersion}
+            {ship.chapter === 0 ? 'PRE-LAUNCH' : `CHAPTER ${ship.chapter}`} / EVENT{' '}
+            {ship.gameVersion}
           </span>
           <strong>{ship.title}</strong>
           <p>{ship.recap}</p>
+          {!readOnly && <ArrivalDossier world={ship} />}
+          {!readOnly && <SeasonFinale world={ship} />}
           <PhaseClock world={ship} />
         </div>
         <div className="vital-stack">
@@ -300,7 +306,8 @@ export function MissionControl({
           <ResourceBar
             label="SUPPLIES"
             value={world.supplies}
-            tone={world.supplies < 25 ? 'critical' : 'warning'}
+            unit="crates"
+            tone={world.supplies < 30 ? 'critical' : 'warning'}
           />
         </div>
         <div className="passenger-readout">
@@ -314,7 +321,7 @@ export function MissionControl({
         <div className="captain-note">
           <span>FLIGHT RECORDER / {ship.gameVersion}</span>
           <p>
-            {ship.events[0]?.summary ??
+            {ship.events.at(-1)?.summary ??
               'No recorded consequence yet. Every commitment will stay with this Ark.'}
           </p>
         </div>
@@ -379,7 +386,7 @@ export function MissionControl({
               STATE <b>{ship.worldVersion}</b>
             </span>
             <span>
-              PHASE <b>{ship.phase}</b>
+              PHASE <b>{ship.phase.replaceAll('-', ' ').toUpperCase()}</b>
             </span>
           </div>
           <div className="view-switch">
@@ -398,6 +405,8 @@ export function MissionControl({
           </div>
         </div>
         <ArkShip selected={selected} navigation={navigation} onSelect={setSelected} view={view} />
+        {readOnly && <ArrivalDossier world={ship} variant="broadcast" />}
+        {readOnly && <SeasonFinale world={ship} variant="broadcast" />}
         <div className="spatial-reticle" aria-hidden="true">
           <span />
           <span />
@@ -439,7 +448,9 @@ export function MissionControl({
           ))}
         </div>
         <div className="signal-strip">
-          <span className="signal-label">{ship.events[0]?.summary ?? ship.phase}</span>
+          <span className="signal-label">
+            {ship.events.at(-1)?.summary ?? 'Awaiting the first saved command'}
+          </span>
           <div className="signal-wave">
             {Array.from({ length: 48 }).map((_, i) => (
               <i key={i} style={{ '--h': `${8 + ((i * 17) % 28)}px` } as React.CSSProperties} />
@@ -504,7 +515,7 @@ function Awakening({ setMode }: { setMode: (mode: Mode) => void }) {
                 : 'LAUNCH THE ARK'}{' '}
             <Icon name="chevron" />
           </Button>
-          <Button onClick={() => setMode('simulator')}>TRY THE JUDGE SIMULATION</Button>
+          <Button onClick={() => setMode('simulator')}>WATCH A TWO-CREW RELAY</Button>
         </div>
       </div>
       <div className="awakening-metrics">
@@ -562,9 +573,12 @@ function Application() {
     return () => document.documentElement.classList.remove('obs-document');
   }, [readOnly]);
   if (readOnly) {
+    // Automatic OBS layout keeps the small dock between chapters, except while a freshly received
+    // Ark's inheritance dossier is pending: that reveal is the moment the new audience needs.
     if (
       overlayView === 'compact' ||
-      (overlayView === 'auto' && (!canonical || canonical.phase === 'ready'))
+      (overlayView === 'auto' &&
+        (!canonical || (canonical.phase === 'ready' && !canonical.arrival)))
     )
       return (
         <div className="obs-source">
@@ -677,6 +691,7 @@ export default function FinalFrontend() {
   return (
     <GameSession>
       <SoundEffects />
+      <ConsequenceCaptions />
       <Application />
     </GameSession>
   );

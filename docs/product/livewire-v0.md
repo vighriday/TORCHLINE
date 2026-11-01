@@ -1,6 +1,6 @@
 # LIVEWIRE v0
 
-Status: isolated feature implementation. Real Twitch mission acceptance remains a release gate. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
+Status: shipped in v0.1.0-preview.2 behind the default-off `LIVEWIRE_ENABLED` flag. Real Twitch mission acceptance remains a release gate. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
 
 ## One complete mission
 
@@ -33,7 +33,7 @@ Resolve or cancel before starting another chapter, parking or preparing a handof
 | L08 Core game remains playable | Only between chapters; existing phases retained; regression/browser suite and mission → chapter journey |
 | L09 Physical persistence | Canonical system integrity/condition/marks, resource effects, cause-linked ship log; not a separate decorative score |
 | L10 Read-only compact OBS | Existing capability/cookie/SSE with compact/auto query layout; browser/native evidence tracked in report |
-| L11 Safe release boundary | Default-off flag, additive migration, isolated branch/schema, no merge into the baseline release |
+| L11 Safe release boundary | Default-off flag and additive migrations 009–010; merged into main in preview.2 without enabling it by default |
 | L12 Authenticity and scope | Streamer-attested result, signed-versus-simulation input classes; no automatic game detection or simulated native-raid claim |
 
 The preset describes the attempted activity; all three presets intentionally use the same bounded economic policy. It is context, not a claimed game integration or a difficulty-dependent reward.

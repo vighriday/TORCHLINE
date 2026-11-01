@@ -22,11 +22,11 @@ Genuine chat-driven game changes, native raid transfer and permanent deployment 
 | [Source register](research/sources.md) | Official references, verification date, findings and limitations |
 | [Validation plan](planning/validation.md) | Engine, custody, security, load, UI, and real Twitch acceptance |
 | [Hackathon plan](planning/hackathon.md) | Organizer requirements, schedule conflict, demo, and evidence |
-| [Development guide](operations/development.md) | Repository structure, future local setup, fixtures, privacy checks |
+| [Development guide](operations/development.md) | Runnable saved practice, configuration, checks and privacy rules |
 | [Deployment runbook](operations/deployment.md) | Proposed hosting, configuration, operations, and recovery |
 | [Versions and releases](operations/releases.md) | Preview tags, seven-package alignment, release notes and immutable source snapshots |
 | [Backup and restore](operations/backup-and-restore.md) | Encrypted snapshots, isolated recovery, replay checks and external durability gates |
-| [Decision register](decisions/README.md) | Proposed architecture decisions and revisit triggers |
+| [Decision register](decisions/README.md) | Architecture decisions, status and revisit triggers |
 | [Changelog](../CHANGELOG.md) | Meaningful project changes |
 | [October 29 integration diagnosis](reports/2026-10-29-integration-diagnosis.md) | Account/channel/application evidence, independent reply degradation, SQL recovery and actual native OBS rendering |
 | [October 27 continuation report](reports/2026-10-27-continuation.md) | Completed gameplay/timing/recovery/history, fixed CI failure, exact native evidence and remaining work |
@@ -36,7 +36,7 @@ Genuine chat-driven game changes, native raid transfer and permanent deployment 
 | [Essential live release checklist](operations/live-release-checklist.md) | Current SSH recovery, exact OAuth, real chat/bot, OBS and two-creator native raid steps |
 | [Existing-account live test](operations/controlled-account-live-test.md) | Verify chat/gameplay/OBS now with hriday29 + hriday_29; add a second broadcaster only for the authentic raid |
 | [October 28 release readiness](reports/2026-10-28-release-readiness.md) | Executed reliability/security/container evidence and remaining external release gates |
-| [Balance evidence](reports/balance-ark-v2.json) | Exhaustive authored-choice/challenge enumeration and ending witnesses |
+| [Balance evidence](reports/balance-ark-v2.json) | Exhaustive ark-v2 authored-choice/challenge enumeration and ending witnesses; current ark-v3 rules use the bounded exploration in `tests/balance-v3.test.ts` |
 | [Public capability and authority review](reviews/2026-10-26-public-authority.md) | All route/component boundaries, four reproduced defects, evidence and pruning recommendations |
 
-The local source concept remains outside version control. No document in this index requires it to run, test, or judge the future application.
+The local source concept remains outside version control. No document in this index requires it to run, test, or judge the application.

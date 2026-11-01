@@ -32,9 +32,9 @@ Current commands are `!scan`, `!route`, `!patch`, `!vote`, `!inspect engine|carg
 | --- | --- | --- |
 | `!inspect engine`, `!inspect cargo`, `!inspect life` | Latest eligible selection per account during investigation | Top selection reveals one authored clue at close; a tie uses content-defined order; one participant is sufficient |
 | `!scan A`, `!route S A C T` | Bounded node discovery and candidate path submission during a challenge | Reveals puzzle constraints and tests an actual solution; first valid solution locks one authored reward |
-| `!allocate hull 3 oxygen 2` | Latest valid preference per account; total preference units at most five | Distributes a creator-declared power budget across repairs using normalized preferences |
+| `!allocate hull 3 oxygen 2` or `!allocate 3 2` | Latest valid preference per account; total preference units one to five | Distributes a creator-declared power budget across repairs using normalized preferences |
 | `!vote 1`, `!vote 2` | Latest eligible vote per Twitch user ID in the current decision | Advisory tally; repeat messages never add voting weight |
-| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or a read-only history link; never one reply per message |
+| `!status`, `!history` | Coalesced channel response with cooldown | Concise status or the last two captain decisions with their communities; never one reply per message |
 | Creator commit | Authenticated custodian; valid phase, state version and affordable option | Applies the selected option, allocation, and future obligations once |
 
 Viewer eligibility means an identified account sending an allowed command in the active host's chat during the current phase window. It does not prove physical viewership or one human per account. Use ordinary viewer privileges without subscriber/follower weighting. Exclude the application's bot. Accept the broadcaster's account at normal weight if it participates.
@@ -93,7 +93,7 @@ Power or navigation at zero imposes explicit crisis constraints, not an undocume
 
 The overlay prioritizes the ship, current crisis, two clear decisions, phase timer, participation totals and inherited consequence. Keep all six resources available but emphasize the two or three relevant to the current choice. Use text/icons with color; animations should read without sound. The receiving overlay includes a short community recap and visibly retains damage.
 
-Claude Design will provide the final UI/UX, animation and art direction. The implementation supplies a functional reference frontend, semantic presentation contract, fixtures and replaceable Ark/challenge renderer interfaces. Do not embed visual interpretation in game rules or treat the reference interface as the final design.
+The owner-supplied Figma v2 design provides the final UI/UX, animation and art direction ([ADR 0033](../decisions/0033-figma-v2-presentation.md)). The implementation supplies the semantic presentation contract, engine-derived fixtures and replaceable Ark/challenge renderer interfaces it consumes. Do not embed visual interpretation in game rules.
 
 Each physical system persists integrity, condition, accumulated scars and last-change provenance. Hull integrity, oxygen reserves and life-support condition are distinct: a temporarily replenished oxygen tank does not repair a leaking system. Sacrificed navigation, sealed habitats, restored shields and jettisoned cargo remain visible across chapters, save/reload and custody changes. A repair changes the current condition while retaining the scar history. See [frontend contracts](../architecture/frontend-contracts.md).
 

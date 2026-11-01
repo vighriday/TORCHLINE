@@ -1,6 +1,6 @@
 # ADR 0031: Versioned missions in the same Ark
 
-Date: October 30, 2026. Status: implementation on isolated `feat/livewire-v0`; not released or live-accepted.
+Date: October 30, 2026. Status: implemented and merged into main in v0.1.0-preview.2 behind a default-off flag; not live-accepted.
 
 LIVEWIRE lets the captain keep playing an ordinary game while chat selects a small, declared consequence for the persistent Ark. Game results are **streamer-attested**, never detected or verified by TORCHLINE. It uses the existing engine package, database, signed chat ingress and scoped read-only overlay.
 

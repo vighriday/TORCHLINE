@@ -8,7 +8,7 @@ Branch: `feat/gameplay-foundation`, tracking `origin/feat/gameplay-foundation`. 
 - Immutable ark-v3 cooperation (`c17b840`): optional investigation reveals a usable shared clue; latest-account repair preferences divide a declared 0–10-power reserve; useful repairs spend actual power with the captain's choice. Combined previews include allocation. Physical scars and causal events persist. Oxygen recovery cannot repair a leaking machine. Frozen advice records captain alignment/override. Existing ark-v2 worlds keep their original rules.
 - Hosted timing/recovery (`0b8925c`): persisted phase deadlines, standard/manual settings, early closure, awaiting-commit, pause/resume remaining time, pause-before-park, explicit resume after restart/disconnect/offline, and no automatic narrative commitment or offline resource drain. Custody transfers clear the outgoing host's pacing while preserving game state.
 - Twitch foundations extended: inspect/allocate chat parsing, signed offline pause handling, durable retry/backoff/quarantine, private queue diagnostics, narrowly scoped current-window chat recovery and worker ownership fencing. No new Twitch scopes were requested.
-- Claude Design consumers remain connected to canonical state. Dashboard/mobile/overlay share phase guidance, repair plans, clock and physical systems. The 720p overlay uses compact information. React sibling keys no longer collide.
+- Presentation consumers remain connected to canonical state. Dashboard/mobile/overlay share phase guidance, repair plans, clock and physical systems. The 720p overlay uses compact information. React sibling keys no longer collide.
 
 ## Executed verification
 

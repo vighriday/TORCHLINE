@@ -91,7 +91,7 @@ Browser POSTs use the same-origin/custom-header guard. It is not sufficient auth
 | C7 Database/work | Durable state, ingress and publishing | DB listens only on loopback locally; mode isolation tested; single-instance worker/retention/scale limits remain |
 | C8 Live projection | Dashboard and spectator snapshots | Read-only projection, scoped feed, revocation and reconnect exercised; public proxy behavior remains unverified |
 | C9 Dashboard | Private creator controls | Static shell does not confer access; stale/cross-custodian actions rejected; fix R4 feedback; retain functional reference scope |
-| C10 OBS overlay | Read-only spectator experience | Chromium scope/continuity tested; actual OBS, 720p legibility and final Claude Design acceptance pending |
+| C10 OBS overlay | Read-only spectator experience | Chromium scope/continuity tested; actual OBS, 720p legibility and final design acceptance pending |
 | C11 History | Persistent lineage and causal state | Public projection exposes recent sanitized events, not raw ballots/commands; full public history navigation is not implemented |
 | C12 Validation | Reproducible evidence | Existing 25 tests pass; earlier two browser journeys and remote CI pass; 48 additional local review checks expose four gaps rather than establishing a clean security bill |
 | C13 Operations | Publishing and public availability | No deployment; local HTTP and DB are loopback-only; history/privacy preflight passed; no further publication during this review |
@@ -112,7 +112,7 @@ Actual Twitch identities/scopes, public HTTPS callback behavior, native raid tra
 
 1. Fix R1–R4 in the existing modules with focused regression tests. Avoid introducing a generic permissions framework to solve these specific lifecycle/identity/input defects.
 2. Retain the full product roadmap, but hold new timer, allocation, networking and visual systems while these boundary fixes are reviewed. Do not discard the already-working solo/cooperative slice.
-3. Keep Claude Design's renderer interfaces and fixtures; avoid further styling the reference frontend as though it were the final design.
+3. Keep the external design's renderer interfaces and fixtures; avoid further styling the reference frontend as though it were the final design.
 4. Treat simulation as a shared rehearsal environment. A public simulator would let visitors act as its sample creators by design; never expose that database as private live gameplay.
 5. Review each proposed push's diff, private-file/secret exclusions, exposed capability and authority, focused tests, and honest verification labels before publishing it. Do not release-tag the current snapshot as live-verified.
 

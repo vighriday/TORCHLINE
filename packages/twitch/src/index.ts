@@ -220,6 +220,24 @@ export function parseLivewireVote(text: string): 'navigation' | 'hull' | 'oxygen
       ? 'hull'
       : 'oxygen';
 }
+// Viewers type either `!allocate 3 2` (hull, oxygen) or the named form the overlay teaches,
+// `!allocate hull 3 oxygen 2`, in either order. The schema still bounds the total to 1-5.
+function allocation(args: string[]) {
+  if (args.length === 2 && args.every((a) => /^[0-5]$/.test(a)))
+    return { hull: Number(args[0]), oxygen: Number(args[1]) };
+  if (args.length !== 2 && args.length !== 4) return null;
+  const plan = { hull: 0, oxygen: 0 };
+  const seen = new Set<string>();
+  for (let index = 0; index < args.length; index += 2) {
+    const key = ({ hull: 'hull', oxygen: 'oxygen', oxy: 'oxygen', o2: 'oxygen' } as const)[
+      args[index].toLowerCase() as 'hull'
+    ];
+    if (!key || seen.has(key) || !/^[0-5]$/.test(args[index + 1])) return null;
+    seen.add(key);
+    plan[key] = Number(args[index + 1]);
+  }
+  return plan;
+}
 export function parseChatCommand(text: string): Command | null {
   if (text.length > 160) return null;
   const [name, ...args] = text.trim().split(/\s+/);
@@ -227,8 +245,8 @@ export function parseChatCommand(text: string): Command | null {
   const candidate =
     verb === '!inspect' && args.length === 1
       ? { type: 'inspect', area: args[0].toLowerCase() }
-      : verb === '!allocate' && args.length === 2 && args.every((a) => /^[0-5]$/.test(a))
-        ? { type: 'allocate', hull: Number(args[0]), oxygen: Number(args[1]) }
+      : verb === '!allocate' && allocation(args)
+        ? { type: 'allocate', ...allocation(args) }
         : verb === '!scan' && args.length === 1
           ? { type: 'scan', node: args[0].toUpperCase() }
           : verb === '!patch' && args.length === 1

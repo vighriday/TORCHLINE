@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { HandoffPreview, WorldPresentation } from '@torchline/contracts';
+import type { HandoffPreview, RecordedWorldEvent, WorldPresentation } from '@torchline/contracts';
 import { ArkShip } from './App.tsx';
 import { Brand, Button, Icon } from './primitives.tsx';
 import { useGame } from './session.tsx';
@@ -7,6 +7,9 @@ import { PhysicalSystems, PracticeChat } from './GameControls.tsx';
 import { request } from '../api.ts';
 import { useWorldHistory } from '../useWorldHistory.ts';
 import type { Mode } from './types.ts';
+import { systemLabels } from './condition.ts';
+import { Rehearsal } from './Rehearsal.tsx';
+import { Lineage, SeasonRecord } from './Lineage.tsx';
 
 export function AccountPanel() {
   const { data, busy, perform, botSetup } = useGame();
@@ -151,10 +154,31 @@ export function Inheritance({
   }, [offer?.id, offer?.status]);
   const recipients =
     data?.mode === 'simulation'
-      ? ['sim-alpha', 'sim-beta', 'sim-gamma']
-          .filter((id) => id !== data.me?.id)
-          .map((id) => ({ id, label: id }))
+      ? ['alpha', 'beta', 'gamma']
+          .filter((name) => `sim-${name}` !== data.me?.id)
+          .map((name) => ({
+            id: `sim-${name}`,
+            label: `Simulation ${name}`,
+            busy: data.recipients?.find((item) => item.id === `sim-${name}`)?.busy,
+          }))
       : (data?.recipients ?? []);
+  const unresolvedMission =
+    !!world?.livewire?.stake && ['open', 'paused', 'locked'].includes(world.livewire.stake.status);
+  const blocked = !world
+    ? ''
+    : world.chapter === 0
+      ? 'Finish chapter one before handing this Ark on.'
+      : world.handoffPending
+        ? 'A relay for this Ark is already pending.'
+        : world.outcome
+          ? 'This voyage has ended; its record stays in the Chronicle.'
+          : world.phase !== 'ready'
+            ? 'Hand off at a finished chapter boundary, between chapters.'
+            : unresolvedMission
+              ? 'Resolve or cancel the LIVEWIRE mission first.'
+              : !recipients.length
+                ? 'No receiving creator has opted in yet.'
+                : '';
   useEffect(() => {
     if (recipients.length && !recipients.some((item) => item.id === target))
       setTarget(recipients[0].id);
@@ -228,8 +252,8 @@ export function Inheritance({
           </div>
           <div>
             <span>SUPPLIES</span>
-            <strong>{inherited ? `${inherited.resources.supplies}%` : '—'}</strong>
-            <small>NO HANDOFF REWARD</small>
+            <strong>{inherited ? inherited.resources.supplies : '—'}</strong>
+            <small>CRATES · NO HANDOFF REWARD</small>
           </div>
         </div>
       </div>
@@ -237,24 +261,28 @@ export function Inheritance({
         <div className="legacy-quote">
           <span>LAST SAVED LOG</span>
           <p>
-            {inherited?.events[0]?.summary ??
+            {inherited?.events.at(-1)?.summary ??
               'No offer is ready. Prepare a transfer at a completed chapter boundary.'}
           </p>
         </div>
         <div className="sacrifice-list">
           <span>INHERITED HISTORY</span>
+          {!inherited?.events.length && <p>No saved decisions yet.</p>}
           <ul>
-            {inherited?.events.slice(0, 3).map((event) => (
-              <li key={event.id}>
-                <b>CH. {event.chapter}</b>
-                <span>{event.summary}</span>
-              </li>
-            ))}
+            {inherited?.events
+              .slice(-3)
+              .reverse()
+              .map((event) => (
+                <li key={event.id}>
+                  <b>CH. {event.chapter}</b>
+                  <span>{event.summary}</span>
+                </li>
+              ))}
           </ul>
         </div>
         {data?.me && (
           <>
-            <label>
+            <label className="receive-toggle">
               <input
                 type="checkbox"
                 checked={receiveDraft ?? data.me.receiveOptIn}
@@ -277,20 +305,14 @@ export function Inheritance({
                     {recipients.map((person) => (
                       <option key={person.id} value={person.id}>
                         {person.label}
+                        {person.busy ? ' · hosting an Ark (must park first)' : ''}
                       </option>
                     ))}
                   </select>
                 </label>
+                {blocked && <small className="relay-blocked">{blocked}</small>}
                 <Button
-                  disabled={
-                    busy ||
-                    world.phase !== 'ready' ||
-                    world.chapter === 0 ||
-                    world.handoffPending ||
-                    !recipients.length ||
-                    (!!world.livewire?.stake &&
-                      ['open', 'paused', 'locked'].includes(world.livewire.stake.status))
-                  }
+                  disabled={busy || !!blocked}
                   onClick={() =>
                     void perform(() =>
                       request('/api/handoffs', {
@@ -313,7 +335,8 @@ export function Inheritance({
             <select value={offer?.id ?? ''} onChange={(e) => setSelected(e.target.value)}>
               {offers.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.status} · {item.source_id} → {item.target_id}
+                  {item.status} · {item.source_label ?? item.source_id} →{' '}
+                  {item.target_label ?? item.target_id}
                 </option>
               ))}
             </select>
@@ -390,6 +413,19 @@ export function Inheritance({
   );
 }
 
+// One line per scarred system, e.g. "Hull 6 damage, 3 repair", instead of every mark in turn.
+function scarSummary(world: WorldPresentation) {
+  return world.systems
+    .filter((system) => system.marks.length)
+    .map((system) => {
+      const counts = new Map<string, number>();
+      for (const mark of system.marks) counts.set(mark.kind, (counts.get(mark.kind) ?? 0) + 1);
+      return `${systemLabels[system.id]} ${[...counts].map(([kind, n]) => `${n} ${kind}`).join(', ')}`;
+    })
+    .join(' · ');
+}
+// Every Ark keeps the vessel name; a short registry code tells saved worlds apart.
+export const registry = (worldId: string) => worldId.replaceAll('-', '').slice(0, 4).toUpperCase();
 export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
   const { data, canonical, busy, perform, launch, setArchiveWorld } = useGame();
   const [selected, setSelected] = useState(''),
@@ -439,10 +475,23 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
             >
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div>
-                <b>ARK / CHAPTER {item.chapter}</b>
-                <strong>{item.outcome ?? (item.parked ? 'PARKED' : 'ACTIVE')}</strong>
+                <b>
+                  ARK·{registry(item.id)} /{' '}
+                  {item.chapter === 0 ? 'PRE-LAUNCH' : `CHAPTER ${item.chapter}`}
+                </b>
+                <strong>
+                  {item.outcome
+                    ? ({ colony: 'COLONY', partial: 'PARTIAL LANDING', wreck: 'WRECK' }[
+                        item.outcome
+                      ] ?? item.outcome.toUpperCase())
+                    : item.parked
+                      ? 'PARKED'
+                      : 'ACTIVE'}
+                </strong>
                 <small>
-                  {id === record?.worldId ? `HULL ${record.resources.hull}%` : 'SELECT TO INSPECT'}
+                  {item.id === record?.worldId
+                    ? `HULL ${record.resources.hull}%`
+                    : 'SELECT TO INSPECT'}
                 </small>
               </div>
               <Icon name="chevron" />
@@ -470,7 +519,7 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
         <div className="hangar-bay">
           <div className="bay-label">
             <span>DIGITAL VESSEL TWIN</span>
-            <b>{record ? 'ARK—001' : 'NO WORLD SELECTED'}</b>
+            <b>{record ? `ARK·${registry(record.worldId)}` : 'NO WORLD SELECTED'}</b>
           </div>
           <ArkShip
             navigation={record?.resources.navigation ?? 100}
@@ -481,7 +530,11 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
         <aside className="world-inspector">
           <span className="eyebrow">SELECTED WORLD</span>
           <strong>{record?.title ?? 'AWAITING DEPARTURE'}</strong>
-          <small>{record?.phase ?? 'Create or resume an Ark'}</small>
+          <small>
+            {record
+              ? `${record.chapter === 0 ? 'Pre-launch' : `Chapter ${record.chapter}`} · ${record.phase.replaceAll('-', ' ')}`
+              : 'Create or resume an Ark'}
+          </small>
           <div className="inspector-data">
             <div>
               <span>CUSTODIAN</span>
@@ -504,9 +557,7 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
             <span>PERMANENT SCARS</span>
             <p>
               {record
-                ? record.systems
-                    .flatMap((system) => system.marks.map((mark) => `${system.id}: ${mark.kind}`))
-                    .join(' · ') || 'No recorded damage.'
+                ? scarSummary(record) || 'No recorded damage.'
                 : 'No invented world or history is shown.'}
             </p>
           </div>
@@ -548,6 +599,38 @@ export function Hangar({ setMode }: { setMode: (mode: Mode) => void }) {
   );
 }
 
+// What each setup step means in this mode; the step list now explains itself instead of only
+// highlighting.
+function setupGuide(live: boolean) {
+  return [
+    {
+      title: 'Connect broadcaster',
+      body: live
+        ? 'Sign in with the Twitch account that streams. Creator consent covers chat and raid events for your own channel only.'
+        : 'Saved practice uses local identities. Switch between alpha, beta and gamma below; each keeps its own Ark and no Twitch message is sent.',
+    },
+    {
+      title: 'Authorize dedicated bot',
+      body: live
+        ? 'Operator only: open the dedicated bot setup below and sign in with the separate bot account. Replies are optional; gameplay never depends on them.'
+        : 'Not needed in saved practice.',
+    },
+    {
+      title: 'Select overlay preset',
+      body: 'Tactical dock is a low strip for gameplay streams. Full expedition shows the whole ship and HUD. Automatic shows the dock between chapters and the full view during chapters and right after an Ark arrives.',
+    },
+    {
+      title: 'Copy OBS source',
+      body: 'Generate the private source and copy it. In OBS add a Browser Source at 1920×1080 with that URL. Rotating the source ends access for every earlier copy.',
+    },
+    {
+      title: 'Verify real delivery',
+      body: live
+        ? 'Start a chapter and ask a viewer to send the displayed command. Health counts signed chat deliveries and applied actions; only an applied action proves the full loop.'
+        : 'Send practice chat from Mission Control or the Judge Arena; the overlay updates from the same saved state.',
+    },
+  ];
+}
 export function BroadcastStudio() {
   const { data, canonical, overlayUrl, makeOverlay, busy, perform } = useGame();
   const [preset, setPreset] = useState<'dock' | 'expedition' | 'auto'>('dock'),
@@ -561,14 +644,29 @@ export function BroadcastStudio() {
         preset === 'dock' ? '/?view=compact#' : preset === 'auto' ? '/?view=auto#' : '/#',
       )
     : '';
+  const live = data?.mode === 'live';
+  const practice = 'NOT USED IN PRACTICE';
   const health = [
-    ['BOT PERMISSION', integration?.botAuthorized ? 'AUTHORIZED' : 'PENDING'],
-    ['EVENTSUB', details?.chatReady ? 'CHAT READY' : 'PENDING'],
-    ['NATIVE RAID', details?.raidReady ? 'SUBSCRIBED · NOT LIVE PROOF' : 'PENDING'],
+    ['BOT PERMISSION', !live ? practice : integration?.botAuthorized ? 'AUTHORIZED' : 'PENDING'],
+    ['EVENTSUB', !live ? practice : details?.chatReady ? 'CHAT READY' : 'PENDING'],
+    [
+      'NATIVE RAID',
+      !live
+        ? 'SIMULATED RELAYS ONLY'
+        : integration?.genuineRaidVerified
+          ? 'VERIFIED TRANSFER RECORDED'
+          : details?.raidReady
+            ? 'SUBSCRIBED · NOT LIVE PROOF'
+            : 'PENDING',
+    ],
     ['OVERLAY ACCESS', overlayUrl ? 'GENERATED' : 'NOT GENERATED'],
     [
       'BOT REPLIES',
-      integration?.botRepliesEnabled === false ? 'PAUSED · OPTIONAL' : 'SEPARATE VERIFICATION',
+      !live
+        ? practice
+        : integration?.botRepliesEnabled === false
+          ? 'PAUSED · OPTIONAL'
+          : 'SEPARATE VERIFICATION',
     ],
   ];
   return (
@@ -627,6 +725,12 @@ export function BroadcastStudio() {
                 </small>
               </Button>
             ))}
+          </div>
+          <div className="setup-guide" role="region" aria-label="Setup step guidance">
+            <span className="eyebrow">
+              STEP 0{step} · {setupGuide(live)[step - 1].title.toUpperCase()}
+            </span>
+            <p>{setupGuide(live)[step - 1].body}</p>
           </div>
           <div className="studio-actions">
             <Button disabled={busy || !data?.me} onClick={makeOverlay}>
@@ -756,120 +860,200 @@ export function BroadcastStudio() {
 function ChronicleRecords({ world }: { world: WorldPresentation }) {
   const { record, error, loading, load } = useWorldHistory(world.worldId);
   const [selected, setSelected] = useState('');
+  // Lineage nodes can point at events older than the loaded page; keep the chosen one visible.
+  const [pinned, setPinned] = useState<RecordedWorldEvent | null>(null);
   useEffect(() => {
     if (record && world.gameVersion > record.throughSequence && !loading) void load('refresh');
   }, [world.gameVersion, record?.throughSequence, loading]);
-  const event = record?.events.find((item) => item.id === selected) ?? record?.events[0];
+  const event =
+    record?.events.find((item) => item.id === selected) ??
+    (pinned?.id === selected ? pinned : undefined) ??
+    record?.events[0];
   return (
-    <section className="archive-layout">
-      <div className="archive-ship">
-        <ArkShip
-          mini
-          navigation={world.resources.navigation}
-          presentation={world}
-          selected="bridge"
-        />
-        <div className="scar-legend">
-          <span>{world.systems.reduce((sum, s) => sum + s.marks.length, 0)} PERMANENT MARKS</span>
-          <b>
-            CHAPTER {world.chapter} / {world.phase}
-          </b>
-        </div>
-        <PhysicalSystems world={world} />
-      </div>
-      <div className="timeline" aria-label="Saved world events">
-        {record?.events.map((item) => (
-          <Button
-            key={item.id}
-            className={event?.id === item.id ? 'active' : ''}
-            onClick={() => setSelected(item.id)}
-          >
-            <span>CH. {item.chapter}</span>
-            <i />
-            <div>
-              <strong>{item.summary}</strong>
-              <small>
-                {new Date(item.at).toLocaleString()} · {item.community.label}
-              </small>
-            </div>
-          </Button>
-        ))}
-        {record?.nextCursor !== null && record && (
-          <Button disabled={loading} onClick={() => void load()}>
-            Load earlier events
-          </Button>
-        )}
-        <Button disabled={loading} onClick={() => void load('refresh')}>
-          Refresh Chronicle
-        </Button>
-        {loading && <p role="status">Loading saved record…</p>}
-        {error && <p role="alert">{error}</p>}
-      </div>
-      <aside className="event-record">
-        <span className="eyebrow">
-          {event ? `CH. ${event.chapter} / CONSEQUENCE RECORD` : 'FLIGHT RECORDER'}
-        </span>
-        <strong>{event?.summary ?? 'No events loaded'}</strong>
-        <b>{event?.community.label ?? world.host}</b>
-        <p>{event ? new Date(event.at).toLocaleString() : 'Saved history appears here.'}</p>
-        <div className="record-delta">
-          {event &&
-            Object.entries(event.resourceDelta).map(([key, value]) => (
-              <span key={key}>
-                {key}
-                <b>
-                  {value! > 0 ? '+' : ''}
-                  {value}
-                </b>
-              </span>
-            ))}
-        </div>
-        {event?.causes.length ? (
-          <div className="cause-links">
-            <span>INHERITED CAUSES</span>
-            {event.causes.map((cause) => {
-              const found = record?.events.find((item) => item.id === cause);
-              return found ? (
-                <Button key={cause} onClick={() => setSelected(cause)}>
-                  Read cause: {found.summary}
-                </Button>
-              ) : (
-                <Button
-                  key={cause}
-                  disabled={loading || record?.nextCursor === null}
-                  onClick={() => void load()}
-                >
-                  Load earlier cause record
-                </Button>
-              );
-            })}
+    <>
+      <SeasonRecord world={world} />
+      <section className="archive-layout">
+        <div className="archive-ship">
+          <ArkShip
+            mini
+            navigation={world.resources.navigation}
+            presentation={world}
+            selected="bridge"
+          />
+          <div className="scar-legend">
+            <span>{world.systems.reduce((sum, s) => sum + s.marks.length, 0)} PERMANENT MARKS</span>
+            <b>
+              CHAPTER {world.chapter} / {world.phase}
+            </b>
           </div>
-        ) : null}
-        <div className="custody-chain">
-          <span>CUSTODY CHAIN</span>
-          {record?.custody.length ? (
-            record.custody.map((step) => (
-              <p key={step.id}>
-                {step.source.label} → {step.target.label}
+          <PhysicalSystems world={world} />
+        </div>
+        <div className="timeline" aria-label="Saved world events">
+          {record?.events.map((item) => (
+            <Button
+              key={item.id}
+              className={event?.id === item.id ? 'active' : ''}
+              onClick={() => setSelected(item.id)}
+            >
+              <span>CH. {item.chapter}</span>
+              <i />
+              <div>
+                <strong>{item.summary}</strong>
                 <small>
-                  {step.mode === 'live'
-                    ? 'NATIVE EVIDENCE / RECEIVER CONSENT'
-                    : 'SIMULATED TRANSFER'}{' '}
-                  · {new Date(step.at).toLocaleString()}
+                  {new Date(item.at).toLocaleString()} · {item.community.label}
                 </small>
-              </p>
-            ))
-          ) : (
-            <p>No custody changes recorded.</p>
-          )}
-          {record?.nextCustodyCursor && (
-            <Button disabled={loading} onClick={() => void load('custody')}>
-              Load earlier custody
+              </div>
+            </Button>
+          ))}
+          {record?.nextCursor !== null && record && (
+            <Button disabled={loading} onClick={() => void load()}>
+              Load earlier events
             </Button>
           )}
+          <Button disabled={loading} onClick={() => void load('refresh')}>
+            Refresh Chronicle
+          </Button>
+          {loading && <p role="status">Loading saved record…</p>}
+          {error && <p role="alert">{error}</p>}
         </div>
-      </aside>
-    </section>
+        <aside className="event-record">
+          <span className="eyebrow">
+            {event ? `CH. ${event.chapter} / CONSEQUENCE RECORD` : 'FLIGHT RECORDER'}
+          </span>
+          <strong>{event?.summary ?? 'No events loaded'}</strong>
+          <b>{event?.community.label ?? world.host}</b>
+          <p>{event ? new Date(event.at).toLocaleString() : 'Saved history appears here.'}</p>
+          <div className="record-delta">
+            {event &&
+              Object.entries(event.resourceDelta).map(([key, value]) => (
+                <span key={key}>
+                  {key}
+                  <b>
+                    {value! > 0 ? '+' : ''}
+                    {value}
+                  </b>
+                </span>
+              ))}
+          </div>
+          {event?.causes.length ? (
+            <div className="cause-links">
+              <span>INHERITED CAUSES</span>
+              {event.causes.map((cause) => {
+                const found = record?.events.find((item) => item.id === cause);
+                return found ? (
+                  <Button key={cause} onClick={() => setSelected(cause)}>
+                    Read cause: {found.summary}
+                  </Button>
+                ) : (
+                  <Button
+                    key={cause}
+                    disabled={loading || record?.nextCursor === null}
+                    onClick={() => void load()}
+                  >
+                    Load earlier cause record
+                  </Button>
+                );
+              })}
+            </div>
+          ) : null}
+          <div className="custody-chain">
+            <span>CUSTODY CHAIN</span>
+            {record?.custody.length ? (
+              record.custody.map((step) => (
+                <p key={step.id}>
+                  {step.source.label} → {step.target.label}
+                  <small>
+                    {step.mode === 'live'
+                      ? 'NATIVE EVIDENCE / RECEIVER CONSENT'
+                      : 'SIMULATED TRANSFER'}{' '}
+                    · {new Date(step.at).toLocaleString()}
+                  </small>
+                </p>
+              ))
+            ) : (
+              <p>No custody changes recorded.</p>
+            )}
+            {record?.nextCustodyCursor && (
+              <Button disabled={loading} onClick={() => void load('custody')}>
+                Load earlier custody
+              </Button>
+            )}
+          </div>
+        </aside>
+      </section>
+      <section className="lineage-panel" aria-label="Lineage across communities">
+        <div className="section-label">
+          <span>LINEAGE · WHO CAUSED WHAT</span>
+          <small>HOVER TO TRACE A CONSEQUENCE · SELECT TO READ ITS RECORD</small>
+        </div>
+        <Lineage
+          world={world}
+          onSelect={(item) => {
+            setPinned(item);
+            setSelected(item.id);
+            document.querySelector('.event-record')?.scrollIntoView({ block: 'nearest' });
+          }}
+        />
+      </section>
+    </>
+  );
+}
+/** Publishes a revocable, read-only public link to this world's Chronicle. */
+function ShareChronicle({ world }: { world: WorldPresentation }) {
+  const { busy, perform } = useGame();
+  const [url, setUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    setUrl('');
+    setCopied(false);
+  }, [world.worldId]);
+  return (
+    <div className="share-chronicle">
+      <Button
+        disabled={busy}
+        onClick={() =>
+          void perform(async () => {
+            const next = await request<{ url: string }>(
+              `/api/worlds/${encodeURIComponent(world.worldId)}/share`,
+              {},
+            );
+            setUrl(next.url);
+            setCopied(false);
+          })
+        }
+      >
+        {url ? 'Rotate public Chronicle link' : 'Share public Chronicle'}
+        <Icon name="chevron" />
+      </Button>
+      {url && (
+        <>
+          <label>
+            Public Chronicle link
+            <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
+          </label>
+          <div className="controls-row">
+            <Button
+              onClick={() =>
+                void navigator.clipboard
+                  .writeText(url)
+                  .then(() => setCopied(true))
+                  .catch(() => setCopied(false))
+              }
+            >
+              {copied ? 'COPIED' : 'COPY LINK'}
+            </Button>
+            <a href={url} target="_blank" rel="noreferrer">
+              Open public view
+            </a>
+          </div>
+          <p>
+            Anyone with this link can read this Ark&rsquo;s saved record, including after it moves
+            to another channel. It grants no controls. Rotating replaces your previous link;
+            disconnecting withdraws it.
+          </p>
+        </>
+      )}
+    </div>
   );
 }
 export function Archive() {
@@ -883,6 +1067,7 @@ export function Archive() {
         <strong>WORLD CHRONICLE</strong>
         <p>The ship remembers every custodian, sacrifice, repair and unresolved obligation.</p>
       </div>
+      {world && <ShareChronicle world={world} />}
       {world ? (
         <ChronicleRecords key={world.worldId} world={world} />
       ) : (
@@ -965,12 +1150,15 @@ export function Codex() {
           </div>
           <div className="command-reference">
             <span>QUICK COMMAND REFERENCE</span>
+            <code>!inspect engine</code>
             <code>!scan A</code>
             <code>!route S A C T</code>
             <code>!patch A</code>
-            <code>!allocate 1 0</code>
+            <code>!allocate hull 3 oxygen 2</code>
             <code>!vote 1</code>
             <code>!stake 2</code>
+            <code>!status</code>
+            <code>!history</code>
             <small>
               Use the displayed legal command during its open window. Bot replies are optional.
             </small>
@@ -985,11 +1173,17 @@ export function Codex() {
                 {canonical?.chapter === index + 1 ? canonical.title : `Chapter ${index + 1}`}
               </span>
               <small>
-                {canonical && canonical.chapter > index + 1
-                  ? 'RECORDED'
-                  : canonical?.chapter === index + 1
-                    ? 'CURRENT'
-                    : 'AHEAD'}
+                {!canonical
+                  ? 'AHEAD'
+                  : canonical.outcome ||
+                      canonical.chapter > index + 1 ||
+                      (canonical.chapter === index + 1 && canonical.phase === 'ready')
+                    ? 'RECORDED'
+                    : canonical.chapter === index + 1
+                      ? 'CURRENT'
+                      : canonical.chapter + 1 === index + 1 && canonical.phase === 'ready'
+                        ? 'NEXT'
+                        : 'AHEAD'}
               </small>
             </div>
           ))}
@@ -1000,21 +1194,7 @@ export function Codex() {
 }
 
 export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
-  const { data, canonical, launch } = useGame();
-  const [step, setStep] = useState(0);
-  const steps = [
-    'Inspect the persistent Ark',
-    'Open a Minecraft LIVEWIRE stake',
-    'Write a physical consequence',
-    'Transfer custody in saved practice',
-  ];
-  const complete = [
-    !!canonical,
-    !!canonical?.livewire?.stake,
-    !!canonical?.livewire?.stake &&
-      ['success', 'failure'].includes(canonical.livewire.stake.status),
-    false,
-  ];
+  const { data } = useGame();
   return (
     <main className="platform-page simulator-page">
       <div className="simulation-banner">
@@ -1023,74 +1203,46 @@ export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
           : 'LIVE MODE / PRACTICE INPUTS DISABLED'}
       </div>
       <div className="platform-title">
-        <span className="eyebrow">JUDGE EXPERIENCE / REAL SAVED GAMEPLAY</span>
-        <strong>THE SIMULATOR</strong>
+        <span className="eyebrow">JUDGE ARENA / REAL SAVED GAMEPLAY</span>
+        <strong>THE RELAY REHEARSAL</strong>
         <p>
-          Explore the complete loop without resetting the world or fabricating provider evidence.
+          Two practice communities, one Ark. Watch one crew&rsquo;s decision become the next
+          crew&rsquo;s crisis. Every step runs the real engine, database and custody rules; no
+          Twitch messages are sent.
         </p>
       </div>
-      <section className="simulator-layout">
-        <div className="sim-stage">
-          <div className="sim-orbit">
-            <span>0{step + 1}</span>
-            <i />
-          </div>
-          <span className="eyebrow">CURRENT OBJECTIVE</span>
-          <strong>{steps[step]}</strong>
+      {data?.mode === 'simulation' ? (
+        <>
+          <Rehearsal setMode={setMode} />
+          <section className="rehearsal-extras" aria-label="More practice">
+            <Button onClick={() => setMode('livewire')}>
+              <b>BONUS</b>
+              <span>Open a LIVEWIRE mission between chapters</span>
+              <Icon name="chevron" />
+            </Button>
+            <Button onClick={() => setMode('mission')}>
+              <b>FREE PLAY</b>
+              <span>Fly the current Ark yourself in Mission Control</span>
+              <Icon name="chevron" />
+            </Button>
+            <details className="rehearsal-tools">
+              <summary>Practice identities and chat</summary>
+              <AccountPanel />
+              <PracticeChat />
+            </details>
+          </section>
+        </>
+      ) : (
+        <div className="empty-platform">
           <p>
-            {step === 0
-              ? 'Launch the actual engine, inspect the Ark and play its shared challenges.'
-              : step === 1
-                ? 'Open a paid mission between chapters. Practice ballots use the same SQL-backed command path.'
-                : step === 2
-                  ? 'Lock before the attempt, confirm its outcome once and reload to see the saved physical consequence.'
-                  : 'Use two practice captains, receiver opt-in, source preparation, labeled simulated evidence and explicit acceptance.'}
+            This deployment runs genuine Twitch worlds, so practice identities and simulated raid
+            evidence are refused. Use a simulation deployment for the guided rehearsal.
           </p>
-          <Button
-            className="platform-primary"
-            onClick={() => {
-              if (!canonical) launch();
-              else setMode(step === 0 ? 'mission' : step === 3 ? 'inheritance' : 'livewire');
-            }}
-          >
-            OPEN EXPERIENCE
-            <Icon name="chevron" />
+          <Button className="platform-primary" onClick={() => setMode('mission')}>
+            Open Mission Control
           </Button>
         </div>
-        <div className="sim-path">
-          {steps.map((label, index) => (
-            <Button
-              key={label}
-              className={step === index ? 'active' : complete[index] ? 'done' : ''}
-              onClick={() => setStep(index)}
-            >
-              <b>0{index + 1}</b>
-              <span>{label}</span>
-              <small>{complete[index] ? 'SAVED' : step === index ? 'CURRENT' : 'EXPLORE'}</small>
-            </Button>
-          ))}
-        </div>
-        <aside className="sim-disclosure">
-          <span>REAL VS SIMULATED</span>
-          <div>
-            <b>REAL SYSTEM</b>
-            <p>
-              PostgreSQL, deterministic mechanics, physical consequences, replay, authorization and
-              scoped overlays.
-            </p>
-          </div>
-          <div>
-            <b>PRACTICE ONLY</b>
-            <p>
-              Local identities and explicitly labeled input/raid evidence. The Minecraft scene
-              illustrates an attempt; it is not game telemetry.
-            </p>
-          </div>
-          <Button onClick={() => setMode('mission')}>OPEN BRIDGE · KEEP SAVE</Button>
-          <AccountPanel />
-          <PracticeChat />
-        </aside>
-      </section>
+      )}
     </main>
   );
 }
@@ -1108,7 +1260,7 @@ export function Settings() {
     ['CINEMATIC AUDIO', 'audio', 'Short synthesized consequence cues after you enable audio.'],
     ['FULL MOTION', 'motion', 'Camera orbit, ship drift, particles and cinematic transitions.'],
     ['HIGH CONTRAST HUD', 'contrast', 'Increase panel separation and diagnostic brightness.'],
-    ['CAPTIONS', 'captions', 'Keep saved consequence text visible.'],
+    ['CAPTIONS', 'captions', 'Show each newly saved consequence as a short text caption.'],
   ] as const;
   return (
     <main className="platform-page settings-page">

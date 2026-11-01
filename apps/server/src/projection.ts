@@ -1,15 +1,24 @@
-import { PRESENTATION_VERSION, SYSTEM_IDS } from '@torchline/contracts';
+import { PRESENTATION_VERSION, SYSTEM_IDS, attributeSummary } from '@torchline/contracts';
 import type { WorldPresentation } from '@torchline/contracts';
-import { getPuzzle, previewChoices, TITLES } from '@torchline/engine';
+import { getPuzzle, previewChoices, titles } from '@torchline/engine';
 import { normalizeAllocation } from '@torchline/engine';
 import { livewireUnresolved } from '@torchline/engine';
 import type { StoredWorld } from '@torchline/storage';
 
 export function presentWorld(world: StoredWorld, hostControls = false): WorldPresentation {
   const s = world.state;
+  const labels = world.labels ?? {};
   const publicEvents = world.events
     .filter((event) => !['vote', 'allocate', 'inspect'].includes(event.command.type))
-    .slice(-30);
+    .slice(-30)
+    .map((event) => ({
+      ...event,
+      summary: attributeSummary(
+        event.summary,
+        event.actor.community,
+        labels[event.actor.community],
+      ),
+    }));
   const last = publicEvents.at(-1);
   const votes: Record<string, number> = {};
   for (const option of Object.values(s.votes)) votes[option] = (votes[option] ?? 0) + 1;
@@ -26,12 +35,16 @@ export function presentWorld(world: StoredWorld, hostControls = false): WorldPre
     handoffPending: Boolean(world.frozen_by),
     chapter: s.chapter,
     phase: s.phase,
-    title: s.crisis === 'safe-corridor' ? 'The Safe Corridor' : TITLES[s.chapter],
+    title: s.crisis === 'safe-corridor' ? 'The Safe Corridor' : titles(s.rulesVersion)[s.chapter],
     recap:
       last?.summary ?? '216 passengers. Five chapters. One world that persists between broadcasts.',
     resources: s.resources,
     systems: SYSTEM_IDS.map((id) => ({
       ...s.systems[id],
+      marks: s.systems[id].marks.map((mark) => ({
+        ...mark,
+        community: labels[mark.community] ?? mark.community,
+      })),
       severity:
         s.systems[id].integrity === 0
           ? 'lost'

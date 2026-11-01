@@ -8,7 +8,7 @@ import { admitInput, DEFAULT_INPUT_POLICY } from './admission.ts';
 import type { InputPolicy } from './admission.ts';
 export { DEFAULT_INPUT_POLICY, inputPolicy } from './admission.ts';
 export type { InputPolicy } from './admission.ts';
-export const REQUIRED_MIGRATION = '010_livewire_recovery_index.sql';
+export const REQUIRED_MIGRATION = '014_world_shares.sql';
 import type { EpisodeClock } from './episodes.ts';
 export { advanceEpisodes, recoverEpisodes, configureEpisode } from './episodes.ts';
 export { interruptEpisode, settleInterruption, CHAT_INTERRUPTED } from './interruptions.ts';
@@ -22,7 +22,15 @@ export {
   recoverLivewire,
   expireLivewire,
 } from './livewire.ts';
-export { readWorldRecord, readWorldHistory, readHandoffPreview } from './records.ts';
+export {
+  readWorldRecord,
+  readWorldHistory,
+  readHandoffPreview,
+  readSharedChronicle,
+  shareWorld,
+} from './records.ts';
+export { sweepRetention, RETENTION_POLICY } from './retention.ts';
+export type { RetentionResult } from './retention.ts';
 
 export interface Creator {
   id: string;
@@ -30,6 +38,7 @@ export interface Creator {
   mode: 'simulation' | 'live';
   receive_opt_in: boolean;
   connected: boolean;
+  assignment_revision: string;
 }
 export interface StoredWorld {
   id: string;
@@ -40,6 +49,8 @@ export interface StoredWorld {
   frozen_by: string | null;
   label: string;
   events: WorldEvent[];
+  /** Display names for every community referenced by the loaded events and physical marks. */
+  labels?: Record<string, string>;
   clock?: EpisodeClock;
   input_suspended?: boolean;
 }
@@ -54,6 +65,9 @@ export interface Handoff {
   proof_id: string | null;
   prepared_at: Date;
   expires_at: Date;
+  /** Display names, present when read through `handoffs()`. */
+  source_label?: string | null;
+  target_label?: string | null;
 }
 export interface RaidProof {
   messageId: string;
@@ -176,6 +190,8 @@ export class Store {
       await c.query('DELETE FROM oauth_grants WHERE id=$1', [channel]);
       await c.query('DELETE FROM sessions WHERE channel_id=$1', [channel]);
       await c.query('DELETE FROM overlay_grants WHERE channel_id=$1', [channel]);
+      // Disconnecting withdraws the public Chronicle links this creator published.
+      await c.query('DELETE FROM world_shares WHERE created_by=$1', [channel]);
       await c.query(
         "UPDATE subscriptions SET status='app_disconnected' WHERE channel_id=$1 AND status IN ('enabled','webhook_callback_verification_pending')",
         [channel],
@@ -293,6 +309,12 @@ export class Store {
         eligible && !duplicate && withinDeadline && supported
           ? await admitInput(c, row.id, row.state.window, participantId, at, policy)
           : null;
+      // A viewer who typed something the current phase cannot accept is told nothing today. Record
+      // the reason so the streamer can say it out loud, which is the only reliable feedback channel
+      // while outbound bot replies stay decoupled. Provider retries and messages that arrived after
+      // the window closed are not the audience's mistake to correct.
+      const ignored =
+        eligible && !duplicate && withinDeadline && !supported ? 'INPUT_WRONG_PHASE' : rejection;
       const accepted = eligible && !duplicate && withinDeadline && supported && !rejection;
       const appliedParticipantId =
         accepted && participantKey ? participantIdentity(row.id, actorId, participantKey) : actorId;
@@ -310,12 +332,21 @@ export class Store {
         'INSERT INTO eventsub_inbox(message_id,type,payload,processed_at,error) VALUES($1,$2,$3,$4,$5) ON CONFLICT(message_id) DO NOTHING',
         [deliveryId, 'channel.chat.message', payload, accepted ? null : at, rejection],
       );
-      if (rejection)
+      if (ignored)
         await c.query(
           'INSERT INTO input_rejections(world_id,input_window,reason) VALUES($1,$2,$3) ON CONFLICT(world_id,input_window,reason) DO UPDATE SET dropped=input_rejections.dropped+1',
-          [row.id, row.state.window, rejection],
+          [row.id, row.state.window, ignored],
         );
     });
+  }
+  /** Bounded, current-window feedback: what the audience tried that did not apply, and why. */
+  async rejections(world: string, window: number) {
+    return (
+      await this.pool.query(
+        'SELECT reason,dropped::integer AS dropped FROM input_rejections WHERE world_id=$1 AND input_window=$2 AND dropped>0 ORDER BY dropped DESC,reason LIMIT 6',
+        [world, window],
+      )
+    ).rows as { reason: string; dropped: number }[];
   }
   async lockChannels(c: PoolClient, ids: string[]) {
     await c.query('SELECT id FROM creators WHERE id=ANY($1::text[]) ORDER BY id FOR UPDATE', [
@@ -327,11 +358,35 @@ export class Store {
     if (!row?.connected || (mode && row.mode !== mode))
       error('FORBIDDEN', 'The creator authorization ended.');
   }
+  /**
+   * A finished voyage stays in its custodian's library as a memorial, but it no longer occupies
+   * the channel. Returns false when the channel still hosts a playable world.
+   */
+  private async releaseFinished(c: PoolClient, channel: string) {
+    const hosted = (
+      await c.query(
+        "SELECT w.id,w.revision,w.state->>'phase' AS phase FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=$1 FOR UPDATE OF w",
+        [channel],
+      )
+    ).rows[0];
+    if (!hosted) return true;
+    if (hosted.phase !== 'ended') return false;
+    await c.query('DELETE FROM channel_slots WHERE channel_id=$1 AND world_id=$2', [
+      channel,
+      hosted.id,
+    ]);
+    await c.query('UPDATE worlds SET revision=revision+1 WHERE id=$1', [hosted.id]);
+    await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [
+      hosted.id,
+      hosted.revision + 1,
+    ]);
+    return true;
+  }
   async create(owner: Creator): Promise<string> {
     return this.transaction(async (c) => {
       await this.lockChannels(c, [owner.id]);
       await this.requireConnected(c, owner.id, owner.mode);
-      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [owner.id])).rowCount)
+      if (!(await this.releaseFinished(c, owner.id)))
         error('CHANNEL_BUSY', 'Park or finish the current world first.');
       const id = randomUUID();
       const state = createWorld(id, CURRENT_RULES_VERSION);
@@ -368,7 +423,16 @@ export class Store {
         [id, row.state.window, row.state.phase],
       )
     ).rows[0];
-    return { ...row, events: recentOnly ? events.reverse() : events, clock };
+    const communities = new Set<string>([row.custodian_id]);
+    for (const event of events as WorldEvent[]) communities.add(event.actor.community);
+    for (const system of Object.values((row.state as WorldState).systems))
+      for (const mark of system.marks) communities.add(mark.community);
+    const labels = Object.fromEntries(
+      (
+        await this.pool.query('SELECT id,label FROM creators WHERE id=ANY($1)', [[...communities]])
+      ).rows.map((creator) => [creator.id as string, creator.label as string]),
+    );
+    return { ...row, events: recentOnly ? events.reverse() : events, labels, clock };
   }
   async active(channel: string, recentOnly = false): Promise<StoredWorld | null> {
     const row = (
@@ -377,9 +441,11 @@ export class Store {
     return row ? this.get(row.world_id, recentOnly) : null;
   }
   async library(channel: string) {
+    // Only the library summary is ever rendered; fetching whole world states here made every
+    // dashboard projection carry up to 50 full state documents.
     return (
       await this.pool.query(
-        'SELECT id,revision,state,mode,NOT EXISTS(SELECT 1 FROM channel_slots s WHERE s.world_id=w.id) AS parked FROM worlds w WHERE custodian_id=$1 ORDER BY created_at DESC LIMIT 50',
+        "SELECT id,(state->>'chapter')::integer AS chapter,state->>'outcome' AS outcome,NOT EXISTS(SELECT 1 FROM channel_slots s WHERE s.world_id=w.id) AS parked FROM worlds w WHERE custodian_id=$1 ORDER BY created_at DESC LIMIT 50",
         [channel],
       )
     ).rows;
@@ -588,12 +654,14 @@ export class Store {
           [ingress.id],
         );
     });
-    return this.get(id, Boolean(ingress));
+    // Return the bounded recent projection. Loading the full log here made every vote and scan
+    // read every earlier event, so command cost grew with the life of the world.
+    return this.get(id, true);
   }
   async handoffs(channel: string): Promise<Handoff[]> {
     return (
       await this.pool.query(
-        'SELECT * FROM handoffs WHERE source_id=$1 OR target_id=$1 ORDER BY prepared_at DESC LIMIT 20',
+        'SELECT h.*,s.label AS source_label,t.label AS target_label FROM handoffs h LEFT JOIN creators s ON s.id=h.source_id LEFT JOIN creators t ON t.id=h.target_id WHERE h.source_id=$1 OR h.target_id=$1 ORDER BY h.prepared_at DESC LIMIT 20',
         [channel],
       )
     ).rows;
@@ -625,7 +693,14 @@ export class Store {
         error('LIVEWIRE_PENDING', 'Resolve or cancel the mission before preparing custody.');
       if (w.state.phase !== 'ready' || w.state.chapter === 0 || w.frozen_by)
         error('INVALID_PHASE', 'Finish a chapter before preparing a handoff.');
-      if ((await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [targetId])).rowCount)
+      if (
+        (
+          await c.query(
+            "SELECT 1 FROM channel_slots s JOIN worlds w ON w.id=s.world_id WHERE s.channel_id=$1 AND w.state->>'phase'<>'ended'",
+            [targetId],
+          )
+        ).rowCount
+      )
         error('TARGET_BUSY', 'The receiving channel already hosts a world.');
       if (
         !(
@@ -746,9 +821,7 @@ export class Store {
         w.custodian_id !== intent.source_id
       )
         error('STALE_VERSION', 'Custody or frozen state changed.');
-      if (
-        (await c.query('SELECT 1 FROM channel_slots WHERE channel_id=$1', [receiver.id])).rowCount
-      )
+      if (!(await this.releaseFinished(c, receiver.id)))
         error('TARGET_BUSY', 'The receiving channel now hosts another world.');
       const proof = (
         await c.query('SELECT * FROM raid_proofs WHERE message_id=$1 FOR UPDATE', [intent.proof_id])
@@ -781,7 +854,7 @@ export class Store {
       ]);
       await c.query("UPDATE handoffs SET status='committed' WHERE id=$1", [intent.id]);
       await c.query(
-        'INSERT INTO custody_events(id,world_id,source_id,target_id,proof_id,mode) VALUES($1,$2,$3,$4,$5,$6)',
+        'INSERT INTO custody_events(id,world_id,source_id,target_id,proof_id,mode,state_version) VALUES($1,$2,$3,$4,$5,$6,$7)',
         [
           intent.id,
           intent.world_id,
@@ -789,6 +862,7 @@ export class Store {
           intent.target_id,
           intent.proof_id,
           intent.mode,
+          w.state.version,
         ],
       );
       await c.query('INSERT INTO outbox(world_id,revision) VALUES($1,$2)', [
@@ -796,7 +870,7 @@ export class Store {
         w.revision + 1,
       ]);
     });
-    return this.get(info!.world_id);
+    return this.get(info!.world_id, true);
   }
   async cancel(intentId: string, channel: string, status: 'cancelled' | 'declined' | 'expired') {
     const info = (await this.pool.query('SELECT * FROM handoffs WHERE id=$1', [intentId])).rows[0];

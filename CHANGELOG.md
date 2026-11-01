@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased — Relay experience and platform completion
+
+- Add the Judge Arena **Relay Rehearsal**: nine explicit steps move one Ark between two practice communities through the same public endpoints the dashboard uses. Alpha's crew solves the shield relay, the captain sacrifices navigation, a receiver opts in, alpha prepares the relay, a labeled practice raid proof arrives, the receiver accepts and reads the dossier, and chapter two applies alpha's debt. Autoplay stops before the receiver's first command. Practice offers last 15 minutes; live offers are unchanged. Regression: `tests/browser/relay-rehearsal.spec.ts`.
+- Hand the receiver an attributed **inheritance dossier**: every captain commitment with its community, lost systems, and each pending debt linked to the decision that created it. Mission Control and the read-only OBS view both show it. Automatic OBS layout now switches to the full view while an arrival is pending. Regression: `tests/custody-arrival.test.ts`.
+- Add the Chronicle **lineage graph** (communities × chapters, saved cause links, custody markers) and a **season record** of each community's commitments and the voyage outcome.
+- End a voyage with a **season finale** on the dashboard and a broadcast-sized card in the OBS view, naming every community and its decisions in command order. A colony is no longer styled as a loss.
+- Publish revocable, read-only **public Chronicle links** (`/chronicle/#token`) so the community that handed an Ark on, returning viewers and judges can follow it across channels. Only a hash is stored (migration 014, now required). Regression: `tests/chronicle-share.test.ts`. [ADR 0036](docs/decisions/0036-public-chronicle-links.md).
+- Budget unsigned entry routes per client and per route (429 with `Retry-After`). `TRUST_PROXY_HOPS` keeps budgets per client behind a hosting proxy. Receivers hosting a playable Ark are flagged in the relay list.
+- Recover overlay and dashboard feeds within seconds of an outage (retry cap 15s → 4s), with a dashboard recovery journey for ADR 0034.
+- Make the Captions setting caption each newly saved consequence; it previously did nothing. Fix the phone view switch covering the signal strip and the Codex chapter status between chapters.
+- Free the channel held by a finished voyage when the captain creates a world or accepts a handoff. Previously "Create new world" failed with CHANNEL_BUSY after any ending. Regression: `tests/storage.test.ts`.
+- Name communities in presentation, history and `!history` replies instead of raw creator IDs; stored events keep the IDs replay needs.
+- Accept `!allocate hull 3 oxygen 2` as well as `!allocate 3 2`, matching what chat is taught.
+- Fix UI defects: the flight recorder, "last saved consequence", the signal strip and the relay screen read the oldest event as the latest; supplies rendered as a percentage; the allocation form capped preferences at the power budget; the chat hint suggested an invalid `!allocate 0 0`; relay offers showed raw IDs and gave no reason when disabled; an ended voyage had no way forward.
+- Raise about 130 HUD labels from 6–9px to legible sizes and make every one follow the HUD text-scale setting.
+- Broadcast Studio's setup steps now explain each step for the current mode, and saved practice no longer reports Twitch health as "pending". Hangar rows show their own hull, scars are summarised per system, and the Chronicle ship is a bounded viewport instead of a stretched canvas.
+- Commands and custody acceptance return the bounded recent projection instead of re-reading the whole event log (audit A07).
+- Report `genuineRaidVerified` from committed live custody instead of a hard-coded false.
+- Reject stale channel assignments and stale mission ballots (migration 011, `snapshot-order.ts`), recover dashboard SSE feeds after transient failures (ADR 0034), and keep private paths outside the SPA fallback. Startup requires migration `014_world_shares.sql`.
+
+## Release hardening (unreleased, included above)
+
+- Serve every view of one channel from a single projection per publication round and publish the server clock separately, so an unchanged world stops rewriting its whole snapshot four times a second. Four idle creator feeds cost **175 pool queries over eight paced ticks instead of the audited 321**, while each view still rechecks its own authority before and after the read. Regression: `tests/feed-projection.test.ts`.
+- Project only the library fields the dashboard renders instead of loading up to 50 complete world states per projection.
+- Add bounded retention for terminal operational rows: delivered outbox, terminal inbox, chat dedup, expired sessions and OAuth states, and closed input windows. Lifetime applied/quarantined diagnostics are folded into `retention_totals` before pruning, so reported totals never shrink, and the sweep never touches world events, custody events, raid proofs, handoffs or command idempotency records. Regression: `tests/retention.test.ts`.
+- Attribute an inherited Ark to the community that sent it. A receiving custodian sees a bounded arrival briefing (source, passengers, lasting marks, chapter, systems lost on arrival) from the committed handoff until their first command, and the archive keeps the custody step. Regression: `tests/custody-arrival.test.ts`.
+- Report why audience input did not apply, per current window, so the streamer can explain a rate limit, a full queue or a command typed in the wrong phase. Viewer identities stay excluded. Regression: `tests/input-feedback.test.ts`.
+- Read chapter titles and choices from the rules version of the world being presented rather than the pinned historical default, and fail loudly if the two rules versions drift apart without a deliberate decision. Regression: `tests/rules-dispatch.test.ts`.
+- Re-verify the audit's reproduced defects on this source: signed chat revocation now pauses the episode (`challenge` → `paused`), and a stale provider validation no longer blocks the local disconnect that revokes authority. Both re-run through `scripts/audit/probes.ts`.
+- Add a current-rule balance exploration with witnesses. A seeded, reproducible sweep of complete ark-v3 seasons attempts every legal action at every boundary it reaches: all three endings are reached with witnesses that replay exactly, no reachable state lacks a legal action, no boundary refuses every legal action, and the only refusals are `UNAFFORDABLE` and `ALREADY_DISCOVERED`. It is a bounded sample, not a proof: a complete season enumeration is not feasible because the state space is the full resource, system and obligation product. Regression: `tests/balance-v3.test.ts`.
+
 ## v0.1.0-preview.2 — October 30, 2026
 
 - Recover the independent QA branch's two real PostgreSQL concurrency regressions and dated assessment during main consolidation. Preserve the superseded UI-LAB work without importing its prototype server or visuals.

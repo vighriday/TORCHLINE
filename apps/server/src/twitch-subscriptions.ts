@@ -431,6 +431,14 @@ export function twitchSubscriptions(
       )
     ).rows;
     const count = (kind: string) => counts.find((row) => row.kind === kind)?.count ?? 0;
+    // A sweep moves the counts of pruned terminal inbox rows here, so these stay lifetime totals.
+    const retained = (
+      await store.pool.query(
+        'SELECT kind,value::integer AS value FROM retention_totals WHERE channel_id=$1',
+        [channel],
+      )
+    ).rows as { kind: string; value: number }[];
+    const retainedCount = (kind: string) => retained.find((row) => row.kind === kind)?.value ?? 0;
     const applied = (
       await store.pool.query(
         "SELECT count(*)::integer AS count FROM eventsub_inbox WHERE processed_at IS NOT NULL AND error IS NULL AND payload->>'kind'='chat' AND payload->>'channelId'=$1",
@@ -472,7 +480,7 @@ export function twitchSubscriptions(
       inbox: {
         pending: inbox.pending,
         retrying: inbox.retrying,
-        quarantined: inbox.quarantined,
+        quarantined: inbox.quarantined + retainedCount('quarantined'),
         oldestAt: inbox.oldest?.toISOString() ?? null,
       },
       botAuthorized: Boolean(botId),
@@ -498,7 +506,7 @@ export function twitchSubscriptions(
         challenge: count('challenge'),
         chat: count('chat'),
         raid: count('raid'),
-        appliedChat: applied,
+        appliedChat: applied + retainedCount('applied_chat'),
         custodyChanges: custody,
       },
     };

@@ -89,6 +89,7 @@ const defaults = {
   SESSION_SECRET: randomBytes(32).toString('hex'),
   TOKEN_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
   BOT_SETUP_SECRET: randomBytes(32).toString('hex'),
+  LIVEWIRE_ENABLED: 'true',
 };
 for (const [key, value] of Object.entries(defaults))
   if (!new RegExp(`^${key}=`, 'm').test(envText)) additions += `${key}=${value}\n`;

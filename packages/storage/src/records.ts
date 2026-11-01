@@ -1,5 +1,6 @@
 import type { PoolClient } from 'pg';
-import { DomainError } from '@torchline/contracts';
+import { createHash } from 'node:crypto';
+import { DomainError, attributeSummary } from '@torchline/contracts';
 import type { WorldHistoryPage } from '@torchline/contracts';
 import type { Creator, StoredWorld, Store } from './index.ts';
 
@@ -32,7 +33,16 @@ async function projected(c: PoolClient, row: Omit<StoredWorld, 'events'>): Promi
     .map((item) => item.event)
     .reverse();
   const clock = (await c.query('SELECT * FROM episode_clocks WHERE world_id=$1', [row.id])).rows[0];
-  return { ...row, events, clock };
+  const communities = new Set<string>([row.custodian_id]);
+  for (const event of events) communities.add(event.actor.community);
+  for (const system of Object.values(row.state.systems))
+    for (const mark of system.marks) communities.add(mark.community);
+  const labels = Object.fromEntries(
+    (await c.query('SELECT id,label FROM creators WHERE id=ANY($1)', [[...communities]])).rows.map(
+      (creator) => [creator.id as string, creator.label as string],
+    ),
+  );
+  return { ...row, events, labels, clock };
 }
 export async function readWorldRecord(
   store: Store,
@@ -48,58 +58,101 @@ export async function readWorldHistory(
   store: Store,
   creator: Creator,
   id: string,
-  query: { before?: number; through?: number; limit: number; custodyBefore?: string },
+  query: HistoryQuery,
 ): Promise<WorldHistoryPage> {
   return store.transaction(async (c) => {
     await store.lockChannels(c, [creator.id]);
-    const row = await owned(c, creator, id);
-    const through = query.through ?? row.state.version;
-    if (through > row.state.version)
-      throw new DomainError('INVALID_CURSOR', 'History cannot extend beyond the saved world.');
-    const events = (
+    return historyPage(c, await owned(c, creator, id), query);
+  });
+}
+interface HistoryQuery {
+  before?: number;
+  through?: number;
+  limit: number;
+  custodyBefore?: string;
+}
+async function historyPage(
+  c: PoolClient,
+  row: { id: string; state: StoredWorld['state'] },
+  query: HistoryQuery,
+): Promise<WorldHistoryPage> {
+  const id = row.id;
+  const through = query.through ?? row.state.version;
+  if (through > row.state.version)
+    throw new DomainError('INVALID_CURSOR', 'History cannot extend beyond the saved world.');
+  const events = (
+    await c.query(
+      `SELECT e.event,p.label AS community_label FROM world_events e LEFT JOIN creators p ON p.id=e.event->'actor'->>'community'
+    WHERE e.world_id=$1 AND e.sequence<=$2 AND ($3::integer IS NULL OR e.sequence<$3) AND e.event->'command'->>'type' NOT IN ('vote','allocate','inspect')
+    ORDER BY e.sequence DESC LIMIT $4`,
+      [id, through, query.before ?? null, query.limit + 1],
+    )
+  ).rows;
+  const custody = (
+    await c.query(
+      `SELECT h.id,h.created_at,s.id AS source_id,s.label AS source_label,t.id AS target_id,t.label AS target_label,h.mode
+    FROM custody_events h JOIN creators s ON s.id=h.source_id JOIN creators t ON t.id=h.target_id
+    WHERE h.world_id=$1 AND ($2::text IS NULL OR (h.created_at,h.id)<(SELECT created_at,id FROM custody_events WHERE world_id=$1 AND id=$2))
+    ORDER BY h.created_at DESC,h.id DESC LIMIT $3`,
+      [id, query.custodyBefore ?? null, query.limit + 1],
+    )
+  ).rows;
+  const page = events.slice(0, query.limit);
+  const steps = custody.slice(0, query.limit);
+  return {
+    schemaVersion: 'world-records-2026-10-27.1',
+    worldId: id,
+    throughSequence: through,
+    events: page.map(({ event, community_label }) => ({
+      id: event.id,
+      sequence: event.sequence,
+      chapter: event.chapter,
+      at: event.at,
+      community: { id: event.actor.community, label: community_label ?? event.actor.community },
+      summary: attributeSummary(event.summary, event.actor.community, community_label),
+      resourceDelta: event.resourceDelta,
+      cues: event.cues,
+      causes: event.causes,
+    })),
+    nextCursor: events.length > query.limit ? page.at(-1)!.event.sequence : null,
+    custody: steps.map((item) => ({
+      id: item.id,
+      at: item.created_at.toISOString(),
+      source: { id: item.source_id, label: item.source_label },
+      target: { id: item.target_id, label: item.target_label },
+      mode: item.mode,
+    })),
+    nextCustodyCursor: custody.length > query.limit ? steps.at(-1)!.id : null,
+  };
+}
+/**
+ * Publishes (or rotates) the caller's read-only public Chronicle link for a world they currently
+ * command. Returns the token once; only its hash is stored.
+ */
+export async function shareWorld(store: Store, creator: Creator, id: string, token: string) {
+  await store.transaction(async (c) => {
+    await store.lockChannels(c, [creator.id]);
+    await owned(c, creator, id);
+    await c.query('DELETE FROM world_shares WHERE world_id=$1 AND created_by=$2', [id, creator.id]);
+    await c.query('INSERT INTO world_shares(hash,world_id,created_by) VALUES($1,$2,$3)', [
+      createHash('sha256').update(token).digest('hex'),
+      id,
+      creator.id,
+    ]);
+  });
+}
+/** Reads a shared world's public record. Unknown or withdrawn links reveal nothing. */
+export async function readSharedChronicle(store: Store, token: string, query: HistoryQuery) {
+  return store.transaction(async (c) => {
+    const row = (
       await c.query(
-        `SELECT e.event,p.label AS community_label FROM world_events e LEFT JOIN creators p ON p.id=e.event->'actor'->>'community'
-      WHERE e.world_id=$1 AND e.sequence<=$2 AND ($3::integer IS NULL OR e.sequence<$3) AND e.event->'command'->>'type' NOT IN ('vote','allocate','inspect')
-      ORDER BY e.sequence DESC LIMIT $4`,
-        [id, through, query.before ?? null, query.limit + 1],
+        'SELECT w.*,p.label FROM world_shares s JOIN worlds w ON w.id=s.world_id JOIN creators p ON p.id=w.custodian_id WHERE s.hash=$1 FOR SHARE OF w',
+        [createHash('sha256').update(token).digest('hex')],
       )
-    ).rows;
-    const custody = (
-      await c.query(
-        `SELECT h.id,h.created_at,s.id AS source_id,s.label AS source_label,t.id AS target_id,t.label AS target_label,h.mode
-      FROM custody_events h JOIN creators s ON s.id=h.source_id JOIN creators t ON t.id=h.target_id
-      WHERE h.world_id=$1 AND ($2::text IS NULL OR (h.created_at,h.id)<(SELECT created_at,id FROM custody_events WHERE world_id=$1 AND id=$2))
-      ORDER BY h.created_at DESC,h.id DESC LIMIT $3`,
-        [id, query.custodyBefore ?? null, query.limit + 1],
-      )
-    ).rows;
-    const page = events.slice(0, query.limit);
-    const steps = custody.slice(0, query.limit);
-    return {
-      schemaVersion: 'world-records-2026-10-27.1',
-      worldId: id,
-      throughSequence: through,
-      events: page.map(({ event, community_label }) => ({
-        id: event.id,
-        sequence: event.sequence,
-        chapter: event.chapter,
-        at: event.at,
-        community: { id: event.actor.community, label: community_label ?? event.actor.community },
-        summary: event.summary,
-        resourceDelta: event.resourceDelta,
-        cues: event.cues,
-        causes: event.causes,
-      })),
-      nextCursor: events.length > query.limit ? page.at(-1)!.event.sequence : null,
-      custody: steps.map((item) => ({
-        id: item.id,
-        at: item.created_at.toISOString(),
-        source: { id: item.source_id, label: item.source_label },
-        target: { id: item.target_id, label: item.target_label },
-        mode: item.mode,
-      })),
-      nextCustodyCursor: custody.length > query.limit ? steps.at(-1)!.id : null,
-    };
+    ).rows[0];
+    if (!row)
+      throw new DomainError('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { world: await projected(c, row), history: await historyPage(c, row, query) };
   });
 }
 export async function readHandoffPreview(store: Store, creator: Creator, id: string) {

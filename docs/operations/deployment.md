@@ -1,6 +1,8 @@
 # Deployment and operational runbook
 
-Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster are running/verified as described in the README; no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
+Current source requires migration **014_world_shares.sql** before startup and readiness. Migrations 011–014 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention, custody arrival attribution and public Chronicle link hashes. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
+
+Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks.
 
 ## Recommended topology
 
@@ -13,7 +15,7 @@ Status: cloud deployment remains proposed. The local app and isolated PostgreSQL
 3. Create and drill an encrypted pre-release backup. Run **one** migration job from this image: `node scripts/migrate.ts` with the target `DATABASE_URL`. Do not run migrations concurrently in every replica.
 4. Start **one replica** with the same configuration. No local volume holds authoritative state. Give graceful shutdown at least 15 seconds and disable proxy buffering for SSE. `/health/ready` must pass before traffic. Container smoke exercises a read-only filesystem, dropped Linux capabilities and no-new-privileges; configure equivalent host restrictions where supported.
 5. Register the exact new OAuth callback in the Twitch developer console; verify callback delivery/subscriptions, actual chat/replies, private OBS source/reconnect and consented native raid using the live checklist. A healthy container cannot prove these external integrations.
-6. Keep the prior compatible image digest for rollback. Additive migration 008 is retained during code rollback; do not reverse data or reset delivery deduplication. After recovery explicitly resume paused episodes and inspect uncertain outbound sends.
+6. Keep the prior compatible image digest for rollback. Additive migrations (008 onward) are retained during code rollback; do not reverse data or reset delivery deduplication. After recovery explicitly resume paused episodes and inspect uncertain outbound sends.
 
 The image contains a migration CLI but no pg_dump/restore utilities or backup key. Run backup operations from a trusted operator checkout/tooling environment as documented in [backup and restore](backup-and-restore.md). No public restore/admin endpoint is added.
 
@@ -22,6 +24,17 @@ One always-on Render web service serves the Fastify API and static browser build
 Render supports long-running web services and managed TLS URLs. Its free service has idle spin-down behavior, so use an appropriate always-on plan for live demonstration and judging. This recommendation is about service properties, not a price quote. [Web service documentation](https://render.com/docs/web-services), [free-tier limitations](https://render.com/docs/free)
 
 Railway, Fly or a managed VM can substitute if they provide the same contract: public HTTPS callback, unbuffered streaming or WebSocket fallback, durable process, secrets, database connectivity, logs, rollback and backup recovery. Do not rewrite the game for a provider-specific database or edge runtime without revisiting the component review.
+
+### Public judge instance
+
+A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. To give judges hands-on access without Twitch accounts, run a **second** service from the same image:
+
+- Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true`.
+- Give it its **own** PostgreSQL database and independent secrets. Never share the live database or keys.
+- Give it its own HTTPS origin, for example a `demo` subdomain, and set `PUBLIC_BASE_URL` to it. No Twitch credentials are needed.
+- Behind the provider's load balancer, set `TRUST_PROXY_HOPS=1` (on the live service too). Otherwise every visitor shares the proxy's address and one per-client request budget, and several judges running the rehearsal at once could be throttled.
+
+Point judges at **Command OS → Judge Arena → Autoplay to the handoff**. The live service keeps genuine Twitch worlds. Public Chronicle links from the live service can show a real world's lineage without granting any control.
 
 ## Pre-deployment gate
 
@@ -46,24 +59,24 @@ Database work is now bounded at PostgreSQL: `DB_STATEMENT_TIMEOUT_MS=10000`, `DB
 
 `/health/live` indicates that the process is responding; `/health/ready` checks database access and migration compatibility. Expose Twitch health separately: an expired grant can affect one creator without marking every world unavailable.
 
-Structured logs include request/command ID, world ID, channel ID, mode, version, subscription/delivery ID, job attempt and error classification. Redact authorization headers, OAuth codes/tokens, cookies, overlay capabilities, encryption keys and raw chat text. Avoid logging full URLs with fragments/query secrets or raw signed request bodies.
+Fastify request logs carry a request ID, method, path and status. World, channel, delivery and job identifiers are not yet attached to log lines; add them before relying on logs for incident tracing. Redact authorization headers, OAuth codes/tokens, cookies, overlay capabilities, encryption keys and raw chat text. Avoid logging full URLs with fragments/query secrets or raw signed request bodies.
 
 Monitor ingress acknowledgement latency, inbox age/failures, outbox age, accepted/rejected commands by reason, phase close lag, handoff outcome/reason, database lock waits/pool utilization, event-loop lag, active feeds, dropped slow clients and token/subscription health. Establish alerts from measured baselines; do not invent production SLO achievement.
 
 ## Recovery procedures to implement and rehearse
 
-| Incident | Response |
-| --- | --- |
-| Database unavailable | Fail mutations/ingress durably with retryable response; show disconnected state; do not announce successful custody change |
-| App restart or deploy | Reclaim expired leases, reconcile subscriptions, pause interrupted timed interactions, drain accepted work, publish current snapshots |
-| Missing/expired raid proof | Preserve source custody, expire/cancel intent, explain retry after cooldown; no operator fabrication of native proof |
-| Token revoked | End associated sessions and chat actions, remove/reconcile subscriptions, ask creator to reconnect through product flow |
-| Recipient busy/opted out | Reject commit, preserve both worlds, cancel/expire safely |
-| Feed stalled | Reconnect and refetch current snapshot; missed visuals do not repeat outcomes |
-| Poison inbox item | Mark failed after bounded retries, expose diagnostic metadata, preserve unrelated work |
-| Exposed overlay capability | Revoke grant and sessions, regenerate channel link, retain independent Twitch connection |
-| Exposed OAuth credential | Revoke/rotate, update server secret/grant, validate reconnect and affected subscriptions |
-| Bad release | Roll back application to a schema-compatible image; do not blindly roll back destructive data changes |
+| Incident                   | Response                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Database unavailable       | Fail mutations/ingress durably with retryable response; show disconnected state; do not announce successful custody change            |
+| App restart or deploy      | Reclaim expired leases, reconcile subscriptions, pause interrupted timed interactions, drain accepted work, publish current snapshots |
+| Missing/expired raid proof | Preserve source custody, expire/cancel intent, explain retry after cooldown; no operator fabrication of native proof                  |
+| Token revoked              | End associated sessions and chat actions, remove/reconcile subscriptions, ask creator to reconnect through product flow               |
+| Recipient busy/opted out   | Reject commit, preserve both worlds, cancel/expire safely                                                                             |
+| Feed stalled               | Reconnect and refetch current snapshot; missed visuals do not repeat outcomes                                                         |
+| Poison inbox item          | Mark failed after bounded retries, expose diagnostic metadata, preserve unrelated work                                                |
+| Exposed overlay capability | Revoke grant and sessions, regenerate channel link, retain independent Twitch connection                                              |
+| Exposed OAuth credential   | Revoke/rotate, update server secret/grant, validate reconnect and affected subscriptions                                              |
+| Bad release                | Roll back application to a schema-compatible image; do not blindly roll back destructive data changes                                 |
 
 ## Backups and judge availability
 

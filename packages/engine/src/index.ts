@@ -30,6 +30,14 @@ function rules(version: RulesVersion) {
   if (version === CURRENT_RULES_VERSION) return v3;
   throw new DomainError('RULES_VERSION', 'Unsupported immutable world rules.');
 }
+/**
+ * Chapter titles belong to the rules version of the world being presented. The pinned `TITLES`
+ * export above is the historical default for fixtures and old replays, so presentation must not
+ * read it directly: a later rules fork would otherwise silently retitle current worlds.
+ */
+export function titles(version: RulesVersion) {
+  return rules(version).TITLES;
+}
 // Historical default stays stable for fixtures. Storage explicitly selects current rules.
 export function createWorld(id: string, version: RulesVersion = RULES_VERSION) {
   return rules(version).createWorld(id);
