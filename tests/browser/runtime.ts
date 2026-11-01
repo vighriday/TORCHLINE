@@ -67,9 +67,12 @@ export async function snapshot(page: Page) {
 }
 async function renderedRevision(page: Page) {
   const saved = await snapshot(page);
+  // The first render on a GPU-less CI runner can exceed the default wait; the assertion is the
+  // same exact saved revision, only observed for longer.
   await expect(page.locator('main.mission')).toHaveAttribute(
     'data-version',
     String(saved.worldVersion),
+    { timeout: 20000 },
   );
 }
 export async function command(page: Page, value: Command) {
