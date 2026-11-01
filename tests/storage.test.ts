@@ -160,7 +160,8 @@ describe('real PostgreSQL consistency', () => {
         sourceId: source.creator.id,
         targetId: receiver.id,
         subscriptionId: 'simulation-only',
-        notificationAt: new Date().toISOString(),
+        // Evidence must fall inside the offer window measured by the database clock.
+        notificationAt: new Date(intent.prepared_at.getTime() + 10).toISOString(),
       });
       await store.accept(intent.id, receiver);
       expect((await store.active(receiver.id))?.id).toBe(source.id);
