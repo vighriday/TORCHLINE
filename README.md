@@ -33,6 +33,8 @@ When a captain hands the Ark on, the receiving stream sees an **inheritance doss
 
 Rows are communities, columns are chapters. Arrows are saved cause links: a sacrifice that became a crisis, a repair that prevented a later leak. Dotted markers are custody changes. The season record names what each community decided. A captain can publish a revocable, read-only **public Chronicle link** so their community can keep following the Ark after it leaves their channel.
 
+<a href="assets/readme/season-finale.png"><img src="assets/readme/season-finale.png" width="1440" alt="The read-only OBS view at the end of the voyage: a season finale card reads A New Home, 216 of 216 aboard, and lists chapter 1 Simulation alpha (sacrifice navigation), chapter 2 Simulation beta (rebuild navigation) and chapters 3 to 5 Simulation gamma, carried by three communities and two relays."></a>
+
 <a href="assets/readme/season-record.png"><img src="assets/readme/season-record.png" width="1440" alt="Season record: A New Home. 216 passengers landed. Simulation alpha sacrificed navigation, Simulation beta rebuilt it, Simulation gamma restored life support, salvaged and landed."></a>
 
 Captured from the integrated app in saved practice. The relays used labeled simulated raid evidence, not native Twitch raids.
