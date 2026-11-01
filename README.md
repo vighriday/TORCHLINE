@@ -71,14 +71,14 @@ You can play all five chapters on one channel. **A raid moves the world; you don
   <img src="assets/readme/relay-two-games.webp" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission fails and the hull loses 6. After the handoff, channel B's aerial-goal mission succeeds and the same hull gains 3.">
 </picture>
 
-<sub>This is the Judge Arena, recorded from the app in saved practice. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are streamer-attested and saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
+<sub>This is the Judge Arena, recorded from the app in saved practice. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are scripted practice attestations, saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
 
 <details>
 <summary><b>The eleven steps of the relay rehearsal</b>: every one calls the same API the dashboard uses</summary>
 <br>
 
 1. **Alpha takes command** of a fresh Ark: 216 passengers, five chapters.
-2. **Chat stakes the hull on one jump.** Three crew ballots lock the hull before the attempt. The streamer confirms the failure, and the hull loses 6.
+2. **Chat stakes the hull on one jump.** Three crew ballots lock the hull before the attempt. The practice captain confirms the scripted failure, and the hull loses 6.
 3. **The crew solves the shield relay** through practice chat. It is the same parser Twitch chat uses.
 4. **Alpha sacrifices navigation.** Everyone survives, but a blind jump is now owed.
 5. **Another community opts in** to receive an Ark.
@@ -383,12 +383,12 @@ flowchart LR
 
 | Day | What Codex built |
 | --- | --- |
-| **26 Oct** | The product plan, requirements, architecture and decision stress review. Then the persistent-Ark engine and the Twitch foundation: OAuth, signed EventSub webhooks and bot replies that never block gameplay |
-| **27 Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
-| **28 Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
-| **29 Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
-| **30 Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2 |
-| **31 Oct** | Shared channel projections, bounded retention, attributed custody arrivals, and property-based balance tests |
+| **26&nbsp;Oct** | The product plan, requirements, architecture and decision stress review. Then the persistent-Ark engine and the Twitch foundation: OAuth, signed EventSub webhooks and bot replies that never block gameplay |
+| **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
+| **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
+| **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
+| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2 |
+| **31&nbsp;Oct** | Shared channel projections, bounded retention, attributed custody arrivals, and property-based balance tests |
 
 Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and the replies stay paused.
 
