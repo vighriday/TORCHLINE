@@ -12,7 +12,8 @@ Updated November 1, 2026. The `feat/ark-complete-20261101` branch (pending revie
 - Default-off LIVEWIRE v0: paid mission, finite allowance, normalized ballots, explicit lock/solo target, attested outcome, physical consequence and scoped OBS dock. No other speculative arms.
 - Final ten-screen design wired to these existing behaviors, shared corrected Ark/cockpit, Minecraft illustration, local preferences and read-only full/compact/automatic OBS.
 - Judge Arena relay rehearsal: nine steps through the public endpoints as named practice identities, with labeled simulated raid proof only ([ADR 0035](../decisions/0035-relay-rehearsal-and-attributed-inheritance.md)).
-- Attributed inheritance dossier on the dashboard and OBS (decisions, communities, lost systems, debts linked to their cause); Chronicle lineage graph and season record.
+- Attributed inheritance dossier on the dashboard and OBS (decisions, communities, lost systems, debts linked to their cause); Chronicle lineage graph, season record and a broadcast season finale.
+- Revocable, hash-stored public Chronicle links for following an Ark across channels ([ADR 0036](../decisions/0036-public-chronicle-links.md)); per-client budgets on unsigned entry routes.
 - Finished voyages release their channel on the next create or accept; presentation, history and `!history` name communities instead of raw IDs; named `!allocate hull 3 oxygen 2`.
 - Stale channel-assignment and mission-ballot protection (migration 011, audit A11), dashboard SSE recovery (ADR 0034), shared channel projections and bounded operational retention (migration 012).
 
