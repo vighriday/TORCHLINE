@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import { debtCopy } from './Dossier.tsx';
 import type { LivewireTarget } from '@torchline/contracts';
 import { ArkShip } from './App.tsx';
 import { Button, Brand, Icon } from './primitives.tsx';
@@ -399,7 +400,8 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
           <Brand compact />
           <div className="mini-status">
             <span>
-              {stake ? stageLabel : 'ARK STANDBY'} · {world.mode === 'live' ? 'TWITCH' : 'PRACTICE'}
+              {stake ? stageLabel : world.arrival ? 'ARK RECEIVED' : 'ARK STANDBY'} ·{' '}
+              {world.mode === 'live' ? 'TWITCH' : 'PRACTICE'}
             </span>
             <strong>
               {stake?.target ? risk.toUpperCase() : attemptName}
@@ -410,7 +412,13 @@ export function Livewire({ overlay = false }: { overlay?: boolean }) {
                 ? '!stake 1 NAV · 2 HULL · 3 O₂'
                 : stake?.status === 'locked'
                   ? 'COMMITMENT LOCKED · AWAITING ATTEMPT'
-                  : 'SAVED SHIP · CAPTAIN OPENS NEXT MISSION'}
+                  : world.arrival
+                    ? `INHERITED FROM ${world.arrival.from.label.toUpperCase()}${
+                        world.arrival.debts?.[0]
+                          ? ` · ${debtCopy[world.arrival.debts[0].kind].title.toUpperCase()} DUE CH.${world.arrival.debts[0].dueChapter}`
+                          : ''
+                      }`
+                    : 'SAVED SHIP · CAPTAIN OPENS NEXT MISSION'}
             </small>
             {visibleError && <small role="status">{visibleError}</small>}
           </div>
