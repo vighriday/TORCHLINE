@@ -601,7 +601,14 @@ export function BroadcastStudio() {
   const health = [
     ['BOT PERMISSION', integration?.botAuthorized ? 'AUTHORIZED' : 'PENDING'],
     ['EVENTSUB', details?.chatReady ? 'CHAT READY' : 'PENDING'],
-    ['NATIVE RAID', details?.raidReady ? 'SUBSCRIBED · NOT LIVE PROOF' : 'PENDING'],
+    [
+      'NATIVE RAID',
+      integration?.genuineRaidVerified
+        ? 'VERIFIED TRANSFER RECORDED'
+        : details?.raidReady
+          ? 'SUBSCRIBED · NOT LIVE PROOF'
+          : 'PENDING',
+    ],
     ['OVERLAY ACCESS', overlayUrl ? 'GENERATED' : 'NOT GENERATED'],
     [
       'BOT REPLIES',

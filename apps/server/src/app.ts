@@ -252,6 +252,13 @@ export async function createApp(
   // command instead of becoming permanent decoration. World revision is part of the key because a
   // second transfer can arrive at the same state version.
   type ArrivalBriefing = NonNullable<WorldPresentation['arrival']>;
+  // True only after a live world actually changed custody on signed native raid evidence and
+  // receiver consent. Subscriptions, simulations and screenshots never set it.
+  const genuineRaidVerified = async () =>
+    config.mode === 'live' &&
+    Boolean(
+      (await store.pool.query("SELECT 1 FROM custody_events WHERE mode='live' LIMIT 1")).rowCount,
+    );
   const arrivals = new Map<string, ArrivalBriefing | undefined>();
   const arrivalBriefing = async (world: StoredWorld): Promise<ArrivalBriefing | undefined> => {
     const key = `${world.id}:${world.state.version}:${world.revision}`;
@@ -395,7 +402,7 @@ export async function createApp(
         botAuthorized: details?.botAuthorized ?? Boolean(bot),
         botRepliesEnabled: config.botRepliesEnabled !== false,
         publicHttps: secure,
-        genuineRaidVerified: false,
+        genuineRaidVerified: await genuineRaidVerified(),
         ...(details ? { details } : {}),
       },
     };
@@ -452,7 +459,7 @@ export async function createApp(
               ).rowCount,
             ),
           publicHttps: secure,
-          genuineRaidVerified: false,
+          genuineRaidVerified: await genuineRaidVerified(),
         },
       };
     const result = await snapshot(await currentCreator(request));

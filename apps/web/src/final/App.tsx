@@ -570,9 +570,12 @@ function Application() {
     return () => document.documentElement.classList.remove('obs-document');
   }, [readOnly]);
   if (readOnly) {
+    // Automatic OBS layout keeps the small dock between chapters, except while a freshly received
+    // Ark's inheritance dossier is pending: that reveal is the moment the new audience needs.
     if (
       overlayView === 'compact' ||
-      (overlayView === 'auto' && (!canonical || canonical.phase === 'ready'))
+      (overlayView === 'auto' &&
+        (!canonical || (canonical.phase === 'ready' && !canonical.arrival)))
     )
       return (
         <div className="obs-source">
