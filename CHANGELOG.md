@@ -7,7 +7,9 @@
 - Add the Chronicle **lineage graph** (communities × chapters, saved cause links, custody markers) and a **season record** of each community's commitments and the voyage outcome.
 - End a voyage with a **season finale** on the dashboard and a broadcast-sized card in the OBS view, naming every community and its decisions in command order. A colony is no longer styled as a loss.
 - Publish revocable, read-only **public Chronicle links** (`/chronicle/#token`) so the community that handed an Ark on, returning viewers and judges can follow it across channels. Only a hash is stored (migration 014, now required). Regression: `tests/chronicle-share.test.ts`. [ADR 0036](docs/decisions/0036-public-chronicle-links.md).
-- Budget unsigned entry routes per client (429 with `Retry-After`) and flag receivers that are hosting a playable Ark.
+- Budget unsigned entry routes per client and per route (429 with `Retry-After`). `TRUST_PROXY_HOPS` keeps budgets per client behind a hosting proxy. Receivers hosting a playable Ark are flagged in the relay list.
+- Recover overlay and dashboard feeds within seconds of an outage (retry cap 15s → 4s), with a dashboard recovery journey for ADR 0034.
+- Make the Captions setting caption each newly saved consequence; it previously did nothing. Fix the phone view switch covering the signal strip and the Codex chapter status between chapters.
 - Free the channel held by a finished voyage when the captain creates a world or accepts a handoff. Previously "Create new world" failed with CHANNEL_BUSY after any ending. Regression: `tests/storage.test.ts`.
 - Name communities in presentation, history and `!history` replies instead of raw creator IDs; stored events keep the IDs replay needs.
 - Accept `!allocate hull 3 oxygen 2` as well as `!allocate 3 2`, matching what chat is taught.
