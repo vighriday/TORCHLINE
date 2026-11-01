@@ -95,10 +95,15 @@ export function ResourceBar({
   label,
   value,
   tone = 'normal',
+  unit = '%',
+  max = 100,
 }: {
   label: string;
   value: number;
   tone?: 'normal' | 'warning' | 'critical';
+  /** Supplies are counted crates, not a percentage, and can exceed one hundred. */
+  unit?: string;
+  max?: number;
 }) {
   return (
     <div className={`resource resource--${tone}`}>
@@ -117,11 +122,13 @@ export function ResourceBar({
           data-value={value}
         >
           {value}
-          <small>%</small>
+          <small>{unit === '%' ? '%' : ` ${unit}`}</small>
         </strong>
       </div>
       <div className="resource-track">
-        <span style={{ '--value': `${value}%` } as React.CSSProperties} />
+        <span
+          style={{ '--value': `${Math.min(100, (value / max) * 100)}%` } as React.CSSProperties}
+        />
       </div>
     </div>
   );

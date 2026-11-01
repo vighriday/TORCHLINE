@@ -38,7 +38,7 @@ export function SoundEffects() {
     const ctx = audio.current;
     const oscillator = ctx.createOscillator(),
       gain = ctx.createGain();
-    const loss = Object.values(canonical.events[0]?.resourceDelta ?? {}).some(
+    const loss = Object.values(canonical.events.at(-1)?.resourceDelta ?? {}).some(
       (value) => (value ?? 0) < 0,
     );
     oscillator.type = 'sine';
