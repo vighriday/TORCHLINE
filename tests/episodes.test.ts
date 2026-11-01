@@ -196,7 +196,22 @@ describe('persisted hosted episode policy', () => {
   it('parses bounded real-chat cooperation without host authority', () => {
     expect(parseChatCommand('!inspect LIFE')).toEqual({ type: 'inspect', area: 'life' });
     expect(parseChatCommand('!allocate 3 2')).toEqual({ type: 'allocate', hull: 3, oxygen: 2 });
+    expect(parseChatCommand('!allocate hull 3 oxygen 2')).toEqual({
+      type: 'allocate',
+      hull: 3,
+      oxygen: 2,
+    });
+    expect(parseChatCommand('!allocate O2 4 HULL 1')).toEqual({
+      type: 'allocate',
+      hull: 1,
+      oxygen: 4,
+    });
+    expect(parseChatCommand('!allocate hull 2')).toEqual({ type: 'allocate', hull: 2, oxygen: 0 });
     for (const value of [
+      '!allocate hull 3 hull 2',
+      '!allocate hull 4 oxygen 4',
+      '!allocate power 3',
+      '!allocate hull',
       '!allocate 5 5',
       '!allocate 0 0',
       '!allocate -1 2',
