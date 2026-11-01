@@ -90,6 +90,9 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
     expect(started.state.obligations[0].status).toBe('applied');
 
     await page.getByRole('button', { name: 'OPEN THE CHRONICLE', exact: true }).click();
+    // Proof on demand: the whole saved log replays to this exact ship.
+    await page.getByRole('button', { name: 'VERIFY THIS RECORD', exact: true }).click();
+    await expect(page.locator('.replay-check[data-matches=true]')).toContainText('REPLAY VERIFIED');
     await expect(page.locator('.season-record')).toContainText('Simulation alpha');
     await expect(page.locator('.season-record')).toContainText('Simulation beta');
     await expect(page.locator('.lineage-custody')).toHaveCount(1);
@@ -120,6 +123,8 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
       await reader.goto(link);
       await expect(reader.locator('.season-record')).toContainText('Simulation alpha');
       await expect(reader.locator('.lineage-custody')).toHaveCount(1);
+      await reader.getByRole('button', { name: 'VERIFY THIS RECORD', exact: true }).click();
+      await expect(reader.locator('.replay-check[data-matches=true]')).toBeVisible();
       await expect(reader.locator('.public-chronicle-custody')).toContainText(
         'Simulation alpha → Simulation beta',
       );

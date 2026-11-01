@@ -22,6 +22,8 @@ import {
   readSharedChronicle,
   readAlternatives,
   readSharedAlternatives,
+  verifyWorldReplay,
+  verifySharedReplay,
   shareWorld,
   advanceEpisodes,
   recoverEpisodes,
@@ -652,6 +654,22 @@ export async function createApp(
     if (shared.mode !== config.mode)
       denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
     return { mode: config.mode, alternatives: shared.alternatives };
+  });
+  // Replays the whole saved log through the pinned rules and compares digests. Read only.
+  app.get('/api/worlds/:id/verify', async (request) => {
+    const creator = await currentCreator(request);
+    const { id } = z.object({ id: NodeText }).parse(request.params);
+    return verifyWorldReplay(store, creator, id);
+  });
+  app.post('/api/chronicle/verify', async (request) => {
+    const { token } = z
+      .object({ token: z.string().regex(/^[a-f\d]{64}$/) })
+      .strict()
+      .parse(request.body);
+    const shared = await verifySharedReplay(store, token);
+    if (shared.mode !== config.mode)
+      denied('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: config.mode, verification: shared.verification };
   });
   app.post('/api/chronicle', async (request) => {
     const body = z

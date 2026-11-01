@@ -367,6 +367,20 @@ export interface DecisionAlternatives {
   verified: boolean;
   branches: AlternativeBranch[];
 }
+/** The whole saved event log replayed through the world's pinned rules and compared. */
+export interface ReplayVerification {
+  schemaVersion: 'world-records-2026-10-27.1';
+  worldId: string;
+  rulesVersion: RulesVersion;
+  events: number;
+  throughSequence: number;
+  /** SHA-256 of the canonical saved state and of the state the replay produced. */
+  savedDigest: string;
+  replayedDigest: string | null;
+  matches: boolean;
+  /** Why the pinned rules refused the log, when they did. */
+  failure: string | null;
+}
 export interface HandoffPreview {
   schemaVersion: 'world-records-2026-10-27.1';
   intentId: string;

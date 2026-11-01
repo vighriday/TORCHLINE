@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type {
   CustodyStep,
   RecordedWorldEvent,
+  ReplayVerification,
   WorldHistoryPage,
   WorldPresentation,
 } from '@torchline/contracts';
@@ -385,12 +386,60 @@ const endingTitle = {
  * The season's closing record: how the voyage ended and what each community contributed. It
  * reads only saved events; nothing here is scored or invented.
  */
+/**
+ * Proof on demand: the server replays every saved event through the pinned rules and compares
+ * SHA-256 digests of the replayed and the saved ship. Plain buttons, because the public
+ * Chronicle renders this without a dashboard session.
+ */
+function ReplayCheck({ verify }: { verify: () => Promise<ReplayVerification> }) {
+  const [result, setResult] = useState<ReplayVerification | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  if (!result)
+    return (
+      <div className="replay-check">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            setError('');
+            verify()
+              .then(setResult)
+              .catch((failure: Error) => setError(failure.message))
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? 'REPLAYING THE SAVED LOG…' : 'VERIFY THIS RECORD'}
+        </button>
+        {error && <p role="alert">{error}</p>}
+      </div>
+    );
+  return (
+    <div className="replay-check" data-matches={result.matches} role="status">
+      <b>{result.matches ? 'REPLAY VERIFIED' : 'REPLAY DIFFERS'}</b>
+      <span>
+        {result.matches
+          ? `${result.events} saved events replayed through ${result.rulesVersion} reproduce this exact ship.`
+          : (result.failure ?? 'The replayed ship does not match the saved one.')}
+      </span>
+      <small>
+        SHA-256 · saved {result.savedDigest.slice(0, 12)}…
+        {result.replayedDigest ? ` · replayed ${result.replayedDigest.slice(0, 12)}…` : ''}
+      </small>
+    </div>
+  );
+}
+
 export function SeasonRecord({
   world,
   loader,
+  verify,
 }: {
   world: WorldPresentation;
   loader?: HistoryLoader;
+  /** Replays the saved log and compares digests; omitted where no record access exists. */
+  verify?: () => Promise<ReplayVerification>;
 }) {
   const { record } = useFullHistory(world.worldId, world.gameVersion, loader);
   const nodes = record ? lineageNodes(record.events) : [];
@@ -428,6 +477,7 @@ export function SeasonRecord({
             ? world.endingReason
             : 'Every community that has commanded this Ark, and what it decided. The voyage is still open.'}
         </p>
+        {verify && <ReplayCheck key={world.gameVersion} verify={verify} />}
         <div className="season-resources">
           {(
             [

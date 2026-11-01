@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type {
   DecisionAlternatives,
   RecordedWorldEvent,
+  ReplayVerification,
   WorldHistoryPage,
   WorldPresentation,
 } from '@torchline/contracts';
@@ -79,7 +80,17 @@ export function PublicChronicle() {
       {!shared && !error && <p className="lineage-empty">Reading the saved record…</p>}
       {shared && (
         <>
-          <SeasonRecord world={shared.world} loader={loader} />
+          <SeasonRecord
+            world={shared.world}
+            loader={loader}
+            verify={async () =>
+              (
+                await request<{ verification: ReplayVerification }>('/api/chronicle/verify', {
+                  token,
+                })
+              ).verification
+            }
+          />
           <section className="lineage-panel" aria-label="Lineage across communities">
             <div className="section-label">
               <span>LINEAGE · WHO CAUSED WHAT</span>

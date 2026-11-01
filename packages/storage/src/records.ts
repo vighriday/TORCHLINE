@@ -5,6 +5,7 @@ import type {
   AlternativeBranch,
   Command,
   DecisionAlternatives,
+  ReplayVerification,
   WorldEvent,
   WorldHistoryPage,
   WorldState,
@@ -165,17 +166,89 @@ export async function readSharedChronicle(store: Store, token: string, query: Hi
 }
 // History is append-only, so a decision's alternatives never change once computed.
 const alternativeCache = new Map<string, DecisionAlternatives>();
+// JSON semantics with sorted keys: absent and undefined fields compare equal, as in storage.
 const canonical = (value: unknown): string =>
   Array.isArray(value)
-    ? `[${value.map(canonical).join(',')}]`
+    ? `[${value.map((item) => (item === undefined ? 'null' : canonical(item))).join(',')}]`
     : value !== null && typeof value === 'object'
       ? `{${Object.keys(value)
+          .filter((key) => (value as Record<string, unknown>)[key] !== undefined)
           .sort()
           .map(
             (key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`,
           )
           .join(',')}}`
       : JSON.stringify(value);
+const digest = (value: unknown) => createHash('sha256').update(canonical(value)).digest('hex');
+
+// The replay of a given saved version never changes; the saved state is re-hashed every time.
+const replayCache = new Map<
+  string,
+  { digest: string | null; failure: string | null; events: number }
+>();
+/**
+ * Replays a world's entire saved event log from genesis through its pinned rules version and
+ * compares a SHA-256 digest of the result with a digest of the saved state. A refusal by the
+ * rules (a stored effect they no longer produce, a sequence gap) is reported, never hidden.
+ */
+async function verifyReplay(
+  c: PoolClient,
+  row: { id: string; state: StoredWorld['state'] },
+): Promise<ReplayVerification> {
+  const key = `${row.id}:${row.state.version}`;
+  let replay = replayCache.get(key);
+  if (!replay) {
+    const events: WorldEvent[] = (
+      await c.query(
+        'SELECT event FROM world_events WHERE world_id=$1 AND sequence<=$2 ORDER BY sequence',
+        [row.id, row.state.version],
+      )
+    ).rows.map((item) => item.event);
+    try {
+      replay = {
+        digest: digest(replayEvents(row.id, events, row.state.rulesVersion)),
+        failure: null,
+        events: events.length,
+      };
+    } catch (error) {
+      if (!(error instanceof DomainError)) throw error;
+      replay = { digest: null, failure: error.message, events: events.length };
+    }
+    if (replayCache.size > 256) replayCache.clear();
+    replayCache.set(key, replay);
+  }
+  const savedDigest = digest(row.state);
+  return {
+    schemaVersion: 'world-records-2026-10-27.1',
+    worldId: row.id,
+    rulesVersion: row.state.rulesVersion,
+    events: replay.events,
+    throughSequence: row.state.version,
+    savedDigest,
+    replayedDigest: replay.digest,
+    matches: replay.digest === savedDigest,
+    failure: replay.failure,
+  };
+}
+export async function verifyWorldReplay(store: Store, creator: Creator, id: string) {
+  return store.transaction(async (c) => {
+    await store.lockChannels(c, [creator.id]);
+    return verifyReplay(c, await owned(c, creator, id));
+  });
+}
+export async function verifySharedReplay(store: Store, token: string) {
+  return store.transaction(async (c) => {
+    const row = (
+      await c.query(
+        'SELECT w.id,w.mode,w.state FROM world_shares s JOIN worlds w ON w.id=s.world_id WHERE s.hash=$1 FOR SHARE OF w',
+        [createHash('sha256').update(token).digest('hex')],
+      )
+    ).rows[0];
+    if (!row)
+      throw new DomainError('NOT_FOUND', 'This Chronicle link is unknown or was withdrawn.');
+    return { mode: row.mode as Creator['mode'], verification: await verifyReplay(c, row) };
+  });
+}
 
 /**
  * Rebuilds the saved world just before one decision from its own event log, then applies every

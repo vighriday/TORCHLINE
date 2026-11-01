@@ -515,7 +515,7 @@ function Awakening({ setMode }: { setMode: (mode: Mode) => void }) {
                 : 'LAUNCH THE ARK'}{' '}
             <Icon name="chevron" />
           </Button>
-          <Button onClick={() => setMode('simulator')}>WATCH A TWO-CREW RELAY</Button>
+          <Button onClick={() => setMode('simulator')}>WATCH TWO GAMES SHARE ONE ARK</Button>
         </div>
       </div>
       <div className="awakening-metrics">

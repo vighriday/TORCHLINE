@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type {
   DecisionAlternatives,
   HandoffPreview,
+  ReplayVerification,
   RecordedWorldEvent,
   WorldPresentation,
 } from '@torchline/contracts';
@@ -877,7 +878,10 @@ function ChronicleRecords({ world }: { world: WorldPresentation }) {
     record?.events[0];
   return (
     <>
-      <SeasonRecord world={world} />
+      <SeasonRecord
+        world={world}
+        verify={() => request<ReplayVerification>(`/api/worlds/${world.worldId}/verify`)}
+      />
       <section className="archive-layout">
         <div className="archive-ship">
           <ArkShip
@@ -1223,8 +1227,9 @@ export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
         <span className="eyebrow">JUDGE ARENA / REAL SAVED GAMEPLAY</span>
         <strong>THE RELAY REHEARSAL</strong>
         <p>
-          Two practice communities, one Ark. Watch one crew&rsquo;s decision become the next
-          crew&rsquo;s crisis. Every step runs the real engine, database and custody rules; no
+          Two practice communities, two games, one Ark. Watch a Minecraft failure and one
+          crew&rsquo;s sacrifice become the next crew&rsquo;s crisis, then a Rocket League win
+          repair the same hull. Every step runs the real engine, database and custody rules; no
           Twitch messages are sent.
         </p>
       </div>

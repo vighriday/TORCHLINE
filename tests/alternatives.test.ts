@@ -6,6 +6,8 @@ import {
   readAlternatives,
   readSharedAlternatives,
   shareWorld,
+  verifySharedReplay,
+  verifyWorldReplay,
 } from '@torchline/storage';
 import type { Creator, Store } from '@torchline/storage';
 import { database } from './helpers.ts';
@@ -147,5 +149,62 @@ describe('one-step decision alternatives', () => {
       await expect(
         readSharedAlternatives(store, 'cd'.repeat(32), decision.id),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    }));
+});
+
+describe('whole-record replay verification', () => {
+  it('replays the full saved log to the saved ship and catches a tampered state', () =>
+    database(async (store) => {
+      const creator = await store.ensureCreator('sim-alpha', 'Alpha crew', 'simulation');
+      const id = await store.create(creator);
+      await mission(store, id, creator, {
+        type: 'open',
+        preset: 'match',
+        game: 'Rocket League',
+        label: 'Aerial goal',
+      });
+      const stakeId = (await store.get(id)).state.livewire!.stake.id;
+      await mission(store, id, creator, { type: 'lock', stakeId, solo: 'hull' });
+      await mission(store, id, creator, { type: 'resolve', stakeId, outcome: 'success' });
+      for (const input of [
+        { type: 'start' },
+        { type: 'close-challenge' },
+        { type: 'commit', option: 'burn-navigation' },
+      ] as Command[])
+        await command(store, id, creator, input);
+      const saved = await store.get(id);
+      const verified = await verifyWorldReplay(store, creator, id);
+      expect(verified).toMatchObject({
+        matches: true,
+        failure: null,
+        events: saved.events.length,
+        throughSequence: saved.state.version,
+        rulesVersion: 'ark-v3',
+      });
+      expect(verified.savedDigest).toMatch(/^[a-f\d]{64}$/);
+      expect(verified.replayedDigest).toBe(verified.savedDigest);
+
+      // A saved state the log does not produce is reported, not hidden.
+      await store.pool.query(
+        "UPDATE worlds SET state=jsonb_set(state,'{resources,hull}',to_jsonb((state->'resources'->>'hull')::int + 1)) WHERE id=$1",
+        [id],
+      );
+      const tampered = await verifyWorldReplay(store, creator, id);
+      expect(tampered.matches).toBe(false);
+      expect(tampered.replayedDigest).toBe(verified.replayedDigest);
+      expect(tampered.savedDigest).not.toBe(verified.savedDigest);
+
+      const token = 'ef'.repeat(32);
+      await store.pool.query(
+        "UPDATE worlds SET state=jsonb_set(state,'{resources,hull}',to_jsonb((state->'resources'->>'hull')::int - 1)) WHERE id=$1",
+        [id],
+      );
+      await shareWorld(store, creator, id, token);
+      const shared = await verifySharedReplay(store, token);
+      expect(shared.verification.matches).toBe(true);
+      const stranger = await store.ensureCreator('sim-beta', 'Beta crew', 'simulation');
+      await expect(verifyWorldReplay(store, stranger, id)).rejects.toMatchObject({
+        code: 'FORBIDDEN',
+      });
     }));
 });

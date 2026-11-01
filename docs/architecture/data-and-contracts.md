@@ -71,6 +71,7 @@ Keep rules/content immutable once a world starts. New balancing creates a new ve
 | `POST /api/chronicle` | Public; token in body; read-only presentation and paginated history for a shared world, 404 when unknown or withdrawn |
 | `GET /api/worlds/:id/alternatives?event=` | Current custodian; one-step, read-only replay of every option of a saved decision or attested mission result, with a recomputation check; 409 for other events ([ADR 0038](../decisions/0038-one-step-decision-alternatives.md)) |
 | `POST /api/chronicle/alternatives` | Public; token and event in body; the same alternatives for a shared world, 404 when unknown, withdrawn or in the other mode |
+| `GET /api/worlds/:id/verify`, `POST /api/chronicle/verify` | Custodian session, or a public link token in the body; replays the whole saved log and compares SHA-256 digests of the replayed and saved state |
 | `POST /api/worlds/:id/commands` | Session, CSRF/origin, custody, mode, expected version, idempotency key |
 | `POST /api/handoffs`, `/api/handoffs/:id/accept`, `/decline`, `/cancel` | Source/recipient identity by action; state-machine and transaction checks |
 | `POST /api/creator/presence`, `/receive-opt-in` | Creator-controlled readiness, separate from actual raid proof |

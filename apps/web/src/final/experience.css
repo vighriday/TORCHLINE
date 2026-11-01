@@ -1713,3 +1713,50 @@ body:has(.platform-page) .consequence-caption {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+/* Replay check: the saved log replayed through the pinned rules, digests compared. */
+.replay-check {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  margin-top: 12px;
+}
+.replay-check button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(127, 214, 164, 0.55);
+  background: rgba(127, 214, 164, 0.08);
+  color: #9fe0bb;
+  font: 600 calc(10.5px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.1em;
+}
+.replay-check[data-matches] {
+  padding: 8px 11px;
+  border-left: 3px solid #7fd6a4;
+  background: rgba(127, 214, 164, 0.07);
+}
+.replay-check[data-matches='false'] {
+  border-left-color: #e08a75;
+  background: rgba(224, 138, 117, 0.08);
+}
+.replay-check b {
+  color: #7fd6a4;
+  font: 700 calc(11px * var(--hud-scale, 1)) var(--mono);
+  letter-spacing: 0.12em;
+}
+.replay-check[data-matches='false'] b {
+  color: #e08a75;
+}
+.replay-check span {
+  color: var(--bone);
+  font: 500 12px/1.45 var(--mono);
+}
+.replay-check small {
+  color: #7f8a86;
+  font: 400 calc(9.5px * var(--hud-scale, 1)) var(--mono);
+  overflow-wrap: anywhere;
+}
+.replay-check p {
+  margin: 0;
+  color: #f1b3a5;
+  font: 400 11px var(--mono);
+}
