@@ -155,7 +155,7 @@ const navigationItems: Array<{ mode: Mode; index: string; name: string; descript
   { mode: 'broadcast', index: '06', name: 'Broadcast', description: 'Creator and OBS studio' },
   { mode: 'archive', index: '07', name: 'Archive', description: 'Persistent world chronicle' },
   { mode: 'codex', index: '08', name: 'The Codex', description: 'Field manual and rules' },
-  { mode: 'simulator', index: '09', name: 'Judge Arena', description: 'Guided deterministic demo' },
+  { mode: 'simulator', index: '09', name: 'Judge Arena', description: 'Guided two-crew relay' },
   { mode: 'settings', index: '10', name: 'Settings', description: 'Display and accessibility' },
 ];
 
@@ -512,7 +512,7 @@ function Awakening({ setMode }: { setMode: (mode: Mode) => void }) {
                 : 'LAUNCH THE ARK'}{' '}
             <Icon name="chevron" />
           </Button>
-          <Button onClick={() => setMode('simulator')}>TRY THE JUDGE SIMULATION</Button>
+          <Button onClick={() => setMode('simulator')}>WATCH A TWO-CREW RELAY</Button>
         </div>
       </div>
       <div className="awakening-metrics">

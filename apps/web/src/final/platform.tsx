@@ -310,6 +310,7 @@ export function Inheritance({
                     ))}
                   </select>
                 </label>
+                {blocked && <small className="relay-blocked">{blocked}</small>}
                 <Button
                   disabled={busy || !!blocked}
                   onClick={() =>
@@ -324,7 +325,6 @@ export function Inheritance({
                 >
                   Prepare handoff
                 </Button>
-                {blocked && <small className="relay-blocked">{blocked}</small>}
               </div>
             )}
           </>
