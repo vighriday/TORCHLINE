@@ -95,7 +95,9 @@ describe('persisted hosted episode policy', () => {
       const { creator, id } = await setup(store);
       await command(store, id, creator, { type: 'start' });
       await store.pool.query(
-        "UPDATE episode_clocks SET observed_at=clock_timestamp()-interval '5 minutes',deadline_at=clock_timestamp()-interval '4 minutes' WHERE world_id=$1",
+        // One statement timestamp for both columns: two clock_timestamp() calls drift apart by
+        // microseconds and made the restored duration 59999 ms.
+        "UPDATE episode_clocks SET observed_at=now()-interval '5 minutes',deadline_at=now()-interval '4 minutes' WHERE world_id=$1",
         [id],
       );
       const resources = (await store.get(id)).state.resources;
