@@ -69,3 +69,10 @@ jobs:
       - name: Hosted demo logs
         if: always()
         run: docker logs torchline-demo 2>&1 | tail -40 || true
+      - name: Judges' own live setup (live mode, their Twitch app and ngrok address)
+        run: node scripts/smoke-live-compose.mjs
+      - name: Stop the live setup
+        if: always()
+        run: |
+          docker compose --env-file .env.live -f compose.live.yaml logs app 2>&1 | tail -40 || true
+          docker compose --env-file .env.live -f compose.live.yaml down --volumes || true

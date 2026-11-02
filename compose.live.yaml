@@ -1,0 +1,74 @@
+# Your own live TORCHLINE: your Twitch channel, your machine, your free ngrok address.
+# Fill .env.live from .env.live.example (README → Judge guide → path 4), then:
+#   docker compose --env-file .env.live -f compose.live.yaml up -d --build
+# Twitch reaches this server only through the ngrok tunnel. The Ark is kept in a named volume
+# until you run `down --volumes`. Nothing here contacts the author's machine or accounts.
+name: torchline-live
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: torchline
+      POSTGRES_PASSWORD: local-live
+      POSTGRES_DB: torchline
+    volumes:
+      - live-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U torchline -d torchline']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Development mode, as in the verified 2 November live run: production mode also requires
+      # TLS to a remote database, which this private compose network does not use.
+      NODE_ENV: development
+      WORLD_MODE: live
+      LIVEWIRE_ENABLED: 'true'
+      BOT_REPLIES_ENABLED: 'true'
+      DATABASE_URL: postgresql://torchline:local-live@db:5432/torchline
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL in .env.live}
+      TWITCH_REDIRECT_URI: ${PUBLIC_BASE_URL}/auth/twitch/callback
+      TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:?set TWITCH_CLIENT_ID in .env.live}
+      TWITCH_CLIENT_SECRET: ${TWITCH_CLIENT_SECRET:?set TWITCH_CLIENT_SECRET in .env.live}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env.live}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:?set TOKEN_ENCRYPTION_KEY in .env.live}
+      BOT_SETUP_SECRET: ${BOT_SETUP_SECRET:?set BOT_SETUP_SECRET in .env.live}
+      EVENTSUB_SECRET: ${EVENTSUB_SECRET:?set EVENTSUB_SECRET in .env.live}
+      # The ngrok tunnel always sits in front, so per-viewer budgets read its forwarded address.
+      TRUST_PROXY_HOPS: '1'
+      HOST: 0.0.0.0
+      PORT: '3000'
+    entrypoint: ['sh', '-c', 'node scripts/migrate.ts && exec node apps/server/src/main.ts']
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+  tunnel:
+    image: ngrok/ngrok:3.39.12-alpine
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?set NGROK_AUTHTOKEN in .env.live}
+    command: ['http', 'app:3000', '--url', '${PUBLIC_BASE_URL}', '--log', 'stdout']
+volumes:
+  live-db:
