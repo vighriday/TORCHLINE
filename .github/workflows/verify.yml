@@ -56,3 +56,16 @@ jobs:
       - name: Stop the preview
         if: always()
         run: docker compose down --volumes
+      - name: Hosted demo image (production mode, private loopback PostgreSQL)
+        run: |
+          docker build -f deploy/demo/Dockerfile -t torchline:demo .
+          docker run -d --name torchline-demo -p 127.0.0.1:3100:3000 \
+            -e PUBLIC_BASE_URL=https://demo.invalid torchline:demo
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:3100/health/ready >/dev/null && break
+            sleep 2
+          done
+          PREVIEW_URL=http://127.0.0.1:3100 PREVIEW_ORIGIN=https://demo.invalid node scripts/smoke-compose.mjs
+      - name: Hosted demo logs
+        if: always()
+        run: docker logs torchline-demo 2>&1 | tail -40 || true
