@@ -6,11 +6,13 @@ const git = (...args) =>
     encoding: 'utf8',
   }).trim();
 const tracked = git('ls-files').split('\n').filter(Boolean);
+// Placeholder-only templates; every other environment file is private.
+const envTemplates = new Set(['.env.example', '.env.live.example']);
 const privateFiles = tracked.filter(
   (path) =>
     /(^|\/)idea\.txt$/i.test(path) ||
     /^docs\/internal\//i.test(path) ||
-    (/(^|\/)\.env($|\.)/.test(path) && path !== '.env.example') ||
+    (/(^|\/)\.env($|\.)/.test(path) && !envTemplates.has(path)) ||
     /^\.(local|tools)\//.test(path),
 );
 if (privateFiles.length)
