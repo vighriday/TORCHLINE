@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://youtu.be/mp-ckxsH4M4">
+<a href="https://youtu.be/uf695BGAE7A">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/awakening.png">
     <img src="assets/readme/hero-awakening.webp" width="960" alt="TORCHLINE's opening scene: the persistent generation ship ARK-001 rolls above a planet beside the line 'The stream ends. The world doesn't.' Recorded from the app in saved practice.">
@@ -15,7 +15,7 @@
 
 <p>
 <a href="https://torchline-demo.onrender.com"><b>▶&nbsp;Play it in your browser</b></a> &nbsp;·&nbsp;
-<a href="https://youtu.be/mp-ckxsH4M4"><b>🎬&nbsp;Watch the video</b></a> &nbsp;·&nbsp;
+<a href="https://youtu.be/uf695BGAE7A"><b>🎬&nbsp;Watch the video</b></a> &nbsp;·&nbsp;
 <a href="#watch">Two games, one Ark</a> &nbsp;·&nbsp;
 <a href="#chair">Take the captain's chair</a> &nbsp;·&nbsp;
 <a href="#livewire">LIVEWIRE</a> &nbsp;·&nbsp;
@@ -41,7 +41,7 @@
 > **Codex session ID: `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`** · [How Codex built it ↓](#codex)
 
 > [!TIP]
-> **Judges, start with the video (2:38): <https://youtu.be/mp-ckxsH4M4>** — real Twitch chat changing the Ark on a live broadcast, LIVEWIRE on live Twitch, and how Codex built it.<br>
+> **Judges, start with the video (2:38): <https://youtu.be/uf695BGAE7A>** — real Twitch chat changing the Ark on a live broadcast, LIVEWIRE on live Twitch, and how Codex built it.<br>
 > **Then play it yourself: <https://torchline-demo.onrender.com>** — no install, no Twitch account. Choose **Watch two games share one Ark → Autoplay to the handoff**: in about two minutes two communities in two different games change one Ark, using the real engine, database and custody rules with practice crews and a labelled simulated raid.<br>
 > **Or test everything yourself, on your own machine and your own Twitch channel:** the [Judge guide ↓](#judges) needs nothing of mine.<br>
 > <sub>Free hosting: after an idle spell the first visit can take about a minute, and the demo starts fresh each time it wakes. Prefer local? `docker compose up --build`, then http://localhost:3000.</sub>
@@ -72,7 +72,7 @@ You can play all five chapters on one channel. **A raid moves the world; you don
 
 ## 🎬 Watch two games share one Ark
 
-<a href="https://youtu.be/mp-ckxsH4M4?t=71"><img src="assets/readme/cross-game-relay.png" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission failed and the hull lost 6. After the handoff, channel B's aerial-goal mission succeeded and the same hull gained 3."></a>
+<a href="https://youtu.be/uf695BGAE7A?t=71"><img src="assets/readme/cross-game-relay.png" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission failed and the hull lost 6. After the handoff, channel B's aerial-goal mission succeeded and the same hull gained 3."></a>
 
 <sub>This is the Judge Arena, captured from the app in saved practice; select the image to watch it run in the video. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are scripted practice attestations, saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
 
@@ -244,7 +244,7 @@ Every chat message reaches TORCHLINE as a signed EventSub notification. It is de
 
 ## 🎮 LIVEWIRE: your next attempt matters
 
-<a href="https://youtu.be/mp-ckxsH4M4?t=48"><img src="assets/readme/voxel-livewire.png" width="960" alt="A LIVEWIRE mission on the voxel preset in saved practice: chat's hull stake is locked before the lava-gap jump. Select it to watch LIVEWIRE on live Twitch in the video."></a>
+<a href="https://youtu.be/uf695BGAE7A?t=48"><img src="assets/readme/voxel-livewire.png" width="960" alt="A LIVEWIRE mission on the voxel preset in saved practice: chat's hull stake is locked before the lava-gap jump. Select it to watch LIVEWIRE on live Twitch in the video."></a>
 
 Keep playing your usual game. Before a difficult jump, an aerial or a boss attempt, open one mission:
 
@@ -364,7 +364,7 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 <tr><td><b>Codex session ID</b></td><td><code>01a176fc-1e4a-7e83-b21e-1043aa17e8bc</code></td></tr>
 <tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–30 October 2026</td></tr>
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
-<tr><td><b>In the video</b></td><td><a href="https://youtu.be/mp-ckxsH4M4?t=122">From 2:02: the Codex thread, its brief and its commits</a></td></tr>
+<tr><td><b>In the video</b></td><td><a href="https://youtu.be/uf695BGAE7A?t=122">From 2:02: the Codex thread, its brief and its commits</a></td></tr>
 </table>
 
 **Codex by the numbers**, one thread, 26–30 October:
@@ -460,10 +460,10 @@ flowchart LR
 | Your own live instance                                    |   ✅   | [`compose.live.yaml`](compose.live.yaml) runs the live server with your Twitch application and your free ngrok address ([Judge guide](#judge-twitch)). CI starts it in live mode on every push and checks that Twitch sign-in goes to your application with the exact redirect; the same server ran live on my channel on 2 Nov |
 | OBS views                                                 |   ✅   | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md))                                                                                                                                                                                                   |
 | Real Twitch chat → live Ark                               |   ✅   | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md))                                                                                                                                                   |
-| Overlay updating from live chat, on video                 |   ✅   | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 ([watch at 0:16](https://youtu.be/mp-ckxsH4M4?t=16))                                         |
+| Overlay updating from live chat, on video                 |   ✅   | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 ([watch at 0:16](https://youtu.be/uf695BGAE7A?t=16))                                         |
 | Raid handoff (custody transfer)                           |   ✅   | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next            |
-| LIVEWIRE on live Twitch                                   |   ✅   | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect ([watch at 0:48](https://youtu.be/mp-ckxsH4M4?t=48))                     |
-| Bot replies                                               |   ✅   | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov ([watch at 0:40](https://youtu.be/mp-ckxsH4M4?t=40)). Gameplay never depends on replies  |
+| LIVEWIRE on live Twitch                                   |   ✅   | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect ([watch at 0:48](https://youtu.be/uf695BGAE7A?t=48))                     |
+| Bot replies                                               |   ✅   | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov ([watch at 0:40](https://youtu.be/uf695BGAE7A?t=40)). Gameplay never depends on replies  |
 | Permanent live hosting                                    |   ⏳   | The practice demo is hosted (above). My live Twitch play runs on my own computer through a secure tunnel while I stream, and you can run your own the same way ([Judge guide](#judge-twitch)); viewers need nothing but Twitch chat. An always-on live host is next                                                             |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
@@ -490,7 +490,7 @@ Nothing below depends on my computer or my accounts. Each path stands alone, fro
 
 ### 1 · Watch the video
 
-<https://youtu.be/mp-ckxsH4M4>: live Twitch from [0:16](https://youtu.be/mp-ckxsH4M4?t=16), LIVEWIRE live from [0:48](https://youtu.be/mp-ckxsH4M4?t=48), the Judge Arena from [1:11](https://youtu.be/mp-ckxsH4M4?t=71) and Codex from [2:02](https://youtu.be/mp-ckxsH4M4?t=122).
+<https://youtu.be/uf695BGAE7A>: live Twitch from [0:16](https://youtu.be/uf695BGAE7A?t=16), LIVEWIRE live from [0:48](https://youtu.be/uf695BGAE7A?t=48), the Judge Arena from [1:11](https://youtu.be/uf695BGAE7A?t=71) and Codex from [2:02](https://youtu.be/uf695BGAE7A?t=122).
 
 <a id="judge-hosted"></a>
 
