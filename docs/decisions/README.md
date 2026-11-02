@@ -43,7 +43,8 @@ ADRs 0001–0007 were approved for implementation on 2026-10-26. Their original 
 | [0037](0037-cross-game-livewire-relay.md) | One illustrative feed per LIVEWIRE preset, a two-game relay rehearsal and an attributed mission ledger | Presentation/LIVEWIRE/custody; component review not recorded |
 | [0038](0038-one-step-decision-alternatives.md) | One-step, read-only replay of every option of a saved decision, and whole-record replay verification by digest | Engine/records/presentation; component review not recorded |
 | [0039](0039-hosted-practice-demo.md) | Hosted practice demo: production server in simulation mode with a private loopback database, disposable on restart | Deployment/access; component review not recorded |
+| [0040](0040-bot-moderator-role.md) | The bot account is a moderator of the owner's channel; scopes unchanged; replies re-enabled after verified delivery | Twitch/bot delivery; component review not recorded |
 
-The [component stress review](../architecture/decision-stress-review.md) evaluates the choices it lists across all component boundaries; ADRs 0034–0039 have no recorded component review. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
+The [component stress review](../architecture/decision-stress-review.md) evaluates the choices it lists across all component boundaries; ADRs 0034–0040 have no recorded component review. The [validation plan](../planning/validation.md) defines the future evidence needed to accept their runtime behavior.
 
 For a new ADR, record context, decision, strongest alternative, consequences, dependencies, validation and revisit trigger. Link relevant requirements, component matrix rows and sources. Do not replace an explicit user preference with a local guideline.

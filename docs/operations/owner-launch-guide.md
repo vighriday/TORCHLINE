@@ -1,6 +1,6 @@
 # Get TORCHLINE operational with Twitch
 
-Updated 2026-11-01. Account and live-state notes are dated snapshots, not current status. For the configured accounts start with the [existing-account live test](controlled-account-live-test.md) and shorter [live release checklist](live-release-checklist.md). OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub delivers signed events to the server. You do not need manual tokens or a Twitch Extension.
+Updated 2026-11-02. Account and live-state notes are dated snapshots, not current status. For the configured accounts start with the [existing-account live test](controlled-account-live-test.md) and shorter [live release checklist](live-release-checklist.md). OAuth means Twitch's consent screen; a callback is the HTTPS address Twitch returns to afterward. EventSub delivers signed events to the server. You do not need manual tokens or a Twitch Extension.
 
 ## Starting point (dated evidence)
 
@@ -13,9 +13,9 @@ Updated 2026-11-01. Account and live-state notes are dated snapshots, not curren
 | HTTPS callbacks | Three genuine signed challenges and three enabled chat/stream subscriptions were verified on October 26. This is historical evidence, not proof the endpoint is currently reachable. |
 | Development origin | As of October 29, after the callback mismatch was corrected, a fresh creator sign-in through the development tunnel created the first live Ark. `YOUR_ORIGIN` below stands for your own HTTPS origin. Simulation stays on 3000. |
 | Real chat | As of October 29: four signed query deliveries, none applied as gameplay. On October 30 three genuine viewer chat messages (from an ordinary viewer account, not the broadcaster or bot) arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. |
-| Bot replies | Not verified. Twitch accepted two sends but no other viewer saw them. Replies are disabled in the live configuration (`BOT_REPLIES_ENABLED=false`). |
-| Actual OBS | Native OBS 32.2.2 rendered the 30 Oct final-design build in isolated saved practice; the current build and live-chat-driven updates are not yet verified in OBS. |
-| Live LIVEWIRE | Not verified. One live mission was opened and expired; no attested live result exists. |
+| Bot replies | Verified on 2 November 2026. Earlier sends were accepted by Twitch but no other viewer saw them, because Twitch was filtering the new bot account. After the owner made `hriday_29` a moderator of `hriday29` ([ADR 0040](../decisions/0040-bot-moderator-role.md)), an anonymous read-only viewer connection received the bot's message, replies were re-enabled in the live configuration (`BOT_REPLIES_ENABLED=true`) and `!status` produced exactly one visible reply in the live chat. The bot token has no moderation scopes. |
+| Actual OBS | Native OBS 32.2.2 rendered the 30 Oct final-design build in isolated saved practice. On 2 November 2026 the OBS browser source (full expedition view) on the live stream updated from live chat without a refresh, screen-recorded from the public twitch.tv viewer page; the current build is otherwise not yet re-verified in OBS. |
+| Live LIVEWIRE | Verified on 2 November 2026. At the chapter 1 boundary a mission opened, a signed `!stake 2` from chat selected hull, the mission locked before the attempt and the streamer-attested success saved hull +3 (80 to 83); `pnpm twitch:verify:livewire` reported status success. An earlier live mission, on October 30, expired. |
 | Native raid | Not passed. A separate consenting broadcaster is needed only for this later acceptance; the dedicated bot keeps its role. |
 | Production hosting | No permanent live hosting exists; a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI). Hosting below is a proposed procedure, not a deployed service. |
 
@@ -110,7 +110,7 @@ For a fresh bot authorization:
 4. Check the actual account name on Twitch. Approve `user:read:chat`, `user:write:chat`, and `user:bot`. This matches [Twitch's cloud chatbot grant requirements](https://dev.twitch.tv/docs/chat/authenticating/).
 5. If that empty account was accidentally connected as a creator, TORCHLINE shows **Use ACCOUNT as the dedicated bot?** Choose **Convert ACCOUNT to the dedicated bot** only when the name is correct. The confirmation expires in five minutes. An account with Ark or handoff history cannot be converted; use a separate bot account instead.
 
-**Confirm:** the site reports the dedicated bot authorization is current. This gives the bot chat access, not world custody or creator controls. Do not grant moderator status as a blanket troubleshooting step; the implemented cloud-bot grants are the intended authorization path.
+**Confirm:** the site reports the dedicated bot authorization is current. This gives the bot chat access, not world custody or creator controls. Do not grant moderator status as a blanket troubleshooting step; the implemented cloud-bot grants are the intended authorization path. On 2 November 2026, after diagnosing that Twitch was filtering the new bot account, the owner deliberately made `hriday_29` a moderator of `hriday29` ([ADR 0040](../decisions/0040-bot-moderator-role.md)). TORCHLINE's bot token has no moderation scopes, so it cannot use moderator powers. Per ADR 0040, another channel that runs its own new bot account should make that account a moderator or expect the same filtering.
 
 ## 7. Check EventSub subscriptions and permissions
 
@@ -128,12 +128,12 @@ Webhook URL: `https://YOUR_ORIGIN/integrations/twitch/eventsub`. It accepts auth
 2. Open that broadcaster's **actual Twitch chat**, using the ordinary Twitch site or mobile app. Send `!scan A` from a participant account. Look for the discovered clue in TORCHLINE and an increase in **chat actions applied** under Broadcast.
 3. Share scans, discover the constraints, and submit a route using `!route` followed by space-separated nodes, such as the path the crew has solved. A successful solution must change canonical resources and repair shields; reloading must preserve it.
 4. Choose **Close challenge**, then send `!vote 1`. Its advisory tally should change. The captain reviews the forecast and commits; chat votes cannot directly commit a sacrifice.
-5. Bot replies require `BOT_REPLIES_ENABLED=true`; visible delivery is unverified. With replies enabled, send `!status` or `!history` and check whether another viewer sees the dedicated bot's reply in Twitch chat and Broadcast records a sent outcome. Repeated requests are coalesced for ten seconds; wait before retrying.
+5. Bot replies require `BOT_REPLIES_ENABLED=true`; visible delivery was verified on 2 November 2026 after the bot became a channel moderator ([ADR 0040](../decisions/0040-bot-moderator-role.md)). With replies enabled, send `!status` or `!history` and check whether another viewer sees the dedicated bot's reply in Twitch chat and Broadcast records a sent outcome. Repeated requests are coalesced for ten seconds; wait before retrying.
 6. In chapter 3, use `!scan A`, then `!patch A`, and cooperate on the remaining prerequisites. Repairs should change life support, oxygen and future consequences. The interface explains the current reward.
 
 Check the public exposure scan with `pnpm check:public-secrets`. It checks configured credentials and saved tokens in Git, browser output, local logs and selected public responses. It first identifies the live application; an offline/tunnel error returns **partial** with exit 2. `pnpm check:public-secrets --artifacts-only` explicitly checks local artifacts while HTTPS is unavailable and does not verify public routes. These are bounded checks, not claims of universal security.
 
-**Confirm:** record an actual chat message → accepted action → visible canonical change. A visible bot reply is a separate gate: it requires `BOT_REPLIES_ENABLED=true`, and visible delivery is unverified. Fixture tests and synthetic messages do not satisfy this acceptance stage. Bot sending may be recorded as failed, dropped or uncertain; HTTP success alone is insufficient. Keep tokens and private overlay links out of recordings.
+**Confirm:** record an actual chat message → accepted action → visible canonical change. A visible bot reply is a separate gate: it requires `BOT_REPLIES_ENABLED=true`, and visible delivery was verified on 2 November 2026 only after the bot became a channel moderator. Fixture tests and synthetic messages do not satisfy this acceptance stage. Bot sending may be recorded as failed, dropped or uncertain; HTTP success alone is insufficient. Keep tokens and private overlay links out of recordings.
 
 ## 9. Add the read-only game view to OBS
 
@@ -194,7 +194,7 @@ Chromium overlay coverage does not replace your OBS browser-source, cookie refre
 | Bot grant missing | Separate operator-protected bot consent; creator login alone does not authorize it |
 | Chat subscription not ready | Bot/current broadcaster grants, public callback reachability, then Broadcast reconciliation |
 | Delivered chat but no effect | Active live Ark, correct broadcaster channel, open phase, valid grammar, and applied-action diagnostics; old windows/deduplicated input intentionally do not apply |
-| No bot message | `BOT_REPLIES_ENABLED=true` (false pauses replies), `!status`/`!history`, pacing/coalescing, provider outcome, real channel; visible delivery is unverified, so do not spam requests |
+| No bot message | `BOT_REPLIES_ENABLED=true` (false pauses replies), `!status`/`!history`, pacing/coalescing, provider outcome, real channel, bot's moderator role (Twitch filtered the new bot account until it became a moderator, [ADR 0040](../decisions/0040-bot-moderator-role.md)); do not spam requests |
 | Overlay blank or access ended | Original complete capability link, current grant after rotation, active Ark and source dimensions; graphics should fall back automatically |
 | Handoff cannot prepare/accept | Correct mode, current custody, chapter boundary, opted-in idle receiver, current subscriptions/grants, stream readiness and unexpired intent |
 | Raid still only prepared | Genuine raid settings/event delivery, source/target/time match, incoming subscription; simulated proof cannot repair a live verification gap |

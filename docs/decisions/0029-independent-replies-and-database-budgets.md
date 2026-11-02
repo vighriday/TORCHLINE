@@ -1,5 +1,7 @@
 # 0029 — Independent replies and bounded database work
 
+Amended 2026-11-02 by [ADR 0040](0040-bot-moderator-role.md): replies are re-enabled in the live configuration after the bot became a channel moderator and an anonymous viewer received its messages. The switch below is unchanged.
+
 Accepted and implemented October 29, 2026. Follow-up to audit A08 and the unresolved native bot-delivery failure. No new service, scope, role or engine rule.
 
 ## Decision

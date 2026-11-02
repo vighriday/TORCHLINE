@@ -4,7 +4,7 @@
 
 All ten screens of the final Figma v2 frontend use actual saved state. Promotion of source does not deploy a live service or close owner/provider acceptance gates; nothing is deployed. [Current implementation status](planning/implementation-status.md) · [Final design](design/README.md) · [Cutover](design/final-frontend-replacement.md) · [ADR 0033](decisions/0033-figma-v2-presentation.md). As of 30 October 2026: [main consolidation and preview.2](reports/2026-10-30-main-consolidation.md) · [final frontend implementation and evidence](reports/2026-10-30-final-frontend.md).
 
-Genuine viewer chat → saved gameplay was observed on 30 Oct. A recorded overlay update from live chat, a live LIVEWIRE result, native raid transfer and permanent hosting remain open. [October 29 diagnosis](reports/2026-10-29-integration-diagnosis.md) and [critical audit](reviews/2026-10-29-comprehensive-audit.md) retain historical provider/security evidence. [LIVEWIRE rules](product/livewire-v0.md) and [acceptance](operations/livewire-v0.md) describe the default-off extension.
+Genuine viewer chat → saved gameplay was observed on 30 Oct. On 2 Nov a recorded overlay update from live chat, visible bot replies ([ADR 0040](decisions/0040-bot-moderator-role.md)) and a live attested LIVEWIRE result were verified. Native raid transfer and permanent hosting remain open. [October 29 diagnosis](reports/2026-10-29-integration-diagnosis.md) and [critical audit](reviews/2026-10-29-comprehensive-audit.md) retain historical provider/security evidence. [LIVEWIRE rules](product/livewire-v0.md) and [acceptance](operations/livewire-v0.md) describe the default-off extension.
 
 ## Review sequence
 

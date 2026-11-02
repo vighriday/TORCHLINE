@@ -20,9 +20,9 @@ Open **Command OS → Creator Studio**, choose **TACTICAL DOCK**, then **Generat
 
 All views share the same scoped read grant. Generating a new grant rotates them together. The exchange removes the private fragment while retaining the presentation setting. Do not publish access links, screenshots containing them, cookies or local session files.
 
-## Real Twitch acceptance — still required
+## Real Twitch acceptance
 
-Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed. As of November 1 no attested live result exists: one live mission was opened and expired.
+Use the existing [account setup and live guide](controlled-account-live-test.md). Keep hriday29 as broadcaster and hriday_29 as bot. The existing app/scopes/webhook connection suffice; no new Twitch application or outbound bot capability is needed. On October 30 one live mission was opened and expired. On November 2 a live attested result was recorded: at the chapter 1 boundary the captain opened a Souls Run mission (game "Surf", attempt "Reach 500 m"), spending one supply; a signed `!stake 2` from Twitch chat selected hull; the mission locked before the attempt with 1 crew ballot; after one real attempt the streamer attested success and hull +3 was saved (80 to 83). `pnpm twitch:verify:livewire` reported status success, 1 signed ballot, 1 attested effect and the backend path observed.
 
 Apply all migrations (currently through 014) to the intended database, set `LIVEWIRE_ENABLED=true` in its private runtime configuration and restart. Do not claim a deployment has the feature enabled until its configuration says so.
 
@@ -32,7 +32,7 @@ Apply all migrations (currently through 014) to the intended database, set `LIVE
 4. Compare the saved Ark, physical condition and Archive; reload dashboard/OBS. Check one result event and unchanged state after retry/restart. Keep the result explicitly labeled streamer-attested.
 5. Resolve/cancel before any native handoff. The [real raid checklist](controlled-account-live-test.md#4-authentic-raid--only-when-a-second-broadcaster-is-available) is unchanged and needs a second consenting broadcaster.
 
-No repeated bot-status trials are needed. Replies are disabled in the live configuration (`BOT_REPLIES_ENABLED=false`). Do not weaken bot roles, channel protections, native proof or receiving consent to accelerate acceptance.
+No repeated bot-status trials are needed. Replies were re-enabled in the live configuration (`BOT_REPLIES_ENABLED=true`) on November 2, after the owner made the bot a channel moderator ([ADR 0040](../decisions/0040-bot-moderator-role.md)); its token has no moderation scopes. Do not weaken bot roles, channel protections, native proof or receiving consent to accelerate acceptance.
 
 Run `pnpm twitch:verify:livewire` with that candidate's ignored `.env.live`. It reads a consistent database snapshot and joins accepted signed-input receipts, the locked crew choice and one cause-linked attested result. It writes a private `.local/livewire-live-result.json` and exits 2 while incomplete. It sends no chat, chooses no result and never turns simulation, a solo choice, OBS rendering or provider metadata into genuine gameplay proof. Native OBS and the actual game attempt still require separate observation.
 

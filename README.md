@@ -398,7 +398,7 @@ flowchart LR
 | **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
 | **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2. Then stale-assignment protection, a private-path guard and property-based balance witnesses, committed that night |
 
-Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and the replies stay paused.
+Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and replies stayed paused until 2 November, when making the bot a channel moderator fixed delivery.
 
 ### The rest of the team
 
@@ -457,10 +457,10 @@ flowchart LR
 | One-command preview | ✅ | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)) |
 | OBS views | ✅ | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md)) |
 | Real Twitch chat → live Ark | ✅ | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md)) |
-| Overlay updating from live chat, on video | ⏳ | Being recorded |
+| Overlay updating from live chat, on video | ✅ | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 |
 | Raid handoff (custody transfer) | ✅ | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next |
-| LIVEWIRE on live Twitch | ⏳ | Practice missions are verified above. On live Twitch one mission was opened on 30 Oct and expired in its 45-second selection window; a live streamer-attested result is next |
-| Bot replies | ⚠️ | Optional. Twitch accepts every send (`is_sent: true`) but does not deliver them from the new bot account, confirmed with an anonymous viewer on 2 Nov. Replies are paused; gameplay never depends on them |
+| LIVEWIRE on live Twitch | ✅ | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect |
+| Bot replies | ✅ | Twitch was filtering the new bot account. After the owner made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov. Gameplay never depends on replies |
 | Permanent live hosting | ⏳ | The practice demo is hosted (above); the live Twitch service runs from the creator's machine through a tunnel |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>

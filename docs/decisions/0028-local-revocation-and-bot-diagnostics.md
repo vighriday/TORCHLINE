@@ -1,5 +1,7 @@
 # 0028 — Local self-revocation and honest bot diagnostics
 
+Amended 2026-11-02 by [ADR 0040](0040-bot-moderator-role.md): after the failure was isolated to Twitch filtering the new bot account, the owner made it a channel moderator. TORCHLINE's bot scopes are unchanged.
+
 Accepted/implemented 2026-10-29 after audit A06 and the owner's first genuine chat attempt. That signed command arrived; Twitch rejected its reply with `msg_rejected`. A healthy subscription is not proof of a delivered reply.
 
 ## Decision and alternatives
