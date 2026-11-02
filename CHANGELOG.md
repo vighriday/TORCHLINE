@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Require a strong bot setup secret for every live world, not only in production mode, so the judges' development-mode live setup cannot start with a weak or placeholder operator key.
 - Add a judge guide to the README with five self-contained paths, and [`compose.live.yaml`](compose.live.yaml) so judges can run the live server with their own Twitch application and free ngrok address ([ADR 0041](docs/decisions/0041-judge-self-hosted-live.md)). CI starts it in live mode on every push and checks the Twitch sign-in redirect.
 - Rename the LIVEWIRE presets to generic names (Voxel Survival, Car Soccer, Souls Run) and remove third-party game titles from the app, tests and documentation; README stills captured earlier blur them, and the two README animations that showed them were replaced by stills linked to the video ([ADR 0042](docs/decisions/0042-generic-preset-names.md)).
 - Record the 2 November live broadcast: four signed chat commands updated the Ark and the OBS overlay on the stream (hull 70 → 85); a live LIVEWIRE mission locked a signed `!stake 2` from chat and saved a streamer-attested +3 hull; `!status` was answered in the live chat.

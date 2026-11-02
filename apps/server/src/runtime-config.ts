@@ -57,7 +57,10 @@ export function runtimeConfig(env: NodeJS.ProcessEnv) {
   };
   const sessionSecret = hex('SESSION_SECRET'),
     tokenKey = hex('TOKEN_ENCRYPTION_KEY');
-  const botSetupSecret = production ? hex('BOT_SETUP_SECRET') : (env.BOT_SETUP_SECRET ?? '');
+  // A live world is reachable through a public origin, so its operator key must be strong even
+  // when it runs in development mode (as the judges' compose setup does).
+  const botSetupSecret =
+    production || mode === 'live' ? hex('BOT_SETUP_SECRET') : (env.BOT_SETUP_SECRET ?? '');
   const secrets = [sessionSecret, tokenKey, botSetupSecret, env.EVENTSUB_SECRET]
     .filter(Boolean)
     .map((s) => s!.toLowerCase());

@@ -66,6 +66,13 @@ it('rejects insecure or ambiguous release configuration without echoing credenti
   expect(() =>
     runtimeConfig({ ...live, TWITCH_REDIRECT_URI: 'https://other.example/auth/twitch/callback' }),
   ).toThrow('exactly match');
+  // Development-mode live worlds (the judges' compose setup) still need a strong operator key.
+  const developmentLive = { ...live, NODE_ENV: undefined };
+  expect(runtimeConfig(developmentLive).config.mode).toBe('live');
+  for (const BOT_SETUP_SECRET of [undefined, 'REPLACE_WITH_64_RANDOM_HEX_CHARACTERS', 'short'])
+    expect(() => runtimeConfig({ ...developmentLive, BOT_SETUP_SECRET })).toThrow(
+      'BOT_SETUP_SECRET',
+    );
 });
 
 it('bounds authenticated feeds per channel and globally, releases closed slots and applies security headers', () =>
