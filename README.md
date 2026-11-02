@@ -460,8 +460,8 @@ flowchart LR
 | Overlay updating from live chat, on video | ✅ | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 |
 | Raid handoff (custody transfer) | ✅ | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next |
 | LIVEWIRE on live Twitch | ✅ | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect |
-| Bot replies | ✅ | Twitch was filtering the new bot account. After the owner made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov. Gameplay never depends on replies |
-| Permanent live hosting | ⏳ | The practice demo is hosted (above); the live Twitch service runs from the creator's machine through a tunnel |
+| Bot replies | ✅ | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov. Gameplay never depends on replies |
+| Permanent live hosting | ⏳ | The practice demo is hosted (above). Live Twitch play runs on my own computer through a secure tunnel while I stream; viewers need nothing but Twitch chat. An always-on live host is next |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
 
