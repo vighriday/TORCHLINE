@@ -2,7 +2,7 @@
 
 Current source requires migration **014_world_shares.sql** before startup and readiness. Migrations 011–014 are additive: durable channel-assignment epochs (stale-response protection), bounded operational retention, custody arrival attribution and public Chronicle link hashes. Historical Ark state and events are unchanged. Run the migration command before switching the application, and keep an extension-capable binary for LIVEWIRE histories.
 
-Status: cloud deployment remains proposed. The local app and isolated PostgreSQL development cluster run as described in the [development guide](development.md); no cloud hosting has been provisioned or purchased. Final hosting depends on account, price, region, backup and streaming checks. No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
+Status: live cloud deployment remains proposed; nothing has been purchased. A disposable practice demo image (`deploy/demo/`, [ADR 0039](../decisions/0039-hosted-practice-demo.md)) is built and played in CI on every push; see [public judge instance](#public-judge-instance) for its hosted copy. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can also run `docker compose up --build` (verified in CI).
 
 ## Recommended topology
 
@@ -27,9 +27,9 @@ Railway, Fly or a managed VM can substitute if they provide the same contract: p
 
 ### Public judge instance
 
-Proposed; not deployed or tested. No public judge instance exists. Judges can run the same practice locally with `docker compose up --build` ([development guide](development.md#one-command-with-docker)), which CI starts on every push.
+Implemented as a disposable demo ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). `deploy/demo/Dockerfile` is the production image plus PostgreSQL 17 on loopback; `deploy/demo/start.sh` creates a fresh database and fresh secrets on every start, then migrates and starts the unchanged server with `NODE_ENV=production`, `WORLD_MODE=simulation`, `LIVEWIRE_ENABLED=true` and `TRUST_PROXY_HOPS=1`. CI builds it and plays practice sign-in and Ark creation against it. [`render.yaml`](../../render.yaml) deploys it as a free Render web service: **New → Blueprint**, pick this repository, and the start script reads `RENDER_EXTERNAL_URL`. Free services sleep when idle; the first visit after a sleep takes about a minute and starts a fresh database. Another host sets `PUBLIC_BASE_URL` to its HTTPS origin. Worlds disappear on every restart or redeploy, and no Twitch credentials exist in it. Judges can also run the same practice locally with `docker compose up --build` ([development guide](development.md#one-command-with-docker)).
 
-A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. A hosted judge instance would run a **second** service from the same image:
+A live-mode deployment refuses practice identities and simulated raid evidence by design, so judges cannot run the Judge Arena relay rehearsal there. A durable judge instance, rather than the disposable demo, would run a **second** service from the main image:
 
 - Set `WORLD_MODE=simulation` and `LIVEWIRE_ENABLED=true`.
 - Give it its **own** PostgreSQL database and independent secrets. Never share the live database or keys.
@@ -90,4 +90,4 @@ Keep the submitted candidate available across the full conservative judging wind
 
 ## Scale-out gate
 
-Start with one application replica. Before adding replicas, implement cross-instance feed fan-out, shared session/rate-limit storage, worker lease ownership, subscription reconciliation ownership and consistent shutdown. PostgreSQL uniqueness preserves custody correctness across processes, but a single-consumer outbox does not broadcast to every replica. Load evidence should drive this work; no platform-wide capacity is claimed.
+Start with one application replica. The worker lease is a PostgreSQL session lock taken at startup, and a new process exits if an older one still holds it. On a host that starts the replacement before stopping the old instance (overlapping or zero-downtime deploys), a live service sharing one database fails that deploy: use non-overlapping deploys or stop the old instance first. The disposable demo is unaffected because each container owns its database. Before adding replicas, implement cross-instance feed fan-out, shared session/rate-limit storage, worker lease ownership, subscription reconciliation ownership and consistent shutdown. PostgreSQL uniqueness preserves custody correctness across processes, but a single-consumer outbox does not broadcast to every replica. Load evidence should drive this work; no platform-wide capacity is claimed.

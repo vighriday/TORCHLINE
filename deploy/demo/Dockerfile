@@ -1,5 +1,5 @@
 # Hosted practice demo: the production app image plus a private loopback PostgreSQL inside the
-# same container. Simulation only; no Twitch credentials exist here. Used by railway.json.
+# same container. Simulation only; no Twitch credentials exist here. Used by render.yaml.
 # Every container start creates a fresh practice database and fresh secrets.
 FROM node:24.22.1-bookworm-slim AS base
 WORKDIR /app

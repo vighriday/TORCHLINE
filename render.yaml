@@ -1,0 +1,10 @@
+# One-click Render Blueprint for the disposable practice demo (deploy/demo, ADR 0039).
+# Simulation only: no Twitch credentials, and the database resets on every restart.
+services:
+  - type: web
+    name: torchline-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/demo/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/ready
