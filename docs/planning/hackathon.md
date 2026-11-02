@@ -34,7 +34,7 @@ Plan judge availability from the earlier published judging start through **Novem
 - [ ] Devpost entry explicitly submitted; a saved draft is not enough.
 - [ ] Final URL, submitted commit/tag, video URL, session ID and confirmation stored in a sanitized submission record.
 
-Status as of 1 November 2026: the repository is pushed to GitHub as a private repository, and pre-releases v0.1.0-preview.1 and v0.1.0-preview.2 are published there; v0.1.0-preview.3 is being prepared. No submission has been made. Nothing is hosted: the live configuration runs only on the owner's PC behind a temporary development tunnel when started.
+Status as of 2 November 2026: the repository is on GitHub as a private repository, pre-releases v0.1.0-preview.1 to v0.1.0-preview.3 are published there, and v0.1.0-preview.4 is being prepared. A disposable practice demo is hosted at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)); the live configuration runs only on the owner's PC behind a temporary development tunnel when started.
 
 ## Proposed 2:55 video
 

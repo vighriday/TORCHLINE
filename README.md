@@ -23,7 +23,7 @@
 <a href="docs/README.md">Docs</a>
 </p>
 
-<sub><a href="docs/releases/v0.1.0-preview.3.md">v0.1.0-preview.3</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
+<sub><a href="docs/releases/v0.1.0-preview.4.md">v0.1.0-preview.4</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
 
 </div>
 
@@ -34,7 +34,7 @@
 > - the OBS overlay and the ten-screen interface from the Figma design;
 > - LIVEWIRE.
 >
-> It wrote tests against real PostgreSQL as it went, from 26 to 31 October 2026.<br>
+> It wrote tests against real PostgreSQL as it went, from 26 to 30 October 2026.<br>
 > **Codex session ID: `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`** · [How Codex built it ↓](#codex)
 
 > [!TIP]
@@ -361,7 +361,7 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 
 <table>
 <tr><td><b>Codex session ID</b></td><td><code>01a176fc-1e4a-7e83-b21e-1043aa17e8bc</code></td></tr>
-<tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–31 October 2026</td></tr>
+<tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–30 October 2026</td></tr>
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
 </table>
 
@@ -388,8 +388,7 @@ flowchart LR
 | **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
 | **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
 | **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
-| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2 |
-| **31&nbsp;Oct** | Shared channel projections, bounded retention, attributed custody arrivals, and property-based balance tests |
+| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2. Then stale-assignment protection, a private-path guard and property-based balance witnesses, committed that night |
 
 Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and the replies stay paused.
 

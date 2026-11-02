@@ -1,6 +1,6 @@
 # Versions and releases
 
-TORCHLINE uses one application version across the root, two apps and four internal packages. **v0.1.0-preview.3** is the release being prepared on `main`, with every manifest at `0.1.0-preview.3`: the Judge Arena relay rehearsal, inheritance dossier, Chronicle lineage, public Chronicle links, What if?, Verify this record, per-preset LIVEWIRE feeds and the Docker preview ([notes](../releases/v0.1.0-preview.3.md)). The published pre-release tags **v0.1.0-preview.1** and **v0.1.0-preview.2** remain immutable. These are development previews, not claims that native Twitch acceptance or production operations are complete.
+TORCHLINE uses one application version across the root, two apps and four internal packages. **v0.1.0-preview.4** is the release being prepared on `main`, with every manifest at `0.1.0-preview.4`: the hosted practice demo and the raid readiness fix ([notes](../releases/v0.1.0-preview.4.md)). The published pre-release tags **v0.1.0-preview.1** to **v0.1.0-preview.3** remain immutable. These are development previews, not claims that native Twitch acceptance or production operations are complete.
 
 ## What the numbers mean
 
