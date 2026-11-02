@@ -49,7 +49,13 @@ const ProviderSubscription = z.object({
   type: z.string(),
   version: z.string(),
   status: z.string(),
-  condition: z.record(z.string(), z.string()),
+  // Twitch echoes a channel.raid subscription's unused direction as an empty string. Dropping empty
+  // values keeps provider conditions comparable with, and stored exactly like, the requested ones.
+  condition: z
+    .record(z.string(), z.string())
+    .transform((condition) =>
+      Object.fromEntries(Object.entries(condition).filter(([, value]) => value !== '')),
+    ),
   transport: z.object({ method: z.string(), callback: z.string().optional() }),
 });
 type Subscription = z.infer<typeof ProviderSubscription>;

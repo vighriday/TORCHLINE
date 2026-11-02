@@ -120,7 +120,11 @@ export function providerFixture(config = liveConfig) {
           type: body.type,
           version: body.version,
           status: 'webhook_callback_verification_pending',
-          condition: body.condition,
+          // Twitch echoes the unused raid direction as an empty string instead of omitting it.
+          condition:
+            body.type === 'channel.raid'
+              ? { from_broadcaster_user_id: '', to_broadcaster_user_id: '', ...body.condition }
+              : body.condition,
           transport: { method: body.transport.method, callback: body.transport.callback },
         };
         subscriptions.push(sub);
