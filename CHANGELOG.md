@@ -6,6 +6,7 @@
 - Make the bot a moderator of the owner's channel and re-enable replies ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)): Twitch was filtering the new bot account; afterwards an anonymous viewer received its messages. Bot scopes are unchanged.
 - Add the session's own counts to the README's Codex section: 45 completed tasks, 1,795 tool executions, 560 patches, 202 test runs and 73 commits in one thread from 26 to 30 October.
 - Keep the hosted practice demo awake with a scheduled readiness request every five minutes, so judges do not wait for a cold start.
+- Link the public demo video ([youtu.be/mp-ckxsH4M4](https://youtu.be/mp-ckxsH4M4)) from the top of the README, with timestamps beside the live Twitch evidence and the Codex section.
 
 ## v0.1.0-preview.4 — November 2, 2026 — Hosted demo and raid readiness
 

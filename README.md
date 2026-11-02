@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="#watch">
+<a href="https://youtu.be/mp-ckxsH4M4">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/awakening.png">
     <img src="assets/readme/hero-awakening.webp" width="960" alt="TORCHLINE's opening scene: the persistent generation ship ARK-001 rolls above a planet beside the line 'The stream ends. The world doesn't.' Recorded from the app in saved practice.">
@@ -15,7 +15,8 @@
 
 <p>
 <a href="https://torchline-demo.onrender.com"><b>▶&nbsp;Play it in your browser</b></a> &nbsp;·&nbsp;
-<a href="#watch">Watch</a> &nbsp;·&nbsp;
+<a href="https://youtu.be/mp-ckxsH4M4"><b>🎬&nbsp;Watch the video</b></a> &nbsp;·&nbsp;
+<a href="#watch">Two games, one Ark</a> &nbsp;·&nbsp;
 <a href="#chair">Take the captain's chair</a> &nbsp;·&nbsp;
 <a href="#livewire">LIVEWIRE</a> &nbsp;·&nbsp;
 <a href="#codex">Built with Codex</a> &nbsp;·&nbsp;
@@ -38,7 +39,8 @@
 > **Codex session ID: `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`** · [How Codex built it ↓](#codex)
 
 > [!TIP]
-> **Judges, play it now: <https://torchline-demo.onrender.com>** — no install, no Twitch account. Choose **Watch two games share one Ark → Autoplay to the handoff**: in about two minutes two communities in two different games change one Ark, using the real engine, database and custody rules with practice crews and a labelled simulated raid.<br>
+> **Judges, start with the video (2:38): <https://youtu.be/mp-ckxsH4M4>** — real Twitch chat changing the Ark on a live broadcast, LIVEWIRE on live Twitch, and how Codex built it.<br>
+> **Then play it yourself: <https://torchline-demo.onrender.com>** — no install, no Twitch account. Choose **Watch two games share one Ark → Autoplay to the handoff**: in about two minutes two communities in two different games change one Ark, using the real engine, database and custody rules with practice crews and a labelled simulated raid.<br>
 > <sub>Free hosting: after an idle spell the first visit can take about a minute, and the demo starts fresh each time it wakes. Prefer local? `docker compose up --build`, then http://localhost:3000. [More ways to run it ↓](#play)</sub>
 
 ## The idea in three moves
@@ -363,6 +365,7 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 <tr><td><b>Codex session ID</b></td><td><code>01a176fc-1e4a-7e83-b21e-1043aa17e8bc</code></td></tr>
 <tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–30 October 2026</td></tr>
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
+<tr><td><b>In the video</b></td><td><a href="https://youtu.be/mp-ckxsH4M4?t=122">From 2:02: the Codex thread, its brief and its commits</a></td></tr>
 </table>
 
 **Codex by the numbers**, one thread, 26–30 October:
@@ -457,10 +460,10 @@ flowchart LR
 | One-command preview | ✅ | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)) |
 | OBS views | ✅ | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md)) |
 | Real Twitch chat → live Ark | ✅ | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md)) |
-| Overlay updating from live chat, on video | ✅ | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 |
+| Overlay updating from live chat, on video | ✅ | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 ([watch at 0:16](https://youtu.be/mp-ckxsH4M4?t=16)) |
 | Raid handoff (custody transfer) | ✅ | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next |
-| LIVEWIRE on live Twitch | ✅ | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect |
-| Bot replies | ✅ | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov. Gameplay never depends on replies |
+| LIVEWIRE on live Twitch | ✅ | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect ([watch at 0:48](https://youtu.be/mp-ckxsH4M4?t=48)) |
+| Bot replies | ✅ | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov ([watch at 0:40](https://youtu.be/mp-ckxsH4M4?t=40)). Gameplay never depends on replies |
 | Permanent live hosting | ⏳ | The practice demo is hosted (above). Live Twitch play runs on my own computer through a secure tunnel while I stream; viewers need nothing but Twitch chat. An always-on live host is next |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
