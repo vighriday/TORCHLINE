@@ -10,6 +10,9 @@
 !packages/**
 !scripts/
 !scripts/migrate.ts
+!deploy/
+!deploy/demo/
+!deploy/demo/start.sh
 **/node_modules
 **/dist
 **/.env*

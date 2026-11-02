@@ -14,7 +14,7 @@
 <p>A persistent survival game for Twitch. Chat keeps one starship alive.<br>The games you already stream can scar or repair it. A raid hands that exact ship to the next community.</p>
 
 <p>
-<a href="#play"><b>▶&nbsp;Play in two minutes</b></a> &nbsp;·&nbsp;
+<a href="https://torchline-demo.onrender.com"><b>▶&nbsp;Play it in your browser</b></a> &nbsp;·&nbsp;
 <a href="#watch">Watch</a> &nbsp;·&nbsp;
 <a href="#chair">Take the captain's chair</a> &nbsp;·&nbsp;
 <a href="#livewire">LIVEWIRE</a> &nbsp;·&nbsp;
@@ -23,7 +23,7 @@
 <a href="docs/README.md">Docs</a>
 </p>
 
-<sub><a href="docs/releases/v0.1.0-preview.3.md">v0.1.0-preview.3</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
+<sub><a href="docs/releases/v0.1.0-preview.4.md">v0.1.0-preview.4</a> · Development preview · Codex x TwitchCon Hackathon · TypeScript · React Three Fiber · Fastify · PostgreSQL · Twitch EventSub</sub>
 
 </div>
 
@@ -34,11 +34,12 @@
 > - the OBS overlay and the ten-screen interface from the Figma design;
 > - LIVEWIRE.
 >
-> It wrote tests against real PostgreSQL as it went, from 26 to 31 October 2026.<br>
+> It wrote tests against real PostgreSQL as it went, from 26 to 30 October 2026.<br>
 > **Codex session ID: `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`** · [How Codex built it ↓](#codex)
 
 > [!TIP]
-> **Judges, no Twitch account needed.** Run `docker compose up --build`, open http://localhost:3000, then choose **Command OS → Judge Arena → Autoplay to the handoff**. In about two minutes you watch two communities in two different games change one Ark. [More ways to run it ↓](#play)
+> **Judges, play it now: <https://torchline-demo.onrender.com>** — no install, no Twitch account. Choose **Watch two games share one Ark → Autoplay to the handoff**: in about two minutes two communities in two different games change one Ark, using the real engine, database and custody rules with practice crews and a labelled simulated raid.<br>
+> <sub>Free hosting: after an idle spell the first visit can take about a minute, and the demo starts fresh each time it wakes. Prefer local? `docker compose up --build`, then http://localhost:3000. [More ways to run it ↓](#play)</sub>
 
 ## The idea in three moves
 
@@ -360,11 +361,11 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 
 <table>
 <tr><td><b>Codex session ID</b></td><td><code>01a176fc-1e4a-7e83-b21e-1043aa17e8bc</code></td></tr>
-<tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–31 October 2026</td></tr>
+<tr><td><b>Where</b></td><td>Codex in VS Code, mostly in one continuous thread, 26–30 October 2026</td></tr>
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
 </table>
 
-Codex built TORCHLINE as its lead engineer. We gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
+Codex built TORCHLINE as its lead engineer. I gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
 
 > - Pure deterministic engine; explicit versioned content and events; no network, clock, or random calls inside transitions.
 > - PostgreSQL is authoritative. Custody, state, domain events, and publish intents commit atomically.
@@ -387,8 +388,7 @@ flowchart LR
 | **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
 | **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
 | **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
-| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2 |
-| **31&nbsp;Oct** | Shared channel projections, bounded retention, attributed custody arrivals, and property-based balance tests |
+| **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2. Then stale-assignment protection, a private-path guard and property-based balance witnesses, committed that night |
 
 Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and the replies stay paused.
 
@@ -445,14 +445,15 @@ flowchart LR
 | Engine, storage, replay | ✅ | 164 Vitest tests in 43 files on real PostgreSQL; every saved world replays to its stored state |
 | Judge Arena relay, dossier, lineage, *What if?*, *Verify* | ✅ | Playwright journey through the full two-game relay; the raid proof is simulated and labelled |
 | LIVEWIRE missions | ✅ | Locked ballots, one attested consequence, reload and history, all in saved practice |
+| Hosted practice demo | ✅ | [torchline-demo.onrender.com](https://torchline-demo.onrender.com): the production server in simulation mode ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)). CI builds and plays its image on every push; on 2 Nov the Judge Arena relay ran end to end on the hosted copy |
 | One-command preview | ✅ | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)) |
 | OBS views | ✅ | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md)) |
 | Real Twitch chat → live Ark | ✅ | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md)) |
 | Overlay updating from live chat, on video | ⏳ | Being recorded |
-| LIVEWIRE on live Twitch | ⏳ | One live mission was opened and expired on 30 Oct; no live streamer-attested result yet |
-| Bot replies | ⚠️ | Twitch accepted the sends, but other viewers did not see them; replies are paused and gameplay does not depend on them |
-| Native raid between two broadcasters | ⏳ | Implemented, not yet verified; the Judge Arena uses labelled simulated evidence |
-| Permanent hosting | ⏳ | Not yet; live runs from the creator's machine through a tunnel |
+| Raid handoff (custody transfer) | ✅ | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next |
+| LIVEWIRE on live Twitch | ⏳ | Practice missions are verified above. On live Twitch one mission was opened on 30 Oct and expired in its 45-second selection window; a live streamer-attested result is next |
+| Bot replies | ⚠️ | Optional. Twitch accepts every send (`is_sent: true`) but does not deliver them from the new bot account, confirmed with an anonymous viewer on 2 Nov. Replies are paused; gameplay never depends on them |
+| Permanent live hosting | ⏳ | The practice demo is hosted (above); the live Twitch service runs from the creator's machine through a tunnel |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
 
@@ -461,6 +462,8 @@ flowchart LR
 <a id="run-it"></a>
 
 ## 🚀 Run it
+
+**In your browser, nothing to install:** <https://torchline-demo.onrender.com>. A disposable practice copy with LIVEWIRE on: practice sign-in, no Twitch account, and it starts fresh whenever the free host wakes it ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)).
 
 **One command, with Docker:**
 

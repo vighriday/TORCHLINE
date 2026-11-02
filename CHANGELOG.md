@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.0-preview.4 — November 2, 2026 — Hosted demo and raid readiness
+
+- Fix native raid readiness: Twitch echoes a `channel.raid` subscription's unused direction as an empty `from_broadcaster_user_id`, which the strict condition comparison rejected, so a raid offer could never be prepared. Empty provider condition values are now dropped on parse, and the provider fixture echoes Twitch's real shape.
+- Host a disposable practice demo at https://torchline-demo.onrender.com ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)): the production server in simulation mode with PostgreSQL on loopback in the same container (`deploy/demo/`, `render.yaml`). CI builds the image and plays practice sign-in and Ark creation against it; the Judge Arena relay was run end to end on the hosted copy on 2 November.
+- Diagnose bot replies further: on 2 November Twitch accepted two test sends (`is_sent: true`, no drop reason) that an anonymous viewer connection never received. Replies stay paused; gameplay never depends on them.
+- Document that a live service sharing one database must not use overlapping deploys while the worker lease fails fast.
+- Fix an intermittent episode-clock test that backdated two columns with two drifting `clock_timestamp()` calls.
+- State Codex's working dates as 26–30 October to match the session.
+
 ## v0.1.0-preview.3 — November 1, 2026 — Relay experience and platform completion
 
 - Rebuild the README around what a judge can see and check:

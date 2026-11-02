@@ -1,4 +1,4 @@
-# Live test with the accounts we already have
+# Live test with the accounts I already have
 
 Updated November 1, 2026. The evidence and phase notes below are dated snapshots, not current status. Use **hriday29** as broadcaster and **hriday_29** as bot. No third account is needed for chat, gameplay, OBS or recovery tests. A second consenting broadcaster is needed only for the authentic raid; arrange that later. Never convert the bot into a broadcaster.
 
@@ -31,7 +31,7 @@ pnpm live:check
 
 Normal server startup validates/refreshes existing grants and reconciles subscriptions. `live:check` runs real public/provider probes plus read-only acceptance counters, preserves the existing acceptance baseline and shows the current Ark phase. Exit 2 means acceptance remains incomplete, not necessarily that setup failed. These commands never log into Twitch, send chat, choose an ending, start OBS streaming or invent a raid.
 
-Site: `https://YOUR_ORIGIN`. Exact registered callback: `https://YOUR_ORIGIN/auth/twitch/callback`. Keep computer/database/app/SSH awake. No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
+Site: `https://YOUR_ORIGIN`. Exact registered callback: `https://YOUR_ORIGIN/auth/twitch/callback`. Keep computer/database/app/SSH awake. No permanent live hosting exists; a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
 
 ## 1. Bot replies — paused, cause unresolved
 

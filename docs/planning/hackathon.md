@@ -14,7 +14,7 @@ As checked on 2026-10-26, the [official rules](https://twitchcon-codex.devpost.c
 | [Schedule](https://twitchcon-codex.devpost.com/details/dates) | Deadline labeled 2 PM PST; judging Nov 3–6 | Deadline agrees with PST label; judging differs |
 | [FAQ/resources](https://twitchcon-codex.devpost.com/resources) | Deadline 2 PM Pacific, but FAQ also says 21:00 UTC; judging Nov 5–15 | UTC conversion is one hour earlier than PST conversion |
 
-November 2 at 14:00 PST converts to **November 3, 2026 at 03:30 IST** (22:00 UTC). The FAQ's 21:00 UTC statement instead converts to 02:30 IST. Do not silently choose the later time when scheduling submission. Use **November 2 at 23:59 IST** as our internal submit-by cutoff, and recheck the organizer countdown/updates before submission. If necessary, the owner can seek clarification; no external message has been sent during planning.
+November 2 at 14:00 PST converts to **November 3, 2026 at 03:30 IST** (22:00 UTC). The FAQ's 21:00 UTC statement instead converts to 02:30 IST. Do not silently choose the later time when scheduling submission. Use **November 2 at 23:59 IST** as my internal submit-by cutoff, and recheck the organizer countdown/updates before submission. If necessary, the owner can seek clarification; no external message has been sent during planning.
 
 Plan judge availability from the earlier published judging start through **November 16 at 06:30 IST**, covering the rules' November 15 at 17:00 PST end. Freeze and identify the submitted commit; handle post-deadline changes only as permitted by organizer instructions.
 
@@ -28,13 +28,13 @@ Plan judge availability from the earlier published judging start through **Novem
 - [ ] Description explains product functionality and concrete Codex contributions.
 - [ ] Public YouTube video below three minutes, link checked from a signed-out browser.
 - [ ] Judge access configured according to the current organizer instructions, including private repo access if applicable.
-- [ ] Hosted project and dependency services available without payment/access barriers for judges. Nothing is hosted; the one-command `docker compose` saved-practice preview needs no Twitch account or hosted service.
+- [x] Hosted project and dependency services available without payment/access barriers for judges: a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). The one-command `docker compose` saved-practice preview also needs no Twitch account or hosted service.
 - [ ] Asset provenance, third-party permissions and branding checked; original private idea file absent from repository and recordings.
 - [ ] Entrant/team representative and eligibility reviewed by the owner.
 - [ ] Devpost entry explicitly submitted; a saved draft is not enough.
 - [ ] Final URL, submitted commit/tag, video URL, session ID and confirmation stored in a sanitized submission record.
 
-Status as of 1 November 2026: the repository is pushed to GitHub as a private repository, and pre-releases v0.1.0-preview.1 and v0.1.0-preview.2 are published there; v0.1.0-preview.3 is being prepared. No submission has been made. Nothing is hosted: the live configuration runs only on the owner's PC behind a temporary development tunnel when started.
+Status as of 2 November 2026: the repository is on GitHub as a private repository, pre-releases v0.1.0-preview.1 to v0.1.0-preview.3 are published there, and v0.1.0-preview.4 is being prepared. A disposable practice demo is hosted at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)); the live configuration runs only on the owner's PC behind a temporary development tunnel when started.
 
 ## Proposed 2:55 video
 

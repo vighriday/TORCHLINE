@@ -1,7 +1,8 @@
-// Checks the one-command preview started by `docker compose up --build --wait`.
+// Checks the one-command preview started by `docker compose up --build --wait`, or the hosted demo
+// image when PREVIEW_URL and PREVIEW_ORIGIN name it.
 // Plays the first steps a judge takes: practice sign-in, a new Ark and its LIVEWIRE-enabled view.
 const base = process.env.PREVIEW_URL ?? 'http://127.0.0.1:3000';
-const origin = 'http://localhost:3000';
+const origin = process.env.PREVIEW_ORIGIN ?? 'http://localhost:3000';
 const headers = { 'content-type': 'application/json', 'x-torchline-request': '1', origin };
 
 const ready = await fetch(new URL('/health/ready', base));

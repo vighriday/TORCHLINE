@@ -17,7 +17,7 @@ Updated 2026-11-01. Account and live-state notes are dated snapshots, not curren
 | Actual OBS | Native OBS 32.2.2 rendered the 30 Oct final-design build in isolated saved practice; the current build and live-chat-driven updates are not yet verified in OBS. |
 | Live LIVEWIRE | Not verified. One live mission was opened and expired; no attested live result exists. |
 | Native raid | Not passed. A separate consenting broadcaster is needed only for this later acceptance; the dedicated bot keeps its role. |
-| Production hosting | No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI). Hosting below is a proposed procedure, not a deployed service. |
+| Production hosting | No permanent live hosting exists; a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI). Hosting below is a proposed procedure, not a deployed service. |
 
 ## 1. Keep the two Twitch accounts separate
 
@@ -60,10 +60,10 @@ Open the [Twitch developer console](https://dev.twitch.tv/console/apps), select 
 | --- | --- |
 | Name | TORCHLINE, or an available unique variation |
 | Category | Game Integration |
-| Client type | Confidential; credentials stay on our server |
+| Client type | Confidential; credentials stay on the TORCHLINE server |
 | OAuth Redirect URL | `https://YOUR_ORIGIN/auth/twitch/callback` |
 
-For a development tunnel the exact redirect is `https://YOUR_ORIGIN/auth/twitch/callback` with the tunnel's domain as `YOUR_ORIGIN`. Begin sign-in from the home page; do not reopen an old callback/error tab. Scheme, domain, path and trailing slash must match our configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
+For a development tunnel the exact redirect is `https://YOUR_ORIGIN/auth/twitch/callback` with the tunnel's domain as `YOUR_ORIGIN`. Begin sign-in from the home page; do not reopen an old callback/error tab. Scheme, domain, path and trailing slash must match the TORCHLINE configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
 
 Keep your existing Client ID and Client Secret unless there is a reason to rotate them. The Client ID identifies the app publicly in OAuth; the Client Secret is private. A second developer application is unnecessary for the bot.
 
