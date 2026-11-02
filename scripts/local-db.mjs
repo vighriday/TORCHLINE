@@ -51,7 +51,7 @@ try {
   run('pg_ctl', ['-D', data, 'status']);
   running = true;
 } catch {
-  /* our private cluster is stopped */
+  /* the private cluster is stopped */
 }
 if (!running)
   console.log(

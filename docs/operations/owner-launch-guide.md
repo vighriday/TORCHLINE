@@ -60,10 +60,10 @@ Open the [Twitch developer console](https://dev.twitch.tv/console/apps), select 
 | --- | --- |
 | Name | TORCHLINE, or an available unique variation |
 | Category | Game Integration |
-| Client type | Confidential; credentials stay on our server |
+| Client type | Confidential; credentials stay on the TORCHLINE server |
 | OAuth Redirect URL | `https://YOUR_ORIGIN/auth/twitch/callback` |
 
-For a development tunnel the exact redirect is `https://YOUR_ORIGIN/auth/twitch/callback` with the tunnel's domain as `YOUR_ORIGIN`. Begin sign-in from the home page; do not reopen an old callback/error tab. Scheme, domain, path and trailing slash must match our configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
+For a development tunnel the exact redirect is `https://YOUR_ORIGIN/auth/twitch/callback` with the tunnel's domain as `YOUR_ORIGIN`. Begin sign-in from the home page; do not reopen an old callback/error tab. Scheme, domain, path and trailing slash must match the TORCHLINE configuration exactly. You can keep an existing development redirect while adding an approved production redirect. The EventSub webhook path is **not** the OAuth redirect. [Twitch registration documentation](https://dev.twitch.tv/docs/authentication/register-app/)
 
 Keep your existing Client ID and Client Secret unless there is a reason to rotate them. The Client ID identifies the app publicly in OAuth; the Client Secret is private. A second developer application is unnecessary for the bot.
 

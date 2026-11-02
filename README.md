@@ -365,7 +365,7 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
 </table>
 
-Codex built TORCHLINE as its lead engineer. We gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
+Codex built TORCHLINE as its lead engineer. I gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
 
 > - Pure deterministic engine; explicit versioned content and events; no network, clock, or random calls inside transitions.
 > - PostgreSQL is authoritative. Custody, state, domain events, and publish intents commit atomically.

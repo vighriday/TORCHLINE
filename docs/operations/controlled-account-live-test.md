@@ -1,4 +1,4 @@
-# Live test with the accounts we already have
+# Live test with the accounts I already have
 
 Updated November 1, 2026. The evidence and phase notes below are dated snapshots, not current status. Use **hriday29** as broadcaster and **hriday_29** as bot. No third account is needed for chat, gameplay, OBS or recovery tests. A second consenting broadcaster is needed only for the authentic raid; arrange that later. Never convert the bot into a broadcaster.
 

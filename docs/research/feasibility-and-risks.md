@@ -51,7 +51,7 @@ This is a bounded initial review, not an exhaustive novelty or trademark search.
 
 | Product/pattern | Primary evidence | Implication for TORCHLINE |
 | --- | --- | --- |
-| Crowd Control | [Official features](https://crowdcontrol.live/features) describe viewer-triggered in-game effects | Audience influence and overlays are established; our differentiator must be portable world custody and traceable consequences, not commands alone. |
+| Crowd Control | [Official features](https://crowdcontrol.live/features) describe viewer-triggered in-game effects | Audience influence and overlays are established; TORCHLINE's differentiator must be portable world custody and traceable consequences, not commands alone. |
 | Ravenfall | [Official how-to-play](https://www.ravenfall.stream/how-to-play) describes chat-driven characters and ongoing training | Persistent chat gameplay is established. Retaining progress alone cannot establish originality. |
 | Native Twitch raids | [Official raids guide](https://dev.twitch.tv/docs/api/raids/) covers audience transitions | The signature is the separately authorized game-state handoff layered onto a genuine native raid. |
 | Creator/community games and relay formats | Broader survey remains open | The initial search did not establish a direct match for the full combination. Absence in a bounded search is not evidence that no equivalent exists. |

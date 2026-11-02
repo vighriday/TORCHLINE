@@ -14,7 +14,7 @@ As checked on 2026-10-26, the [official rules](https://twitchcon-codex.devpost.c
 | [Schedule](https://twitchcon-codex.devpost.com/details/dates) | Deadline labeled 2 PM PST; judging Nov 3–6 | Deadline agrees with PST label; judging differs |
 | [FAQ/resources](https://twitchcon-codex.devpost.com/resources) | Deadline 2 PM Pacific, but FAQ also says 21:00 UTC; judging Nov 5–15 | UTC conversion is one hour earlier than PST conversion |
 
-November 2 at 14:00 PST converts to **November 3, 2026 at 03:30 IST** (22:00 UTC). The FAQ's 21:00 UTC statement instead converts to 02:30 IST. Do not silently choose the later time when scheduling submission. Use **November 2 at 23:59 IST** as our internal submit-by cutoff, and recheck the organizer countdown/updates before submission. If necessary, the owner can seek clarification; no external message has been sent during planning.
+November 2 at 14:00 PST converts to **November 3, 2026 at 03:30 IST** (22:00 UTC). The FAQ's 21:00 UTC statement instead converts to 02:30 IST. Do not silently choose the later time when scheduling submission. Use **November 2 at 23:59 IST** as my internal submit-by cutoff, and recheck the organizer countdown/updates before submission. If necessary, the owner can seek clarification; no external message has been sent during planning.
 
 Plan judge availability from the earlier published judging start through **November 16 at 06:30 IST**, covering the rules' November 15 at 17:00 PST end. Freeze and identify the submitted commit; handle post-deadline changes only as permitted by organizer instructions.
 

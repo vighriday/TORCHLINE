@@ -56,7 +56,7 @@ Other implemented operational tables: `oauth_states` (001), `chat_message_dedup`
 7. Participation has one current contribution per actor per interaction; accepted order is recorded explicitly.
 8. Mode boundaries are checked on every command, proof, assignment and read subscription.
 
-Use SQL constraints/partial unique indexes plus fixed-order row locks. For absent target slots, lock the persistent creator/channel row before testing occupancy so concurrent inserts serialize. Do not rely on locking a row that does not exist. The [PostgreSQL locking documentation](https://www.postgresql.org/docs/17/explicit-locking.html) supports the mechanism; the specific lock protocol is our application design.
+Use SQL constraints/partial unique indexes plus fixed-order row locks. For absent target slots, lock the persistent creator/channel row before testing occupancy so concurrent inserts serialize. Do not rely on locking a row that does not exist. The [PostgreSQL locking documentation](https://www.postgresql.org/docs/17/explicit-locking.html) supports the mechanism; the specific lock protocol is TORCHLINE's own design.
 
 Use one checked-out `pg` client for all statements in a transaction. [node-postgres requires that client affinity](https://node-postgres.com/features/transactions). All SQL parameters are bound values. Migrations are ordered, checked-in SQL with a schema-version ledger; never perform automatic destructive synchronization.
 
