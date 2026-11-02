@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add the session's own counts to the README's Codex section: 45 completed tasks, 1,795 tool executions, 560 patches, 202 test runs and 73 commits in one thread from 26 to 30 October.
+- Keep the hosted practice demo awake with a scheduled readiness request every five minutes, so judges do not wait for a cold start.
+
 ## v0.1.0-preview.4 — November 2, 2026 — Hosted demo and raid readiness
 
 - Fix native raid readiness: Twitch echoes a `channel.raid` subscription's unused direction as an empty `from_broadcaster_user_id`, which the strict condition comparison rejected, so a raid offer could never be prepared. Empty provider condition values are now dropped on parse, and the provider fixture echoes Twitch's real shape.

@@ -1,0 +1,18 @@
+# Keeps the free hosted practice demo awake through judging, so a judge's first visit does not wait for a
+# cold start. A free instance can still restart; every restart begins with a fresh practice database.
+name: Keep the demo awake
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Request the demo's readiness check
+        run: curl -fsS --retry 2 --max-time 150 https://torchline-demo.onrender.com/health/ready

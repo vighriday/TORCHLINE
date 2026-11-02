@@ -365,6 +365,14 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 <tr><td><b>Standing brief</b></td><td><a href="AGENTS.md"><code>AGENTS.md</code></a>, the operating contract Codex worked under</td></tr>
 </table>
 
+**Codex by the numbers**, one thread, 26–30 October:
+
+| Tasks completed | Tool executions | File patches | Test runs | Commits | Output tokens |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| **45** | **1,795** | **560** | **202** | **73** | **2.18 M** |
+
+<sub>Counted from the session's own log (`rollout-2026-10-26T12-23-16-01a176fc-….jsonl`): completed tasks, executed tool calls, applied patches, Vitest and Playwright runs, and non-merge commits on `main` in that window. Seventeen context compactions kept it one continuous thread. Counts only; no prompt or output text is published.</sub>
+
 Codex built TORCHLINE as its lead engineer. I gave it a standing contract instead of one-off prompts. These lines from `AGENTS.md` shaped every task:
 
 > - Pure deterministic engine; explicit versioned content and events; no network, clock, or random calls inside transitions.
@@ -397,7 +405,7 @@ Codex verified live behaviour honestly, too. It found that Twitch accepted the b
 | | Role |
 | --- | --- |
 | **OpenAI Codex** | Lead engineer: everything above, in session `01a176fc-1e4a-7e83-b21e-1043aa17e8bc` |
-| **Claude Code** | Reviewer and checker. It audited the build against the hackathon rules and the tests, and verified the live evidence. On 1 November it also built the final layer: the Judge Arena relay rehearsal, the inheritance dossier, lineage and public Chronicle links, *What if?* and *Verify this record*, and the Docker preview. It also integrated the per-game LIVEWIRE scenes from Figma |
+| **Claude Code** | Reviewer and checker. It audited the build against the hackathon rules and the tests, and verified the live evidence. On 1 November it also built the final layer: the Judge Arena relay rehearsal, the inheritance dossier, lineage and public Chronicle links, *What if?* and *Verify this record*, and the Docker preview. It also integrated the per-game LIVEWIRE scenes from Figma. On 2 November it fixed native raid readiness and set up the hosted practice demo |
 | **Claude Design** and **Figma** | UI/UX. Claude Design shaped the first command-deck and OBS layouts; Figma holds the final ten-screen design and the LIVEWIRE game scenes |
 | **The creator** | The vision, the game design direction, the Figma design and every product decision |
 
