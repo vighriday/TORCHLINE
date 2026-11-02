@@ -1,6 +1,6 @@
 # LIVEWIRE v0
 
-Status: shipped in v0.1.0-preview.2 behind the default-off `LIVEWIRE_ENABLED` flag; practice previews (`docker compose`, `pnpm db:up`) enable it, and live remains opt-in. Per-preset illustrated feeds arrived after preview.2 ([ADR 0037](../decisions/0037-cross-game-livewire-relay.md)). Status as of 1 November 2026: no live attested LIVEWIRE result has been recorded, so real Twitch mission acceptance remains a release gate. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
+Status: shipped in v0.1.0-preview.2 behind the default-off `LIVEWIRE_ENABLED` flag; practice previews (`docker compose`, `pnpm db:up`) enable it, and live remains opt-in. Per-preset illustrated feeds arrived after preview.2 ([ADR 0037](../decisions/0037-cross-game-livewire-relay.md)). Status as of 2 November 2026: one live attested LIVEWIRE result has been recorded on Twitch. A Souls Run mission opened at the chapter 1 boundary, a signed `!stake 2` from chat selected hull, the mission locked before the attempt and the streamer-attested success saved hull +3 (80 to 83); the read-only verifier `pnpm twitch:verify:livewire` reported status success. TORCHLINE is still the persistent survival world; LIVEWIRE makes a creator's usual game consequential to that world.
 
 ## One complete mission
 
@@ -24,7 +24,7 @@ Resolve or cancel before starting another chapter, parking or preparing a handof
 | Requirement | Implementation and evidence boundary |
 | --- | --- |
 | L01 Current custodian controls missions | Session API, mode/connected/custody/slot rechecks under SQL locks; negative authority tests |
-| L02 Real chat can choose a system | Existing exact HMAC/subscription ingress; normalized SQL ballots; signed local fixtures pass, genuine service command pending as of 1 November 2026 |
+| L02 Real chat can choose a system | Existing exact HMAC/subscription ingress; normalized SQL ballots; signed local fixtures pass; on 2 November 2026 a genuine signed `!stake 2` from live Twitch chat selected hull |
 | L03 Pre-attempt immutable commitment | Explicit transactional lock; finite authored options and tally snapshot; solo/tie/race tests |
 | L04 One attested consequence | Engine extension and atomic state/event/status/outbox; duplicate/concurrent result and injected-failure tests |
 | L05 Finite economy | One allowance per boundary, one supply on open, repair caps, no revival; lifecycle and full-season witnesses |

@@ -4,7 +4,7 @@ The isolated [LIVEWIRE v0 requirements](livewire-v0.md) add bounded, streamer-at
 
 Status: approved product direction with implementation underway, 2026-10-26. [Current evidence](../planning/implementation-status.md) distinguishes working foundations from unfinished requirements. The owner-supplied Figma v2 export governs final UI/UX, art and motion; its typed adaptation consumes stable physical-state and challenge contracts. Owner roles below indicate responsibility, not staffing assignments.
 
-Status as of 1 November 2026: real broadcaster and bot consent and signed EventSub callbacks are verified, and on 30 October 2026 three genuine viewer chat messages from an ordinary viewer account arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. Still unverified: an overlay update from live chat on video (the rest of PR-03), a native raid between two broadcasters (PR-05), bot replies that viewers can see, a live attested LIVEWIRE result and permanent hosting.
+Status as of 2 November 2026: real broadcaster and bot consent and signed EventSub callbacks are verified, and on 30 October 2026 three genuine viewer chat messages from an ordinary viewer account arrived as signed `channel.chat.message` notifications and were saved as `scan` gameplay events on a live Ark. Verified on 2 November 2026: an overlay update from live chat on video (the rest of PR-03; commands typed in the broadcaster's own chat), bot replies that viewers can see ([ADR 0040](../decisions/0040-bot-moderator-role.md)) and a live attested LIVEWIRE result. Still unverified: a native raid between two broadcasters (PR-05) and permanent hosting.
 
 ## Product thesis
 
