@@ -17,7 +17,7 @@ Updated 2026-11-01. Account and live-state notes are dated snapshots, not curren
 | Actual OBS | Native OBS 32.2.2 rendered the 30 Oct final-design build in isolated saved practice; the current build and live-chat-driven updates are not yet verified in OBS. |
 | Live LIVEWIRE | Not verified. One live mission was opened and expired; no attested live result exists. |
 | Native raid | Not passed. A separate consenting broadcaster is needed only for this later acceptance; the dedicated bot keeps its role. |
-| Production hosting | No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI). Hosting below is a proposed procedure, not a deployed service. |
+| Production hosting | No permanent live hosting exists; a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI). Hosting below is a proposed procedure, not a deployed service. |
 
 ## 1. Keep the two Twitch accounts separate
 

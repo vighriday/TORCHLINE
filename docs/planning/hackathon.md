@@ -28,7 +28,7 @@ Plan judge availability from the earlier published judging start through **Novem
 - [ ] Description explains product functionality and concrete Codex contributions.
 - [ ] Public YouTube video below three minutes, link checked from a signed-out browser.
 - [ ] Judge access configured according to the current organizer instructions, including private repo access if applicable.
-- [ ] Hosted project and dependency services available without payment/access barriers for judges. Nothing is hosted; the one-command `docker compose` saved-practice preview needs no Twitch account or hosted service.
+- [x] Hosted project and dependency services available without payment/access barriers for judges: a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). The one-command `docker compose` saved-practice preview also needs no Twitch account or hosted service.
 - [ ] Asset provenance, third-party permissions and branding checked; original private idea file absent from repository and recordings.
 - [ ] Entrant/team representative and eligibility reviewed by the owner.
 - [ ] Devpost entry explicitly submitted; a saved draft is not enough.

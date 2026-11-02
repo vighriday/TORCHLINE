@@ -11,7 +11,7 @@ As of October 29, a registered project SSH key restored HTTPS on the owner's PC;
 3. Run `pnpm live:ssh` (or `pnpm live:up`) while the live service runs. The helper pins ngrok's published server fingerprint, ignores global SSH config, exposes only live port 3001 and retries network loss. Authorization/host-key failures stop. No request inspection interface runs.
 4. Confirm `https://YOUR_ORIGIN/health/live` returns JSON `ok: true, mode: live` and `https://YOUR_ORIGIN/health/ready` returns `ok: true`. An ngrok error page is a failed test.
 
-Replace `YOUR_ORIGIN` with your own HTTPS origin. The computer/database/live process/SSH connection must remain running. The `live:tunnel` helper is only for installations that use the ngrok agent; this checklist does not need it. This is development ingress. No permanent hosting or public judge instance exists. Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
+Replace `YOUR_ORIGIN` with your own HTTPS origin. The computer/database/live process/SSH connection must remain running. The `live:tunnel` helper is only for installations that use the ngrok agent; this checklist does not need it. This is development ingress. No permanent live hosting exists; a disposable practice demo runs at https://torchline-demo.onrender.com ([ADR 0039](../decisions/0039-hosted-practice-demo.md)). Live Twitch tests used a temporary development tunnel on the owner's PC. Judges can run `docker compose up --build` (verified in CI).
 
 ## 2. Confirm OAuth and subscriptions
 
