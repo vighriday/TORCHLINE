@@ -175,7 +175,7 @@ describe('custody arrival briefing', () => {
         await mission(id, source, {
           type: 'open',
           preset: 'challenge',
-          game: 'Minecraft',
+          game: 'Voxel Survival',
           label: 'Lava gap jump',
         });
         const stakeId = (await store.get(id)).state.livewire!.stake.id;
@@ -190,7 +190,7 @@ describe('custody arrival briefing', () => {
         expect(arrived.arrival.missions).toEqual([
           expect.objectContaining({
             chapter: 0,
-            game: 'Minecraft',
+            game: 'Voxel Survival',
             attempt: 'Lava gap jump',
             outcome: 'failure',
             target: 'hull',
@@ -208,7 +208,7 @@ describe('custody arrival briefing', () => {
         const ended = (await app.inject({ url: '/api/state', headers: receiver })).json().world;
         expect(ended.outcome).toBeTruthy();
         expect(ended.season.missions).toEqual([
-          expect.objectContaining({ game: 'Minecraft', outcome: 'failure', delta: -6 }),
+          expect.objectContaining({ game: 'Voxel Survival', outcome: 'failure', delta: -6 }),
         ]);
       } finally {
         await app.close();

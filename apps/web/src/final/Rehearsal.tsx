@@ -246,10 +246,10 @@ const steps: Step[] = [
     },
   },
   {
-    actor: 'ALPHA STREAMS MINECRAFT · LIVEWIRE',
+    actor: 'ALPHA STREAMS VOXEL SURVIVAL · LIVEWIRE',
     side: 'alpha',
     status: ['ON AIR · MISSION OPEN', 'ON AIR · NO ARK YET'],
-    title: 'Chat stakes the hull on one Minecraft jump',
+    title: 'Chat stakes the hull on one lava jump',
     body: 'Alpha never leaves their own game. Chat picks which Ark system rides on the next attempt and the choice locks before the jump. The jump fails, alpha attests it, and the hull keeps the damage.',
     proof: 'POST /api/worlds/:id/livewire · open → lock → streamer-attested resolve',
     mission: {
@@ -416,7 +416,7 @@ const steps: Step[] = [
     },
   },
   {
-    actor: 'RECEIVER STREAMS ROCKET LEAGUE · LIVEWIRE',
+    actor: 'RECEIVER STREAMS CAR SOCCER · LIVEWIRE',
     side: 'receiver',
     status: ['ARK HANDED ON', 'ON AIR · NEW CAPTAIN'],
     dossier: true,

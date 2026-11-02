@@ -22,9 +22,9 @@ GameControls renders server-revealed clues, the relay graph, work orders, invest
 
 The [mission contract](../../packages/contracts/src/livewire.ts) exposes sanitized lifecycle/deadline, three aggregate counts, ballot revision, availability and exact bounded effects. Individual voters are not projected. A streamer opens a supply-cost mission (one in-game supply) at a chapter boundary, locks the commitment, attempts the real game and explicitly attests the result. The illustration cannot judge that attempt. [Rules and economy](../product/livewire-v0.md) remain unchanged.
 
-Each of the three presets has its own illustrated practice feed and game-styled HUD, labeled illustrative: a voxel "Minecraft" lava gap jump, a car-soccer "Rocket League" aerial goal and a "Souls Run" boss attempt. A saved mission reopens in its own preset's feed. No game telemetry, automatic result detection or media upload. 'What if?' shows read-only one-step alternatives and never changes the saved world.
+Each of the three presets has its own illustrated practice feed and game-styled HUD, labeled illustrative: a "Voxel Survival" lava gap jump, a "Car Soccer" aerial goal and a "Souls Run" boss attempt. A saved mission reopens in its own preset's feed. No game telemetry, automatic result detection or media upload. 'What if?' shows read-only one-step alternatives and never changes the saved world.
 
-Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them; its practice scenes are original illustrations and never read game data.
+TORCHLINE's practice scenes are original illustrations and never read game data.
 
 ## OBS and recovery
 

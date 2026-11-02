@@ -21,6 +21,7 @@
 <a href="#livewire">LIVEWIRE</a> &nbsp;·&nbsp;
 <a href="#codex">Built with Codex</a> &nbsp;·&nbsp;
 <a href="#proven">What is proven</a> &nbsp;·&nbsp;
+<a href="#judges">Judge guide</a> &nbsp;·&nbsp;
 <a href="docs/README.md">Docs</a>
 </p>
 
@@ -30,6 +31,7 @@
 
 > [!IMPORTANT]
 > **Built with OpenAI Codex.** Codex was TORCHLINE's lead engineer. Working in VS Code, it planned the product and its architecture, then built:
+>
 > - the deterministic game engine and PostgreSQL storage;
 > - Twitch OAuth and signed EventSub;
 > - the OBS overlay and the ten-screen interface from the Figma design;
@@ -41,7 +43,8 @@
 > [!TIP]
 > **Judges, start with the video (2:38): <https://youtu.be/mp-ckxsH4M4>** — real Twitch chat changing the Ark on a live broadcast, LIVEWIRE on live Twitch, and how Codex built it.<br>
 > **Then play it yourself: <https://torchline-demo.onrender.com>** — no install, no Twitch account. Choose **Watch two games share one Ark → Autoplay to the handoff**: in about two minutes two communities in two different games change one Ark, using the real engine, database and custody rules with practice crews and a labelled simulated raid.<br>
-> <sub>Free hosting: after an idle spell the first visit can take about a minute, and the demo starts fresh each time it wakes. Prefer local? `docker compose up --build`, then http://localhost:3000. [More ways to run it ↓](#play)</sub>
+> **Or test everything yourself, on your own machine and your own Twitch channel:** the [Judge guide ↓](#judges) needs nothing of mine.<br>
+> <sub>Free hosting: after an idle spell the first visit can take about a minute, and the demo starts fresh each time it wakes. Prefer local? `docker compose up --build`, then http://localhost:3000.</sub>
 
 ## The idea in three moves
 
@@ -69,12 +72,9 @@ You can play all five chapters on one channel. **A raid moves the world; you don
 
 ## 🎬 Watch two games share one Ark
 
-<picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/cross-game-relay.png">
-  <img src="assets/readme/relay-two-games.webp" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission fails and the hull loses 6. After the handoff, channel B's aerial-goal mission succeeds and the same hull gains 3.">
-</picture>
+<a href="https://youtu.be/mp-ckxsH4M4?t=71"><img src="assets/readme/cross-game-relay.png" width="960" alt="The Judge Arena's two channels side by side. Channel A's lava-jump mission failed and the hull lost 6. After the handoff, channel B's aerial-goal mission succeeded and the same hull gained 3."></a>
 
-<sub>This is the Judge Arena, recorded from the app in saved practice. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are scripted practice attestations, saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
+<sub>This is the Judge Arena, captured from the app in saved practice; select the image to watch it run in the video. In channel A, a LIVEWIRE lava jump fails and the hull loses 6. After the handoff, channel B's aerial goal repairs the same hull by 3. Both results are scripted practice attestations, saved to the same Ark. The feeds are illustrations, not game telemetry, and the raid proof is simulated and labelled.</sub>
 
 <details>
 <summary><b>The eleven steps of the relay rehearsal</b>: every one calls the same API the dashboard uses</summary>
@@ -131,9 +131,9 @@ sequenceDiagram
 <summary><b>🅰 Sacrifice navigation</b>: save every passenger</summary>
 <br>
 
-| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| **216** | 65 | 50 | 65 | **0 · destroyed** | 50 |
+| Passengers | Hull | Power | Oxygen |    Navigation     | Supplies |
+| :--------: | :--: | :---: | :----: | :---------------: | :------: |
+|  **216**   |  65  |  50   |   65   | **0 · destroyed** |    50    |
 
 **Debt created:** a blind jump, due in chapter 2.
 
@@ -143,9 +143,9 @@ sequenceDiagram
 <summary>Rebuild navigation</summary>
 <br>
 
-| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| 216 | 55 | **35** | 65 | **60** | **25** |
+| Passengers | Hull | Power  | Oxygen | Navigation | Supplies |
+| :--------: | :--: | :----: | :----: | :--------: | :------: |
+|    216     |  55  | **35** |   65   |   **60**   |  **25**  |
 
 Navigation comes back, but it costs power and supplies, plus **a new debt: a supply debt due in chapter 4.** Repairs are never free.
 
@@ -155,9 +155,9 @@ Navigation comes back, but it costs power and supplies, plus **a new debt: a sup
 <summary>Fly the debris field manually</summary>
 <br>
 
-| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| 216 | **30** | 50 | **55** | 0 · destroyed | 50 |
+| Passengers |  Hull  | Power | Oxygen |  Navigation   | Supplies |
+| :--------: | :----: | :---: | :----: | :-----------: | :------: |
+|    216     | **30** |  50   | **55** | 0 · destroyed |    50    |
 
 No new debt, but nearly half the remaining hull is gone.
 
@@ -172,8 +172,8 @@ No new debt, but nearly half the remaining hull is gone.
 <br>
 
 | Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| **168** | 60 | 60 | 60 | 70 | 50 |
+| :--------: | :--: | :---: | :----: | :--------: | :------: |
+|  **168**   |  60  |  60   |   60   |     70     |    50    |
 
 The sealed habitat stays visible on the ship and in the record.
 
@@ -183,9 +183,9 @@ The sealed habitat stays visible on the ship and in the record.
 <summary>Search the derelict</summary>
 <br>
 
-| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| 168 | **45** | 55 | 60 | 70 | **65** |
+| Passengers |  Hull  | Power | Oxygen | Navigation | Supplies |
+| :--------: | :----: | :---: | :----: | :--------: | :------: |
+|    168     | **45** |  55   |   60   |     70     |  **65**  |
 
 The search finds 15 supplies, at a cost of 15 hull and 5 power.
 
@@ -195,9 +195,9 @@ The search finds 15 supplies, at a cost of 15 hull and 5 power.
 <summary>Take the safe corridor</summary>
 <br>
 
-| Passengers | Hull | Power | Oxygen | Navigation | Supplies |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| 168 | 60 | **55** | 60 | 70 | 50 |
+| Passengers | Hull | Power  | Oxygen | Navigation | Supplies |
+| :--------: | :--: | :----: | :----: | :--------: | :------: |
+|    168     |  60  | **55** |   60   |     70     |    50    |
 
 The hull holds and only five power is spent.
 
@@ -228,15 +228,15 @@ Open the [flight recorder](assets/readme/flight-log.csv) and search for **patch*
 
 Voting is only one part of the job. A correct shared solution changes resources, ship condition and the choices that come later.
 
-| Type in chat | What it does |
-| --- | --- |
-| <kbd>!scan A</kbd> | Reveals a relay clue that the crew shares |
-| <kbd>!route A B C</kbd> | Submits a power route; the right one repairs the shields |
-| <kbd>!patch A</kbd> | Patches failing equipment |
-| <kbd>!inspect engine</kbd> | Investigates an area (engine, cargo or life support) |
-| <kbd>!allocate hull 3 oxygen 2</kbd> | Splits the crew's repair effort |
-| <kbd>!vote 1</kbd> | Advises the captain; only the captain commits |
-| <kbd>!stake 2</kbd> · <kbd>!stake hull</kbd> | Picks the system at risk in a LIVEWIRE mission |
+| Type in chat                                 | What it does                                             |
+| -------------------------------------------- | -------------------------------------------------------- |
+| <kbd>!scan A</kbd>                           | Reveals a relay clue that the crew shares                |
+| <kbd>!route A B C</kbd>                      | Submits a power route; the right one repairs the shields |
+| <kbd>!patch A</kbd>                          | Patches failing equipment                                |
+| <kbd>!inspect engine</kbd>                   | Investigates an area (engine, cargo or life support)     |
+| <kbd>!allocate hull 3 oxygen 2</kbd>         | Splits the crew's repair effort                          |
+| <kbd>!vote 1</kbd>                           | Advises the captain; only the captain commits            |
+| <kbd>!stake 2</kbd> · <kbd>!stake hull</kbd> | Picks the system at risk in a LIVEWIRE mission           |
 
 Every chat message reaches TORCHLINE as a signed EventSub notification. It is deduplicated and applied at most once, and the overlay shows the result.
 
@@ -244,12 +244,10 @@ Every chat message reaches TORCHLINE as a signed EventSub notification. It is de
 
 ## 🎮 LIVEWIRE: your next attempt matters
 
-<picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme/minecraft-livewire.png">
-  <img src="assets/readme/livewire-attempt.webp" width="960" alt="A LIVEWIRE mission on the voxel preset: chat's hull stake is locked, the lava-gap jump is attempted, the streamer confirms the loss and the hull damage is written to the Ark.">
-</picture>
+<a href="https://youtu.be/mp-ckxsH4M4?t=48"><img src="assets/readme/voxel-livewire.png" width="960" alt="A LIVEWIRE mission on the voxel preset in saved practice: chat's hull stake is locked before the lava-gap jump. Select it to watch LIVEWIRE on live Twitch in the video."></a>
 
 Keep playing your usual game. Before a difficult jump, an aerial or a boss attempt, open one mission:
+
 1. Chat chooses which Ark system is at risk.
 2. The commitment locks before you try.
 3. You confirm what happened.
@@ -262,24 +260,24 @@ Keep playing your usual game. Before a difficult jump, an aerial or a boss attem
 <td width="33%"><img src="assets/readme/livewire-souls.webp" alt="Souls-style preset: boss courtyard with boss bar and vitals HUD."></td>
 </tr>
 <tr>
-<td align="center"><b>Minecraft</b> preset · lava gap jump</td>
-<td align="center"><b>Rocket League</b> preset · aerial goal</td>
+<td align="center"><b>Voxel Survival</b> preset · lava gap jump</td>
+<td align="center"><b>Car Soccer</b> preset · aerial goal</td>
 <td align="center"><b>Souls Run</b> preset · boss attempt</td>
 </tr>
 </table>
 
 The preset only picks the illustrated scene. The streamer names the game they are really playing.
 
-| Rule | Value |
-| --- | --- |
-| When | At a chapter boundary, once per boundary (five per voyage at most) |
-| Cost | 1 supply, never refunded |
-| Chat picks | Navigation, hull or life support with <kbd>!stake 1</kbd>, <kbd>!stake 2</kbd> or <kbd>!stake 3</kbd> |
-| Success | Up to **+3** to that system |
-| Failure | Up to **−6**, never below 1 |
+| Rule         | Value                                                                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| When         | At a chapter boundary, once per boundary (five per voyage at most)                                                                                    |
+| Cost         | 1 supply, never refunded                                                                                                                              |
+| Chat picks   | Navigation, hull or life support with <kbd>!stake 1</kbd>, <kbd>!stake 2</kbd> or <kbd>!stake 3</kbd>                                                 |
+| Success      | Up to **+3** to that system                                                                                                                           |
+| Failure      | Up to **−6**, never below 1                                                                                                                           |
 | Lasting mark | The system is also marked repaired (win) or damaged (loss), and that can matter later. For example, damaged life support leaks 15 oxygen in chapter 4 |
-| Never | Revives a destroyed system, reads game data or decides the result |
-| Evidence | Every result is labelled **streamer-attested** |
+| Never        | Revives a destroyed system, reads game data or decides the result                                                                                     |
+| Evidence     | Every result is labelled **streamer-attested**                                                                                                        |
 
 ```mermaid
 stateDiagram-v2
@@ -306,6 +304,7 @@ stateDiagram-v2
 <td>
 
 When a captain hands the Ark on, the receiving stream sees an **inheritance dossier**:
+
 - who handed it over;
 - every decision aboard and the community that made it;
 - **what other games did to the hull**;
@@ -371,8 +370,8 @@ Captured from the app in saved practice. Those relays used labelled simulated ra
 **Codex by the numbers**, one thread, 26–30 October:
 
 | Tasks completed | Tool executions | File patches | Test runs | Commits | Output tokens |
-| :-: | :-: | :-: | :-: | :-: | :-: |
-| **45** | **1,795** | **560** | **202** | **73** | **2.18 M** |
+| :-------------: | :-------------: | :----------: | :-------: | :-----: | :-----------: |
+|     **45**      |    **1,795**    |   **560**    |  **202**  | **73**  |  **2.18 M**   |
 
 <sub>Counted from the session's own log (`rollout-2026-10-26T12-23-16-01a176fc-….jsonl`): completed tasks, executed tool calls, applied patches, Vitest and Playwright runs, and non-merge commits on `main` in that window. Seventeen context compactions kept it one continuous thread. Counts only; no prompt or output text is published.</sub>
 
@@ -393,24 +392,24 @@ flowchart LR
     R --> I
 ```
 
-| Day | What Codex built |
-| --- | --- |
-| **26&nbsp;Oct** | The product plan, requirements, architecture and decision stress review. Then the persistent-Ark engine and the Twitch foundation: OAuth, signed EventSub webhooks and bot replies that never block gameplay |
-| **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views |
-| **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling |
-| **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1 |
+| Day             | What Codex built                                                                                                                                                                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **26&nbsp;Oct** | The product plan, requirements, architecture and decision stress review. Then the persistent-Ark engine and the Twitch foundation: OAuth, signed EventSub webhooks and bot replies that never block gameplay                                                                                                    |
+| **27&nbsp;Oct** | Episodes and pacing, viewer allocation, Twitch recovery, versioned cooperation rules and a complete history. Also the cinematic launch, the Ark geometry, and the command deck and OBS views                                                                                                                    |
+| **28&nbsp;Oct** | Cinematic encounters, encrypted backups with verified restores, credential-safe live HTTPS, a restricted container image checked in CI, and live acceptance tooling                                                                                                                                             |
+| **29&nbsp;Oct** | An independent adversarial QA pass, chat-delivery diagnosis and recovery, overlays that reconnect after lost chat, and requirement and authority audits. Released v0.1.0-preview.1                                                                                                                              |
 | **30&nbsp;Oct** | The final Figma design across all ten screens, and LIVEWIRE: finite versioned missions, signed chat selection, atomic Ark consequences and a transparent OBS dock. Released v0.1.0-preview.2. Then stale-assignment protection, a private-path guard and property-based balance witnesses, committed that night |
 
 Codex verified live behaviour honestly, too. It found that Twitch accepted the bot's replies but viewers never saw them. So acknowledgements moved to the overlay, and replies stayed paused until 2 November, when making the bot a channel moderator fixed delivery.
 
 ### The rest of the team
 
-| | Role |
-| --- | --- |
-| **OpenAI Codex** | Lead engineer: everything above, in session `01a176fc-1e4a-7e83-b21e-1043aa17e8bc` |
-| **Claude Code** | Reviewer and checker. It audited the build against the hackathon rules and the tests, and verified the live evidence. On 1 November it also built the final layer: the Judge Arena relay rehearsal, the inheritance dossier, lineage and public Chronicle links, *What if?* and *Verify this record*, and the Docker preview. It also integrated the per-game LIVEWIRE scenes from Figma. On 2 November it fixed native raid readiness and set up the hosted practice demo |
-| **Claude Design** and **Figma** | UI/UX. Claude Design shaped the first command-deck and OBS layouts; Figma holds the final ten-screen design and the LIVEWIRE game scenes |
-| **The creator** | The vision, the game design direction, the Figma design and every product decision |
+|                                 | Role                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **OpenAI Codex**                | Lead engineer: everything above, in session `01a176fc-1e4a-7e83-b21e-1043aa17e8bc`                                                                                                                                                                                                                                                                                                                                                                                         |
+| **Claude Code**                 | Reviewer and checker. It audited the build against the hackathon rules and the tests, and verified the live evidence. On 1 November it also built the final layer: the Judge Arena relay rehearsal, the inheritance dossier, lineage and public Chronicle links, _What if?_ and _Verify this record_, and the Docker preview. It also integrated the per-game LIVEWIRE scenes from Figma. On 2 November it fixed native raid readiness and set up the hosted practice demo |
+| **Claude Design** and **Figma** | UI/UX. Claude Design shaped the first command-deck and OBS layouts; Figma holds the final ten-screen design and the LIVEWIRE game scenes                                                                                                                                                                                                                                                                                                                                   |
+| **The creator**                 | The vision, the game design direction, the Figma design and every product decision                                                                                                                                                                                                                                                                                                                                                                                         |
 
 <a id="architecture"></a>
 
@@ -451,40 +450,74 @@ flowchart LR
 
 ## ✅ What is proven
 
-| Area | Status | Evidence |
-| --- | :-: | --- |
-| Engine, storage, replay | ✅ | 164 Vitest tests in 43 files on real PostgreSQL; every saved world replays to its stored state |
-| Judge Arena relay, dossier, lineage, *What if?*, *Verify* | ✅ | Playwright journey through the full two-game relay; the raid proof is simulated and labelled |
-| LIVEWIRE missions | ✅ | Locked ballots, one attested consequence, reload and history, all in saved practice |
-| Hosted practice demo | ✅ | [torchline-demo.onrender.com](https://torchline-demo.onrender.com): the production server in simulation mode ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)). CI builds and plays its image on every push; on 2 Nov the Judge Arena relay ran end to end on the hosted copy |
-| One-command preview | ✅ | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)) |
-| OBS views | ✅ | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md)) |
-| Real Twitch chat → live Ark | ✅ | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md)) |
-| Overlay updating from live chat, on video | ✅ | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 ([watch at 0:16](https://youtu.be/mp-ckxsH4M4?t=16)) |
-| Raid handoff (custody transfer) | ✅ | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next |
-| LIVEWIRE on live Twitch | ✅ | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect ([watch at 0:48](https://youtu.be/mp-ckxsH4M4?t=48)) |
-| Bot replies | ✅ | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov ([watch at 0:40](https://youtu.be/mp-ckxsH4M4?t=40)). Gameplay never depends on replies |
-| Permanent live hosting | ⏳ | The practice demo is hosted (above). Live Twitch play runs on my own computer through a secure tunnel while I stream; viewers need nothing but Twitch chat. An always-on live host is next |
+| Area                                                      | Status | Evidence                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------- | :----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Engine, storage, replay                                   |   ✅   | 164 Vitest tests in 43 files on real PostgreSQL; every saved world replays to its stored state                                                                                                                                                                                                                                  |
+| Judge Arena relay, dossier, lineage, _What if?_, _Verify_ |   ✅   | Playwright journey through the full two-game relay; the raid proof is simulated and labelled                                                                                                                                                                                                                                    |
+| LIVEWIRE missions                                         |   ✅   | Locked ballots, one attested consequence, reload and history, all in saved practice                                                                                                                                                                                                                                             |
+| Hosted practice demo                                      |   ✅   | [torchline-demo.onrender.com](https://torchline-demo.onrender.com): the production server in simulation mode ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)). CI builds and plays its image on every push; on 2 Nov the Judge Arena relay ran end to end on the hosted copy                                           |
+| One-command preview                                       |   ✅   | CI starts `docker compose` on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs))                                                                                                                                                                                                     |
+| Your own live instance                                    |   ✅   | [`compose.live.yaml`](compose.live.yaml) runs the live server with your Twitch application and your free ngrok address ([Judge guide](#judge-twitch)). CI starts it in live mode on every push and checks that Twitch sign-in goes to your application with the exact redirect; the same server ran live on my channel on 2 Nov |
+| OBS views                                                 |   ✅   | Native OBS render, refresh and link rotation verified in saved practice ([report](docs/reports/2026-10-30-final-frontend.md))                                                                                                                                                                                                   |
+| Real Twitch chat → live Ark                               |   ✅   | On 30 Oct, three genuine viewer commands arrived as signed EventSub notifications and were saved as gameplay on a live Ark ([status](docs/planning/implementation-status.md))                                                                                                                                                   |
+| Overlay updating from live chat, on video                 |   ✅   | On 2 Nov, recorded from the public stream page: `!scan A`, `!scan B`, `!scan C` and `!route S A C T` arrived as signed EventSub notifications, the OBS overlay on the live stream updated without a refresh, and hull rose 70 → 85 ([watch at 0:16](https://youtu.be/mp-ckxsH4M4?t=16))                                         |
+| Raid handoff (custody transfer)                           |   ✅   | Implemented end to end and tested against Twitch's signed `channel.raid` payload shape, including the empty unused-direction field Twitch echoes (handled since 2 Nov). The Judge Arena runs it with labelled simulated evidence. A live run between two broadcasters needs a second consenting streamer and is next            |
+| LIVEWIRE on live Twitch                                   |   ✅   | On 2 Nov, during the broadcast: a mission opened, a signed `!stake 2` from chat chose hull, the stake locked before the attempt, and the streamer-attested success saved +3 hull. The read-only verifier reports 1 signed ballot and 1 attested effect ([watch at 0:48](https://youtu.be/mp-ckxsH4M4?t=48))                     |
+| Bot replies                                               |   ✅   | Twitch was filtering the new bot account. After I made it a channel moderator ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), an anonymous viewer received its messages, and `!status` was answered in the live chat on 2 Nov ([watch at 0:40](https://youtu.be/mp-ckxsH4M4?t=40)). Gameplay never depends on replies  |
+| Permanent live hosting                                    |   ⏳   | The practice demo is hosted (above). My live Twitch play runs on my own computer through a secure tunnel while I stream, and you can run your own the same way ([Judge guide](#judge-twitch)); viewers need nothing but Twitch chat. An always-on live host is next                                                             |
 
 <sub>✅ implemented and verified as described · ⏳ open · ⚠️ known limitation. This is a development preview, not a production service. [Implementation status](docs/planning/implementation-status.md) · [Critical audit](docs/reviews/2026-10-29-comprehensive-audit.md)</sub>
+
+<a id="judges"></a>
 
 <a id="play"></a>
 
 <a id="run-it"></a>
 
-## 🚀 Run it
+## 🧑‍⚖️ Judge guide: test everything yourself
 
-**In your browser, nothing to install:** <https://torchline-demo.onrender.com>. A disposable practice copy with LIVEWIRE on: practice sign-in, no Twitch account, and it starts fresh whenever the free host wakes it ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)).
+Nothing below depends on my computer or my accounts. Each path stands alone, from watching to running TORCHLINE on your own Twitch channel.
 
-**One command, with Docker:**
+| Path                                                    | Time     | You need                                                  | What you can check                                                                                 |
+| ------------------------------------------------------- | -------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [1 · Watch the video](#judge-watch)                     | 2:38     | A browser                                                 | The real broadcast, LIVEWIRE on live Twitch and how Codex built it                                 |
+| [2 · Play the hosted demo](#judge-hosted)               | 2–10 min | A browser                                                 | The Judge Arena relay, LIVEWIRE, the Chronicle, _What if?_, _Verify this record_ and the OBS views |
+| [3 · Run it with Docker](#judge-docker)                 | ~5 min   | Docker and Git                                            | The same practice game, served from your machine                                                   |
+| [4 · Play it on your own Twitch channel](#judge-twitch) | ~25 min  | Docker, Git, two Twitch accounts and a free ngrok account | Your real chat changing your Ark and overlay, LIVEWIRE, bot replies and, optionally, a raid        |
+| [5 · Check the engineering](#judge-tests)               | 1–15 min | A browser, or Node 24 and PostgreSQL 17                   | 164 Vitest tests on real PostgreSQL and 25 Playwright journeys                                     |
 
-```powershell
-docker compose up --build    # then open http://localhost:3000
+<a id="judge-watch"></a>
+
+### 1 · Watch the video
+
+<https://youtu.be/mp-ckxsH4M4>: live Twitch from [0:16](https://youtu.be/mp-ckxsH4M4?t=16), LIVEWIRE live from [0:48](https://youtu.be/mp-ckxsH4M4?t=48), the Judge Arena from [1:11](https://youtu.be/mp-ckxsH4M4?t=71) and Codex from [2:02](https://youtu.be/mp-ckxsH4M4?t=122).
+
+<a id="judge-hosted"></a>
+
+### 2 · Play the hosted demo
+
+<https://torchline-demo.onrender.com> is a disposable practice copy with LIVEWIRE on: practice sign-in and no Twitch account ([ADR 0039](docs/decisions/0039-hosted-practice-demo.md)). After an idle spell the first visit can take about a minute, and it starts fresh whenever the free host wakes it.
+
+1. Choose **WATCH TWO GAMES SHARE ONE ARK**, then **AUTOPLAY TO THE HANDOFF**. Autoplay stops at step 9 so you read the inheritance dossier before the receiver acts.
+2. Run step 9 (a different game repairs the same hull) and step 10 (the inherited debt arrives).
+3. Open the Chronicle, then try **What if?** and **Verify this record**.
+4. For free play, choose **LAUNCH THE ARK** and use **Command OS** for all ten destinations: send practice chat such as `!scan A` from Mission Control, open a mission in **03 Livewire** at a chapter boundary, and see the OBS views in **06 Broadcast**.
+
+<a id="judge-docker"></a>
+
+### 3 · Run it with Docker
+
+```sh
+git clone https://github.com/vighriday/TORCHLINE.git
+cd TORCHLINE
+docker compose up --build    # the first build takes a few minutes; then open http://localhost:3000
 ```
 
-This starts saved practice with LIVEWIRE on, on a fresh in-memory database, bound to this machine only. No Twitch account is involved.
+The same saved practice as the hosted demo, with LIVEWIRE on, served only to your machine from a fresh database on every start. No Twitch account is involved. Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd>, then `docker compose down`. CI runs this exact command on every push and plays the first judge steps ([`smoke-compose.mjs`](scripts/smoke-compose.mjs)).
 
-**Or with Node 24**, pinned pnpm and PostgreSQL 17 ([development guide](docs/operations/development.md)):
+<details>
+<summary><b>Without Docker: Node 24, pnpm 12.4.2 and PostgreSQL 17</b></summary>
+<br>
 
 ```powershell
 pnpm install --frozen-lockfile
@@ -494,23 +527,106 @@ pnpm build
 pnpm start        # http://localhost:3000
 ```
 
-**The two-minute path:**
-1. Choose **Command OS → Judge Arena → Autoplay to the handoff**.
-2. Read the dossier.
-3. Run step 9 (a different game repairs the same hull) and step 10 (the inherited debt arrives).
-4. Open the Chronicle, then try **What if?** and **Verify this record**.
+`pnpm db:up` expects the PostgreSQL 17 binaries; the [development guide](docs/operations/development.md) explains the options.
 
-**Free play:** choose **Launch the Ark**, then use **Command OS** to reach all ten destinations.
+</details>
 
-**On your real stream:** follow the [owner setup guide](docs/operations/owner-launch-guide.md) in order: HTTPS → exact Twitch callback → broadcaster and bot consent → subscriptions → OBS → genuine chat → native raid.
+<a id="judge-twitch"></a>
+
+### 4 · Play it on your own Twitch channel
+
+[`compose.live.yaml`](compose.live.yaml) runs the live server, its PostgreSQL and an ngrok tunnel on your machine with **your** Twitch application. Twitch reaches it through your own free ngrok address, and nothing touches my machine or accounts. Chat play works while your channel is offline; only a raid needs you to be live.
+
+**You need:**
+
+- Docker Desktop (or Docker Engine with Compose v2) and Git.
+- Your Twitch account with two-factor authentication on, which Twitch requires for its developer console.
+- A second Twitch account for the bot. To reuse your email, turn on **Enable additional account creation** under Twitch → Settings → Security and Privacy.
+- A free [ngrok account](https://dashboard.ngrok.com/signup). Each account includes one fixed dev domain, such as `your-name.ngrok-free.dev`.
+
+**Set up once, about 15 minutes:**
+
+1. **Your address.** In the ngrok dashboard, copy your authtoken and your dev domain (under **Domains**).
+2. **Your Twitch application.** At <https://dev.twitch.tv/console/apps>, choose **Register Your Application**:
+
+   | Field               | Value                                                   |
+   | ------------------- | ------------------------------------------------------- |
+   | Name                | Anything unique, such as `TORCHLINE-yourname`           |
+   | OAuth Redirect URLs | `https://your-name.ngrok-free.dev/auth/twitch/callback` |
+   | Category            | Game Integration                                        |
+   | Client Type         | Confidential                                            |
+
+   Then choose **Manage**, copy the **Client ID**, choose **New Secret** and copy the **Client Secret**.
+
+3. **Your settings.** In the cloned repository, copy the template:
+
+   ```sh
+   cp .env.live.example .env.live    # PowerShell: Copy-Item .env.live.example .env.live
+   ```
+
+   Fill in `NGROK_AUTHTOKEN`, `PUBLIC_BASE_URL` (`https://` and your dev domain, with no trailing slash), `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`. Then print four fresh private keys and paste them over the placeholders:
+
+   ```sh
+   docker run --rm node:24-alpine node -e "for (const k of ['SESSION_SECRET','TOKEN_ENCRYPTION_KEY','BOT_SETUP_SECRET','EVENTSUB_SECRET']) console.log(k + '=' + require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   `.env.live` is ignored by Git and never enters the Docker image.
+
+4. **Start it:**
+
+   ```sh
+   docker compose --env-file .env.live -f compose.live.yaml up -d --build
+   ```
+
+   `https://your-name.ngrok-free.dev/health/ready` should show `{"ok":true}`. On ngrok's free plan each browser sees a one-time "You are about to visit" page; choose **Visit Site**.
+
+5. **Connect your channel.** Open your address in your usual browser, signed in to Twitch as yourself. Choose **CONNECT CREATOR WITH TWITCH** and approve.
+6. **Authorize your bot.** In a private window, sign in to twitch.tv as the bot account and open your address. Expand **Dedicated bot setup · operator access**, paste `BOT_SETUP_SECRET` from `.env.live` into **Bot setup secret**, choose **Authorize dedicated bot** and approve.
+7. **Connect Twitch events.** Back in your usual window, refresh, open **Command OS → 06 Broadcast** and choose **Check / repair Twitch subscriptions**. The chat, stream-online and stream-offline subscriptions should be confirmed; Twitch calls your address to confirm each one.
+
+**Play, about 10 minutes:**
+
+8. **Your chat is the crew.** Choose **LAUNCH THE ARK** and **Start chapter 1** in Mission Control. In your channel's chat (**Open Twitch chat**, or `twitch.tv/popout/YOURNAME/chat`) send `!scan A`, `!scan B` and `!scan C`, then the route the clues reveal (chapter 1 accepts `!route S A C T`). The ship changes, the change is saved, and **chat actions applied** rises in 06 Broadcast. Any viewer account works the same way.
+9. **Your overlay.** In 06 Broadcast choose **Generate / rotate private OBS source**, then **COPY SOURCE**. Add it to OBS as a Browser Source (1920 × 1080) or open it in a new tab; it updates without a refresh. Keep that link private.
+10. **LIVEWIRE.** At a chapter boundary, open **03 Livewire** and choose **Open mission · spend 1 supply**. Chat stakes a system with `!stake 2`. Choose **Lock commitment · start attempt**, make your attempt in any game, confirm the result and choose **WRITE CONSEQUENCE TO ARK**.
+11. **Bot replies (optional).** Twitch filters brand-new bot accounts, so type `/mod YOURBOTNAME` in your chat ([ADR 0040](docs/decisions/0040-bot-moderator-role.md)), then send `!status`.
+12. **A native raid (optional).** Connect a second broadcaster account at the same address from another browser profile, turn on **04 Relay → Accept incoming world offers** there and repair its subscriptions. With both channels live, choose **Prepare handoff** on the source at a chapter boundary, raid the receiver with Twitch's usual `/raid` command, then choose **Accept inherited Ark** on the receiver. This flow is implemented and tested against Twitch's signed `channel.raid` payload, but I have not yet run it between two live broadcasters.
+
+**Stop or reset:** `docker compose --env-file .env.live -f compose.live.yaml down` keeps your Ark for next time; add `--volumes` to erase it. **Disconnect Twitch authorization** in 06 Broadcast removes TORCHLINE's access to your account.
 
 <details>
-<summary><b>Checks</b></summary>
+<summary><b>If something goes wrong</b></summary>
 <br>
 
+| Symptom                             | Check                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `set … in .env.live`                | That value is still missing from `.env.live`                                                                    |
+| Twitch says the redirect is invalid | The console's OAuth Redirect URL must be exactly `PUBLIC_BASE_URL` followed by `/auth/twitch/callback`          |
+| Subscriptions stay unconfirmed      | `docker compose --env-file .env.live -f compose.live.yaml logs tunnel app`, and `/health/ready` on your address |
+| Chat does nothing                   | An Ark in an open phase on your channel, the bot authorized and the subscriptions confirmed                     |
+| OBS shows ngrok's notice            | Right-click the source → **Interact** → **Visit Site**, once                                                    |
+| "Invalid state" after sign-in       | The one-use sign-in expired; start again from your address                                                      |
+
+More detail: [Twitch setup](docs/operations/twitch-setup.md) and the [launch guide](docs/operations/owner-launch-guide.md).
+
+</details>
+
+**What has been verified:** the same server ran live on my channel on 2 November through an ngrok tunnel: chat changed the Ark and the overlay, LIVEWIRE saved a result and the bot replied. CI builds [`compose.live.yaml`](compose.live.yaml) on every push and checks that it starts in live mode and sends Twitch sign-in to your application with the exact redirect.
+
+<a id="judge-tests"></a>
+
+### 5 · Check the engineering
+
+**Without installing anything:** every push runs the full suite on GitHub Actions: 164 Vitest tests on real PostgreSQL, 25 Playwright journeys, the Docker preview, the hosted demo image and the live setup above. Open the latest [Verify run](https://github.com/vighriday/TORCHLINE/actions/workflows/verify.yml) and read its log.
+
+**On your machine,** with Node 24, pnpm 12.4.2 and PostgreSQL 17 (`pnpm db:up` creates a private cluster, or set `DATABASE_URL` in `.env` to any empty database):
+
 ```powershell
-pnpm typecheck
+pnpm install --frozen-lockfile
+pnpm db:up
+pnpm build
 pnpm test            # Vitest: engine, storage (real PostgreSQL), server, Twitch fixtures
+pnpm exec playwright install chromium
 pnpm test:browser    # Playwright journeys, including the full relay
 pnpm format:check
 pnpm check:repo      # private inputs excluded, local links valid
@@ -518,22 +634,22 @@ pnpm check:version   # versions, release notes and this README agree
 pnpm readme:proof    # regenerate the engine proof behind this README
 ```
 
-</details>
+The [Verify workflow](.github/workflows/verify.yml) is the exact recipe CI uses, including its PostgreSQL 17 container.
 
 <details>
 <summary><b>Repository map</b></summary>
 <br>
 
-| Path | What lives there |
-| --- | --- |
-| [`apps/server`](apps/server) | Fastify API, Twitch webhooks and OAuth, server-sent event feeds |
-| [`apps/web`](apps/web) | React 19 + React Three Fiber client: ten screens, OBS views, LIVEWIRE scenes |
-| [`packages/engine`](packages/engine) | Pure deterministic rules (`ark-v3`) and the LIVEWIRE extension |
-| [`packages/storage`](packages/storage) | PostgreSQL authority, migrations, replay, *What if?* and verification |
-| [`packages/contracts`](packages/contracts) | Zod schemas shared by every package |
-| [`packages/twitch`](packages/twitch) | OAuth, EventSub signature checks, chat parsing, bot delivery |
-| [`tests`](tests) | Vitest suites on real PostgreSQL and Playwright journeys |
-| [`docs`](docs/README.md) | Product, architecture, operations, decisions and dated reports |
+| Path                                       | What lives there                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| [`apps/server`](apps/server)               | Fastify API, Twitch webhooks and OAuth, server-sent event feeds              |
+| [`apps/web`](apps/web)                     | React 19 + React Three Fiber client: ten screens, OBS views, LIVEWIRE scenes |
+| [`packages/engine`](packages/engine)       | Pure deterministic rules (`ark-v3`) and the LIVEWIRE extension               |
+| [`packages/storage`](packages/storage)     | PostgreSQL authority, migrations, replay, _What if?_ and verification        |
+| [`packages/contracts`](packages/contracts) | Zod schemas shared by every package                                          |
+| [`packages/twitch`](packages/twitch)       | OAuth, EventSub signature checks, chat parsing, bot delivery                 |
+| [`tests`](tests)                           | Vitest suites on real PostgreSQL and Playwright journeys                     |
+| [`docs`](docs/README.md)                   | Product, architecture, operations, decisions and dated reports               |
 
 </details>
 
@@ -554,6 +670,6 @@ pnpm readme:proof    # regenerate the engine proof behind this README
 
 <br><br>
 
-<sub>Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them, or by Twitch or OpenAI. Its game scenes are original illustrations and never read game data.</sub>
+<sub>TORCHLINE is not affiliated with or endorsed by Twitch or OpenAI. Its game scenes are original illustrations and never read game data.</sub>
 
 </div>

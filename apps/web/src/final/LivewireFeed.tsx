@@ -17,8 +17,8 @@ export const gameContexts: Record<
   GameContext,
   { name: string; attempt: string; preset: LivewireStake['preset'] }
 > = {
-  voxel: { name: 'Minecraft', attempt: 'LAVA GAP JUMP', preset: 'challenge' },
-  rocket: { name: 'Rocket League', attempt: 'AERIAL GOAL', preset: 'match' },
+  voxel: { name: 'Voxel Survival', attempt: 'LAVA GAP JUMP', preset: 'challenge' },
+  rocket: { name: 'Car Soccer', attempt: 'AERIAL GOAL', preset: 'match' },
   souls: { name: 'Souls Run', attempt: 'BOSS ATTEMPT', preset: 'boss' },
 };
 

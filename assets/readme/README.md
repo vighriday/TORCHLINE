@@ -4,46 +4,45 @@ Only owner-supplied Figma design (the v2 export and the 1 November LIVEWIRE scen
 
 ## Animations
 
-The root README embeds each animated WebP in a `<picture>` element whose `prefers-reduced-motion: reduce` source is the matching still, with descriptive alt text and a caption.
+The root README embeds the animated WebP in a `<picture>` element whose `prefers-reduced-motion: reduce` source is the matching still, with descriptive alt text and a caption.
 
-| Asset | Shows | Reduced-motion still |
-| --- | --- | --- |
-| hero-awakening.webp | The opening scene: ARK-001 rolling above a planet (960×540, about 5 s) | awakening.png |
-| relay-two-games.webp | The Judge Arena's two channels side by side: channel A's lava-jump mission fails (hull −6); after the labelled simulated handoff, channel B's aerial goal repairs the same hull (+3) (960×302, about 10 s) | cross-game-relay.png |
-| livewire-attempt.webp | A voxel-preset LIVEWIRE mission: chat's hull stake locks, the lava-gap jump is attempted, the streamer confirms the loss and the hull damage is saved (800×450, about 8 s) | minecraft-livewire.png |
+| Asset               | Shows                                                                  | Reduced-motion still |
+| ------------------- | ---------------------------------------------------------------------- | -------------------- |
+| hero-awakening.webp | The opening scene: ARK-001 rolling above a planet (960×540, about 5 s) | awakening.png        |
 
-The three animations were recorded from an isolated saved-practice server with GPU-accelerated headless Chromium. Frames came from a Chrome DevTools Protocol (CDP) screencast and were encoded with Chromium's own WebP encoder on a 24 fps timeline (42 ms per frame). Some frames are held for two or more ticks, so the average rate of distinct frames is about 18–21 per second. They are real browser frames, with no generated or interpolated gameplay. The scratch capture script is not committed.
+The animation was recorded from an isolated saved-practice server with GPU-accelerated headless Chromium. Frames came from a Chrome DevTools Protocol (CDP) screencast and were encoded with Chromium's own WebP encoder on a 24 fps timeline (42 ms per frame). Some frames are held for two or more ticks, so the average rate of distinct frames is about 18–21 per second. They are real browser frames, with no generated or interpolated gameplay. The relay and LIVEWIRE animations were retired on 2 November 2026; the README now shows their stills and links to the same moments in the video. The scratch capture script is not committed.
 
 ## Stills
 
-| Asset | Shows |
-| --- | --- |
-| awakening.png | Full-size final entry scene (1440×900) |
-| mission-control.png | Saved chapter one: resources, the cooperative shield-relay challenge and captain controls |
-| minecraft-livewire.png | Saved LIVEWIRE mission dock with the illustrated voxel scene |
-| livewire-voxel.webp, livewire-rocket.webp, livewire-souls.webp | The three preset feeds and game-styled HUDs (1280×720): voxel lava-gap jump ("Minecraft" preset), car-soccer aerial goal ("Rocket League" preset) and souls-style boss attempt ("Souls Run" preset) |
-| dossier.png | Element screenshot of the inheritance dossier on a received practice Ark |
-| what-if.png | Element screenshot of the *What if?* panel for the chapter-one decision |
-| verify.png | Element screenshot of a *Verify this record* result: the saved log replayed through `ark-v3` with matching SHA-256 digests |
-| relay-broadcast.png | Read-only OBS view of a received Ark showing the inheritance dossier after a practice relay |
-| cross-game-relay.png | Judge Arena after both LIVEWIRE missions: alpha's voxel-preset failure and the receiver's car-soccer-preset repair on the same Ark |
-| lineage.png, season-record.png | Chronicle lineage and season record for one Ark carried by three practice communities to a colony |
-| season-finale.png | Read-only OBS view of the same finished voyage with its season finale card |
-| relay-rehearsal.png | Judge Arena relay rehearsal stopped on the receiver's dossier; kept in this folder but not embedded in the root README |
+These stills were captured before the LIVEWIRE presets were renamed on 2 November 2026, so the third-party game names they showed are blurred.
+
+| Asset                                                          | Shows                                                                                                                                                                                                 |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| awakening.png                                                  | Full-size final entry scene (1440×900)                                                                                                                                                                |
+| mission-control.png                                            | Saved chapter one: resources, the cooperative shield-relay challenge and captain controls                                                                                                             |
+| voxel-livewire.png                                             | Saved LIVEWIRE mission dock with the illustrated voxel scene                                                                                                                                          |
+| livewire-voxel.webp, livewire-rocket.webp, livewire-souls.webp | The three preset feeds and game-styled HUDs (1280×720): voxel lava-gap jump ("Voxel Survival" preset), car-soccer aerial goal ("Car Soccer" preset) and souls-style boss attempt ("Souls Run" preset) |
+| dossier.png                                                    | Element screenshot of the inheritance dossier on a received practice Ark                                                                                                                              |
+| what-if.png                                                    | Element screenshot of the _What if?_ panel for the chapter-one decision                                                                                                                               |
+| verify.png                                                     | Element screenshot of a _Verify this record_ result: the saved log replayed through `ark-v3` with matching SHA-256 digests                                                                            |
+| relay-broadcast.png                                            | Read-only OBS view of a received Ark showing the inheritance dossier after a practice relay                                                                                                           |
+| cross-game-relay.png                                           | Judge Arena after both LIVEWIRE missions: alpha's voxel-preset failure and the receiver's car-soccer-preset repair on the same Ark                                                                    |
+| lineage.png, season-record.png                                 | Chronicle lineage and season record for one Ark carried by three practice communities to a colony                                                                                                     |
+| season-finale.png                                              | Read-only OBS view of the same finished voyage with its season finale card                                                                                                                            |
 
 ## Engine proof
 
-| Asset | Shows |
-| --- | --- |
-| proof.json | Pure-engine examples: the same captain route with and without one viewer's repair, both first-chapter commitments, and `captainChair`, the two-level decision tree behind the README's captain's-chair section. Every journey is replay-checked |
-| flight-log.csv | Command-by-command flight recorder of the viewer-repair journey |
+| Asset          | Shows                                                                                                                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proof.json     | Pure-engine examples: the same captain route with and without one viewer's repair, both first-chapter commitments, and `captainChair`, the two-level decision tree behind the README's captain's-chair section. Every journey is replay-checked |
+| flight-log.csv | Command-by-command flight recorder of the viewer-repair journey                                                                                                                                                                                 |
 
 `pnpm readme:proof` ([export-proof.ts](../../scripts/readme/export-proof.ts)) regenerates both files from the current rules; CI fails if either drifts.
 
 ## How each capture was made
 
-- **Committed script.** [capture-final.ts](../../scripts/readme/capture-final.ts) captures awakening.png, mission-control.png and minecraft-livewire.png. It binds only a disposable local simulation at port 3102, then drops its schema and closes the app and browser. It waits for actual rendered frames and for the canvas and its ancestors' entrance fades to become visible; a ready GPU frame alone is insufficient. Its raw frames and manifest stay ignored under `.local/final-media`. The optional [encode-final.py](../../scripts/readme/encode-final.py) step ([requirements](../../scripts/readme/requirements.txt)) belongs to an earlier animation pipeline and is not used for the current media.
-- **Not committed.** The three animated WebPs, the preset stills, the dossier, *What if?* and *Verify* element screenshots, and the relay, cross-game, lineage, season and rehearsal images were captured manually or with scratch scripts that are not in the repository. The 1920×1080 relay images came from a local saved-practice server after driving the public practice endpoints as practice communities; every relay used labelled simulated raid evidence.
+- **Committed script.** [capture-final.ts](../../scripts/readme/capture-final.ts) captures awakening.png, mission-control.png and voxel-livewire.png. It binds only a disposable local simulation at port 3102, then drops its schema and closes the app and browser. It waits for actual rendered frames and for the canvas and its ancestors' entrance fades to become visible; a ready GPU frame alone is insufficient. Its raw frames and manifest stay ignored under `.local/final-media`. The optional [encode-final.py](../../scripts/readme/encode-final.py) step ([requirements](../../scripts/readme/requirements.txt)) belongs to an earlier animation pipeline and is not used for the current media.
+- **Not committed.** The animated WebP, the preset stills, the dossier, _What if?_ and _Verify_ element screenshots, and the relay, cross-game, lineage and season images were captured manually or with scratch scripts that are not in the repository. The 1920×1080 relay images came from a local saved-practice server after driving the public practice endpoints as practice communities; every relay used labelled simulated raid evidence.
 
 To regenerate the committed captures and proof, use Node 24, the pinned workspace dependencies, a built frontend, installed Playwright Chromium and an isolated development `DATABASE_URL`:
 

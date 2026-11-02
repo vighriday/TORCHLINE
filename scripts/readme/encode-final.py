@@ -14,7 +14,7 @@ for name, duration in [('ark', 180), ('livewire', 120)]:
             frames.append(frame)
     if len(frames) != 24:
         raise ValueError(f'Expected 24 real {name} frames')
-    output = root / 'assets' / 'readme' / ('ark-roll.gif' if name == 'ark' else 'minecraft-livewire.gif')
+    output = root / 'assets' / 'readme' / ('ark-roll.gif' if name == 'ark' else 'voxel-livewire.gif')
     for colors in [128, 96, 64]:
         palette = frames[0].quantize(colors=colors)
         encoded = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]

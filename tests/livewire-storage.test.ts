@@ -280,7 +280,7 @@ describe('LIVEWIRE real PostgreSQL transactions', () => {
       const req = {
         expectedVersion: 0,
         commandId: randomUUID(),
-        action: { type: 'open', preset: 'match', game: 'Rocket League', label: 'Ranked match' },
+        action: { type: 'open', preset: 'match', game: 'Car Soccer', label: 'Ranked match' },
       } as const;
       await Promise.all([
         mutateLivewire(store, creator, id, req, true),

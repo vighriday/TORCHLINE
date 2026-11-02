@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { replayEvents } from '@torchline/engine';
 import { serve, launch, navigate, snapshot, overlayLink } from './runtime.ts';
-test('Minecraft LIVEWIRE persists a crew lock and one attested consequence across reload, history and OBS', async ({
+test('Voxel Survival LIVEWIRE persists a crew lock and one attested consequence across reload, history and OBS', async ({
   page,
   browser,
 }) =>
@@ -81,7 +81,7 @@ test('each LIVEWIRE preset renders its own practice feed and a saved mission kee
       await expect(page.locator('.game-hud--voxel')).toBeVisible();
       await page.locator('.controls-toggle').click();
       for (const [preset, hud] of [
-        ['Rocket League', 'rocket'],
+        ['Car Soccer', 'rocket'],
         ['Souls Run', 'souls'],
       ] as const) {
         await page.getByRole('button', { name: new RegExp(`^${preset}`) }).click();

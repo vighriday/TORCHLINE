@@ -36,8 +36,8 @@ Resolve or cancel before starting another chapter, parking or preparing a handof
 | L11 Safe release boundary | Default-off flag and additive migrations 009–010; merged into main in preview.2 without enabling it by default; practice previews (`docker compose`, `pnpm db:up`) enable it, and live remains opt-in |
 | L12 Authenticity and scope | Streamer-attested result, signed-versus-simulation input classes; no automatic game detection or simulated native-raid claim |
 
-The preset describes the attempted activity and picks the illustrated practice scene: a voxel "Minecraft" lava gap jump (Personal challenge), a car-soccer "Rocket League" aerial goal (Match) or a "Souls Run" boss attempt (Boss attempt). A saved mission reopens in its own preset's scene. The scenes are illustrations with no game telemetry; the streamer names the game they actually play, validated by the same plain-text rule as the attempt label. All three presets intentionally use the same bounded economic policy. The game name is context, not a claimed game integration or a difficulty-dependent reward.
+The preset describes the attempted activity and picks the illustrated practice scene: a "Voxel Survival" lava gap jump (Personal challenge), a "Car Soccer" aerial goal (Match) or a "Souls Run" boss attempt (Boss attempt). A saved mission reopens in its own preset's scene. The scenes are illustrations with no game telemetry; the streamer names the game they actually play, validated by the same plain-text rule as the attempt label. All three presets intentionally use the same bounded economic policy. The game name is context, not a claimed game integration or a difficulty-dependent reward.
 
-Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them; its practice scenes are original illustrations and never read game data.
+TORCHLINE's practice scenes are original illustrations and never read game data.
 
 See [ADR 0031](../decisions/0031-livewire-v0.md) for the C1–C13 review and [operations](../operations/livewire-v0.md) for setup and acceptance. Other proposed expansion arms are not part of v0.

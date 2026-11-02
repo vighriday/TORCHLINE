@@ -1238,11 +1238,10 @@ export function Simulator({ setMode }: { setMode: (mode: Mode) => void }) {
         <span className="eyebrow">JUDGE ARENA / SIMULATED CREWS · REAL SAVED STATE</span>
         <strong>THE RELAY REHEARSAL</strong>
         <p>
-          Two practice communities, two games, one Ark. Watch a Minecraft failure and one
-          crew&rsquo;s sacrifice become the next crew&rsquo;s crisis, then a Rocket League win
-          repair the same hull. Every step runs the real engine, database and custody rules with
-          practice crews, scripted mission results and a labeled simulated raid; no Twitch messages
-          are sent.
+          Two practice communities, two games, one Ark. Watch a voxel-survival failure and one
+          crew&rsquo;s sacrifice become the next crew&rsquo;s crisis, then a car-soccer win repair
+          the same hull. Every step runs the real engine, database and custody rules with practice
+          crews, scripted mission results and a labeled simulated raid; no Twitch messages are sent.
         </p>
       </div>
       {data?.mode === 'simulation' ? (

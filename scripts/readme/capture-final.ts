@@ -113,7 +113,7 @@ try {
   await page.getByRole('button', { name: 'Lock commitment · start attempt', exact: true }).click();
   await ready();
   await page.locator('.voxel-canvas[data-scene-ready=true]').waitFor({ timeout: 60000 });
-  await page.screenshot({ path: 'assets/readme/minecraft-livewire.png' });
+  await page.screenshot({ path: 'assets/readme/voxel-livewire.png' });
   await page.getByRole('button', { name: /^ATTEMPT LAVA GAP JUMP/ }).click();
   for (let i = 0; i < 24; i++) {
     await page.screenshot({ path: output + '/livewire/' + String(i).padStart(3, '0') + '.png' });

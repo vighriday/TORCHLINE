@@ -6,9 +6,9 @@ October 30, 2026. Candidate branch: **feat/frontend-replacement**. Cutover sourc
 
 ## Delivered
 
-The final owner-supplied Figma v2 design now owns the application. All ten destinations, Ark/cockpit, original visual vocabulary and Minecraft scene are retained as typed React components. Prototype voting, fictional accounts, automatic outcomes and browser-owned resources are replaced with actual saved state and authorized APIs.
+The final owner-supplied Figma v2 design now owns the application. All ten destinations, Ark/cockpit, original visual vocabulary and voxel scene are retained as typed React components. Prototype voting, fictional accounts, automatic outcomes and browser-owned resources are replaced with actual saved state and authorized APIs.
 
-Minecraft and Rocket League are trademarks of their respective owners. TORCHLINE is not affiliated with or endorsed by them; its practice scenes are original illustrations and never read game data.
+TORCHLINE's practice scenes are original illustrations and never read game data.
 
 The extra emissive blue rectangle at the ship's nose is removed. The bridge shell, running light, cockpit and navigation damage remain. Awakening, Mission Control, inheritance, history and OBS use the same corrected model. Permanent marks follow the ship's movement and miniature scale rather than floating separately.
 
@@ -33,7 +33,7 @@ The existing engine, PostgreSQL transactions/migrations, history, Twitch gateway
 | Automated engine/API/database suite | 134 tests in 31 files pass, including real PostgreSQL; provider fixtures are not real Twitch |
 | Complete replacement browser suite | All 15 original replacement journeys passed locally; saved cooperation/allocation, custody, recovery, authority, all ten screens, seven fixtures at both broadcast sizes, mobile and actual moving pixels |
 | First cutover CI (5b7f328) | Engine/build stages pass, but browser stage fails: 8 pass / 7 fail. This is not accepted CI. Slow graphics scheduling, a create-world setup race and journey budgets are addressed in the follow-up; remote acceptance must be checked on its actual run |
-| Affected repeats | Minecraft mission with actual voxel first-frame readiness passes; physical fixtures, moving Ark and solo/recovery/rotation rechecked after presentation fixes |
+| Affected repeats | voxel mission with actual voxel first-frame readiness passes; physical fixtures, moving Ark and solo/recovery/rotation rechecked after presentation fixes |
 | Native OBS 32.2.2 | Cutover build 5b7f328 renders full Ark, survives source refresh, ends old grant access and renders a replacement transparent dock with actual miniature, resources and zero host controls; scheduling follow-up is not a new native OBS acceptance |
 | Native evidence boundary | Isolated saved simulation over loopback. No Twitch input, public proxy, stream, recording or real Ark consequence is implied. Saved world/game revisions remain unchanged |
 | Repository / version / generated proof | Link/privacy/whitespace and seven-package version checks pass; balance, fixtures and README engine proof regenerate without canonical changes |
@@ -51,7 +51,7 @@ After the final readability adjustment, both responsive geometry journeys pass a
 
 The application mounts one presentation and no retired styles. Fifty obsolete presentation/media/tooling paths were removed after archive. Superseded design guidance/ADRs are retired or marked superseded. Historical security/provider findings remain dated and their source links identify the archive when needed.
 
-The README uses only the corrected final design: full-size entry/mission/Minecraft captures, actual 24-frame Ark and Minecraft GIFs, a script-free SVG container, Mermaid and the replay-checked searchable flight log. Owner review caught the first entry capture during its entrance fade: the capture now checks canvas and ancestor opacity as well as actual frames, and the new still is visually inspected with the Ark visible. GIFs have a 5 MB budget with PNG alternatives. [Reproduction and provenance](../../assets/readme/README.md).
+The README uses only the corrected final design: full-size entry/mission/voxel captures, actual 24-frame Ark and voxel GIFs, a script-free SVG container, Mermaid and the replay-checked searchable flight log. Owner review caught the first entry capture during its entrance fade: the capture now checks canvas and ancestor opacity as well as actual frames, and the new still is visually inspected with the Ark visible. GIFs have a 5 MB budget with PNG alternatives. [Reproduction and provenance](../../assets/readme/README.md).
 
 The raw export is unchanged and ignored. Original idea/internal inputs, local credentials, session exports, access links, native profiles and archives are absent from the index. The final artifact-only scan passes against 18 configured private fingerprints; it does not reverify public hosting. The archive tag preserves the prior published source. The unrelated UI-LAB worktree and the original release were not modified.
 

@@ -51,7 +51,7 @@ describe('livewire-v0 pinned engine extension', () => {
         type: 'livewire-open',
         stakeId: randomUUID(),
         preset: 'match',
-        game: 'Rocket League',
+        game: 'Car Soccer',
         label: 'Ranked match',
       },
       { type: 'livewire-lock', tallies: [0, 2, 1], evidence: 'simulation' },

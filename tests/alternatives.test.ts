@@ -92,7 +92,7 @@ describe('one-step decision alternatives', () => {
       await mission(store, id, creator, {
         type: 'open',
         preset: 'challenge',
-        game: 'Minecraft',
+        game: 'Voxel Survival',
         label: 'Lava gap jump',
       });
       const stakeId = (await store.get(id)).state.livewire!.stake.id;
@@ -103,7 +103,7 @@ describe('one-step decision alternatives', () => {
       expect(result).toMatchObject({
         kind: 'livewire',
         chapter: 0,
-        title: 'Minecraft · Lava gap jump',
+        title: 'Voxel Survival · Lava gap jump',
         verified: true,
       });
       const before = result.before.hull;
@@ -160,7 +160,7 @@ describe('whole-record replay verification', () => {
       await mission(store, id, creator, {
         type: 'open',
         preset: 'match',
-        game: 'Rocket League',
+        game: 'Car Soccer',
         label: 'Aerial goal',
       });
       const stakeId = (await store.get(id)).state.livewire!.stake.id;

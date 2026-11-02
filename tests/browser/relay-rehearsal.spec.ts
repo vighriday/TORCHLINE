@@ -12,10 +12,10 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
     await page.goto('/?screen=simulator');
     await expect(page.locator('.rehearsal-stage')).toHaveAttribute('data-step', '1');
     // Both channels are on screen from the start, each in its own game.
-    await expect(page.locator('.relay-stream[data-side=alpha]')).toContainText('MINECRAFT');
-    await expect(page.locator('.relay-stream[data-side=receiver]')).toContainText('ROCKET LEAGUE');
+    await expect(page.locator('.relay-stream[data-side=alpha]')).toContainText('VOXEL SURVIVAL');
+    await expect(page.locator('.relay-stream[data-side=receiver]')).toContainText('CAR SOCCER');
     await page.getByRole('button', { name: 'AUTOPLAY TO THE HANDOFF', exact: true }).click();
-    // Alpha's Minecraft mission fails and the attested damage stays pinned to alpha's channel.
+    // Alpha's Voxel Survival mission fails and the attested damage stays pinned to alpha's channel.
     await expect(page.locator('.relay-stream[data-side=alpha] .relay-result')).toContainText(
       'LAVA GAP JUMP · FAILURE',
       { timeout: 60000 },
@@ -31,7 +31,7 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
     await expect(dossier).toContainText('Blind jump');
     await expect(dossier).toContainText('Created by Simulation alpha');
     // The dossier names what the other game did to the hull, and who attested it.
-    await expect(dossier.locator('.dossier-missions')).toContainText('Minecraft');
+    await expect(dossier.locator('.dossier-missions')).toContainText('Voxel Survival');
     await expect(dossier.locator('.dossier-missions')).toContainText('LAVA GAP JUMP · failure');
     await expect(dossier.locator('.dossier-missions')).toContainText('Hull -6');
 
@@ -131,7 +131,9 @@ test('the judge relay rehearsal moves one Ark between two practice communities i
       await expect(reader.getByRole('button', { name: /Commit|Start chapter/ })).toHaveCount(0);
       await reader.locator('.lineage-node[data-kind=livewire]').first().click();
       await reader.getByRole('button', { name: 'WHAT IF THEY HAD CHOSEN DIFFERENTLY?' }).click();
-      await expect(reader.locator('section.what-if')).toContainText('Minecraft · LAVA GAP JUMP');
+      await expect(reader.locator('section.what-if')).toContainText(
+        'Voxel Survival · LAVA GAP JUMP',
+      );
       await expect(reader.locator('section.what-if li[data-option=success]')).toContainText(
         'NOT TAKEN',
       );

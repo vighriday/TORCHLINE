@@ -82,7 +82,7 @@ it('applies signed provider fixtures to real SQL ballots, one attested effect, h
       const opened = await action({
         type: 'open',
         preset: 'match',
-        game: 'Rocket League',
+        game: 'Car Soccer',
         label: 'Win this match',
       });
       expect(opened.statusCode).toBe(200);

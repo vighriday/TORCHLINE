@@ -15,7 +15,7 @@ Implementation authorized on 2026-10-26 after architecture review. Retain the ap
 - The user requested an ambitious full-product plan with progressive delivery. Do not impose a team size, hourly budget, or proof-of-concept-only ceiling.
 - Check each architectural decision against every component in `docs/architecture/decision-stress-review.md`; distinguish design review from executed tests.
 - The persistent game must remain engaging on one channel. Raids authorize signature custody transfers; they do not gate chapters or consequences. Viewer gameplay must include cooperative problem solving beyond aggregate votes and resource changes.
-- The owner-supplied frontend-design/figma-v2 is the sole visual source. Preserve all ten screens, Ark/cockpit and Minecraft LIVEWIRE artwork. Extend missing functionality in the same style. Retain versioned presentation contracts, persistent condition and server authority; exclude retired presentation source/media.
+- The owner-supplied frontend-design/figma-v2 is the sole visual source. Preserve all ten screens, Ark/cockpit and voxel LIVEWIRE artwork. Extend missing functionality in the same style. Retain versioned presentation contracts, persistent condition and server authority; exclude retired presentation source/media.
 - Exhaustively audit authored decisions and challenge outcomes when balancing content. Viewer challenge success must alter canonical state, future choices and persistent ship condition, not just presentation.
 
 ## Privacy
